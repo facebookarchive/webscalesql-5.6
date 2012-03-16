@@ -1,0 +1,171 @@
+
+2.2. Installing MySQL from Generic Binaries on Unix/Linux
+
+   Oracle provides a set of binary distributions of MySQL. These
+   include binary distributions in the form of compressed tar files
+   (files with a .tar.gz extension) for a number of platforms, as
+   well as binaries in platform-specific package formats for selected
+   platforms.
+
+   This section covers the installation of MySQL from a compressed
+   tar file binary distribution. For other platform-specific package
+   formats, see the other platform-specific sections. For example,
+   for Windows distributions, see Section 2.3, "Installing MySQL on
+   Microsoft Windows."
+
+   To obtain MySQL, see Section 2.1.3, "How to Get MySQL."
+
+   MySQL compressed tar file binary distributions have names of the
+   form mysql-VERSION-OS.tar.gz, where VERSION is a number (for
+   example, 5.6.5), and OS indicates the type of operating system for
+   which the distribution is intended (for example, pc-linux-i686 or
+   winx64).
+
+   To install MySQL from a compressed tar file binary distribution,
+   your system must have GNU gunzip to uncompress the distribution
+   and a reasonable tar to unpack it. If your tar program supports
+   the z option, it can both uncompress and unpack the file.
+
+   GNU tar is known to work. The standard tar provided with some
+   operating systems is not able to unpack the long file names in the
+   MySQL distribution. You should download and install GNU tar, or if
+   available, use a preinstalled version of GNU tar. Usually this is
+   available as gnutar, gtar, or as tar within a GNU or Free Software
+   directory, such as /usr/sfw/bin or /usr/local/bin. GNU tar is
+   available from http://www.gnu.org/software/tar/.
+   Warning
+
+   If you have previously installed MySQL using your operating system
+   native package management system, such as yum or apt-get, you may
+   experience problems installing using a native binary. Make sure
+   your previous MySQL previous installation has been removed
+   entirely (using your package management system), and that any
+   additional files, such as old versions of your data files, have
+   also been removed. You should also check the existence of
+   configuration files such as /etc/my.cnf or the /etc/mysql
+   directory have been deleted.
+
+   If you run into problems and need to file a bug report, please use
+   the instructions in Section 1.7, "How to Report Bugs or Problems."
+
+   On Unix, to install a compressed tar file binary distribution,
+   unpack it at the installation location you choose (typically
+   /usr/local/mysql). This creates the directories shown in the
+   following table.
+
+   Table 2.2. MySQL Installation Layout for Generic Unix/Linux Binary
+   Package
+   Directory Contents of Directory
+   bin Client programs and the mysqld server
+   data Log files, databases
+   docs Manual in Info format
+   man Unix manual pages
+   include Include (header) files
+   lib Libraries
+   scripts mysql_install_db
+   share Miscellaneous support files, including error messages,
+   sample configuration files, SQL for database installation
+   sql-bench Benchmarks
+
+   Debug versions of the mysqld binary are available as mysqld-debug.
+   To compile your own debug version of MySQL from a source
+   distribution, use the appropriate configuration options to enable
+   debugging support. For more information on compiling from source,
+   see Section 2.9, "Installing MySQL from Source."
+
+   To install and use a MySQL binary distribution, the basic command
+   sequence looks like this:
+shell> groupadd mysql
+shell> useradd -r -g mysql mysql
+shell> cd /usr/local
+shell> tar zxvf /path/to/mysql-VERSION-OS.tar.gz
+shell> ln -s full-path-to-mysql-VERSION-OS mysql
+shell> cd mysql
+shell> chown -R mysql .
+shell> chgrp -R mysql .
+shell> scripts/mysql_install_db --user=mysql
+shell> chown -R root .
+shell> chown -R mysql data
+# Next command is optional
+shell> cp support-files/my-medium.cnf /etc/my.cnf
+shell> bin/mysqld_safe --user=mysql &
+# Next command is optional
+shell> cp support-files/mysql.server /etc/init.d/mysql.server
+
+   A more detailed version of the preceding description for
+   installing a binary distribution follows.
+   Note
+
+   This procedure assumes that you have root (administrator) access
+   to your system. Alternatively, you can prefix each command using
+   the sudo (Linux) or pfexec (OpenSolaris) command.
+
+   The procedure does not set up any passwords for MySQL accounts.
+   After following the procedure, proceed to Section 2.10,
+   "Postinstallation Setup and Testing."
+
+Create a mysql User and Group
+
+   If your system does not already have a user and group for mysqld
+   to run as, you may need to create one. The following commands add
+   the mysql group and the mysql user. You might want to call the
+   user and group something else instead of mysql. If so, substitute
+   the appropriate name in the following instructions. The syntax for
+   useradd and groupadd may differ slightly on different versions of
+   Unix, or they may have different names such as adduser and
+   addgroup.
+shell> groupadd mysql
+shell> useradd -r -g mysql mysql
+
+   Note
+
+   Because the user is required only for ownership purposes, not
+   login purposes, the useradd command uses the -r option to create a
+   user that does not have login permissions to your server host.
+   Omit this option to permit logins for the user (or if your useradd
+   does not support the option).
+
+Obtain and Unpack the Distribution
+
+   Pick the directory under which you want to unpack the distribution
+   and change location into it. The example here unpacks the
+   distribution under /usr/local. The instructions, therefore, assume
+   that you have permission to create files and directories in
+   /usr/local. If that directory is protected, you must perform the
+   installation as root.
+shell> cd /usr/local
+
+   Obtain a distribution file using the instructions in Section
+   2.1.3, "How to Get MySQL." For a given release, binary
+   distributions for all platforms are built from the same MySQL
+   source distribution.
+
+   Unpack the distribution, which creates the installation directory.
+   Then create a symbolic link to that directory. tar can uncompress
+   and unpack the distribution if it has z option support:
+shell> tar zxvf /path/to/mysql-VERSION-OS.tar.gz
+shell> ln -s full-path-to-mysql-VERSION-OS mysql
+
+   The tar command creates a directory named mysql-VERSION-OS. The ln
+   command makes a symbolic link to that directory. This enables you
+   to refer more easily to the installation directory as
+   /usr/local/mysql.
+
+   If your tar does not have z option support, use gunzip to unpack
+   the distribution and tar to unpack it. Replace the preceding tar
+   command with the following alternative command to uncompress and
+   extract the distribution:
+shell> gunzip < /path/to/mysql-VERSION-OS.tar.gz | tar xvf -
+
+Perform Postinstallation Setup
+
+   The remainder of the installation process involves setting up the
+   configuration file, creating the core databases, and starting the
+   MySQL server. For instructions, see Section 2.10,
+   "Postinstallation Setup and Testing."
+   Note
+
+   The accounts that are listed in the MySQL grant tables initially
+   have no passwords. After starting the server, you should set up
+   passwords for them using the instructions in Section 2.10,
+   "Postinstallation Setup and Testing."

@@ -1,0 +1,182 @@
+#
+# testing of the TIME column type
+#
+
+--disable_warnings
+drop table if exists t1;
+--enable_warnings
+
+create table t1 (t time);
+insert into t1 values("10:22:33"),("12:34:56.78"),(10),(1234),(123456.78),(1234559.99),("1"),("1:23"),("1:23:45"), ("10.22"), ("-10  1:22:33.45"),("20 10:22:33"),("1999-02-03 20:33:34");
+insert t1 values (30),(1230),("1230"),("12:30"),("12:30:35"),("1 12:30:31.32");
+select * from t1;
+# Test wrong values
+insert into t1 values("10.22.22"),(1234567),(123456789),(123456789.10),("10 22:22"),("12.45a");
+select * from t1;
+drop table t1;
+
+create table t1 (t time);
+insert into t1 values ('09:00:00'),('13:00:00'),('19:38:34'), ('13:00:00'),('09:00:00'),('09:00:00'),('13:00:00'),('13:00:00'),('13:00:00'),('09:00:00');
+select t, time_to_sec(t),sec_to_time(time_to_sec(t)) from t1;
+select sec_to_time(time_to_sec(t)) from t1;
+drop table t1;
+
+CREATE TABLE t1 (t TIME);
+INSERT INTO t1 VALUES (+10), (+10.0), (+10e0);
+INSERT INTO t1 VALUES (-10), (-10.0), (-10e0);
+SELECT * FROM t1;
+DROP TABLE t1;
+
+#
+# BUG #12440: Incorrect processing of time values containing
+# long fraction part and/or large exponent part.
+#
+SELECT CAST(235959.123456 AS TIME);
+SELECT CAST(0.235959123456e+6 AS TIME);
+SELECT CAST(235959123456e-6 AS TIME);
+
+# These must cut fraction part
+SELECT CAST(235959.1234567 AS TIME);
+SELECT CAST(0.2359591234567e6 AS TIME);
+
+# This must return NULL and produce warning:
+SELECT CAST(0.2359591234567e+30 AS TIME);
+###########################################################
+
+--echo End of 4.1 tests
+
+#
+# Bug#29555: Comparing time values as strings may lead to a wrong result.
+#
+select cast('100:55:50' as time) < cast('24:00:00' as time);
+select cast('100:55:50' as time) < cast('024:00:00' as time);
+select cast('300:55:50' as time) < cast('240:00:00' as time);
+select cast('100:55:50' as time) > cast('24:00:00' as time);
+select cast('100:55:50' as time) > cast('024:00:00' as time);
+select cast('300:55:50' as time) > cast('240:00:00' as time);
+create table t1 (f1 time);
+insert into t1 values ('24:00:00');
+select cast('24:00:00' as time) = (select f1 from t1);
+drop table t1;
+
+#
+# Bug#29739: Incorrect time comparison in BETWEEN.
+#
+create table t1(f1 time, f2 time);
+insert into t1 values('20:00:00','150:00:00');
+select 1 from t1 where cast('100:00:00' as time) between f1 and f2;
+drop table t1;
+
+#
+# Bug#29729: Wrong conversion error led to an empty result set.
+#
+CREATE TABLE  t1 (
+  f2 date NOT NULL,
+  f3 int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (f3, f2)
+);
+insert into t1 values('2007-07-01', 1);
+insert into t1 values('2007-07-01', 2);
+insert into t1 values('2007-07-02', 1);
+insert into t1 values('2007-07-02', 2);
+SELECT sum(f3) FROM t1 where f2='2007-07-01 00:00:00' group by f2;
+drop table t1;
+
+
+--echo #
+--echo # Bug #44792: valgrind warning when casting from time to time
+--echo #
+
+CREATE TABLE t1 (c TIME);
+INSERT INTO t1 VALUES ('0:00:00');
+SELECT CAST(c AS TIME) FROM t1;
+DROP TABLE t1;
+
+--echo End of 5.0 tests
+
+--echo #
+--echo # Bug#53942 valgrind warnings with timestamp() function and incomplete datetime values
+--echo #
+SET @@timestamp=UNIX_TIMESTAMP('2001-01-01 01:00:00');
+CREATE TABLE t1(f1 TIME);
+INSERT INTO t1 VALUES ('23:38:57');
+SELECT TIMESTAMP(f1,'1') FROM t1;
+DROP TABLE t1;
+SET @@timestamp=default;
+
+--echo End of 5.1 tests
+
+#
+# Bug#42664 - Sign ignored for TIME types when not comparing as longlong
+#
+
+CREATE TABLE t1 (f1 TIME);
+INSERT INTO t1 VALUES ('24:00:00');
+SELECT      '24:00:00' = (SELECT f1 FROM t1);
+SELECT CAST('24:00:00' AS TIME) = (SELECT f1 FROM t1);
+SELECT CAST('-24:00:00' AS TIME) = (SELECT f1 FROM t1);
+TRUNCATE t1;
+INSERT INTO t1 VALUES ('-24:00:00');
+SELECT CAST('24:00:00' AS TIME) = (SELECT f1 FROM t1);
+SELECT CAST('-24:00:00' AS TIME) = (SELECT f1 FROM t1);
+SELECT '-24:00:00' = (SELECT f1 FROM t1);
+DROP TABLE t1;
+
+--echo #
+--echo # Start of 5.6 tests
+--echo #
+
+--echo #
+--echo # WL#946 Testing <=> operator with TIME
+--echo #
+CREATE TABLE t1 (a TIME);
+INSERT INTO t1 VALUES ('20:00:00'),('19:20:30');
+SELECT * FROM t1 WHERE a<=>'19:20:30';
+SELECT * FROM t1 WHERE a<=>TIME'19:20:30';
+SELECT * FROM t1 WHERE a<=>192030;
+DROP TABLE t1;
+
+
+--echo #
+--echo # WL#946: Testing rounding
+--echo #
+CREATE TABLE t1 (a TIME);
+INSERT INTO t1 VALUES ('10:10:10.9999994'), ('10:10:10.9999995');
+INSERT INTO t1 VALUES (101010.9999994), (101010.9999995);
+SELECT * FROM t1;
+DROP TABLE t1;
+
+--echo #
+--echo # Before WL#946 TIME did not reject too big negative minutes/seconds
+--echo #
+CREATE TABLE t1 (a TIME);
+INSERT INTO t1 VALUES ('-10:60:59'), ('-10:59:60'), (-106059), (-105960);
+SELECT * FROM t1;
+DROP TABLE t1;
+
+--echo #
+--echo # WL#946 Make sure case from number to TIME properly handles
+--echo # too big negative minutes/secons
+--echo #
+CREATE TABLE t1 (a INT);
+INSERT INTO t1 VALUES (-106059), (-105960);
+SELECT CAST(a AS TIME) FROM t1;
+DROP TABLE t1;
+
+--echo #
+--echo # WL#946 Checking function TIME()
+--echo #
+SELECT TIME('1000009:10:10');
+SELECT TIME('1000009:10:10.1999999999999');
+SELECT TIME('10000090:10:10');
+SELECT TIME('10000090:10:10.1999999999999');
+SELECT TIME('100000900:10:10');
+SELECT TIME('100000900:10:10.1999999999999');
+SELECT TIME('1000009000:10:10');
+SELECT TIME('1000009000:10:10.1999999999999');
+SELECT TIME('10000090000:10:10');
+SELECT TIME('10000090000:10:10.1999999999999');
+
+--echo #
+--echo # End of 5.6 tests
+--echo #

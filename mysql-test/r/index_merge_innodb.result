@@ -1,0 +1,293 @@
+#---------------- 2-sweeps read Index merge test 2 -------------------------------
+SET SESSION DEFAULT_STORAGE_ENGINE = InnoDB;
+drop table if exists t1;
+create table t1 (
+pk int primary key,
+key1 int,
+key2 int,
+filler char(200),
+filler2 char(200),
+index(key1),
+index(key2)
+);
+select * from t1 where (key1 >= 2 and key1 <= 10) or (pk >= 4 and pk <=8 );
+pk	key1	key2	filler	filler2
+2	2	2	filler-data	filler-data-2
+3	3	3	filler-data	filler-data-2
+9	9	9	filler-data	filler-data-2
+10	10	10	filler-data	filler-data-2
+4	4	4	filler-data	filler-data-2
+5	5	5	filler-data	filler-data-2
+6	6	6	filler-data	filler-data-2
+7	7	7	filler-data	filler-data-2
+8	8	8	filler-data	filler-data-2
+set @maxv=1000;
+select * from t1 where
+(pk < 5) or (pk > 10 and pk < 15) or (pk >= 50 and pk < 55 ) or (pk > @maxv-10)
+or key1=18 or key1=60;
+pk	key1	key2	filler	filler2
+18	18	18	filler-data	filler-data-2
+60	60	60	filler-data	filler-data-2
+1	1	1	filler-data	filler-data-2
+2	2	2	filler-data	filler-data-2
+3	3	3	filler-data	filler-data-2
+4	4	4	filler-data	filler-data-2
+11	11	11	filler-data	filler-data-2
+12	12	12	filler-data	filler-data-2
+13	13	13	filler-data	filler-data-2
+14	14	14	filler-data	filler-data-2
+50	50	50	filler-data	filler-data-2
+51	51	51	filler-data	filler-data-2
+52	52	52	filler-data	filler-data-2
+53	53	53	filler-data	filler-data-2
+54	54	54	filler-data	filler-data-2
+991	991	991	filler-data	filler-data-2
+992	992	992	filler-data	filler-data-2
+993	993	993	filler-data	filler-data-2
+994	994	994	filler-data	filler-data-2
+995	995	995	filler-data	filler-data-2
+996	996	996	filler-data	filler-data-2
+997	997	997	filler-data	filler-data-2
+998	998	998	filler-data	filler-data-2
+999	999	999	filler-data	filler-data-2
+1000	1000	1000	filler-data	filler-data-2
+select * from t1 where
+(pk < 5) or (pk > 10 and pk < 15) or (pk >= 50 and pk < 55 ) or (pk > @maxv-10)
+or key1 < 3 or key1 > @maxv-11;
+pk	key1	key2	filler	filler2
+990	990	990	filler-data	filler-data-2
+1	1	1	filler-data	filler-data-2
+2	2	2	filler-data	filler-data-2
+3	3	3	filler-data	filler-data-2
+4	4	4	filler-data	filler-data-2
+11	11	11	filler-data	filler-data-2
+12	12	12	filler-data	filler-data-2
+13	13	13	filler-data	filler-data-2
+14	14	14	filler-data	filler-data-2
+50	50	50	filler-data	filler-data-2
+51	51	51	filler-data	filler-data-2
+52	52	52	filler-data	filler-data-2
+53	53	53	filler-data	filler-data-2
+54	54	54	filler-data	filler-data-2
+991	991	991	filler-data	filler-data-2
+992	992	992	filler-data	filler-data-2
+993	993	993	filler-data	filler-data-2
+994	994	994	filler-data	filler-data-2
+995	995	995	filler-data	filler-data-2
+996	996	996	filler-data	filler-data-2
+997	997	997	filler-data	filler-data-2
+998	998	998	filler-data	filler-data-2
+999	999	999	filler-data	filler-data-2
+1000	1000	1000	filler-data	filler-data-2
+select * from t1 where
+(pk < 5) or (pk > 10 and pk < 15) or (pk >= 50 and pk < 55 ) or (pk > @maxv-10)
+or
+(key1 < 5) or (key1 > 10 and key1 < 15) or (key1 >= 50 and key1 < 55 ) or (key1 > @maxv-10);
+pk	key1	key2	filler	filler2
+1	1	1	filler-data	filler-data-2
+2	2	2	filler-data	filler-data-2
+3	3	3	filler-data	filler-data-2
+4	4	4	filler-data	filler-data-2
+11	11	11	filler-data	filler-data-2
+12	12	12	filler-data	filler-data-2
+13	13	13	filler-data	filler-data-2
+14	14	14	filler-data	filler-data-2
+50	50	50	filler-data	filler-data-2
+51	51	51	filler-data	filler-data-2
+52	52	52	filler-data	filler-data-2
+53	53	53	filler-data	filler-data-2
+54	54	54	filler-data	filler-data-2
+991	991	991	filler-data	filler-data-2
+992	992	992	filler-data	filler-data-2
+993	993	993	filler-data	filler-data-2
+994	994	994	filler-data	filler-data-2
+995	995	995	filler-data	filler-data-2
+996	996	996	filler-data	filler-data-2
+997	997	997	filler-data	filler-data-2
+998	998	998	filler-data	filler-data-2
+999	999	999	filler-data	filler-data-2
+1000	1000	1000	filler-data	filler-data-2
+select * from t1 where
+(pk > 10 and pk < 15) or (pk >= 50 and pk < 55 )
+or
+(key1 < 5) or (key1 > @maxv-10);
+pk	key1	key2	filler	filler2
+1	1	1	filler-data	filler-data-2
+2	2	2	filler-data	filler-data-2
+3	3	3	filler-data	filler-data-2
+4	4	4	filler-data	filler-data-2
+991	991	991	filler-data	filler-data-2
+992	992	992	filler-data	filler-data-2
+993	993	993	filler-data	filler-data-2
+994	994	994	filler-data	filler-data-2
+995	995	995	filler-data	filler-data-2
+996	996	996	filler-data	filler-data-2
+997	997	997	filler-data	filler-data-2
+998	998	998	filler-data	filler-data-2
+999	999	999	filler-data	filler-data-2
+1000	1000	1000	filler-data	filler-data-2
+11	11	11	filler-data	filler-data-2
+12	12	12	filler-data	filler-data-2
+13	13	13	filler-data	filler-data-2
+14	14	14	filler-data	filler-data-2
+50	50	50	filler-data	filler-data-2
+51	51	51	filler-data	filler-data-2
+52	52	52	filler-data	filler-data-2
+53	53	53	filler-data	filler-data-2
+54	54	54	filler-data	filler-data-2
+drop table t1;
+#---------------- Clustered PK ROR-index_merge tests -----------------------------
+SET SESSION DEFAULT_STORAGE_ENGINE = InnoDB;
+drop table if exists  t1;
+create table t1
+(
+pk1 int not null,
+pk2 int not null,
+key1 int not null,
+key2 int not null,
+pktail1ok  int not null,
+pktail2ok  int not null,
+pktail3bad int not null,
+pktail4bad int not null,
+pktail5bad int not null,
+pk2copy int not null,
+badkey  int not null,
+filler1 char (200),
+filler2 char (200),
+key (key1),
+key (key2),
+/* keys with tails from CPK members */
+key (pktail1ok, pk1),
+key (pktail2ok, pk1, pk2),
+key (pktail3bad, pk2, pk1),
+key (pktail4bad, pk1, pk2copy),
+key (pktail5bad, pk1, pk2, pk2copy),
+primary key (pk1, pk2)
+);
+explain select * from t1 where pk1 = 1 and pk2 < 80  and key1=0;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	t1	range	PRIMARY,key1	PRIMARY	8	NULL	ROWS	Using index condition; Using where
+select * from t1 where pk1 = 1 and pk2 < 80  and key1=0;
+pk1	pk2	key1	key2	pktail1ok	pktail2ok	pktail3bad	pktail4bad	pktail5bad	pk2copy	badkey	filler1	filler2
+1	10	0	0	0	0	0	0	0	10	0	filler-data-10	filler2
+1	11	0	0	0	0	0	0	0	11	0	filler-data-11	filler2
+1	12	0	0	0	0	0	0	0	12	0	filler-data-12	filler2
+1	13	0	0	0	0	0	0	0	13	0	filler-data-13	filler2
+1	14	0	0	0	0	0	0	0	14	0	filler-data-14	filler2
+1	15	0	0	0	0	0	0	0	15	0	filler-data-15	filler2
+1	16	0	0	0	0	0	0	0	16	0	filler-data-16	filler2
+1	17	0	0	0	0	0	0	0	17	0	filler-data-17	filler2
+1	18	0	0	0	0	0	0	0	18	0	filler-data-18	filler2
+1	19	0	0	0	0	0	0	0	19	0	filler-data-19	filler2
+explain select pk1,pk2 from t1 where key1 = 10 and key2=10 and 2*pk1+1 < 2*96+1;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	t1	index_merge	key1,key2	key1,key2	4,4	NULL	1	Using intersect(key1,key2); Using where; Using index
+select pk1,pk2 from t1 where key1 = 10 and key2=10 and 2*pk1+1 < 2*96+1;
+pk1	pk2
+95	50
+95	51
+95	52
+95	53
+95	54
+95	55
+95	56
+95	57
+95	58
+95	59
+explain select * from t1 where badkey=1 and key1=10;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	t1	ref	key1	key1	4	const	ROWS	Using where
+explain select * from t1 where pk1 < 7500 and key1 = 10;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	t1	index_merge	PRIMARY,key1	key1,PRIMARY	4,4	NULL	ROWS	Using intersect(key1,PRIMARY); Using where
+explain select * from t1 where pktail1ok=1 and key1=10;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	t1	index_merge	key1,pktail1ok	key1,pktail1ok	4,4	NULL	1	Using intersect(key1,pktail1ok); Using where
+explain select * from t1 where pktail2ok=1 and key1=10;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	t1	index_merge	key1,pktail2ok	key1,pktail2ok	4,4	NULL	1	Using intersect(key1,pktail2ok); Using where
+explain select * from t1 where (pktail2ok=1 and pk1< 50000) or key1=10;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	t1	index_merge	PRIMARY,key1,pktail2ok	pktail2ok,key1	8,4	NULL	ROWS	Using sort_union(pktail2ok,key1); Using where
+explain select * from t1 where pktail3bad=1 and key1=10;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	t1	ref	key1,pktail3bad	EITHER_KEY	4	const	ROWS	Using where
+explain select * from t1 where pktail4bad=1 and key1=10;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	t1	ref	key1,pktail4bad	key1	4	const	ROWS	Using where
+explain select * from t1 where pktail5bad=1 and key1=10;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	t1	ref	key1,pktail5bad	key1	4	const	ROWS	Using where
+explain select pk1,pk2,key1,key2 from t1 where key1 = 10 and key2=10 limit 10;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	t1	index_merge	key1,key2	key1,key2	4,4	NULL	1	Using intersect(key1,key2); Using where; Using index
+select pk1,pk2,key1,key2 from t1 where key1 = 10 and key2=10 limit 10;
+pk1	pk2	key1	key2
+95	50	10	10
+95	51	10	10
+95	52	10	10
+95	53	10	10
+95	54	10	10
+95	55	10	10
+95	56	10	10
+95	57	10	10
+95	58	10	10
+95	59	10	10
+drop table t1;
+create table t1
+(
+RUNID varchar(22),
+SUBMITNR varchar(5),
+ORDERNR char(1),
+PROGRAMM varchar(8),
+TESTID varchar(4),
+UCCHECK char(1),
+ETEXT varchar(80),
+ETEXT_TYPE char(1),
+INFO char(1),
+SEVERITY tinyint(3),
+TADIRFLAG char(1),
+PRIMARY KEY  (RUNID,SUBMITNR,ORDERNR,PROGRAMM,TESTID,UCCHECK),
+KEY `TVERM~KEY`  (PROGRAMM,TESTID,UCCHECK)
+) DEFAULT CHARSET=latin1;
+update t1 set `ETEXT` = '', `ETEXT_TYPE`='', `INFO`='', `SEVERITY`='', `TADIRFLAG`=''
+WHERE
+`RUNID`= '' AND `SUBMITNR`= '' AND `ORDERNR`='' AND `PROGRAMM`='' AND
+`TESTID`='' AND `UCCHECK`='';
+drop table t1;
+#
+# Bug#50402 Optimizer producing wrong results when using Index Merge on InnoDB
+#
+CREATE TABLE t1 (f1 INT, PRIMARY KEY (f1));
+INSERT INTO t1 VALUES (2);
+CREATE TABLE t2 (f1 INT, f2 INT, f3 char(1),
+PRIMARY KEY (f1), KEY (f2), KEY (f3) );
+INSERT INTO t2 VALUES (1, 1, 'h'), (2, 3, 'h'), (3, 2, ''), (4, 2, '');
+SELECT t1.f1 FROM t1
+WHERE (SELECT COUNT(*) FROM t2 WHERE t2.f3 = 'h' AND t2.f2 = t1.f1) = 0 AND t1.f1 = 2;
+f1
+2
+EXPLAIN SELECT t1.f1 FROM t1
+WHERE (SELECT COUNT(*) FROM t2 WHERE t2.f3 = 'h' AND t2.f2 = t1.f1) = 0 AND t1.f1 = 2;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	PRIMARY	t1	const	PRIMARY	PRIMARY	4	const	1	Using index
+2	DEPENDENT SUBQUERY	t2	index_merge	f2,f3	f3,f2	2,5	NULL	1	Using intersect(f3,f2); Using where; Using index
+DROP TABLE t1,t2;
+#
+# Bug#11747423 32254: INDEX MERGE USED UNNECESSARILY
+#
+CREATE TABLE t1 (
+id INT NOT NULL PRIMARY KEY,
+id2 INT NOT NULL,
+id3 INT NOT NULL,
+KEY (id2),
+KEY (id3),
+KEY covering_index (id2,id3)
+) ENGINE=InnoDB;
+INSERT INTO t1 VALUES (0, 0, 0), (1, 1, 1), (2, 2, 2), (3, 3, 3), (4, 4, 4), (5, 5, 5), (6, 6, 6), (7, 7, 7);
+INSERT INTO t1 SELECT id + 8, id2 + 8, id3 +8 FROM t1;
+INSERT INTO t1 SELECT id + 16, 7, 0 FROM t1;
+EXPLAIN SELECT SQL_NO_CACHE count(*) FROM t1 WHERE id2=7 AND id3=0;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	t1	ref	id2,id3,covering_index	covering_index	8	const,const	16	Using index
+DROP TABLE t1;

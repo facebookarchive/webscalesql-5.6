@@ -1,0 +1,12 @@
+#! /bin/sh
+
+rm -f TAGS
+filter='\.cpp$\|\.cc$\|\.c$\|\.h$\|\.yy$'
+
+list="find . -type f"
+bzr root >/dev/null 2>/dev/null && list="bzr ls --from-root -R --kind=file --versioned"
+
+$list |grep $filter |while read f; 
+do
+	 etags -o TAGS --append $f
+done

@@ -4707,6 +4707,10 @@ int Query_log_event::do_apply_event(Relay_log_info const *rli,
         thd->variables.sql_mode=
           (sql_mode_t) ((thd->variables.sql_mode & MODE_NO_DIR_IN_CREATE) |
                        (sql_mode & ~(ulonglong) MODE_NO_DIR_IN_CREATE));
+        // Force NO_UNSIGNED_SUBTRACTION for replication if it is set for
+        // this server, even if it isn't set on the master.
+        if (global_system_variables.sql_mode & MODE_NO_UNSIGNED_SUBTRACTION)
+          thd->variables.sql_mode |= MODE_NO_UNSIGNED_SUBTRACTION;
       if (charset_inited)
       {
         if (rli->cached_charset_compare(charset))

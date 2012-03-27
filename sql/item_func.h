@@ -608,6 +608,7 @@ public:
   Item_func_additive_op(Item *a,Item *b) :Item_num_op(a,b) {}
   void result_precision();
   bool check_partition_func_processor(uchar *int_arg) {return FALSE;}
+  void fix_length_and_dec();
 };
 
 
@@ -629,7 +630,6 @@ public:
   longlong int_op();
   double real_op();
   my_decimal *decimal_op(my_decimal *);
-  void fix_length_and_dec();
 };
 
 

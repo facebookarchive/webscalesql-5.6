@@ -1424,7 +1424,7 @@ void Item_func_additive_op::result_precision()
   subtraction of UNSIGNED BIGINT to return negative values.
 */
 
-void Item_func_minus::fix_length_and_dec()
+void Item_func_additive_op::fix_length_and_dec()
 {
   Item_num_op::fix_length_and_dec();
   if (unsigned_flag &&

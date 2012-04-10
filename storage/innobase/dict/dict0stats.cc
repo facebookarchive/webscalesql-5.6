@@ -51,7 +51,7 @@ Created Jan 06, 2010 Vasil Dimov
 
 The algorithm is controlled by one number - srv_stats_persistent_sample_pages,
 let it be A, which is the number of leaf pages to analyze for a given index
-for each n-prefix (if the index is on 3 columns, then 3*A pages will be
+for each n-prefix (if the index is on 3 columns, then 3*A leaf pages will be
 analyzed).
 
 Let the total number of leaf pages in the table be T.
@@ -68,7 +68,7 @@ We avoid diving below boring records when searching for a leaf page to
 estimate the number of distinct records because we know that such a leaf
 page will have number of distinct records == 1.
 
-For each n-prefix start from the root level and full scan subsequent lower
+For each n-prefix: start from the root level and full scan subsequent lower
 levels until a level that contains at least A*10 distinct records is found.
 Lets call this level LA.
 As an optimization the search is canceled if it has reached level 1 (never
@@ -96,10 +96,16 @@ each page and diving below it.
 
 This way, a total of A leaf pages are analyzed for the given n-prefix.
 
-Let the number of different key values found in page i be Pi (i=1..A)
-Let the number of different key values in the whole level LA be V.
-Then the total number of different key values in the whole tree is:
-V * (P1 + P2 + ... PA) / A.
+Let the number of different key values found in each leaf page i be Pi (i=1..A).
+Let N_DIFF_AVG_LEAF be (P1 + P2 + ... + PA) / A.
+Let the number of different key values on level LA be N_DIFF_LA.
+Let the total number of records on level LA be TOTAL_LA.
+Let R be N_DIFF_LA / TOTAL_LA, we assume this ratio is the same on the
+leaf level.
+Let the number of leaf pages be N.
+Then the total number of different key values on the leaf level is:
+N * R * N_DIFF_AVG_LEAF.
+See REF01 for the implementation.
 
 The above describes how to calculate the cardinality of an index.
 This algorithm is executed for each n-prefix of a multi-column index
@@ -154,7 +160,7 @@ dict_stats_update_transient(
 	if (index == NULL) {
 		/* Table definition is corrupt */
 		ut_print_timestamp(stderr);
-		fprintf(stderr, "InnoDB: table %s has no indexes. "
+		fprintf(stderr, " InnoDB: table %s has no indexes. "
 			"Cannot calculate statistics.\n", table->name);
 		return;
 	}
@@ -170,19 +176,32 @@ dict_stats_update_transient(
 		    (srv_force_recovery < SRV_FORCE_NO_IBUF_MERGE
 		     || (srv_force_recovery < SRV_FORCE_NO_LOG_REDO
 			 && dict_index_is_clust(index)))) {
+			mtr_t	mtr;
 			ulint	size;
-			size = btr_get_size(index, BTR_TOTAL_SIZE);
 
-			index->stat_index_size = size;
+			mtr_start(&mtr);
+			mtr_s_lock(dict_index_get_lock(index), &mtr);
 
-			sum_of_index_sizes += size;
+			size = btr_get_size(index, BTR_TOTAL_SIZE, &mtr);
 
-			size = btr_get_size(index, BTR_N_LEAF_PAGES);
+			if (size != ULINT_UNDEFINED) {
+				index->stat_index_size = size;
 
-			if (size == 0) {
+				size = btr_get_size(
+					index, BTR_N_LEAF_PAGES, &mtr);
+			}
+
+			mtr_commit(&mtr);
+
+			switch (size) {
+			case ULINT_UNDEFINED:
+				goto fake_statistics;
+			case 0:
 				/* The root node of the tree is a leaf */
 				size = 1;
 			}
+
+			sum_of_index_sizes += index->stat_index_size;
 
 			index->stat_n_leaf_pages = size;
 
@@ -196,6 +215,7 @@ dict_stats_update_transient(
 			various means, also via secondary indexes. */
 			ulint	i;
 
+fake_statistics:
 			sum_of_index_sizes++;
 			index->stat_index_size = index->stat_n_leaf_pages = 1;
 
@@ -247,7 +267,7 @@ dict_stats_persistent_storage_check(
 		{"table_name", DATA_VARMYSQL,
 			DATA_NOT_NULL, 192 /* NAME_LEN from mysql_com.h */},
 
-		{"stats_timestamp", DATA_FIXBINARY,
+		{"last_update", DATA_FIXBINARY,
 			DATA_NOT_NULL, 4},
 
 		{"n_rows", DATA_INT,
@@ -276,7 +296,7 @@ dict_stats_persistent_storage_check(
 		{"index_name", DATA_VARMYSQL,
 			DATA_NOT_NULL, 192 /* NAME_LEN from mysql_com.h */},
 
-		{"stat_timestamp", DATA_FIXBINARY,
+		{"last_update", DATA_FIXBINARY,
 			DATA_NOT_NULL, 4},
 
 		{"stat_name", DATA_VARMYSQL,
@@ -358,7 +378,7 @@ an index. Each of the 1..n_uniq prefixes are looked up and the results are
 saved in the array n_diff[]. Notice that n_diff[] must be able to store
 n_uniq+1 numbers because the results are saved in
 n_diff[1] .. n_diff[n_uniq]. The total number of records on the level is
-saved in total.
+saved in total_recs.
 Also, the index of the last record in each group of equal records is saved
 in n_diff_boundaries[1..n_uniq], records indexing starts from the leftmost
 record on the level and continues cross pages boundaries, counting from 0.
@@ -604,15 +624,20 @@ dict_stats_analyze_index_level(
 #ifdef UNIV_STATS_DEBUG
 	for (i = 1; i <= n_uniq; i++) {
 
-		DEBUG_PRINTF("    %s(): total recs: %llu, total pages: %llu, "
-			     "n_diff[%lu]: %lld\n",
-			     __func__, *total_recs, *total_pages,
+		DEBUG_PRINTF("    %s(): total recs: " UINT64PF
+			     ", total pages: " UINT64PF
+			     ", n_diff[%lu]: " UINT64PF "\n",
+			     __func__, *total_recs,
+			     *total_pages,
 			     i, n_diff[i]);
 
+#if 0
 		if (n_diff_boundaries != NULL) {
 			ib_uint64_t	j;
 
-			printf("boundaries: ");
+			DEBUG_PRINTF("    %s(): boundaries[%lu]: ",
+				     __func__, i);
+
 			for (j = 0; j < n_diff[i]; j++) {
 				ib_uint64_t	idx;
 
@@ -620,10 +645,12 @@ dict_stats_analyze_index_level(
 					&n_diff_boundaries[i],
 					j * sizeof(ib_uint64_t));
 
-				printf(UINT64PF "=" UINT64PF ", ", j, idx);
+				DEBUG_PRINTF(UINT64PF "=" UINT64PF ", ",
+					     j, idx);
 			}
-			printf("\n");
+			DEBUG_PRINTF("\n");
 		}
+#endif
 	}
 #endif /* UNIV_STATS_DEBUG */
 
@@ -721,7 +748,6 @@ dict_stats_scan_page(
 				       offsets_rec, offsets_next_rec,
 				       index, FALSE, &matched_fields,
 				       &matched_bytes);
-
 
 		if (matched_fields < n_prefix) {
 			/* rec != next_rec, => rec is non-boring */
@@ -849,7 +875,7 @@ dict_stats_analyze_index_below_cur(
 
 		/* pages on level > 0 are not allowed to be empty */
 		ut_a(offsets_rec != NULL);
-		/* if page is not empty (rec != NULL) then n_diff must
+		/* if page is not empty (offsets_rec != NULL) then n_diff must
 		be > 0, otherwise there is a bug in dict_stats_scan_page() */
 		ut_a(n_diff > 0);
 
@@ -891,7 +917,7 @@ dict_stats_analyze_index_below_cur(
 	}
 
 #if 0
-	DEBUG_PRINTF("      %s(): n_diff below page_no=%lu: %llu\n",
+	DEBUG_PRINTF("      %s(): n_diff below page_no=%lu: " UINT64PF "\n",
 		     __func__, page_no, n_diff);
 #endif
 
@@ -924,7 +950,6 @@ dict_stats_analyze_index_for_n_prefix(
 						records on the given level,
 						when looking at the first
 						n_prefix columns */
-
 	dyn_array_t*	boundaries)		/*!< in: array that contains
 						n_diff_for_this_prefix
 						integers each of which
@@ -948,7 +973,7 @@ dict_stats_analyze_index_for_n_prefix(
 
 #if 0
 	DEBUG_PRINTF("    %s(table=%s, index=%s, level=%lu, n_prefix=%lu, "
-		     "n_diff_for_this_prefix=%llu)\n",
+		     "n_diff_for_this_prefix=" UINT64PF ")\n",
 		     __func__, index->table->name, index->name, level,
 		     n_prefix, n_diff_for_this_prefix);
 #endif
@@ -1060,8 +1085,8 @@ dict_stats_analyze_index_for_n_prefix(
 					     * sizeof(ib_uint64_t)));
 
 #if 0
-		DEBUG_PRINTF("    %s(): dive below rec_idx=%llu\n",
-			     __func__, dive_below_idx);
+		DEBUG_PRINTF("    %s(): dive below record with index="
+			     UINT64PF "\n", __func__, dive_below_idx);
 #endif
 
 		/* seek to the record with index dive_below_idx */
@@ -1084,20 +1109,57 @@ dict_stats_analyze_index_for_n_prefix(
 
 		ut_a(rec_idx == dive_below_idx);
 
-		n_diff_sum_of_all_analyzed_pages
-			+= dict_stats_analyze_index_below_cur(
-				btr_pcur_get_btr_cur(&pcur), n_prefix, &mtr);
+		ib_uint64_t	n_diff_on_leaf_page;
+
+		n_diff_on_leaf_page = dict_stats_analyze_index_below_cur(
+			btr_pcur_get_btr_cur(&pcur), n_prefix, &mtr);
+
+		/* We adjust n_diff_on_leaf_page here to avoid counting
+		one record twice - once as the last on some page and once
+		as the first on another page. Consider the following example:
+		Leaf level:
+		page: (2,2,2,2,3,3)
+		... many pages like (3,3,3,3,3,3) ...
+		page: (3,3,3,3,5,5)
+		... many pages like (5,5,5,5,5,5) ...
+		page: (5,5,5,5,8,8)
+		page: (8,8,8,8,9,9)
+		our algo would (correctly) get an estimate that there are
+		2 distinct records per page (average). Having 4 pages below
+		non-boring records, it would (wrongly) estimate the number
+		of distinct records to 8. */
+		if (n_diff_on_leaf_page > 0) {
+			n_diff_on_leaf_page--;
+		}
+
+		n_diff_sum_of_all_analyzed_pages += n_diff_on_leaf_page;
 	}
 
+	if (n_diff_sum_of_all_analyzed_pages == 0) {
+		n_diff_sum_of_all_analyzed_pages = 1;
+	}
+
+	/* See REF01 for an explanation of the algorithm */
 	index->stat_n_diff_key_vals[n_prefix]
-		= total_recs_on_level * n_diff_sum_of_all_analyzed_pages
+		= index->stat_n_leaf_pages
+
+		* n_diff_for_this_prefix
+		/ total_recs_on_level
+
+		* n_diff_sum_of_all_analyzed_pages
 		/ n_recs_to_dive_below;
 
 	index->stat_n_sample_sizes[n_prefix] = n_recs_to_dive_below;
 
-	DEBUG_PRINTF("    %s(): n_diff=%llu for n_prefix=%lu\n",
+	DEBUG_PRINTF("    %s(): n_diff=" UINT64PF " for n_prefix=%lu "
+		     "(%lu"
+		     " * " UINT64PF " / " UINT64PF
+		     " * " UINT64PF " / " UINT64PF ")\n",
 		     __func__, index->stat_n_diff_key_vals[n_prefix],
-		     n_prefix);
+		     n_prefix,
+		     index->stat_n_leaf_pages,
+		     n_diff_for_this_prefix, total_recs_on_level,
+		     n_diff_sum_of_all_analyzed_pages, n_recs_to_dive_below);
 
 	btr_pcur_close(&pcur);
 
@@ -1111,10 +1173,9 @@ dict_stats_analyze_index_for_n_prefix(
 Calculates new statistics for a given index and saves them to the index
 members stat_n_diff_key_vals[], stat_n_sample_sizes[], stat_index_size and
 stat_n_leaf_pages. This function could be slow.
-dict_stats_analyze_index() @{
-@return DB_SUCCESS or error code */
+dict_stats_analyze_index() @{ */
 static
-enum db_err
+void
 dict_stats_analyze_index(
 /*=====================*/
 	dict_index_t*	index)	/*!< in/out: index to analyze */
@@ -1129,21 +1190,42 @@ dict_stats_analyze_index(
 	ib_uint64_t	total_pages;
 	dyn_array_t*	n_diff_boundaries;
 	mtr_t		mtr;
+	ulint		size;
 	ulint		i;
 
 	DEBUG_PRINTF("  %s(index=%s)\n", __func__, index->name);
 
-	index->stat_index_size = btr_get_size(index, BTR_TOTAL_SIZE);
-
-	index->stat_n_leaf_pages = btr_get_size(index, BTR_N_LEAF_PAGES);
-	if (index->stat_n_leaf_pages == 0) {
-		/* The root node of the tree is a leaf */
-		index->stat_n_leaf_pages = 1;
-	}
-
 	mtr_start(&mtr);
 
 	mtr_s_lock(dict_index_get_lock(index), &mtr);
+
+	size = btr_get_size(index, BTR_TOTAL_SIZE, &mtr);
+
+	if (size != ULINT_UNDEFINED) {
+		index->stat_index_size = size;
+		size = btr_get_size(index, BTR_N_LEAF_PAGES, &mtr);
+	}
+
+	switch (size) {
+	case ULINT_UNDEFINED:
+		mtr_commit(&mtr);
+		/* Fake some statistics. */
+		index->stat_index_size = index->stat_n_leaf_pages = 1;
+
+		for (i = dict_index_get_n_unique(index); i; ) {
+			index->stat_n_diff_key_vals[i--] = 1;
+		}
+
+		memset(index->stat_n_non_null_key_vals, 0,
+		       (1 + dict_index_get_n_unique(index))
+		       * sizeof(*index->stat_n_non_null_key_vals));
+		return;
+	case 0:
+		/* The root node of the tree is a leaf */
+		size = 1;
+	}
+
+	index->stat_n_leaf_pages = size;
 
 	root_level = btr_page_get_level(btr_root_get(index, &mtr), &mtr);
 
@@ -1185,7 +1267,7 @@ dict_stats_analyze_index(
 			index->stat_n_sample_sizes[i] = total_pages;
 		}
 
-		return(DB_SUCCESS);
+		return;
 	}
 	/* else */
 
@@ -1306,8 +1388,8 @@ dict_stats_analyze_index(
 		}
 found_level:
 
-		DEBUG_PRINTF("  %s(): found level %lu that has %llu "
-			     "distinct records for n_prefix=%lu\n",
+		DEBUG_PRINTF("  %s(): found level %lu that has " UINT64PF
+			     " distinct records for n_prefix=%lu\n",
 			     __func__, level, n_diff_on_level[n_prefix],
 			     n_prefix);
 
@@ -1335,8 +1417,6 @@ found_level:
 	mem_free(n_diff_boundaries);
 
 	mem_free(n_diff_on_level);
-
-	return(DB_SUCCESS);
 }
 /* @} */
 
@@ -1410,7 +1490,7 @@ enum db_err
 dict_stats_save_index_stat(
 /*=======================*/
 	dict_index_t*	index,		/*!< in: index */
-	lint		stat_timestamp,	/*!< in: timestamp of the stat */
+	lint		last_update,	/*!< in: timestamp of the stat */
 	const char*	stat_name,	/*!< in: name of the stat */
 	ib_uint64_t	stat_value,	/*!< in: value of the stat */
 	ib_uint64_t*	sample_size,	/*!< in: n pages sampled or NULL */
@@ -1433,7 +1513,7 @@ dict_stats_save_index_stat(
 
 	pars_info_add_str_literal(pinfo, "index_name", index->name);
 
-	pars_info_add_int4_literal(pinfo, "stat_timestamp", stat_timestamp);
+	pars_info_add_int4_literal(pinfo, "last_update", last_update);
 
 	pars_info_add_str_literal(pinfo, "stat_name", stat_name);
 
@@ -1470,7 +1550,7 @@ dict_stats_save_index_stat(
 			   "  :database_name,\n"
 			   "  :table_name,\n"
 			   "  :index_name,\n"
-			   "  :stat_timestamp,\n"
+			   "  :last_update,\n"
 			   "  :stat_name,\n"
 			   "  :stat_value,\n"
 			   "  :sample_size,\n"
@@ -1478,6 +1558,7 @@ dict_stats_save_index_stat(
 			   "  );\n"
 			   "ELSE\n"
 			   "  UPDATE \"" INDEX_STATS_NAME "\" SET\n"
+			   "  last_update = :last_update,\n"
 			   "  stat_value = :stat_value,\n"
 			   "  sample_size = :sample_size,\n"
 			   "  stat_description = :stat_description\n"
@@ -1500,6 +1581,8 @@ dict_stats_save_index_stat(
 			"stat name %s: %s\n",
 			index->table->name, index->name,
 			stat_name, ut_strerr(ret));
+
+		trx->error_state = DB_SUCCESS;
 	}
 
 	return(ret);
@@ -1548,7 +1631,7 @@ dict_stats_save(
 	pars_info_add_str_literal(pinfo, "table_name",
 				  dict_remove_db_name(table->name));
 
-	pars_info_add_int4_literal(pinfo, "stats_timestamp", now);
+	pars_info_add_int4_literal(pinfo, "last_update", now);
 
 	pars_info_add_ull_literal(pinfo, "n_rows", table->stat_n_rows);
 
@@ -1576,14 +1659,14 @@ dict_stats_save(
 			   "  (\n"
 			   "  :database_name,\n"
 			   "  :table_name,\n"
-			   "  :stats_timestamp,\n"
+			   "  :last_update,\n"
 			   "  :n_rows,\n"
 			   "  :clustered_index_size,\n"
 			   "  :sum_of_other_index_sizes\n"
 			   "  );\n"
 			   "ELSE\n"
 			   "  UPDATE \"" TABLE_STATS_NAME "\" SET\n"
-			   "  stats_timestamp = :stats_timestamp,\n"
+			   "  last_update = :last_update,\n"
 			   "  n_rows = :n_rows,\n"
 			   "  clustered_index_size = :clustered_index_size,\n"
 			   "  sum_of_other_index_sizes = "
@@ -1861,10 +1944,8 @@ dict_stats_fetch_index_stats_step(
 			     index != NULL;
 			     index = dict_table_get_next_index(index)) {
 
-				// FIXME: Can we use a better cast operator
-				if (strncasecmp(index->name,
-						(const char*) data,
-						len) == 0) {
+				if (strlen(index->name) == len
+				    && memcmp(index->name, data, len) == 0) {
 					/* the corresponding index was found */
 					break;
 				}
@@ -1950,26 +2031,29 @@ dict_stats_fetch_index_stats_step(
 	/* sample_size could be UINT64_UNDEFINED here, if it is NULL */
 
 #define PFX	"n_diff_pfx"
+#define PFX_LEN	10
 
-	if (strncasecmp("size", stat_name, stat_name_len) == 0) {
+	if (stat_name_len == 4 /* strlen("size") */
+	    && strncasecmp("size", stat_name, stat_name_len) == 0) {
 		index->stat_index_size = (ulint) stat_value;
 		arg->stats_were_modified = TRUE;
-	} else if (strncasecmp("n_leaf_pages", stat_name, stat_name_len)
+	} else if (stat_name_len == 12 /* strlen("n_leaf_pages") */
+		   && strncasecmp("n_leaf_pages", stat_name, stat_name_len)
 		   == 0) {
 		index->stat_n_leaf_pages = (ulint) stat_value;
 		arg->stats_were_modified = TRUE;
-	} else if (strncasecmp(PFX, stat_name,
-			       ut_min(strlen(PFX), stat_name_len)) == 0) {
+	} else if (stat_name_len > PFX_LEN /* e.g. stat_name=="n_diff_pfx01" */
+		   && strncasecmp(PFX, stat_name, PFX_LEN) == 0) {
 
 		const char*	num_ptr;
 		unsigned long	n_pfx;
 
 		/* point num_ptr into "1" from "n_diff_pfx12..." */
-		num_ptr = stat_name + strlen(PFX);
+		num_ptr = stat_name + PFX_LEN;
 
 		/* stat_name should have exactly 2 chars appended to PFX
 		and they should be digits */
-		if (stat_name_len != strlen(PFX) + 2
+		if (stat_name_len != PFX_LEN + 2
 		    || num_ptr[0] < '0' || num_ptr[0] > '9'
 		    || num_ptr[1] < '0' || num_ptr[1] > '9') {
 
@@ -2182,7 +2266,7 @@ dict_stats_update(
 /*==============*/
 	dict_table_t*		table,	/*!< in/out: table */
 	dict_stats_upd_option_t	stats_upd_option,
-					/*!< in: whether to (re)calc
+					/*!< in: whether to (re) calc
 					the stats or to fetch them from
 					the persistent statistics
 					storage */
@@ -2202,10 +2286,9 @@ dict_stats_update(
 	if (table->ibd_file_missing) {
 		ut_print_timestamp(stderr);
 		fprintf(stderr,
-			"  InnoDB: cannot calculate statistics for table %s\n"
-			"InnoDB: because the .ibd file is missing.  For help,"
-			" please refer to\n"
-			"InnoDB: " REFMAN "innodb-troubleshooting.html\n",
+			" InnoDB: cannot calculate statistics for table %s "
+			"because the .ibd file is missing. For help, please "
+			"refer to " REFMAN "innodb-troubleshooting.html\n",
 			table->name);
 
 		return(DB_TABLESPACE_DELETED);
@@ -2227,11 +2310,11 @@ dict_stats_update(
 
 		/* FTS auxiliary tables do not need persistent stats */
 		if ((ut_strcount(table->name, "FTS") > 0
-		&& (ut_strcount(table->name, "CONFIG") > 0
-		    || ut_strcount(table->name, "INDEX") > 0
-		    || ut_strcount(table->name, "DELETED") > 0
-		    || ut_strcount(table->name, "DOC_ID") > 0
-		    || ut_strcount(table->name, "ADDED") > 0))) {
+		     && (ut_strcount(table->name, "CONFIG") > 0
+			 || ut_strcount(table->name, "INDEX") > 0
+			 || ut_strcount(table->name, "DELETED") > 0
+			 || ut_strcount(table->name, "DOC_ID") > 0
+			 || ut_strcount(table->name, "ADDED") > 0))) {
 			goto transient;
 		}
 
@@ -2544,6 +2627,8 @@ dict_stats_delete_index_stats(
 
 		ut_print_timestamp(stderr);
 		fprintf(stderr, " InnoDB: %s\n", errstr);
+
+		trx->error_state = DB_SUCCESS;
 	}
 
 	dict_stats_close(dict_stats);

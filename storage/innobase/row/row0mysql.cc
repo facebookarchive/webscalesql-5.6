@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-Copyright (c) 2000, 2011, Oracle and/or its affiliates. All Rights Reserved.
+Copyright (c) 2000, 2012, Oracle and/or its affiliates. All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -92,8 +92,9 @@ static const char S_innodb_monitor[] = "innodb_monitor";
 static const char S_innodb_lock_monitor[] = "innodb_lock_monitor";
 static const char S_innodb_tablespace_monitor[] = "innodb_tablespace_monitor";
 static const char S_innodb_table_monitor[] = "innodb_table_monitor";
+#ifdef UNIV_MEM_DEBUG
 static const char S_innodb_mem_validate[] = "innodb_mem_validate";
-static const char S_innodb_sql[] = "innodb_sql";
+#endif /* UNIV_MEM_DEBUG */
 /* @} */
 
 /** Evaluates to true if str1 equals str2_onstack, used for comparing
@@ -694,18 +695,61 @@ UNIV_INTERN
 row_prebuilt_t*
 row_create_prebuilt(
 /*================*/
-	dict_table_t*	table)	/*!< in: Innobase table handle */
+	dict_table_t*	table,		/*!< in: Innobase table handle */
+	ulint		mysql_row_len)	/*!< in: length in bytes of a row in
+					the MySQL format */
 {
 	row_prebuilt_t*	prebuilt;
 	mem_heap_t*	heap;
 	dict_index_t*	clust_index;
 	dtuple_t*	ref;
 	ulint		ref_len;
+	ulint		search_tuple_n_fields;
 
-	heap = mem_heap_create(sizeof *prebuilt + 128);
+	search_tuple_n_fields = 2 * dict_table_get_n_cols(table);
+
+	clust_index = dict_table_get_first_index(table);
+
+	/* Make sure that search_tuple is long enough for clustered index */
+	ut_a(2 * dict_table_get_n_cols(table) >= clust_index->n_fields);
+
+	ref_len = dict_index_get_n_unique(clust_index);
+
+#define PREBUILT_HEAP_INITIAL_SIZE	\
+	( \
+	sizeof(*prebuilt) \
+	/* allocd in this function */ \
+	+ DTUPLE_EST_ALLOC(search_tuple_n_fields) \
+	+ DTUPLE_EST_ALLOC(ref_len) \
+	/* allocd in row_prebuild_sel_graph() */ \
+	+ sizeof(sel_node_t) \
+	+ sizeof(que_fork_t) \
+	+ sizeof(que_thr_t) \
+	/* allocd in row_get_prebuilt_update_vector() */ \
+	+ sizeof(upd_node_t) \
+	+ sizeof(upd_t) \
+	+ sizeof(upd_field_t) \
+	  * dict_table_get_n_cols(table) \
+	+ sizeof(que_fork_t) \
+	+ sizeof(que_thr_t) \
+	/* allocd in row_get_prebuilt_insert_row() */ \
+	+ sizeof(ins_node_t) \
+	/* mysql_row_len could be huge and we are not \
+	sure if this prebuilt instance is going to be \
+	used in inserts */ \
+	+ (mysql_row_len < 256 ? mysql_row_len : 0) \
+	+ DTUPLE_EST_ALLOC(dict_table_get_n_cols(table)) \
+	+ sizeof(que_fork_t) \
+	+ sizeof(que_thr_t) \
+	)
+
+	/* We allocate enough space for the objects that are likely to
+	be created later in order to minimize the number of malloc()
+	calls */
+	heap = mem_heap_create(PREBUILT_HEAP_INITIAL_SIZE);
 
 	prebuilt = static_cast<row_prebuilt_t*>(
-		mem_heap_zalloc(heap, sizeof *prebuilt));
+		mem_heap_zalloc(heap, sizeof(*prebuilt)));
 
 	prebuilt->magic_n = ROW_PREBUILT_ALLOCATED;
 	prebuilt->magic_n2 = ROW_PREBUILT_ALLOCATED;
@@ -715,21 +759,13 @@ row_create_prebuilt(
 	prebuilt->sql_stat_start = TRUE;
 	prebuilt->heap = heap;
 
-	prebuilt->pcur = btr_pcur_create_for_mysql();
-	prebuilt->clust_pcur = btr_pcur_create_for_mysql();
+	btr_pcur_reset(&prebuilt->pcur);
+	btr_pcur_reset(&prebuilt->clust_pcur);
 
 	prebuilt->select_lock_type = LOCK_NONE;
 	prebuilt->stored_select_lock_type = LOCK_NONE_UNSET;
 
-	prebuilt->search_tuple = dtuple_create(
-		heap, 2 * dict_table_get_n_cols(table));
-
-	clust_index = dict_table_get_first_index(table);
-
-	/* Make sure that search_tuple is long enough for clustered index */
-	ut_a(2 * dict_table_get_n_cols(table) >= clust_index->n_fields);
-
-	ref_len = dict_index_get_n_unique(clust_index);
+	prebuilt->search_tuple = dtuple_create(heap, search_tuple_n_fields);
 
 	ref = dtuple_create(heap, ref_len);
 
@@ -740,7 +776,7 @@ row_create_prebuilt(
 	prebuilt->autoinc_error = 0;
 	prebuilt->autoinc_offset = 0;
 
-	/* Default to 1, we will set the actual value later in 
+	/* Default to 1, we will set the actual value later in
 	ha_innobase::get_auto_increment(). */
 	prebuilt->autoinc_increment = 1;
 
@@ -748,6 +784,8 @@ row_create_prebuilt(
 
 	/* During UPDATE and DELETE we need the doc id. */
 	prebuilt->fts_doc_id = 0;
+
+	prebuilt->mysql_row_len = mysql_row_len;
 
 	return(prebuilt);
 }
@@ -784,8 +822,8 @@ row_prebuilt_free(
 	prebuilt->magic_n = ROW_PREBUILT_FREED;
 	prebuilt->magic_n2 = ROW_PREBUILT_FREED;
 
-	btr_pcur_free_for_mysql(prebuilt->pcur);
-	btr_pcur_free_for_mysql(prebuilt->clust_pcur);
+	btr_pcur_reset(&prebuilt->pcur);
+	btr_pcur_reset(&prebuilt->clust_pcur);
 
 	if (prebuilt->mysql_template) {
 		mem_free(prebuilt->mysql_template);
@@ -974,7 +1012,7 @@ row_update_statistics_if_needed(
 	a counter table which is very small and updated very often. */
 
 	if (counter > 2000000000
-	    || ((ib_int64_t)counter > 16 + table->stat_n_rows / 16)) {
+	    || ((ib_int64_t) counter > 16 + table->stat_n_rows / 16)) {
 
 		ut_ad(!mutex_own(&dict_sys->mutex));
 		dict_stats_update(table, DICT_STATS_FETCH, FALSE);
@@ -1307,7 +1345,7 @@ error_exit:
 			}
 		}
 
-		/* Pass NULL for the colums affected, since an INSERT affects
+		/* Pass NULL for the columns affected, since an INSERT affects
 		all FTS indexes. */
 		fts_trx_add_op(trx, table, doc_id, FTS_INSERT, NULL);
 	}
@@ -1599,11 +1637,11 @@ row_update_for_mysql(
 
 	clust_index = dict_table_get_first_index(table);
 
-	if (prebuilt->pcur->btr_cur.index == clust_index) {
-		btr_pcur_copy_stored_position(node->pcur, prebuilt->pcur);
+	if (prebuilt->pcur.btr_cur.index == clust_index) {
+		btr_pcur_copy_stored_position(node->pcur, &prebuilt->pcur);
 	} else {
 		btr_pcur_copy_stored_position(node->pcur,
-					      prebuilt->clust_pcur);
+					      &prebuilt->clust_pcur);
 	}
 
 	ut_a(node->pcur->rel_pos == BTR_PCUR_ON);
@@ -1716,8 +1754,8 @@ row_unlock_for_mysql(
 					clust_pcur, and we do not need
 					to reposition the cursors. */
 {
-	btr_pcur_t*	pcur		= prebuilt->pcur;
-	btr_pcur_t*	clust_pcur	= prebuilt->clust_pcur;
+	btr_pcur_t*	pcur		= &prebuilt->pcur;
+	btr_pcur_t*	clust_pcur	= &prebuilt->clust_pcur;
 	trx_t*		trx		= prebuilt->trx;
 
 	ut_ad(prebuilt && trx);
@@ -2064,9 +2102,7 @@ err_exit:
 	Certain table names starting with 'innodb_' have their special
 	meaning regardless of the database name.  Thus, we need to
 	ignore the database name prefix in the comparisons. */
-	table_name = strchr(table->name, '/');
-	ut_a(table_name);
-	table_name++;
+	table_name = dict_remove_db_name(table->name);
 	table_name_len = strlen(table_name) + 1;
 
 	if (STR_EQ(table_name, table_name_len, S_innodb_monitor)) {
@@ -2096,6 +2132,7 @@ err_exit:
 
 		srv_print_innodb_table_monitor = TRUE;
 		os_event_set(srv_timeout_event);
+#ifdef UNIV_MEM_DEBUG
 	} else if (STR_EQ(table_name, table_name_len,
 			  S_innodb_mem_validate)) {
 		/* We define here a debugging feature intended for
@@ -2108,37 +2145,10 @@ err_exit:
 		      "quiet because allocation from a mem heap"
 		      " is not protected\n"
 		      "by any semaphore.\n", stderr);
-#ifdef UNIV_MEM_DEBUG
 		ut_a(mem_validate());
 		fputs("Memory validated\n", stderr);
-#else /* UNIV_MEM_DEBUG */
-		fputs("Memory NOT validated (recompile with UNIV_MEM_DEBUG)\n",
-		      stderr);
 #endif /* UNIV_MEM_DEBUG */
-	} else if (table_name_len == sizeof S_innodb_sql
-		   && !memcmp(table_name, S_innodb_sql,
-			      sizeof S_innodb_sql)) {
-#ifdef UNIV_DIRECT_SQL_DEBUG
-		/* Check that the table contains exactly one column of type
-		TEXT NOT NULL in Latin-1 encoding. */
-		dtype_t type;
-
-		ut_a(dict_table_get_n_user_cols(table) == 1);
-
-		dict_col_copy_type(dict_table_get_nth_col(table, 0), &type);
-
-		ut_a(dtype_get_mtype(&type) == DATA_BLOB);
-		ut_a((dtype_get_prtype(&type) & DATA_BINARY_TYPE) == 0);
-		ut_a(dtype_get_prtype(&type) & DATA_NOT_NULL);
-		ut_a(dtype_get_charset_coll(dtype_get_prtype(&type))
-		     == DATA_MYSQL_LATIN1_SWEDISH_CHARSET_COLL);
-
-#else
-		fputs("Created table 'innodb_sql' is not special since the\n"
-		      "program was compiled without UNIV_DIRECT_SQL_DEBUG.\n",
-                      stderr);
-#endif
-        }
+	}
 
 
 	heap = mem_heap_create(512);
@@ -2184,6 +2194,20 @@ err_exit:
 			trx_commit_for_mysql(trx);
 		}
 		break;
+
+	case DB_TOO_MANY_CONCURRENT_TRXS:
+		/* We already have .ibd file here. it should be deleted. */
+
+		if (table->space && !fil_delete_tablespace(table->space)) {
+			ut_print_timestamp(stderr);
+			fprintf(stderr,
+				"  InnoDB: Error: not able to"
+				" delete tablespace %lu of table ",
+				(ulong) table->space);
+			ut_print_name(stderr, trx, TRUE, table->name);
+			fputs("!\n", stderr);
+		}
+		/* fall through */
 
 	case DB_DUPLICATE_KEY:
 	default:
@@ -3095,7 +3119,8 @@ row_truncate_table_for_mysql(
 
 			if (space == ULINT_UNDEFINED
 			    || fil_create_new_single_table_tablespace(
-				    space, table->name, FALSE, flags,
+				    space, table->name, FALSE,
+				    flags, table->flags2,
 				    FIL_IBD_FILE_INITIAL_SIZE) != DB_SUCCESS) {
 				dict_table_x_unlock_indexes(table);
 				ut_print_timestamp(stderr);
@@ -3166,7 +3191,8 @@ row_truncate_table_for_mysql(
 
 		rec = btr_pcur_get_rec(&pcur);
 
-		field = rec_get_nth_field_old(rec, 0, &len);
+		field = rec_get_nth_field_old(
+			rec, DICT_FLD__SYS_INDEXES__TABLE_ID, &len);
 		ut_ad(len == 8);
 
 		if (memcmp(buf, field, len) != 0) {
@@ -3188,7 +3214,7 @@ row_truncate_table_for_mysql(
 
 		if (root_page_no != FIL_NULL) {
 			page_rec_write_field(
-				rec, DICT_SYS_INDEXES_PAGE_NO_FIELD,
+				rec, DICT_FLD__SYS_INDEXES__PAGE_NO,
 				root_page_no, &mtr);
 			/* We will need to commit and restart the
 			mini-transaction in order to avoid deadlocks.
@@ -3363,13 +3389,14 @@ row_drop_table_for_mysql(
 {
 	dict_foreign_t*	foreign;
 	dict_table_t*	table;
+	dict_index_t*	index;
 	ulint		space_id;
 	ulint		err;
 	const char*	table_name;
 	ulint		namelen;
 	ibool		locked_dictionary	= FALSE;
 	ibool		fts_bg_thread_exited	= FALSE;
-	pars_info_t*    info			= NULL;
+	pars_info_t*	info			= NULL;
 
 	ut_a(name != NULL);
 
@@ -3639,6 +3666,18 @@ check_next_foreign:
 	trx_set_dict_operation(trx, TRX_DICT_OP_TABLE);
 	trx->table_id = table->id;
 
+	/* Mark all indexes unavailable in the data dictionary cache
+	before starting to drop the table. */
+
+	for (index = dict_table_get_first_index(table);
+	     index != NULL;
+	     index = dict_table_get_next_index(index)) {
+		rw_lock_x_lock(dict_index_get_lock(index));
+		ut_ad(!index->to_be_dropped);
+		index->to_be_dropped = TRUE;
+		rw_lock_x_unlock(dict_index_get_lock(index));
+	}
+
 	/* We use the private SQL parser of Innobase to generate the
 	query graphs needed in deleting the dictionary data from system
 	tables in Innobase. Deleting a row from SYS_INDEXES table also
@@ -3727,7 +3766,6 @@ check_next_foreign:
 
 	switch (err) {
 		ibool		is_temp;
-		const char*	name_or_path;
 		mem_heap_t*	heap;
 
 	case DB_SUCCESS:
@@ -3740,14 +3778,8 @@ check_next_foreign:
 		name = mem_heap_strdup(heap, name);
 		space_id = table->space;
 
-		if (table->dir_path_of_temp_table != NULL) {
-			name_or_path = mem_heap_strdup(
-				heap, table->dir_path_of_temp_table);
-			is_temp = TRUE;
-		} else {
-			name_or_path = name;
-			is_temp = table->flags2 & DICT_TF2_TEMPORARY;
-		}
+		is_temp = table->flags2 & DICT_TF2_TEMPORARY;
+		ut_a(table->dir_path_of_temp_table == NULL || is_temp);
 
 		if (dict_table_has_fts_index(table)
 		    || DICT_TF2_FLAG_IS_SET(table, DICT_TF2_FTS_HAS_DOC_ID)) {
@@ -3783,10 +3815,8 @@ check_next_foreign:
 		wrong: we do not want to delete valuable data of the user */
 
 		if (err == DB_SUCCESS && space_id > 0) {
-			if (!fil_space_for_table_exists_in_mem(space_id,
-							       name_or_path,
-							       is_temp, FALSE,
-							       !is_temp)) {
+			if (!fil_space_for_table_exists_in_mem(
+					space_id, name, FALSE, !is_temp)) {
 				err = DB_SUCCESS;
 
 				fprintf(stderr,
@@ -3845,6 +3875,17 @@ check_next_foreign:
 		trx->error_state = DB_SUCCESS;
 		trx_rollback_to_savepoint(trx, NULL);
 		trx->error_state = DB_SUCCESS;
+
+		/* Mark all indexes available in the data dictionary
+		cache again. */
+
+		for (index = dict_table_get_first_index(table);
+		     index != NULL;
+		     index = dict_table_get_next_index(index)) {
+			rw_lock_x_lock(dict_index_get_lock(index));
+			index->to_be_dropped = FALSE;
+			rw_lock_x_unlock(dict_index_get_lock(index));
+		}
 	}
 
 funct_exit:
@@ -3903,7 +3944,8 @@ row_mysql_drop_temp_tables(void)
 		/* The high order bit of N_COLS is set unless
 		ROW_FORMAT=REDUNDANT. */
 		rec = btr_pcur_get_rec(&pcur);
-		field = rec_get_nth_field_old(rec, 4/*N_COLS*/, &len);
+		field = rec_get_nth_field_old(
+			rec, DICT_FLD__SYS_TABLES__N_COLS, &len);
 		if (len != 4
 		    || !(mach_read_from_4(field) & DICT_N_COLS_COMPACT)) {
 			continue;
@@ -3913,14 +3955,16 @@ row_mysql_drop_temp_tables(void)
 		in ROW_FORMAT=REDUNDANT could write garbage to
 		SYS_TABLES.MIX_LEN, where we now store the is_temp flag.
 		Above, we assumed is_temp=0 if ROW_FORMAT=REDUNDANT. */
-		field = rec_get_nth_field_old(rec, 7/*MIX_LEN*/, &len);
+		field = rec_get_nth_field_old(
+			rec, DICT_FLD__SYS_TABLES__MIX_LEN, &len);
 		if (len != 4
 		    || !(mach_read_from_4(field) & DICT_TF2_TEMPORARY)) {
 			continue;
 		}
 
 		/* This is a temporary table. */
-		field = rec_get_nth_field_old(rec, 0/*NAME*/, &len);
+		field = rec_get_nth_field_old(
+			rec, DICT_FLD__SYS_TABLES__NAME, &len);
 		if (len == UNIV_SQL_NULL || len == 0) {
 			/* Corrupted SYS_TABLES.NAME */
 			continue;
@@ -4680,21 +4724,17 @@ row_is_magic_monitor_table(
 	const char*	name; /* table_name without database/ */
 	ulint		len;
 
-	name = strchr(table_name, '/');
-	ut_a(name != NULL);
-	name++;
+	name = dict_remove_db_name(table_name);
 	len = strlen(name) + 1;
 
-	if (STR_EQ(name, len, S_innodb_monitor)
-	    || STR_EQ(name, len, S_innodb_lock_monitor)
-	    || STR_EQ(name, len, S_innodb_tablespace_monitor)
-	    || STR_EQ(name, len, S_innodb_table_monitor)
-	    || STR_EQ(name, len, S_innodb_mem_validate)) {
-
-		return(TRUE);
-	}
-
-	return(FALSE);
+	return(STR_EQ(name, len, S_innodb_monitor)
+	       || STR_EQ(name, len, S_innodb_lock_monitor)
+	       || STR_EQ(name, len, S_innodb_tablespace_monitor)
+	       || STR_EQ(name, len, S_innodb_table_monitor)
+#ifdef UNIV_MEM_DEBUG
+	       || STR_EQ(name, len, S_innodb_mem_validate)
+#endif /* UNIV_MEM_DEBUG */
+	       );
 }
 
 /*********************************************************************//**

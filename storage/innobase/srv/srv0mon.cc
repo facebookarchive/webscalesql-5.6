@@ -720,7 +720,7 @@ static monitor_info_t	innodb_counter_info[] =
 	 MONITOR_NONE,
 	 MONITOR_DEFAULT_START, MONITOR_NUM_UNDO_SLOT_CACHED},
 
-	{"trx_rseg_curent_size", "transaction",
+	{"trx_rseg_current_size", "transaction",
 	 "Current rollback segment size in pages",
 	 static_cast<monitor_type_t>(
 	 MONITOR_EXISTING | MONITOR_DISPLAY_CURRENT),
@@ -743,7 +743,7 @@ static monitor_info_t	innodb_counter_info[] =
 	 MONITOR_DEFAULT_START, MONITOR_N_UPD_EXIST_EXTERN},
 
 	{"purge_invoked", "purge",
-	 "Number of purge was invoked",
+	 "Number of times purge was invoked",
 	 MONITOR_NONE,
 	 MONITOR_DEFAULT_START, MONITOR_PURGE_INVOKED},
 
@@ -756,6 +756,16 @@ static monitor_info_t	innodb_counter_info[] =
 	 "Microseconds DML to be delayed due to purge lagging",
 	 MONITOR_DISPLAY_CURRENT,
 	 MONITOR_DEFAULT_START, MONITOR_DML_PURGE_DELAY},
+
+	{"purge_stop_count", "purge",
+	 "Number of times purge was stopped",
+	 MONITOR_DISPLAY_CURRENT,
+	 MONITOR_DEFAULT_START, MONITOR_PURGE_STOP_COUNT},
+
+	{"purge_resume_count", "purge",
+	 "Number of times purge was resumed",
+	 MONITOR_DISPLAY_CURRENT,
+	 MONITOR_DEFAULT_START, MONITOR_PURGE_RESUME_COUNT},
 
 	/* ========== Counters for Recovery Module ========== */
 	{"module_log", "recovery", "Recovery Module",
@@ -1264,7 +1274,7 @@ srv_mon_set_module_control(
 		turn them on again (which could reset counter value) */
 		if (MONITOR_IS_ON(ix) && (set_option == MONITOR_TURN_ON)) {
 			fprintf(stderr, "Monitor '%s' is already enabled.\n",
-				srv_mon_get_name((monitor_id_t)ix));
+				srv_mon_get_name((monitor_id_t) ix));
 			continue;
 		}
 

@@ -469,18 +469,22 @@ static st_plugin_dl *plugin_dl_add(const LEX_STRING *dl, int report)
   dlpathlen=
     strxnmov(dlpath, sizeof(dlpath) - 1, opt_plugin_dir, "/", dl->str, NullS) -
     dlpath;
+  (void) unpack_filename(dlpath, dlpath);
   plugin_dl.ref_count= 1;
   /* Open new dll handle */
   if (!(plugin_dl.handle= dlopen(dlpath, RTLD_NOW)))
   {
-    const char *errmsg=dlerror();
+    const char *errmsg;
+    int error_number= dlopen_errno;
+    DLERROR_GENERATE(errmsg, error_number);
+
     if (!strncmp(dlpath, errmsg, dlpathlen))
     { // if errmsg starts from dlpath, trim this prefix.
       errmsg+=dlpathlen;
       if (*errmsg == ':') errmsg++;
       if (*errmsg == ' ') errmsg++;
     }
-    report_error(report, ER_CANT_OPEN_LIBRARY, dlpath, errno, errmsg);
+    report_error(report, ER_CANT_OPEN_LIBRARY, dlpath, error_number, errmsg);
     DBUG_RETURN(0);
   }
   /* Determine interface version */
@@ -1296,10 +1300,6 @@ int plugin_init(int *argc, char **argv, int flags)
     }
     for (plugin= *builtins; plugin->info; plugin++)
     {
-      if (opt_ignore_builtin_innodb &&
-          !my_strnncoll(&my_charset_latin1, (const uchar*) plugin->name,
-                        6, (const uchar*) "InnoDB", 6))
-        continue;
       memset(&tmp, 0, sizeof(tmp));
       tmp.plugin= plugin;
       tmp.name.str= (char *)plugin->name;

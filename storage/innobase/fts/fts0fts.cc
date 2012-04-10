@@ -280,7 +280,7 @@ fts_update_max_cache_size(
 /*********************************************************************//**
 This function fetches the document just inserted right before
 we commit the transaction, and tokenize the inserted text data
-and insert into FTS auxiliary table and its cache. 
+and insert into FTS auxiliary table and its cache.
 @return TRUE if successful */
 static
 ulint
@@ -857,7 +857,7 @@ fts_drop_index(
 			rbt_free(index_cache->words);
 		}
 
-		ib_vector_remove(cache->indexes, *(void**)index_cache);
+		ib_vector_remove(cache->indexes, *(void**) index_cache);
 
 		if (cache->get_docs) {
 			fts_reset_get_doc(cache);
@@ -939,7 +939,7 @@ fts_index_get_charset(
 
 		fld_charset = innobase_get_fts_charset(
 			(int)(prtype & DATA_MYSQL_TYPE_MASK),
-			(uint)dtype_get_charset_coll(prtype));
+			(uint) dtype_get_charset_coll(prtype));
 
 		/* All FTS columns should have the same charset */
 		if (charset) {
@@ -1639,7 +1639,7 @@ fts_drop_all_index_tables(
 /*********************************************************************//**
 Drops the ancillary tables needed for supporting an FTS index on a
 given table. row_mysql_lock_data_dictionary must have been called before
-this. 
+this.
 @return DB_SUCCESS or error code */
 UNIV_INTERN
 ulint
@@ -1692,8 +1692,7 @@ ulint
 fts_create_common_tables(
 /*=====================*/
 	trx_t*		trx,			/*!< in: transaction */
-	const dict_table_t*
-			table,			/*!< in: table with FTS index */
+	const dict_table_t* table,		/*!< in: table with FTS index */
 	const char*	name,			/*!< in: table name normalized.*/
 	ibool		skip_doc_id_index)	/*!< in: Skip index on doc id */
 
@@ -1732,7 +1731,7 @@ fts_create_common_tables(
 	graph = fts_parse_sql_no_dict_lock(
 		&fts_table, NULL, fts_config_table_insert_values_sql);
 
-	error = fts_eval_sql( trx, graph);
+	error = fts_eval_sql(trx, graph);
 
 	que_graph_free(graph);
 
@@ -1793,7 +1792,7 @@ fts_create_one_index_table(
 	char*			table_name = fts_get_table_name(fts_table);
 	ulint			error;
 	CHARSET_INFO*		charset;
-	
+
 	ut_ad(index->type & DICT_FTS);
 
 	new_table = dict_mem_table_create(table_name, 0, 5, 1, 0);
@@ -1801,7 +1800,7 @@ fts_create_one_index_table(
 	field = dict_index_get_nth_field(index, 0);
 	charset = innobase_get_fts_charset(
 		(int)(field->col->prtype & DATA_MYSQL_TYPE_MASK),
-		(uint)dtype_get_charset_coll(field->col->prtype));
+		(uint) dtype_get_charset_coll(field->col->prtype));
 
 	if (strcmp(charset->name, "latin1_swedish_ci") == 0) {
 		dict_mem_table_add_col(new_table, heap, "word", DATA_VARCHAR,
@@ -2040,7 +2039,7 @@ fts_trx_row_get_new_state(
 	ut_a(old_state < FTS_INVALID);
 	ut_a(event < FTS_INVALID);
 
-	result = table[(int)old_state][(int)event];
+	result = table[(int) old_state][(int) event];
 	ut_a(result != FTS_INVALID);
 
 	return(result);
@@ -2255,7 +2254,8 @@ fts_trx_add_op(
 	dict_table_t*	table,			/*!< in: table */
 	doc_id_t	doc_id,			/*!< in: new doc id */
 	fts_row_state	state,			/*!< in: state of the row */
-	ib_vector_t*	fts_indexes)		/*!< in: FTS indexes affected */
+	ib_vector_t*	fts_indexes)		/*!< in: FTS indexes affected
+						(NULL=all) */
 {
 	fts_trx_table_t*	tran_ftt;
 	fts_trx_table_t*	stmt_ftt;
@@ -2386,9 +2386,7 @@ fts_get_total_document_count(
 /*=========================*/
 	dict_table_t*   table)		/*!< in: table instance */
 {
-	if (!table->stat_initialized) {
-		dict_stats_update(table, DICT_STATS_RECALC_TRANSIENT, FALSE);
-	}
+	ut_ad(table->stat_initialized);
 
 	return((ulint) table->stat_n_rows);
 }
@@ -2940,7 +2938,7 @@ fts_commit_table(
 		}
 		rw_lock_x_unlock(&cache->init_lock);
 	}
-	
+
 	for (node = rbt_first(rows);
 	     node != NULL && error == DB_SUCCESS;
 	     node = rbt_next(rows, node)) {
@@ -3116,11 +3114,11 @@ fts_query_expansion_fetch_doc(
 			ulint   prtype = dfield->type.prtype;
 			doc_charset = innobase_get_fts_charset(
 					(int)(prtype & DATA_MYSQL_TYPE_MASK),
-					(uint)dtype_get_charset_coll(prtype));
+					(uint) dtype_get_charset_coll(prtype));
 		}
 
 		doc.charset = doc_charset;
-			
+
 		if (dfield_is_ext(dfield)) {
 			/* We ignore columns that are stored externally, this
 			could result in too many words to search */
@@ -3212,7 +3210,7 @@ fts_fetch_doc_from_rec(
 		if (rec_offs_nth_extern(offsets, clust_pos)) {
 			doc->text.f_str =
 				btr_rec_copy_externally_stored_field(
-					clust_rec, offsets, 
+					clust_rec, offsets,
 					dict_table_zip_size(table),
 					clust_pos, &doc->text.f_len,
 					static_cast<mem_heap_t*>(
@@ -3245,7 +3243,7 @@ fts_fetch_doc_from_rec(
 /*********************************************************************//**
 This function fetches the document inserted during the committing
 transaction, and tokenize the inserted text data and insert into
-FTS auxiliary table and its cache. 
+FTS auxiliary table and its cache.
 @return TRUE if successful */
 static
 ulint
@@ -3259,8 +3257,8 @@ fts_add_doc_by_id(
 	mtr_t		mtr;
 	mem_heap_t*	heap;
 	btr_pcur_t	pcur;
-	dict_table_t*	table; 
-	dtuple_t*	tuple; 
+	dict_table_t*	table;
+	dtuple_t*	tuple;
 	dfield_t*       dfield;
 	fts_get_doc_t*	get_doc;
 	doc_id_t        temp_doc_id;
@@ -3286,7 +3284,7 @@ fts_add_doc_by_id(
 	table = get_doc->index_cache->index->table;
 
 	heap = mem_heap_create(512);
-	
+
 	clust_index = dict_table_get_first_index(table);
 	fts_id_index = dict_table_get_index_on_name(
 				table, FTS_DOC_ID_INDEX_NAME);
@@ -3351,7 +3349,7 @@ fts_add_doc_by_id(
 
 			doc_pcur = &clust_pcur;
 			clust_rec = btr_pcur_get_rec(&clust_pcur);
-						   
+
 		}
 
 		offsets = rec_get_offsets(clust_rec, clust_index,
@@ -3497,7 +3495,7 @@ fts_get_max_doc_id(
 
 		offsets = rec_get_offsets(
 			rec, index, offsets, ULINT_UNDEFINED, &heap);
-		
+
 		data = rec_get_nth_field(rec, offsets, 0, &len);
 
 		doc_id = static_cast<doc_id_t>(fts_read_doc_id(
@@ -4901,7 +4899,7 @@ fts_cache_find_word(
 	dict_table_t*		table = index_cache->index->table;
 	fts_cache_t*		cache = table->fts->cache;
 
-	ut_ad(rw_lock_own((rw_lock_t*)&cache->lock, RW_LOCK_EX));
+	ut_ad(rw_lock_own((rw_lock_t*) &cache->lock, RW_LOCK_EX));
 #endif
 
 	/* Lookup the word in the rb tree */
@@ -5450,7 +5448,7 @@ fts_undo_last_stmt(
 
 			case FTS_DELETE:
 				if (s_row->state == FTS_NOTHING) {
-					s_row->state = FTS_INSERT;	
+					s_row->state = FTS_INSERT;
 				} else if (s_row->state == FTS_DELETE) {
 					ut_free(rbt_remove_node(
 						s_rows, parent.last));
@@ -6011,7 +6009,7 @@ fts_load_stopword(
 		error = fts_config_get_ulint(
 			trx, &fts_table, FTS_USE_STOPWORD, &use_stopword);
 	} else {
-		use_stopword = (ulint)stopword_is_on;
+		use_stopword = (ulint) stopword_is_on;
 
 		error = fts_config_set_ulint(
 			trx, &fts_table, FTS_USE_STOPWORD, use_stopword);
@@ -6106,7 +6104,7 @@ fts_init_recover_doc(
 	fts_cache_t*    cache = static_cast<fts_cache_t*>(user_arg);
 
 	if (ib_vector_is_empty(cache->get_docs)) {
-		has_fts = FALSE;	
+		has_fts = FALSE;
 	} else {
 		get_doc = static_cast<fts_get_doc_t*>(
 			ib_vector_get(cache->get_docs, 0));
@@ -6154,7 +6152,7 @@ fts_init_recover_doc(
 			get_doc->index_cache->charset =
 				innobase_get_fts_charset(
 				(int)(prtype & DATA_MYSQL_TYPE_MASK),
-				(uint)dtype_get_charset_coll(prtype));
+				(uint) dtype_get_charset_coll(prtype));
 		}
 
 		doc.charset = get_doc->index_cache->charset;

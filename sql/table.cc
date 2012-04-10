@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+   Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -930,8 +930,6 @@ static int open_binary_frm(THD *thd, TABLE_SHARE *share, uchar *head,
     share->table_charset= default_charset_info;
   }
   share->db_record_offset= 1;
-  if (db_create_options & HA_OPTION_LONG_BLOB_PTR)
-    share->blob_ptr_size= portable_sizeof_char_ptr;
   /* Set temporarily a good value for db_low_byte_first */
   share->db_low_byte_first= test(legacy_db_type != DB_TYPE_ISAM);
   error=4;
@@ -1578,8 +1576,6 @@ static int open_binary_frm(THD *thd, TABLE_SHARE *share, uchar *head,
 
     if (reg_field->unireg_check == Field::NEXT_NUMBER)
       share->found_next_number_field= field_ptr;
-    if (share->timestamp_field == reg_field)
-      share->timestamp_field_offset= i;
 
     if (use_hash)
       if (my_hash_insert(&share->name_hash, (uchar*) field_ptr) )
@@ -2018,9 +2014,6 @@ int open_table_from_share(THD *thd, TABLE_SHARE *share, const char *alias,
   if (share->found_next_number_field)
     outparam->found_next_number_field=
       outparam->field[(uint) (share->found_next_number_field - share->field)];
-  if (share->timestamp_field)
-    outparam->set_timestamp_field(outparam->
-                                  field[share->timestamp_field_offset]);
 
   /* Fix key->name and key_part->field */
   if (share->key_parts)
@@ -2463,6 +2456,7 @@ void open_table_error(TABLE_SHARE *share, int error, int db_errno, int errarg)
 {
   int err_no;
   char buff[FN_REFLEN];
+  char errbuf[MYSYS_STRERROR_SIZE];
   myf errortype= ME_ERROR+ME_WAITTANG;
   DBUG_ENTER("open_table_error");
 
@@ -2475,7 +2469,8 @@ void open_table_error(TABLE_SHARE *share, int error, int db_errno, int errarg)
     {
       strxmov(buff, share->normalized_path.str, reg_ext, NullS);
       my_error((db_errno == EMFILE) ? ER_CANT_OPEN_FILE : ER_FILE_NOT_FOUND,
-               errortype, buff, db_errno);
+               errortype, buff,
+               db_errno, my_strerror(errbuf, sizeof(errbuf), db_errno));
     }
     break;
   case 2:
@@ -2495,7 +2490,8 @@ void open_table_error(TABLE_SHARE *share, int error, int db_errno, int errarg)
     err_no= (db_errno == ENOENT) ? ER_FILE_NOT_FOUND : (db_errno == EAGAIN) ?
       ER_FILE_USED : ER_CANT_OPEN_FILE;
     strxmov(buff, share->normalized_path.str, datext, NullS);
-    my_error(err_no,errortype, buff, db_errno);
+    my_error(err_no,errortype, buff,
+             db_errno, my_strerror(errbuf, sizeof(errbuf), db_errno));
     delete file;
     break;
   }
@@ -3454,9 +3450,6 @@ void TABLE::init(THD *thd, TABLE_LIST *tl)
   DBUG_ASSERT(!auto_increment_field_not_null);
   auto_increment_field_not_null= FALSE;
 
-  if (timestamp_field)
-    timestamp_field_type= timestamp_field->get_auto_set_type();
-
   pos_in_table_list= tl;
 
   clear_column_bitmaps();
@@ -3537,7 +3530,8 @@ void TABLE::reset_item_list(List<Item> *item_list) const
 void  TABLE_LIST::calc_md5(char *buffer)
 {
   uchar digest[16];
-  MY_MD5_HASH(digest, (uchar *) select_stmt.str, select_stmt.length);
+  compute_md5_hash((char *) digest, (const char *) select_stmt.str,
+                   select_stmt.length);
   sprintf((char *) buffer,
 	    "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
 	    digest[0], digest[1], digest[2], digest[3],
@@ -3738,8 +3732,8 @@ bool TABLE_LIST::prep_where(THD *thd, Item **conds,
             this expression will not be moved to WHERE condition (i.e. will
             be clean correctly for PS/SP)
           */
-          tbl->on_expr= and_conds(tbl->on_expr,
-                                  where->copy_andor_structure(thd));
+          tbl->set_join_cond(and_conds(tbl->join_cond(),
+                                       where->copy_andor_structure(thd)));
           break;
         }
       }
@@ -3781,8 +3775,8 @@ merge_on_conds(THD *thd, TABLE_LIST *table, bool is_cascaded)
 
   Item *cond= NULL;
   DBUG_PRINT("info", ("alias: %s", table->alias));
-  if (table->on_expr)
-    cond= table->on_expr->copy_andor_structure(thd);
+  if (table->join_cond())
+    cond= table->join_cond()->copy_andor_structure(thd);
   if (!table->nested_join)
     DBUG_RETURN(cond);
   List_iterator<TABLE_LIST> li(table->nested_join->join_list);
@@ -3989,11 +3983,11 @@ void TABLE_LIST::cleanup_items()
     VIEW_CHECK_SKIP   FAILED, but continue
 */
 
-int TABLE_LIST::view_check_option(THD *thd, bool ignore_failure)
+int TABLE_LIST::view_check_option(THD *thd, bool ignore_failure) const
 {
   if (check_option && check_option->val_int() == 0)
   {
-    TABLE_LIST *main_view= top_table();
+    const TABLE_LIST *main_view= top_table();
     if (ignore_failure)
     {
       push_warning_printf(thd, Sql_condition::WARN_LEVEL_WARN,
@@ -4509,10 +4503,14 @@ Item *Field_iterator_table::create_item(THD *thd)
 
   Item_field *item= new Item_field(thd, &select->context, *ptr);
   if (item && thd->variables.sql_mode & MODE_ONLY_FULL_GROUP_BY &&
-      !thd->lex->in_sum_func && select->cur_pos_in_select_list != UNDEF_POS)
+      !thd->lex->in_sum_func &&
+      select->cur_pos_in_all_fields != SELECT_LEX::ALL_FIELDS_UNDEF_POS)
   {
-    select->non_agg_fields.push_back(item);
-    item->marker= select->cur_pos_in_select_list;
+    /*
+      This function creates Item-s which don't go through fix_fields(), so we
+      need to:
+    */
+    item->push_to_non_agg_fields(select);
     select->set_non_agg_field_used(true);
   }
   return item;
@@ -5443,8 +5441,9 @@ void TABLE_LIST::reinit_before_use(THD *thd)
   do
   {
     embedded= parent_embedding;
-    if (embedded->prep_on_expr)
-      embedded->on_expr= embedded->prep_on_expr->copy_andor_structure(thd);
+    if (embedded->prep_join_cond)
+      embedded->
+        set_join_cond(embedded->prep_join_cond->copy_andor_structure(thd));
     parent_embedding= embedded->embedding;
   }
   while (parent_embedding &&

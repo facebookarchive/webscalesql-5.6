@@ -1,4 +1,4 @@
-/* Copyright (c) 2010, 2011, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2010, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -361,14 +361,15 @@ static bool exchange_name_with_ddl_log(THD *thd,
   /* call rename table from table to tmp-name */
   DBUG_EXECUTE_IF("exchange_partition_fail_3",
                   my_error(ER_ERROR_ON_RENAME, MYF(0),
-                           name, tmp_name, 0);
+                           name, tmp_name, 0, "n/a");
                   error_set= TRUE;
                   goto err_rename;);
   DBUG_EXECUTE_IF("exchange_partition_abort_3", abort(););
   if (file->ha_rename_table(name, tmp_name))
   {
-    my_error(ER_ERROR_ON_RENAME, MYF(0),
-             name, tmp_name, my_errno);
+    char errbuf[MYSYS_STRERROR_SIZE];
+    my_error(ER_ERROR_ON_RENAME, MYF(0), name, tmp_name,
+             my_errno, my_strerror(errbuf, sizeof(errbuf), my_errno));
     error_set= TRUE;
     goto err_rename;
   }
@@ -380,14 +381,15 @@ static bool exchange_name_with_ddl_log(THD *thd,
   /* call rename table from partition to table */
   DBUG_EXECUTE_IF("exchange_partition_fail_5",
                   my_error(ER_ERROR_ON_RENAME, MYF(0),
-                           from_name, name, 0);
+                           from_name, name, 0, "n/a");
                   error_set= TRUE;
                   goto err_rename;);
   DBUG_EXECUTE_IF("exchange_partition_abort_5", abort(););
   if (file->ha_rename_table(from_name, name))
   {
-    my_error(ER_ERROR_ON_RENAME, MYF(0),
-             from_name, name, my_errno);
+    char errbuf[MYSYS_STRERROR_SIZE];
+    my_error(ER_ERROR_ON_RENAME, MYF(0), from_name, name,
+             my_errno, my_strerror(errbuf, sizeof(errbuf), my_errno));
     error_set= TRUE;
     goto err_rename;
   }
@@ -399,14 +401,15 @@ static bool exchange_name_with_ddl_log(THD *thd,
   /* call rename table from tmp-nam to partition */
   DBUG_EXECUTE_IF("exchange_partition_fail_7",
                   my_error(ER_ERROR_ON_RENAME, MYF(0),
-                           tmp_name, from_name, 0);
+                           tmp_name, from_name, 0, "n/a");
                   error_set= TRUE;
                   goto err_rename;);
   DBUG_EXECUTE_IF("exchange_partition_abort_7", abort(););
   if (file->ha_rename_table(tmp_name, from_name))
   {
-    my_error(ER_ERROR_ON_RENAME, MYF(0),
-             tmp_name, from_name, my_errno);
+    char errbuf[MYSYS_STRERROR_SIZE];
+    my_error(ER_ERROR_ON_RENAME, MYF(0), tmp_name, from_name,
+             my_errno, my_strerror(errbuf, sizeof(errbuf), my_errno));
     error_set= TRUE;
     goto err_rename;
   }

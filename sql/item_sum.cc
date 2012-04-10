@@ -23,6 +23,9 @@
 
 #include "sql_priv.h"
 #include "sql_select.h"
+#include "sql_tmp_table.h"                 // create_tmp_table
+#include "sql_resolver.h"                  // setup_order, fix_inner_refs
+#include "sql_optimizer.h"                 // JOIN
 
 using std::min;
 using std::max;
@@ -1054,7 +1057,7 @@ void Aggregator_distinct::endup()
   {
     /*
       We don't have a tree only if 'setup()' hasn't been called;
-      this is the case of sql_select.cc:return_zero_rows.
+      this is the case of sql_executor.cc:return_zero_rows.
     */
     if (tree)
       table->field[0]->set_notnull();

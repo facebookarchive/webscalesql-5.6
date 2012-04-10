@@ -2,7 +2,7 @@
 #define HANDLER_INCLUDED
 
 /*
-   Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+   Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
@@ -298,8 +298,24 @@
 #define HA_CACHE_TBL_ASKTRANSACT 2
 #define HA_CACHE_TBL_TRANSACT    4
 
-/* Options of START TRANSACTION statement (and later of SET TRANSACTION stmt) */
-#define MYSQL_START_TRANS_OPT_WITH_CONS_SNAPSHOT 1
+/**
+  Options for the START TRANSACTION statement.
+
+  Note that READ ONLY and READ WRITE are logically mutually exclusive.
+  This is enforced by the parser and depended upon by trans_begin().
+
+  We need two flags instead of one in order to differentiate between
+  situation when no READ WRITE/ONLY clause were given and thus transaction
+  is implicitly READ WRITE and the case when READ WRITE clause was used
+  explicitly.
+*/
+
+// WITH CONSISTENT SNAPSHOT option
+static const uint MYSQL_START_TRANS_OPT_WITH_CONS_SNAPSHOT = 1;
+// READ ONLY option
+static const uint MYSQL_START_TRANS_OPT_READ_ONLY          = 2;
+// READ WRITE option
+static const uint MYSQL_START_TRANS_OPT_READ_WRITE         = 4;
 
 /* Flags for method is_fatal_error */
 #define HA_CHECK_DUP_KEY 1
@@ -1163,6 +1179,10 @@ void get_sweep_read_cost(TABLE *table, ha_rows nrows, bool interrupted,
 /* 
   The MRR user will provide ranges in key order, and MRR implementation
   must return rows in key order.
+  Passing this flag to multi_read_range_init() may cause the
+  default MRR handler to be used even if HA_MRR_USE_DEFAULT_IMPL
+  was not specified.
+  (If the native MRR impl. can not provide SORTED result)
 */
 #define HA_MRR_SORTED 8
 
@@ -1190,6 +1210,15 @@ void get_sweep_read_cost(TABLE *table, ha_rows nrows, bool interrupted,
   will not have NULL values.
 */
 #define HA_MRR_NO_NULL_ENDPOINTS 128
+
+/*
+  Set by the MRR implementation to signal that it will natively
+  produced sorted result if multi_range_read_init() is called with
+  the HA_MRR_SORTED flag - Else multi_range_read_init(HA_MRR_SORTED)
+  will revert to use the default MRR implementation. 
+*/
+#define HA_MRR_SUPPORT_SORTED 256
+
 
 class ha_statistics
 {
@@ -2604,7 +2633,7 @@ int ha_release_temporary_latches(THD *thd);
 
 /* transactions: interface to handlerton functions */
 int ha_start_consistent_snapshot(THD *thd);
-int ha_commit_or_rollback_by_xid(XID *xid, bool commit);
+int ha_commit_or_rollback_by_xid(THD *thd, XID *xid, bool commit);
 int ha_commit_one_phase(THD *thd, bool all);
 int ha_commit_trans(THD *thd, bool all);
 int ha_rollback_trans(THD *thd, bool all);

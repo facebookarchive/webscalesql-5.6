@@ -1,4 +1,4 @@
-/* Copyright (c) 2005, 2011, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2005, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -1011,7 +1011,6 @@ init_lex_with_single_table(THD *thd, TABLE *table, LEX *lex)
     return TRUE;
   context->resolve_in_table_list_only(table_list);
   lex->use_only_table_context= TRUE;
-  select_lex->cur_pos_in_select_list= UNDEF_POS;
   table->map= 1; //To ensure correct calculation of const item
   table->get_fields_in_item_tree= TRUE;
   table_list->table= table;
@@ -4550,11 +4549,20 @@ error:
 }
 
 
-/*
-  Sets which partitions to be used in the command
+/**
+  Sets which partitions to be used in the command.
+
+  @param alter_info     Alter_info pointer holding partition names and flags.
+  @param tab_part_info  partition_info holding all partitions.
+  @param part_state     Which state to set for the named partitions.
+
+  @return Operation status
+    @retval false  Success
+    @retval true   Failure
 */
-uint set_part_state(Alter_info *alter_info, partition_info *tab_part_info,
-               enum partition_state part_state)
+
+bool set_part_state(Alter_info *alter_info, partition_info *tab_part_info,
+                    enum partition_state part_state)
 {
   uint part_count= 0;
   uint num_parts_found= 0;
@@ -4580,7 +4588,21 @@ uint set_part_state(Alter_info *alter_info, partition_info *tab_part_info,
     else
       part_elem->part_state= PART_NORMAL;
   } while (++part_count < tab_part_info->num_parts);
-  return num_parts_found;
+
+  if (num_parts_found != alter_info->partition_names.elements &&
+      !(alter_info->flags & ALTER_ALL_PARTITION))
+  {
+    /* Not all given partitions found, revert and return failure */
+    part_it.rewind();
+    part_count= 0;
+    do
+    {
+      partition_element *part_elem= part_it++;
+      part_elem->part_state= PART_NORMAL;
+    } while (++part_count < tab_part_info->num_parts);
+    return true;
+  }
+  return false;
 }
 
 
@@ -5149,11 +5171,7 @@ that are reorganised.
     }
     else if (alter_info->flags & ALTER_REBUILD_PARTITION)
     {
-      uint num_parts_found;
-      uint num_parts_opt= alter_info->partition_names.elements;
-      num_parts_found= set_part_state(alter_info, tab_part_info, PART_CHANGED);
-      if (num_parts_found != num_parts_opt &&
-          (!(alter_info->flags & ALTER_ALL_PARTITION)))
+      if (set_part_state(alter_info, tab_part_info, PART_CHANGED))
       {
         my_error(ER_DROP_PARTITION_NON_EXISTENT, MYF(0), "REBUILD");
         goto err;
@@ -5316,6 +5334,8 @@ state of p1.
       alt_part_info->subpart_type= tab_part_info->subpart_type;
       alt_part_info->num_subparts= tab_part_info->num_subparts;
       DBUG_ASSERT(!alt_part_info->use_default_partitions);
+      /* We specified partitions explicitly so don't use defaults anymore. */
+      tab_part_info->use_default_partitions= FALSE;
       if (alt_part_info->set_up_defaults_for_partitioning(new_table->file,
                                                           ULL(0), 
                                                           0))
@@ -6724,9 +6744,6 @@ uint fast_alter_partition_table(THD *thd, TABLE *table,
   lpt->pack_frm_data= NULL;
   lpt->pack_frm_len= 0;
 
-  /* Never update timestamp columns when alter */
-  lpt->table->timestamp_field_type= TIMESTAMP_NO_AUTO_SET;
-
   if (table->file->alter_table_flags(alter_info->flags) &
         HA_PARTITION_ONE_PHASE)
   {
@@ -7181,10 +7198,10 @@ void mem_alloc_error(size_t size)
   Return comma-separated list of used partitions in the provided given string.
 
     @param      part_info  Partitioning info
-    @param[out] parts_str  The string to fill
+    @param[out] parts      The resulting list of string to fill
 
     Generate a list of used partitions (from bits in part_info->read_partitions
-    bitmap), asd store it into the provided String object.
+    bitmap), and store it into the provided String object.
     
     @note
     The produced string must not be longer then MAX_PARTITIONS * (1 + FN_LEN).
@@ -7192,13 +7209,15 @@ void mem_alloc_error(size_t size)
     that was written or locked.
 */
 
-void make_used_partitions_str(partition_info *part_info, String *parts_str)
+bool make_used_partitions_str(partition_info *part_info,
+                              List<const char> *parts)
 {
-  parts_str->length(0);
+  parts->empty();
   partition_element *pe;
   uint partition_id= 0;
   List_iterator<partition_element> it(part_info->partitions);
-  
+  StringBuffer<FN_LEN> part_str(system_charset_info);
+
   if (part_info->is_sub_partitioned())
   {
     partition_element *head_pe;
@@ -7209,15 +7228,16 @@ void make_used_partitions_str(partition_info *part_info, String *parts_str)
       {
         if (bitmap_is_set(&part_info->read_partitions, partition_id))
         {
-          if (parts_str->length())
-            parts_str->append(',');
-          parts_str->append(head_pe->partition_name,
-                           strlen(head_pe->partition_name),
-                           system_charset_info);
-          parts_str->append('_');
-          parts_str->append(pe->partition_name,
-                           strlen(pe->partition_name),
-                           system_charset_info);
+          part_str.length(0);
+          if ((part_str.append(head_pe->partition_name,
+                               strlen(head_pe->partition_name),
+                               system_charset_info)) ||
+              part_str.append('_') ||
+              part_str.append(pe->partition_name,
+                              strlen(pe->partition_name),
+                              system_charset_info) ||
+              parts->push_back(part_str.dup(current_thd->mem_root)))
+            return true;
         }
         partition_id++;
       }
@@ -7229,14 +7249,16 @@ void make_used_partitions_str(partition_info *part_info, String *parts_str)
     {
       if (bitmap_is_set(&part_info->read_partitions, partition_id))
       {
-        if (parts_str->length())
-          parts_str->append(',');
-        parts_str->append(pe->partition_name, strlen(pe->partition_name),
-                         system_charset_info);
+        part_str.length(0);
+        if (part_str.append(pe->partition_name, strlen(pe->partition_name),
+                            system_charset_info) ||
+            parts->push_back(part_str.dup(current_thd->mem_root)))
+          return true;
       }
       partition_id++;
     }
   }
+  return false;
 }
 #endif
 
@@ -8028,8 +8050,7 @@ static uint32 get_next_partition_via_walking(PARTITION_ITERATOR *part_iter)
   while (part_iter->field_vals.cur != part_iter->field_vals.end)
   {
     longlong dummy;
-    field->store(part_iter->field_vals.cur++,
-                 ((Field_num*)field)->unsigned_flag);
+    field->store(part_iter->field_vals.cur++, field->flags & UNSIGNED_FLAG);
     if ((part_iter->part_info->is_sub_partitioned() &&
         !part_iter->part_info->get_part_partition_id(part_iter->part_info,
                                                      &part_id, &dummy)) ||
@@ -8053,12 +8074,11 @@ static uint32 get_next_subpartition_via_walking(PARTITION_ITERATOR *part_iter)
     part_iter->field_vals.cur= part_iter->field_vals.start;
     return NOT_A_PARTITION_ID;
   }
-  field->store(part_iter->field_vals.cur++, FALSE);
+  field->store(part_iter->field_vals.cur++, field->flags & UNSIGNED_FLAG);
   if (part_iter->part_info->get_subpartition_id(part_iter->part_info,
                                                 &res))
     return NOT_A_PARTITION_ID;
   return res;
-
 }
 
 

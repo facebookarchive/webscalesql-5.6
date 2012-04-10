@@ -57,6 +57,7 @@ typedef enum { SLAVE_THD_IO, SLAVE_THD_SQL, SLAVE_THD_WORKER } SLAVE_THD_TYPE;
 
 #define MTS_WORKER_UNDEF ((ulong) -1)
 #define MTS_MAX_WORKERS  1024
+#define MTS_MAX_BITS_IN_GROUP ((1L << 19) - 1) /* 524287 */
 
 // Forward declarations
 class Relay_log_info;
@@ -199,7 +200,6 @@ int fetch_master_table(THD* thd, const char* db_name, const char* table_name,
 		       Master_info* mi, MYSQL* mysql, bool overwrite);
 
 bool show_master_info(THD* thd, Master_info* mi);
-bool show_binlog_info(THD* thd);
 bool rpl_master_has_bug(const Relay_log_info *rli, uint bug_id, bool report,
                         bool (*pred)(const void *), const void *param);
 bool rpl_master_erroneous_autoinc(THD* thd);

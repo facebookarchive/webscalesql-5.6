@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-Copyright (c) 1996, 2011, Oracle and/or its affiliates. All Rights Reserved.
+Copyright (c) 1996, 2012, Oracle and/or its affiliates. All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -119,8 +119,6 @@ to cache the BLOB prefixes. */
 #define DICT_TF_BITS	(DICT_TF_WIDTH_COMPACT		\
 			+ DICT_TF_WIDTH_ZIP_SSIZE	\
 			+ DICT_TF_WIDTH_ATOMIC_BLOBS)
-/** Width of all the currently unknown/unused table flags */
-#define DICT_TF_WIDTH_UNUSED	((UNIV_WORD_SIZE * 8) - DICT_TF_BITS)
 
 /** A mask of all the known/used bits in table flags */
 #define DICT_TF_BIT_MASK	(~(~0 << DICT_TF_BITS))
@@ -172,21 +170,25 @@ to cache the BLOB prefixes. */
 These flags will be stored in SYS_TABLES.MIX_LEN.  All unused flags
 will be written as 0.  The column may contain garbage for tables
 created with old versions of InnoDB that only implemented
-ROW_FORMAT=REDUNDANT. */
+ROW_FORMAT=REDUNDANT.  InnoDB engines do not check these flags
+for unknown bits in order to protect backward incompatibility. */
 /* @{ */
 /** Total number of bits in table->flags2. */
-#define DICT_TF2_BITS			4
+#define DICT_TF2_BITS			5
 #define DICT_TF2_BIT_MASK		~(~0 << DICT_TF2_BITS)
 
-#define DICT_TF2_TEMPORARY		1	/*!< TRUE for tables from
-						CREATE TEMPORARY TABLE. */
-#define DICT_TF2_FTS_HAS_DOC_ID		2	/* Has internal defined
-						DOC ID column */
-#define DICT_TF2_FTS			4	/* has an FTS index */
-#define DICT_TF2_FTS_ADD_DOC_ID		8	/* Need to add Doc ID column
-						for FTS index build.
-						This is a transient bit
-						for index build */
+/** TEMPORARY; TRUE for tables from CREATE TEMPORARY TABLE. */
+#define DICT_TF2_TEMPORARY		1
+/** The table has an internal defined DOC ID column */
+#define DICT_TF2_FTS_HAS_DOC_ID		2
+/** The table has an FTS index */
+#define DICT_TF2_FTS			4
+/** Need to add Doc ID column for FTS index build.
+This is a transient bit for index build */
+#define DICT_TF2_FTS_ADD_DOC_ID		8
+/** This bit is used during table creation to indicate that it will
+use its own tablespace instead of the system tablespace. */
+#define DICT_TF2_USE_TABLESPACE		16
 /* @} */
 
 #define DICT_TF2_FLAG_SET(table, flag)				\
@@ -473,7 +475,9 @@ struct dict_index_struct{
 	unsigned	to_be_dropped:1;
 				/*!< TRUE if this index is marked to be
 				dropped in ha_innobase::prepare_drop_index(),
-				otherwise FALSE */
+				otherwise FALSE. Protected by
+				dict_sys->mutex, dict_operation_lock and
+				index->lock.*/
 	dict_field_t*	fields;	/*!< array of field descriptions */
 #ifndef UNIV_HOTBACKUP
 	UT_LIST_NODE_T(dict_index_t)
@@ -580,7 +584,6 @@ a foreign key constraint is enforced, therefore RESTRICT just means no flag */
 #define DICT_FOREIGN_ON_DELETE_NO_ACTION 16	/*!< ON DELETE NO ACTION */
 #define DICT_FOREIGN_ON_UPDATE_NO_ACTION 32	/*!< ON UPDATE NO ACTION */
 /* @} */
-
 
 /** Data structure for a database table.  Most fields will be
 initialized to 0, NULL or FALSE in dict_mem_table_create(). */
@@ -714,7 +717,7 @@ struct dict_table_struct{
 				lock we keep a pointer to the transaction
 				here in the autoinc_trx variable. This is to
 				avoid acquiring the lock_sys_t::mutex and
-			       	scanning the vector in trx_t.
+				scanning the vector in trx_t.
 
 				When an AUTOINC lock has to wait, the
 				corresponding lock instance is created on
@@ -762,8 +765,8 @@ struct dict_table_struct{
 				MySQL does NOT itself check the number of
 				open handles at drop */
 	UT_LIST_BASE_NODE_T(lock_t)
-			locks; /*!< list of locks on the table; protected
-			       by lock_sys->mutex */
+			locks;	/*!< list of locks on the table; protected
+				by lock_sys->mutex */
 #endif /* !UNIV_HOTBACKUP */
 
 #ifdef UNIV_DEBUG

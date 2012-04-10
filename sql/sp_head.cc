@@ -172,7 +172,7 @@ sp_get_item_value(THD *thd, Item *item, String *str)
         buf.append(result->charset()->csname);
         if (cs->escape_with_backslash_is_dangerous)
           buf.append(' ');
-        append_query_string(cs, result, &buf);
+        append_query_string(thd, cs, result, &buf);
         buf.append(" COLLATE '");
         buf.append(item->collation.collation->name);
         buf.append('\'');
@@ -1741,7 +1741,8 @@ sp_head::execute_function(THD *thd, Item **argp, uint argcount,
   DBUG_PRINT("info", ("function %s", m_name.str));
 
   LINT_INIT(binlog_save_options);
-
+  // Resetting THD::where to its default value
+  thd->where= THD::DEFAULT_WHERE;
   /*
     Check that the function is called with all specified arguments.
 
@@ -1899,7 +1900,7 @@ sp_head::execute_function(THD *thd, Item **argp, uint argcount,
       int errcode = query_error_code(thd, thd->killed == THD::NOT_KILLED);
       Query_log_event qinfo(thd, binlog_buf.ptr(), binlog_buf.length(),
                             thd->binlog_evt_union.unioned_events_trans, FALSE, FALSE, errcode);
-      if (mysql_bin_log.write(&qinfo) &&
+      if (mysql_bin_log.write_event(&qinfo) &&
           thd->binlog_evt_union.unioned_events_trans)
       {
         push_warning(thd, Sql_condition::WARN_LEVEL_WARN, ER_UNKNOWN_ERROR,
@@ -2368,7 +2369,6 @@ sp_head::fill_field_definition(THD *thd, LEX *lex,
 {
   LEX_STRING cmt = { 0, 0 };
   uint unused1= 0;
-  int unused2= 0;
 
   if (field_def->init(thd, (char*) "", field_type, lex->length, lex->dec,
                       lex->type, (Item*) 0, (Item*) 0, &cmt, 0,
@@ -2384,8 +2384,7 @@ sp_head::fill_field_definition(THD *thd, LEX *lex,
 
   sp_prepare_create_field(thd, field_def);
 
-  if (prepare_create_field(field_def, &unused1, &unused2, &unused2,
-                           HA_CAN_GEOMETRY))
+  if (prepare_create_field(field_def, &unused1, HA_CAN_GEOMETRY))
   {
     return TRUE;
   }

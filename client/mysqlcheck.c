@@ -142,7 +142,7 @@ static struct my_option my_long_options[] =
    0, 0},
   {"password", 'p',
    "Password to use when connecting to server. If password is not given, it's solicited on the tty.",
-   0, 0, 0, GET_STR, OPT_ARG, 0, 0, 0, 0, 0, 0},
+   0, 0, 0, GET_PASSWORD, OPT_ARG, 0, 0, 0, 0, 0, 0},
 #ifdef __WIN__
   {"pipe", 'W', "Use named pipes to connect to server.", 0, 0, 0, GET_NO_ARG,
    NO_ARG, 0, 0, 0, 0, 0, 0},
@@ -228,7 +228,7 @@ static void print_version(void)
 static void usage(void)
 {
   print_version();
-  puts(ORACLE_WELCOME_COPYRIGHT_NOTICE("2000, 2011"));
+  puts(ORACLE_WELCOME_COPYRIGHT_NOTICE("2000, 2012"));
   puts("This program can be used to CHECK (-c, -m, -C), REPAIR (-r), ANALYZE (-a),");
   puts("or OPTIMIZE (-o) tables. Some of the options (like -e or -q) can be");
   puts("used at the same time. Not all options are supported by all storage engines.");
@@ -352,9 +352,11 @@ static int get_options(int *argc, char ***argv)
     exit(0);
   }
 
+  my_getopt_use_args_separator= TRUE;
   if ((ho_error= load_defaults("my", load_default_groups, argc, argv)) ||
       (ho_error=handle_options(argc, argv, my_long_options, get_one_option)))
     exit(ho_error);
+  my_getopt_use_args_separator= FALSE;
 
   if (!what_to_do)
   {

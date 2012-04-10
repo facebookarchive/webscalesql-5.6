@@ -158,7 +158,7 @@ static struct my_option my_long_options[] =
    &opt_nobeep, 0, GET_BOOL, NO_ARG, 0, 0, 0, 0, 0, 0}, 
   {"password", 'p',
    "Password to use when connecting to server. If password is not given it's asked from the tty.",
-   0, 0, 0, GET_STR, OPT_ARG, 0, 0, 0, 0, 0, 0},
+   0, 0, 0, GET_PASSWORD, OPT_ARG, 0, 0, 0, 0, 0, 0},
 #ifdef __WIN__
   {"pipe", 'W', "Use named pipes to connect to server.", 0, 0, 0, GET_NO_ARG,
    NO_ARG, 0, 0, 0, 0, 0, 0},
@@ -306,8 +306,11 @@ int main(int argc,char *argv[])
 
   MY_INIT(argv[0]);
   mysql_init(&mysql);
+  my_getopt_use_args_separator= TRUE;
   if (load_defaults("my",load_default_groups,&argc,&argv))
    exit(1); 
+  my_getopt_use_args_separator= FALSE;
+
   save_argv = argv;				/* Save for free_defaults */
   if ((ho_error=handle_options(&argc, &argv, my_long_options, get_one_option)))
   {
@@ -700,7 +703,7 @@ static int execute_commands(MYSQL *mysql,int argc, char **argv)
     case ADMIN_VER:
       new_line=1;
       print_version();
-      puts(ORACLE_WELCOME_COPYRIGHT_NOTICE("2000, 2011"));
+      puts(ORACLE_WELCOME_COPYRIGHT_NOTICE("2000, 2012"));
       printf("Server version\t\t%s\n", mysql_get_server_info(mysql));
       printf("Protocol version\t%d\n", mysql_get_proto_info(mysql));
       printf("Connection\t\t%s\n",mysql_get_host_info(mysql));
@@ -1098,7 +1101,7 @@ static void print_version(void)
 static void usage(void)
 {
   print_version();
-  puts(ORACLE_WELCOME_COPYRIGHT_NOTICE("2000, 2011"));
+  puts(ORACLE_WELCOME_COPYRIGHT_NOTICE("2000, 2012"));
   puts("Administration program for the mysqld daemon.");
   printf("Usage: %s [OPTIONS] command command....\n", my_progname);
   my_print_help(my_long_options);

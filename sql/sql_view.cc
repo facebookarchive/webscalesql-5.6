@@ -436,9 +436,31 @@ bool mysql_create_view(THD *thd, TABLE_LIST *views,
   lex->link_first_table_back(view, link_to_local);
   view->open_type= OT_BASE_ONLY;
 
+  /*
+    No pre-opening of temporary tables is possible since must
+    wait until TABLE_LIST::open_type is set. So we have to open
+    them here instead.
+  */
+  if (open_temporary_tables(thd, lex->query_tables))
+  {
+    view= lex->unlink_first_table(&link_to_local);
+    res= true;
+    goto err;
+  }
+
   if (open_and_lock_tables(thd, lex->query_tables, TRUE, 0))
   {
     view= lex->unlink_first_table(&link_to_local);
+    res= TRUE;
+    goto err;
+  }
+
+  /*
+    Checking the existence of the database in which the view is to be created
+  */
+  if (check_db_dir_existence(view->db))
+  {
+    my_error(ER_BAD_DB_ERROR, MYF(0), view->db);
     res= TRUE;
     goto err;
   }
@@ -662,6 +684,15 @@ bool mysql_create_view(THD *thd, TABLE_LIST *views,
 #endif
 
   res= mysql_register_view(thd, view, mode);
+
+  /*
+    View TABLE_SHARE must be removed from the table definition cache in order to
+    make ALTER VIEW work properly. Otherwise, we would not be able to detect
+    meta-data changes after ALTER VIEW.
+  */
+
+  if (!res)
+    tdc_remove_table(thd, TDC_RT_REMOVE_ALL, view->db, view->table_name, false);
 
   if (mysql_bin_log.is_open())
   {

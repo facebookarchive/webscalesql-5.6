@@ -225,8 +225,8 @@ fil_space_truncate_start(
 				some initial files in the space */
 #endif /* UNIV_LOG_ARCHIVE */
 /*******************************************************************//**
-Creates a space memory object and puts it to the 'fil system' hash table. If
-there is an error, prints an error message to the .err log.
+Creates a space memory object and puts it to the 'fil system' hash table.
+If there is an error, prints an error message to the .err log.
 @return	TRUE if success */
 UNIV_INTERN
 ibool
@@ -347,11 +347,15 @@ fil_read_first_page(
 						contain sensible data */
 	ulint*		flags,			/*!< out: tablespace flags */
 #ifdef UNIV_LOG_ARCHIVE
-	ulint*		min_arch_log_no,	/*!< out: */
-	ulint*		max_arch_log_no,	/*!< out: */
+	ulint*		min_arch_log_no,	/*!< out: min of archived
+						log numbers in data files */
+	ulint*		max_arch_log_no,	/*!< out: max of archived
+						log numbers in data files */
 #endif /* UNIV_LOG_ARCHIVE */
-	lsn_t*		min_flushed_lsn,	/*!< out: */
-	lsn_t*		max_flushed_lsn);	/*!< out: */
+	lsn_t*		min_flushed_lsn,	/*!< out: min of flushed
+						lsn values in data files */
+	lsn_t*		max_flushed_lsn);	/*!< out: max of flushed
+						lsn values in data files */
 /*******************************************************************//**
 Increments the count of pending insert buffer page merges, if space is not
 being deleted.
@@ -430,7 +434,7 @@ UNIV_INTERN
 ibool
 fil_rename_tablespace(
 /*==================*/
-	const char*	old_name,	/*!< in: old table name in the standard
+	const char*	old_name_in,	/*!< in: old table name in the standard
 					databasename/tablename format of
 					InnoDB, or NULL if we do the rename
 					based on the space id only */
@@ -458,6 +462,7 @@ fil_create_new_single_table_tablespace(
 	ibool		is_temp,	/*!< in: TRUE if a table created with
 					CREATE TEMPORARY TABLE */
 	ulint		flags,		/*!< in: tablespace flags */
+	ulint		flags2,		/*!< in: table flags2 */
 	ulint		size);		/*!< in: the initial size of the
 					tablespace file in pages,
 					must be >= FIL_IBD_FILE_INITIAL_SIZE */
@@ -522,7 +527,7 @@ fil_load_single_table_tablespaces(void);
 /*******************************************************************//**
 Returns TRUE if a single-table tablespace does not exist in the memory cache,
 or is being deleted there.
-@return	TRUE if does not exist or is being\ deleted */
+@return	TRUE if does not exist or is being deleted */
 UNIV_INTERN
 ibool
 fil_tablespace_deleted_or_being_deleted_in_mem(
@@ -551,10 +556,7 @@ fil_space_for_table_exists_in_mem(
 /*==============================*/
 	ulint		id,		/*!< in: space id */
 	const char*	name,		/*!< in: table name in the standard
-					'databasename/tablename' format or
-					the dir path to a temp table */
-	ibool		is_temp,	/*!< in: TRUE if created with CREATE
-					TEMPORARY TABLE */
+					'databasename/tablename' format */
 	ibool		mark_space,	/*!< in: in crash recovery, at database
 					startup we mark all spaces which have
 					an associated table in the InnoDB

@@ -507,8 +507,8 @@ Development Release
 shell> md5sum package_name
 
    Example:
-shell> md5sum mysql-standard-5.6.5-linux-i686.tar.gz
-aaab65abbec64d5e907dcd41b8699945  mysql-standard-5.6.5-linux-i686.tar
+shell> md5sum mysql-standard-5.6.6-linux-i686.tar.gz
+aaab65abbec64d5e907dcd41b8699945  mysql-standard-5.6.6-linux-i686.tar
 .gz
 
    You should verify that the resulting checksum (the string of
@@ -635,8 +635,8 @@ pg-signature.html
 
    Table 2.1. MySQL Package and Signature Files
        File Type                     File Name
-   Distribution file mysql-standard-5.6.5-linux-i686.tar.gz
-   Signature file    mysql-standard-5.6.5-linux-i686.tar.gz.asc
+   Distribution file mysql-standard-5.6.6-linux-i686.tar.gz
+   Signature file    mysql-standard-5.6.6-linux-i686.tar.gz.asc
 
    Make sure that both files are stored in the same directory and
    then run the following command to verify the signature for the
@@ -644,7 +644,7 @@ pg-signature.html
 shell> gpg --verify package_name.asc
 
    Example:
-shell> gpg --verify mysql-standard-5.6.5-linux-i686.tar.gz.asc
+shell> gpg --verify mysql-standard-5.6.6-linux-i686.tar.gz.asc
 gpg: Signature made Tue 01 Feb 2011 02:38:30 AM CST using DSA key ID
 5072E1F5
 gpg: Good signature from "MySQL Release Engineering <mysql-build@oss.
@@ -664,8 +664,8 @@ oracle.com>"
 shell> rpm --checksig package_name.rpm
 
    Example:
-shell> rpm --checksig MySQL-server-5.6.5-0.glibc23.i386.rpm
-MySQL-server-5.6.5-0.glibc23.i386.rpm: md5 gpg OK
+shell> rpm --checksig MySQL-server-5.6.6-0.glibc23.i386.rpm
+MySQL-server-5.6.6-0.glibc23.i386.rpm: md5 gpg OK
 
    Note
 
@@ -740,7 +740,7 @@ shell> rpm --import mysql_pubkey.asc
 
    MySQL compressed tar file binary distributions have names of the
    form mysql-VERSION-OS.tar.gz, where VERSION is a number (for
-   example, 5.6.5), and OS indicates the type of operating system for
+   example, 5.6.6), and OS indicates the type of operating system for
    which the distribution is intended (for example, pc-linux-i686 or
    winx64).
 
@@ -1043,13 +1043,13 @@ Perform Postinstallation Setup
    from when installing MySQL on Windows:
 
      * The Complete Package: This package has a file name similar to
-       mysql-5.6.5-win32.msi and contains all files needed for a
+       mysql-5.6.6-win32.msi and contains all files needed for a
        complete Windows installation, including the Configuration
        Wizard. This package includes optional components such as the
        embedded server and benchmark suite.
 
      * The Noinstall Archive: This package has a file name similar to
-       mysql-5.6.5-win32.zip and contains all the files found in the
+       mysql-5.6.6-win32.zip and contains all the files found in the
        Complete install package, with the exception of the
        Configuration Wizard. This package does not include an
        automated installer, and must be manually installed and
@@ -1308,7 +1308,7 @@ Perform Postinstallation Setup
    directory. In a default installation it contains C:\Program
    Files\MySQL\MySQL Server 5.6\. The Version string contains the
    release number. For example, for an installation of MySQL Server
-   5.6.5, the key contains a value of 5.6.5.
+   5.6.6, the key contains a value of 5.6.6.
 
    These registry keys are used to help external tools identify the
    installed location of the MySQL server, preventing a complete scan
@@ -1398,7 +1398,7 @@ MSI Package
    the command line (or within a script), you need to use the
    msiexec.exe tool. For example, to perform a quiet installation
    (which shows no dialog boxes or progress):
-shell> msiexec /i /quiet mysql-5.6.5.msi
+shell> msiexec /i /quiet mysql-5.6.6.msi
 
    The /i indicates that you want to perform an installation. The
    /quiet option indicates that you want no interactive elements.
@@ -1406,7 +1406,7 @@ shell> msiexec /i /quiet mysql-5.6.5.msi
    To provide a dialog box showing the progress during installation,
    and the dialog boxes providing information on the installation and
    registration of MySQL, use /passive mode instead of /quiet:
-shell> msiexec /i /passive mysql-5.6.5.msi
+shell> msiexec /i /passive mysql-5.6.6.msi
 
    Regardless of the mode of the installation, installing the package
    in this manner performs a 'Typical' installation, and installs the
@@ -1414,7 +1414,7 @@ shell> msiexec /i /passive mysql-5.6.5.msi
 
    You can also use this method to uninstall MySQL by using the
    /uninstall or /x options:
-shell> msiexec /x /quiet mysql-5.6.5.msi
+shell> msiexec /x /quiet mysql-5.6.6.msi
 
    To install MySQL and configure a MySQL instance from the command
    line, see Section 2.3.4.13, "MySQL Server Instance Config Wizard:
@@ -1999,7 +1999,7 @@ from the Command Line
    service name MySQL56 and setting the root password to 1234.
 shell> MySQLInstanceConfig.exe -i -q "-lC:\mysql_install_log.txt" »
    "-nMySQL Server 5.6" "-pC:\Program Files\MySQL\MySQL Server 5.6" -
-v5.6.5 »
+v5.6.6 »
    "-tmy-template.ini" "-cC:\mytest.ini" ServerType=DEVELOPMENT Datab
 aseType=MIXED »
    ConnectionUsage=DSS Port=3311 ServiceName=MySQL56 RootPassword=123
@@ -2015,7 +2015,7 @@ Date: 2009-10-27 17:07:21
 Installing service ...
 
 Product Name:         MySQL Server 5.6
-Version:              5.6.5
+Version:              5.6.6
 Installation Path:    C:\Program Files\MySQL\MySQL Server 5.6\
 
 Creating configuration file C:\mytest.ini using template my-template.
@@ -2268,7 +2268,7 @@ InnoDB: foreign key constraint system tables created
    something like this, which indicates that the server is ready to
    service client connections:
 mysqld: ready for connections
-Version: '5.6.5'  socket: ''  port: 3306
+Version: '5.6.6'  socket: ''  port: 3306
 
    The server continues to write to the console any further
    diagnostic output it produces. You can open a new console window
@@ -3308,11 +3308,15 @@ Additional Resources
    /usr/share/sql-bench Benchmarks
    Note
 
-   RPM distributions of MySQL often are provided by other vendors. Be
-   aware that they may differ in features and capabilities from those
-   built by us, and that the instructions in this manual do not
-   necessarily apply to installing them. The vendor's instructions
-   should be consulted instead.
+   RPM distributions of MySQL are also provided by other vendors. Be
+   aware that they may differ from those built by us in features,
+   capabilities, and conventions (including communication setup), and
+   that the instructions in this manual do not necessarily apply to
+   installing them. The vendor's instructions should be consulted
+   instead. Because of these differences, RPM packages built by us
+   check whether such RPMs built by other vendors are installed. If
+   so, the RPM does not install and produces a message explaining
+   this.
 
    In most cases, you need to install only the MySQL-server and
    MySQL-client packages to get a functional MySQL installation. The
@@ -3340,10 +3344,8 @@ Additional Resources
    If you get a dependency failure when trying to install MySQL
    packages (for example, error: removing these packages would break
    dependencies: libmysqlclient.so.10 is needed by ...), you should
-   also install the MySQL-shared-compat package, which includes both
-   the shared libraries for backward compatibility
-   (libmysqlclient.so.12 for MySQL 4.0 and libmysqlclient.so.10 for
-   MySQL 3.23).
+   also install the MySQL-shared-compat package, which includes the
+   shared libraries for older releases for backward compatibility.
 
    The RPM packages shown in the following list are available. The
    names shown here use a suffix of .glibc23.i386.rpm, but particular
@@ -3361,13 +3363,6 @@ Additional Resources
        The libraries and include files that are needed if you want to
        compile other MySQL clients, such as the Perl modules.
 
-     * MySQL-debuginfo-VERSION.glibc23.i386.rpm
-       This package contains debugging information. debuginfo RPMs
-       are never needed to use MySQL software; this is true both for
-       the server and for client programs. However, they contain
-       additional information that might be needed by a debugger to
-       analyze a crash.
-
      * MySQL-shared-VERSION.glibc23.i386.rpm
        This package contains the shared libraries
        (libmysqlclient.so*) that certain languages and applications
@@ -3375,10 +3370,10 @@ Additional Resources
        single-threaded and thread-safe libraries.
 
      * MySQL-shared-compat-VERSION.glibc23.i386.rpm
-       This package includes the shared libraries for MySQL 3.23,
-       4.0, and so on, but not the libraries for the current release.
-       It contains single-threaded and thread-safe libraries. Install
-       this package if you have applications installed that are
+       This package includes the shared libraries for older releases,
+       but not the libraries for the current release. It contains
+       single-threaded and thread-safe libraries. Install this
+       package if you have applications installed that are
        dynamically linked against older versions of MySQL but you
        want to upgrade to the current version without breaking the
        library dependencies.
@@ -3412,6 +3407,7 @@ Additional Resources
    glibc23 Platform independent, should run on any Linux distribution
    that supports glibc 2.3
    rhel4, rhel5 Red Hat Enterprise Linux 4 or 5
+   el6 Enterprise Linux 6
    sles10, sles11 SuSE Linux Enterprise Server 10 or 11
 
    In MySQL 5.6, only glibc23 packages are available currently.
@@ -3420,11 +3416,10 @@ Additional Resources
    package is built.
 
    Table 2.13. MySQL Installation Packages for Linux CPU Identifier
-   CPU Value Intended Processor Type or Family
-   i386      x86 processor, 386 and up
-   i586      x86 processor, Pentium and up
-   x86_64    64-bit x86 processor
-   ia64      Itanium (IA-64) processor
+      CPU Value      Intended Processor Type or Family
+   i386, i586, i686 Pentium processor or better, 32 bit
+   x86_64           64-bit x86 processor
+   ia64             Itanium (IA-64) processor
 
    To see all files in an RPM package (for example, a MySQL-server
    RPM), run a command like this:
@@ -3453,20 +3448,6 @@ shell> rpm -i MySQL-client-VERSION.glibc23.i386.rpm
    not lose it when you install a newer RPM.) See Section 2.10.1.2,
    "Starting and Stopping MySQL Automatically," for more information
    on how MySQL can be started automatically on system startup.
-
-   If you want to install the MySQL RPM on older Linux distributions
-   that do not support initialization scripts in /etc/init.d
-   (directly or through a symlink), you should create a symbolic link
-   that points to the location where your initialization scripts
-   actually are installed. For example, if that location is
-   /etc/rc.d/init.d, use these commands before installing the RPM to
-   create /etc/init.d as a symbolic link that points there:
-shell> cd /etc
-shell> ln -s rc.d/init.d .
-
-   However, all current major Linux distributions should support the
-   new directory layout that uses /etc/init.d, because it is required
-   for LSB (Linux Standard Base) compliance.
 
    In MySQL 5.6, during a new installation, the server boot scripts
    are installed, but the MySQL server is not started at the end of
@@ -3780,7 +3761,7 @@ root-shell> emerge --config =dev-db/mysql-5.1.46
        in /etc/init.d/mysql.
        To enable MySQL to start automatically at the normal (default)
        run levels, you can use:
-root-shell> rc-update add default mysql
+root-shell> rc-update add mysql default
 
 2.6. Installing MySQL on Solaris and OpenSolaris
 
@@ -3860,15 +3841,15 @@ Error in accept: Protocol error
    To use this package, download the corresponding
    mysql-VERSION-solaris10-PLATFORM.pkg.gz file, then decompress it.
    For example:
-shell> gunzip mysql-5.6.5-solaris10-x86_64.pkg.gz
+shell> gunzip mysql-5.6.6-solaris10-x86_64.pkg.gz
 
    To install a new package, use pkgadd and follow the onscreen
    prompts. You must have root privileges to perform this operation:
-shell> pkgadd -d mysql-5.6.5-solaris10-x86_64.pkg
+shell> pkgadd -d mysql-5.6.6-solaris10-x86_64.pkg
 
 The following packages are available:
   1  mysql     MySQL Community Server (GPL)
-               (i86pc) 5.6.5
+               (i86pc) 5.6.6
 
 Select package(s) you wish to process (or 'all' to process
 all packages). (default: all) [?,??,q]:
@@ -3905,7 +3886,7 @@ shell> ln /etc/init.d/mysql /etc/rc0.d/K02mysql
    The typical upgrade sequence is therefore:
 shell> mysqladmin shutdown
 shell> pkgrm mysql
-shell> pkgadd -d mysql-5.6.5-solaris10-x86_64.pkg
+shell> pkgadd -d mysql-5.6.6-solaris10-x86_64.pkg
 shell> mysql_upgrade
 shell> mysqld_safe &
 
@@ -4143,7 +4124,7 @@ Source Installation Methods
        Standard distributions are available as compressed tar files,
        Zip archives, or RPM packages. Distribution files have names
        of the form mysql-VERSION.tar.gz, mysql-VERSION.zip, or
-       mysql-VERSION.rpm, where VERSION is a number like 5.6.5. File
+       mysql-VERSION.rpm, where VERSION is a number like 5.6.6. File
        names for source distributions can be distinguished from those
        for precompiled binary distributions in that source
        distribution names are generic and include no platform name,
@@ -4676,6 +4657,7 @@ shell> ccmake .
    MYSQL_DATADIR Data directory
    MYSQL_MAINTAINER_MODE Whether to enable MySQL maintainer-specific
    development environment OFF
+   MYSQL_PROJECT_NAME Windows/Mac OS X project name 3306 5.6.5
    MYSQL_TCP_PORT TCP/IP port number 3306
    MYSQL_UNIX_ADDR Unix socket file /tmp/mysql.sock
    ODBC_INCLUDES ODBC includes directory
@@ -4689,7 +4671,7 @@ shell> ccmake .
    WITH_EXTRA_CHARSETS Which extra character sets to include all
    WITH_LIBWRAP Whether to include libwrap (TCP wrappers) support OFF
 
-   WITH_READLINE Use bundled readline OFF
+   WITH_READLINE Use bundled readline OFF   5.6.5
    WITH_SSL Type of SSL support no
    WITH_UNIXODBC Enable unixODBC support OFF
    WITH_ZLIB Type of zlib support system
@@ -4948,6 +4930,10 @@ Feature Options
        environment. If enabled, this option causes compiler warnings
        to become errors.
 
+     * -DMYSQL_PROJECT_NAME=name
+       For Windows or Mac OS X, the project name to incorporate into
+       the project file name. This option was added in MySQL 5.6.5.
+
      * -DMYSQL_TCP_PORT=port_num
        The port number on on which the server listens for TCP/IP
        connections. The default is 3306.
@@ -4990,7 +4976,8 @@ Feature Options
 
      * -DWITH_READLINE=bool
        Whether to use the readline library bundled with the
-       distribution.
+       distribution. This option was removed in MySQL 5.6.5 because
+       readline is no longer bundled.
 
      * -DWITH_SSL=ssl_type
        The type of SSL support to include, if any:
@@ -5069,9 +5056,9 @@ shell> devenv MySQL.sln /clean
 shell> del CMakeCache.txt
 
    If you build out of the source tree, remove and recreate your
-   build directory before re-running CMake. For instructions on out
-   of source building, see Section 2.9.2, "Installing MySQL from a
-   Standard Source Distribution."
+   build directory before re-running CMake. For instructions on
+   building outside of the source tree, see
+   http://forge.mysql.com/wiki/CMake.
 
    On some systems, warnings may occur due to differences in system
    include files. The following list describes other problems that
@@ -5118,9 +5105,6 @@ pthread.h: No such file or directory
 sql_yacc.yy:#####: fatal error: maximum table size (32767) exceeded
        The maximum table size is not actually exceeded; the error is
        caused by bugs in older versions of bison.
-
-     * On Debian Linux 3.0, you need to install gawk instead of the
-       default mawk.
 
    For information about acquiring or updating tools, see the system
    requirements in Section 2.9, "Installing MySQL from Source."
@@ -5368,10 +5352,10 @@ shell> bin/mysqladmin variables
        on your platform and version of MySQL, but should be similar
        to that shown here:
 shell> bin/mysqladmin version
-mysqladmin  Ver 14.12 Distrib 5.6.5, for pc-linux-gnu on i686
+mysqladmin  Ver 14.12 Distrib 5.6.6, for pc-linux-gnu on i686
 ...
 
-Server version          5.6.5
+Server version          5.6.6
 Protocol version        10
 Connection              Localhost via UNIX socket
 UNIX socket             /var/lib/mysql/mysql.sock
@@ -6881,7 +6865,7 @@ shell> mysqlimport db_name DUMPDIR/*.txt   # load data into tables
    access. You can write a DBI script that works with many different
    database engines without change. To use DBI, you must install the
    DBI module, as well as a DataBase Driver (DBD) module for each
-   type of databas server you want to access. For MySQL, this driver
+   type of database server you want to access. For MySQL, this driver
    is the DBD::mysql module.
 
    Perl, and the DBD::MySQL module for DBI must be installed if you
@@ -7059,3 +7043,11 @@ $sysliblist .= " -lm -lz";
 
    After this, you must run make realclean and then proceed with the
    installation from the beginning.
+
+   Copyright (c) 1997, 2012, Oracle and/or its affiliates. All rights
+   reserved. [1]Legal Notices
+
+References
+
+
+   1. file://localhost/data0/users/mysqldoc/docs-build/mysqldoc/refman-5.6/installing-nolink.html#legalnotice

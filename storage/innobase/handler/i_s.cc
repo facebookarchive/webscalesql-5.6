@@ -1398,7 +1398,7 @@ i_s_cmp_fill_low(
 	Item*		,	/*!< in: condition (ignored) */
 	ibool		reset)	/*!< in: TRUE=reset cumulated counts */
 {
-	TABLE*	table	= (TABLE *) tables->table;
+	TABLE*	table	= (TABLE*) tables->table;
 	int	status	= 0;
 
 	DBUG_ENTER("i_s_cmp_fill_low");
@@ -1683,7 +1683,7 @@ i_s_cmpmem_fill_low(
 	ibool		reset)	/*!< in: TRUE=reset cumulated counts */
 {
 	int		status = 0;
-	TABLE*	table	= (TABLE *) tables->table;
+	TABLE*	table	= (TABLE*) tables->table;
 
 	DBUG_ENTER("i_s_cmpmem_fill_low");
 
@@ -2093,7 +2093,7 @@ i_s_metrics_fill(
 	fields = table_to_fill->field;
 
 	for (count = 0; count < NUM_MONITOR; count++) {
-		monitor_info = srv_mon_get_info((monitor_id_t)count);
+		monitor_info = srv_mon_get_info((monitor_id_t) count);
 
 		/* A good place to sanity check the Monitor ID */
 		ut_a(count == monitor_info->monitor_id);
@@ -2111,7 +2111,7 @@ i_s_metrics_fill(
 		counter. */
 		if (monitor_info->monitor_type & MONITOR_EXISTING
 		    && MONITOR_IS_ON(count)) {
-			srv_mon_process_existing_counter((monitor_id_t)count,
+			srv_mon_process_existing_counter((monitor_id_t) count,
 							 MONITOR_GET_VALUE);
 		}
 
@@ -2157,7 +2157,7 @@ i_s_metrics_fill(
 		}
 
 		/* Calculate the max value since counter started */
-		max_val = srv_mon_calc_max_since_start((monitor_id_t)count);
+		max_val = srv_mon_calc_max_since_start((monitor_id_t) count);
 
 		if (max_val == MAX_RESERVED
 		    || MONITOR_MAX_MIN_NOT_INIT(count)) {
@@ -2169,7 +2169,7 @@ i_s_metrics_fill(
 		}
 
 		/* Calculate the min value since counter started */
-		min_val = srv_mon_calc_min_since_start((monitor_id_t)count);
+		min_val = srv_mon_calc_min_since_start((monitor_id_t) count);
 
 		if (min_val == MIN_RESERVED
 		    || MONITOR_MAX_MIN_NOT_INIT(count)) {
@@ -2468,7 +2468,7 @@ i_s_stopword_fill(
 {
 	Field**	fields;
 	ulint	i = 0;
-	TABLE*	table = (TABLE *) tables->table;
+	TABLE*	table = (TABLE*) tables->table;
 
 	DBUG_ENTER("i_s_stopword_fill");
 
@@ -2588,13 +2588,18 @@ i_s_fts_deleted_generic_fill(
 	ibool		being_deleted)	/*!< in: BEING_DELTED table */
 {
 	Field**			fields;
-	TABLE*			table = (TABLE *) tables->table;
+	TABLE*			table = (TABLE*) tables->table;
 	trx_t*			trx;
 	fts_table_t		fts_table;
 	fts_doc_ids_t*		deleted;
 	dict_table_t*		user_table;
 
 	DBUG_ENTER("i_s_fts_deleted_generic_fill");
+
+	/* deny access to non-superusers */
+	if (check_global_access(thd, PROCESS_ACL)) {
+		DBUG_RETURN(0);
+	}
 
 	if (!fts_internal_tbl_name) {
 		DBUG_RETURN(0);
@@ -2623,7 +2628,7 @@ i_s_fts_deleted_generic_fill(
 	for (ulint j = 0; j < ib_vector_size(deleted->doc_ids); ++j) {
 		doc_id_t	doc_id;
 
-		doc_id = *(doc_id_t*)ib_vector_get_const(deleted->doc_ids, j);
+		doc_id = *(doc_id_t*) ib_vector_get_const(deleted->doc_ids, j);
 
 		OK(fields[I_S_FTS_DOC_ID]->store((longlong) doc_id, true));
 
@@ -2825,13 +2830,18 @@ i_s_fts_inserted_fill(
 	Item*		)	/*!< in: condition (ignored) */
 {
 	Field**			fields;
-	TABLE*			table = (TABLE *) tables->table;
+	TABLE*			table = (TABLE*) tables->table;
 	trx_t*			trx;
 	fts_table_t		fts_table;
 	fts_doc_ids_t*		inserted;
 	dict_table_t*		user_table;
 
 	DBUG_ENTER("i_s_fts_inserted_fill");
+
+	/* deny access to non-superusers */
+	if (check_global_access(thd, PROCESS_ACL)) {
+		DBUG_RETURN(0);
+	}
 
 	if (!fts_internal_tbl_name) {
 		DBUG_RETURN(0);
@@ -2858,7 +2868,7 @@ i_s_fts_inserted_fill(
 	for (ulint j = 0; j < ib_vector_size(inserted->doc_ids); ++j) {
 		doc_id_t	doc_id;
 
-		doc_id = *(doc_id_t*)ib_vector_get_const(inserted->doc_ids, j);
+		doc_id = *(doc_id_t*) ib_vector_get_const(inserted->doc_ids, j);
 
 		OK(fields[I_S_FTS_DOC_ID]->store((longlong) doc_id, true));
 
@@ -3018,7 +3028,7 @@ i_s_fts_index_cache_fill_one_index(
 	THD*			thd,		/*!< in: thread */
 	TABLE_LIST*		tables)		/*!< in/out: tables to fill */
 {
-	TABLE*			table = (TABLE *) tables->table;
+	TABLE*			table = (TABLE*) tables->table;
 	Field**			fields;
 	const ib_rbt_node_t*	rbt_node;
 
@@ -3106,6 +3116,11 @@ i_s_fts_index_cache_fill(
 	fts_cache_t*		cache;
 
 	DBUG_ENTER("i_s_fts_index_cache_fill");
+
+	/* deny access to non-superusers */
+	if (check_global_access(thd, PROCESS_ACL)) {
+		DBUG_RETURN(0);
+	}
 
 	if (!fts_internal_tbl_name) {
 		DBUG_RETURN(0);
@@ -3306,7 +3321,7 @@ i_s_fts_index_table_fill_one_index(
 	THD*			thd,		/*!< in: thread */
 	TABLE_LIST*		tables)		/*!< in/out: tables to fill */
 {
-	TABLE*			table = (TABLE *) tables->table;
+	TABLE*			table = (TABLE*) tables->table;
 	Field**			fields;
 	ib_vector_t*		words;
 	mem_heap_t*		heap;
@@ -3411,6 +3426,11 @@ i_s_fts_index_table_fill(
 	dict_index_t*		index;
 
 	DBUG_ENTER("i_s_fts_index_table_fill");
+
+	/* deny access to non-superusers */
+	if (check_global_access(thd, PROCESS_ACL)) {
+		DBUG_RETURN(0);
+	}
 
 	if (!fts_internal_tbl_name) {
 		DBUG_RETURN(0);
@@ -3556,7 +3576,7 @@ i_s_fts_config_fill(
 	Item*		)	/*!< in: condition (ignored) */
 {
 	Field**			fields;
-	TABLE*			table = (TABLE *) tables->table;
+	TABLE*			table = (TABLE*) tables->table;
 	trx_t*			trx;
 	fts_table_t		fts_table;
 	dict_table_t*		user_table;
@@ -3565,6 +3585,11 @@ i_s_fts_config_fill(
 	unsigned char		str[FTS_MAX_CONFIG_VALUE_LEN + 1];
 
 	DBUG_ENTER("i_s_fts_config_fill");
+
+	/* deny access to non-superusers */
+	if (check_global_access(thd, PROCESS_ACL)) {
+		DBUG_RETURN(0);
+	}
 
 	if (!fts_internal_tbl_name) {
 		DBUG_RETURN(0);
@@ -4469,12 +4494,12 @@ i_s_innodb_buffer_page_fill(
 			page_info->fix_count));
 
 		if (page_info->hashed) {
-                        OK(field_store_string(
-                                fields[IDX_BUFFER_PAGE_HASHED], "YES"));
-                } else {
-                        OK(field_store_string(
-                                fields[IDX_BUFFER_PAGE_HASHED], "NO"));
-                }
+			OK(field_store_string(
+				fields[IDX_BUFFER_PAGE_HASHED], "YES"));
+		} else {
+			OK(field_store_string(
+				fields[IDX_BUFFER_PAGE_HASHED], "NO"));
+		}
 
 		OK(fields[IDX_BUFFER_PAGE_NEWEST_MOD]->store(
 			(longlong) page_info->newest_mod, true));
@@ -6189,7 +6214,7 @@ innodb_sys_indexes_init(
 {
 	ST_SCHEMA_TABLE*	schema;
 
-	DBUG_ENTER("innodb_sys_index_init");
+	DBUG_ENTER("innodb_sys_indexes_init");
 
 	schema = (ST_SCHEMA_TABLE*) p;
 

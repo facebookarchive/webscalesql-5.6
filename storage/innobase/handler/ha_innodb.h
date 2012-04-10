@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-Copyright (c) 2000, 2011, Oracle and/or its affiliates. All Rights Reserved.
+Copyright (c) 2000, 2012, Oracle and/or its affiliates. All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -76,13 +76,14 @@ class ha_innobase: public handler
 	INNOBASE_SHARE*	share;		/*!< information for MySQL
 					table locking */
 
-	uchar*		upd_buff;	/*!< buffer used in updates */
-	uchar*		key_val_buff;	/*!< buffer used in converting
+	uchar*		upd_buf;	/*!< buffer used in updates */
+	ulint		upd_buf_size;	/*!< the size of upd_buf in bytes */
+	uchar		srch_key_val1[REC_VERSION_56_MAX_INDEX_COL_LEN + 2];
+	uchar		srch_key_val2[REC_VERSION_56_MAX_INDEX_COL_LEN + 2];
+					/*!< buffers used in converting
 					search key values from MySQL format
-					to Innodb format */
-	ulong		upd_and_key_val_buff_len;
-					/* the length of each of the previous
-					two buffers */
+					to InnoDB format. "+ 2" for the two
+					bytes where the length is stored */
 	Table_flags	int_table_flags;
 	uint		primary_key;
 	ulong		start_of_scan;	/*!< this is set to 1 when we are
@@ -461,16 +462,19 @@ innobase_fts_load_stopword(
 	THD*		thd);		/*!< in: current thread */
 
 /** Some defines for innobase_fts_check_doc_id_index() return value */
-#define	FTS_INCORRECT_DOC_ID_INDEX	1
-#define	FTS_EXIST_DOC_ID_INDEX		2
-#define	FTS_NOT_EXIST_DOC_ID_INDEX	3
+enum fts_doc_id_index_enum {
+	FTS_INCORRECT_DOC_ID_INDEX,
+	FTS_EXIST_DOC_ID_INDEX,
+	FTS_NOT_EXIST_DOC_ID_INDEX
+};
+
 /*******************************************************************//**
 Check whether the table has a unique index with FTS_DOC_ID_INDEX_NAME
 on the Doc ID column.
 @return FTS_EXIST_DOC_ID_INDEX if there exists the FTS_DOC_ID index,
 FTS_INCORRECT_DOC_ID_INDEX if the FTS_DOC_ID index is of wrong format */
 UNIV_INTERN
-ulint
+enum fts_doc_id_index_enum
 innobase_fts_check_doc_id_index(
 /*============================*/
 	dict_table_t*	table,		/*!< in: table definition */
@@ -483,7 +487,7 @@ on the Doc ID column in MySQL create index definition.
 @return FTS_EXIST_DOC_ID_INDEX if there exists the FTS_DOC_ID index,
 FTS_INCORRECT_DOC_ID_INDEX if the FTS_DOC_ID index is of wrong format */
 UNIV_INTERN
-ulint
+enum fts_doc_id_index_enum
 innobase_fts_check_doc_id_index_in_def(
 /*===================================*/
 	ulint		n_key,		/*!< in: Number of keys */

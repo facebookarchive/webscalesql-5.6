@@ -2,12 +2,12 @@
 .\"     Title: \fBmysql\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 12/13/2011
+.\"      Date: 03/29/2012
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQL\FR" "1" "12/13/2011" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQL\FR" "1" "03/29/2012" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -32,9 +32,7 @@ mysql \- the MySQL command\-line tool
 .SH "DESCRIPTION"
 .PP
 \fBmysql\fR
-is a simple SQL shell (with GNU
-readline
-capabilities)\&. It supports interactive and noninteractive use\&. When used interactively, query results are presented in an ASCII\-table format\&. When used noninteractively (for example, as a filter), the result is presented in tab\-separated format\&. The output format can be changed using command options\&.
+is a simple SQL shell with input line editing capabilities\&. It supports interactive and noninteractive use\&. When used interactively, query results are presented in an ASCII\-table format\&. When used noninteractively (for example, as a filter), the result is presented in tab\-separated format\&. The output format can be changed using command options\&.
 .PP
 If you have problems due to insufficient memory for large result sets, use the
 \fB\-\-quick\fR
@@ -578,6 +576,21 @@ Section\ \&5.1.6, \(lqServer SQL Modes\(rq)\&.
 .sp -1
 .IP \(bu 2.3
 .\}
+.\" mysql: init-command option
+.\" init-command option: mysql
+\fB\-\-init\-command=str\fR
+.sp
+SQL statement to execute after connecting to the server\&. If auto\-reconnect is enabled, the statement is executed again after reconnection occurs\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
 .\" mysql: line-numbers option
 .\" line-numbers option: mysql
 \fB\-\-line\-numbers\fR
@@ -872,6 +885,7 @@ Section\ \&5.5.6, \(lqPluggable Authentication\(rq\&.
 .\}
 .\" mysql: port option
 .\" port option: mysql
+.\" TCP/IP
 \fB\-\-port=\fR\fB\fIport_num\fR\fR,
 \fB\-P \fR\fB\fIport_num\fR\fR
 .sp
@@ -1610,7 +1624,7 @@ interprets as the separator between SQL statements\&. The default is the semicol
 .sp
 The delimiter string can be specified as an unquoted or quoted argument on the
 delimiter
-command line\&. Quoting can be done with either single quote (\'), douple quote ("), or backtick (`) characters\&. To include a quote within a quoted string, either quote the string with a different quote character or escape the quote with a backslash (\(lq\e\(rq) character\&. Backslash should be avoided outside of quoted strings because it is the escape character for MySQL\&. For an unquoted argument, the delimiter is read up to the first space or end of line\&. For a quoted argument, the delimiter is read up to the matching quote on the line\&.
+command line\&. Quoting can be done with either single quote (\'), double quote ("), or backtick (`) characters\&. To include a quote within a quoted string, either quote the string with a different quote character or escape the quote with a backslash (\(lq\e\(rq) character\&. Backslash should be avoided outside of quoted strings because it is the escape character for MySQL\&. For an unquoted argument, the delimiter is read up to the first space or end of line\&. For a quoted argument, the delimiter is read up to the matching quote on the line\&.
 .sp
 \fBmysql\fR
 interprets instances of the delimiter string as a statement delimiter anywhere it occurs, except within quoted strings\&. Be careful about defining a delimiter that might occur within other words\&. For example, if you define the delimiter as
@@ -3053,7 +3067,7 @@ Section\ \&20.9.12, \(lqControlling Automatic Reconnection Behavior\(rq\&.
 .SH "COPYRIGHT"
 .br
 .PP
-Copyright \(co 1997, 2011, Oracle and/or its affiliates. All rights reserved.
+Copyright \(co 1997, 2012, Oracle and/or its affiliates. All rights reserved.
 .PP
 This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
 .PP

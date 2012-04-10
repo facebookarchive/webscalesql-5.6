@@ -1,7 +1,7 @@
-revision-id: ramil@mysql.com-20111213181820-llwkov1ik05diu7y
-date: 2011-12-13 22:18:20 +0400
-build-date: 2011-12-13 19:21:02 +0100
-revno: 3685
-branch-nick: mysql-5.6.4-m7-release
+revision-id: mattias.jonsson@oracle.com-20120329081103-620l8agihmzxp9vc
+date: 2012-03-29 10:11:03 +0200
+build-date: 2012-03-29 10:15:22 +0200
+revno: 3724
+branch-nick: mysql-5.6.5-m8-release
 
-MySQL source 5.6.4
+MySQL source 5.6.5

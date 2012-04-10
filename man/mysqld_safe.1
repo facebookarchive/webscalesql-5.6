@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqld_safe\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 12/13/2011
+.\"      Date: 03/29/2012
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLD_SAFE\FR" "1" "12/13/2011" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLD_SAFE\FR" "1" "03/29/2012" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -495,6 +495,7 @@ The path name of the process ID file\&.
 .\}
 .\" mysqld_safe: port option
 .\" port option: mysqld_safe
+.\" TCP/IP
 \fB\-\-port=\fR\fB\fIport_num\fR\fR
 .sp
 The port number that the server should use when listening for TCP/IP connections\&. The port number must be 1024 or higher unless the server is started by the
@@ -730,6 +731,14 @@ and
 \fB\-\-datadir\fR
 options to indicate the directories in which the server and databases are located on your system\&.
 .PP
+In MySQL 5\&.6\&.5 and later,
+\fBmysqld_safe\fR
+tries to use the
+\fBsleep\fR
+and
+\fBdate\fR
+system utilities to determine how many times it has attempted to start this second, and\(emif these are present and this is greater than 5 times\(emis forced to wait 1 full second before starting again\&. This is intended to prevent excessive CPU usage in the event of repeated failures\&. (Bug #11761530, Bug #54035)
+.PP
 When you use
 \fBmysqld_safe\fR
 to start
@@ -818,7 +827,7 @@ might be overwritten if you upgrade MySQL in the future, so you should make a co
 .SH "COPYRIGHT"
 .br
 .PP
-Copyright \(co 1997, 2011, Oracle and/or its affiliates. All rights reserved.
+Copyright \(co 1997, 2012, Oracle and/or its affiliates. All rights reserved.
 .PP
 This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
 .PP

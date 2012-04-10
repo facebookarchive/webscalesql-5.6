@@ -1,7 +1,7 @@
 #ifndef SQL_PARTITION_INCLUDED
 #define SQL_PARTITION_INCLUDED
 
-/* Copyright (c) 2006, 2011, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2006, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -112,7 +112,8 @@ bool mysql_unpack_partition(THD *thd, char *part_buf,
                             TABLE *table, bool is_create_table_ind,
                             handlerton *default_db_type,
                             bool *work_part_info_used);
-void make_used_partitions_str(partition_info *part_info, String *parts_str);
+bool make_used_partitions_str(partition_info *part_info,
+                              List<const char> *parts);
 uint32 get_list_array_idx_for_endpoint(partition_info *part_info,
                                        bool left_endpoint,
                                        bool include_endpoint);
@@ -250,7 +251,7 @@ uint fast_alter_partition_table(THD *thd, TABLE *table,
                                 char *db,
                                 const char *table_name,
                                 TABLE  *fast_alter_table);
-uint set_part_state(Alter_info *alter_info, partition_info *tab_part_info,
+bool set_part_state(Alter_info *alter_info, partition_info *tab_part_info,
                     enum partition_state part_state);
 uint prep_alter_part_table(THD *thd, TABLE *table, Alter_info *alter_info,
                            HA_CREATE_INFO *create_info,

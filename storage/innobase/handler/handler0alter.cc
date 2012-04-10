@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-Copyright (c) 2005, 2011, Oracle and/or its affiliates. All Rights Reserved.
+Copyright (c) 2005, 2012, Oracle and/or its affiliates. All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -365,7 +365,7 @@ innobase_create_index_field_def(
 		&& field->type() != MYSQL_TYPE_VARCHAR)
 	    || (field->type() == MYSQL_TYPE_VARCHAR
 		&& key_part->length < field->pack_length()
-			- ((Field_varstring*)field)->length_bytes)) {
+			- ((Field_varstring*) field)->length_bytes)) {
 
 		index_field->prefix_len = key_part->length;
 	} else {
@@ -515,9 +515,23 @@ innobase_fts_check_doc_id_col(
 
 			col = dict_table_get_nth_col(table, i);
 
-			if (col->mtype == DATA_INT && col->len == 8
-			    && col->prtype & DATA_NOT_NULL) {
+			if (col->mtype != DATA_INT || col->len != 8) {
+				fprintf(stderr,
+					" InnoDB: %s column in table %s"
+					" must be of the BIGINT datatype\n",
+					FTS_DOC_ID_COL_NAME, table->name);
+			} else if (!(col->prtype & DATA_NOT_NULL)) {
+				fprintf(stderr,
+					" InnoDB: %s column in table %s"
+					" must be NOT NULL\n",
+					FTS_DOC_ID_COL_NAME, table->name);
 
+			} else if (!(col->prtype & DATA_UNSIGNED)) {
+				fprintf(stderr,
+					" InnoDB: %s column in table %s"
+					" must be UNSIGNED\n",
+					FTS_DOC_ID_COL_NAME, table->name);
+			} else {
 				*fts_doc_col_no = i;
 			}
 
@@ -534,7 +548,7 @@ on the Doc ID column.
 @return	FTS_EXIST_DOC_ID_INDEX if there exists the FTS_DOC_ID index,
 FTS_INCORRECT_DOC_ID_INDEX if the FTS_DOC_ID index is of wrong format */
 UNIV_INTERN
-ulint
+enum fts_doc_id_index_enum
 innobase_fts_check_doc_id_index(
 /*============================*/
 	dict_table_t*	table,		/*!< in: table definition */
@@ -586,7 +600,7 @@ on the Doc ID column in MySQL create index definition.
 @return	FTS_EXIST_DOC_ID_INDEX if there exists the FTS_DOC_ID index,
 FTS_INCORRECT_DOC_ID_INDEX if the FTS_DOC_ID index is of wrong format */
 UNIV_INTERN
-ulint
+enum fts_doc_id_index_enum
 innobase_fts_check_doc_id_index_in_def(
 /*===================================*/
 	ulint		n_key,		/*!< in: Number of keys */
@@ -722,10 +736,10 @@ innobase_create_key_def(
 	already has a DOC ID column, if not, we will need to add a
 	Doc ID hidden column and rebuild the primary index */
 	if (*num_fts_index) {
-		ulint	ret;
-		ibool	exists;
-		ulint	doc_col_no;
-		ulint	fts_doc_col_no;
+		enum fts_doc_id_index_enum	ret;
+		ibool				exists;
+		ulint				doc_col_no;
+		ulint				fts_doc_col_no;
 
 		exists = innobase_fts_check_doc_id_col(table, &fts_doc_col_no);
 
@@ -733,13 +747,16 @@ innobase_create_key_def(
 
 			if (fts_doc_col_no == ULINT_UNDEFINED) {
 
-				ut_print_timestamp(stderr);
-				fprintf(stderr,
+				push_warning_printf(
+					(THD*) trx->mysql_thd,
+					Sql_condition::WARN_LEVEL_WARN,
+					ER_WRONG_COLUMN_NAME,
 					" InnoDB: There exists a column %s "
 					"in table %s, but it is the wrong "
 					"type. Create of FTS index failed.\n",
 					FTS_DOC_ID_COL_NAME, table->name);
-				return(NULL);
+
+				DBUG_RETURN(NULL);
 
 			} else if (!table->fts) {
 				table->fts = fts_create(table);
@@ -758,9 +775,11 @@ innobase_create_key_def(
 
 		ret = innobase_fts_check_doc_id_index(table, &doc_col_no);
 
-		if (ret == FTS_NOT_EXIST_DOC_ID_INDEX) {
+		switch (ret) {
+		case FTS_NOT_EXIST_DOC_ID_INDEX:
 			*add_fts_doc_id_idx = TRUE;
-		} else if (ret == FTS_INCORRECT_DOC_ID_INDEX) {
+			break;
+		case FTS_INCORRECT_DOC_ID_INDEX:
 
 			ut_print_timestamp(stderr);
 			fprintf(stderr, " InnoDB: Index %s is used for FTS"
@@ -770,7 +789,7 @@ innobase_create_key_def(
 					FTS_DOC_ID_INDEX_NAME, table->name);
 			DBUG_RETURN(NULL);
 
-		} else {
+		default:
 			ut_ad(ret == FTS_EXIST_DOC_ID_INDEX);
 
 			ut_ad(doc_col_no == fts_doc_col_no);
@@ -1426,7 +1445,12 @@ ha_innobase::final_add_index(
 			trx_commit_for_mysql(prebuilt->trx);
 			row_prebuilt_free(prebuilt, TRUE);
 			error = row_merge_drop_table(trx, old_table);
-			prebuilt = row_create_prebuilt(add->indexed_table);
+			prebuilt = row_create_prebuilt(add->indexed_table,
+				0 /* XXX Do we know the mysql_row_len here?
+				Before the addition of this parameter to
+				row_create_prebuilt() the mysql_row_len
+				member was left 0 (from zalloc) in the
+				prebuilt object. */);
 		}
 
 		err = convert_error_code_to_mysql(
@@ -1617,7 +1641,9 @@ ha_innobase::prepare_drop_index(
 			goto func_exit;
 		}
 
+		rw_lock_x_lock(dict_index_get_lock(index));
 		index->to_be_dropped = TRUE;
+		rw_lock_x_unlock(dict_index_get_lock(index));
 	}
 
 	/* If FOREIGN_KEY_CHECKS = 1 you may not drop an index defined
@@ -1736,7 +1762,9 @@ func_exit:
 			= dict_table_get_first_index(prebuilt->table);
 
 		do {
+			rw_lock_x_lock(dict_index_get_lock(index));
 			index->to_be_dropped = FALSE;
+			rw_lock_x_unlock(dict_index_get_lock(index));
 			index = dict_table_get_next_index(index);
 		} while (index);
 	}
@@ -1827,7 +1855,9 @@ ha_innobase::final_drop_index(
 		for (index = dict_table_get_first_index(prebuilt->table);
 		     index; index = dict_table_get_next_index(index)) {
 
+			rw_lock_x_lock(dict_index_get_lock(index));
 			index->to_be_dropped = FALSE;
+			rw_lock_x_unlock(dict_index_get_lock(index));
 		}
 
 		goto func_exit;

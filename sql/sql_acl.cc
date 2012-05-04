@@ -3026,8 +3026,8 @@ static int replace_user_table(THD *thd, TABLE *table, LEX_USER *combo,
 	 if old_passwords == 2, error.
       * An empty password is considered to be of mysql_native type.
     */
-    
-    if (combo->plugin.str == NULL || combo->plugin.str == '\0')
+
+    if (combo->plugin.str == NULL || combo->plugin.str[0] == '\0')
     {
       if (combo->uses_identified_by_password_clause)
       {
@@ -11637,7 +11637,12 @@ private:
         filesize= ftell(key_file);
         fseek(key_file, 0, SEEK_SET);
         *key_text_buffer= new char[filesize+1];
-        (void) fread(*key_text_buffer, filesize, 1, key_file);
+        if(fread(*key_text_buffer, filesize, 1, key_file) != 1)
+        {
+          sql_print_error("Failure in fread() of key_text_buffer.");
+          fclose(key_file);
+          return true;
+        }
         (*key_text_buffer)[filesize]= '\0';
       }
       fclose(key_file);

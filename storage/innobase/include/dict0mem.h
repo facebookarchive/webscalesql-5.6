@@ -220,13 +220,13 @@ index tables) of a FTS table are in HEX format. */
 /* @} */
 
 #define DICT_TF2_FLAG_SET(table, flag)				\
-	(table->flags2 |= (flag))
+	(table->flags2 = table->flags2 | (flag))
 
 #define DICT_TF2_FLAG_IS_SET(table, flag)			\
 	(table->flags2 & (flag))
 
 #define DICT_TF2_FLAG_UNSET(table, flag)			\
-	(table->flags2 &= ~(flag))
+	(table->flags2 = table->flags2 & ~(flag))
 
 /** Tables could be chained together with Foreign key constraint. When
 first load the parent table, we would load all of its descedents.

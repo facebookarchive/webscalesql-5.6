@@ -1120,8 +1120,8 @@ bool Log_event::write_header(IO_CACHE* file, ulong event_data_length)
   }
 
   now= (ulong) get_time();                              // Query start time
-  if (DBUG_EVALUATE_IF("inc_event_time_by_1_hour",1,0)  &&
-      DBUG_EVALUATE_IF("dec_event_time_by_1_hour",1,0))
+  if (DBUG_EVALUATE_IF("inc_event_time_by_1_hour", true, false)  &&
+      DBUG_EVALUATE_IF("dec_event_time_by_1_hour", true, false))
   {
     /** 
        This assertion guarantees that these debug flags are not
@@ -2731,7 +2731,7 @@ Slave_worker *Log_event::get_slave_worker(Relay_log_info *rli)
   {
     if (!rli->curr_group_seen_gtid && !rli->curr_group_seen_begin)
     {
-      ulong gaq_idx;
+      ulong DBUG_ONLY gaq_idx;
       rli->mts_groups_assigned++;
 
       rli->curr_group_isolated= FALSE;
@@ -3409,7 +3409,7 @@ bool Query_log_event::write(IO_CACHE* file)
       user= thd->get_invoker_user();
       host= thd->get_invoker_host();
     }
-    else if (thd->security_ctx->priv_user)
+    else if (thd->security_ctx->priv_user[0] != '\0')
     {
       Security_context *ctx= thd->security_ctx;
 

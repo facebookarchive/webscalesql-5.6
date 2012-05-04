@@ -4146,7 +4146,7 @@ fil_user_tablespace_restore_page0(
 	bool	err;
 	ulint	flags;
 	ulint	zip_size;
-	ulint	page_no;
+	ulint DBUG_ONLY	page_no;
 	ulint	page_size;
 	ulint	buflen;
 	byte*	page;

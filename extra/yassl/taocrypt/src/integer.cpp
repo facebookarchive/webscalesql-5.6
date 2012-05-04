@@ -2841,8 +2841,7 @@ Integer& Integer::operator++()
     }
     else
     {
-        word borrow = Decrement(reg_.get_buffer(), reg_.size());
-        (void)borrow;           // shut up compiler
+        Decrement(reg_.get_buffer(), reg_.size());
         if (WordCount()==0)
             *this = Zero();
     }
@@ -3211,8 +3210,7 @@ static void CorrectQuotientEstimate(word *R, word *T, word *Q, const word *B,
         T[N+1] = 0;
     }
 
-    word borrow = Subtract(R, R, T, N+2);
-    (void)borrow;       // shut up compiler
+    Subtract(R, R, T, N+2);
 
     while (R[N] || Compare(R, B, N) >= 0)
     {
@@ -3741,8 +3739,7 @@ void MontgomeryReduce(word *R, word *T, const word *X, const word *M,
     MultiplyTop(T, T+N, X, R, M, N);
     word borrow = Subtract(T, X+N, T, N);
     // defend against timing attack by doing this Add even when not needed
-    word carry = Add(T+N, T, M, N);
-    (void)carry;            // shut up compiler
+    Add(T+N, T, M, N);
     CopyWords(R, T + (borrow ? N : 0), N);
 }
 

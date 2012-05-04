@@ -790,6 +790,11 @@ static inline double my_isinf(double x)
 }
 #else
 /* System-provided isinf() is available and safe to use */
+#if defined(__APPLE__) && defined(__cplusplus)
+#include <cmath>
+using std::isinf;
+using std::isnan;
+#endif
 #define my_isinf(X) isinf(X)
 #endif
 #else /* !HAVE_ISINF */

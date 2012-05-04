@@ -1435,7 +1435,8 @@ row_fts_merge_insert(
 	in order to get the correct aux table names. */
 	index->table->flags2 |= DICT_TF2_FTS_AUX_HEX_NAME;
 	DBUG_EXECUTE_IF("innodb_test_wrong_fts_aux_table_name",
-			index->table->flags2 &= ~DICT_TF2_FTS_AUX_HEX_NAME;);
+			index->table->flags2 =
+			  index->table->flags2 & ~DICT_TF2_FTS_AUX_HEX_NAME;);
 
 	ins_ctx.fts_table.type = FTS_INDEX_TABLE;
 	ins_ctx.fts_table.index_id = index->id;

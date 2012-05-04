@@ -119,6 +119,8 @@ extern "C" {
 #include "completion_hash.h"
 #include <welcome_copyright_notice.h> // ORACLE_WELCOME_COPYRIGHT_NOTICE
 
+#include "blind_fwrite.h"
+
 #define PROMPT_CHAR '\\'
 #define DEFAULT_DELIMITER ";"
 
@@ -5182,9 +5184,9 @@ void tee_write(FILE *file, const char *s, size_t slen, int flags)
           my_win_console_write(charset_info, s, mblen);
         else
 #endif
-        fwrite(s, 1, mblen, file);
+        blind_fwrite(s, 1, mblen, file);
         if (opt_outfile)
-          fwrite(s, 1, mblen, OUTFILE);
+          blind_fwrite(s, 1, mblen, OUTFILE);
         s+= mblen - 1;
         continue;
       }

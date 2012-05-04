@@ -117,6 +117,8 @@
 #include "filesort.h"         // filesort_free_buffers
 #include "sql_optimizer.h"    // is_indexed_agg_distinct,field_time_cmp_date
 
+#include "blind_fwrite.h"
+
 using std::min;
 using std::max;
 
@@ -14064,7 +14066,7 @@ print_multiple_key_values(KEY_PART *key_part, const uchar *key,
     {
       if (*key)
       {
-        fwrite("NULL",sizeof(char),4,DBUG_FILE);
+        blind_fwrite("NULL",sizeof(char),4,DBUG_FILE);
         continue;
       }
       key++;                                    // Skip null byte
@@ -14075,7 +14077,7 @@ print_multiple_key_values(KEY_PART *key_part, const uchar *key,
       (void) field->val_int_as_str(&tmp, 1);
     else
       field->val_str(&tmp);
-    fwrite(tmp.ptr(),sizeof(char),tmp.length(),DBUG_FILE);
+    blind_fwrite(tmp.ptr(),sizeof(char),tmp.length(),DBUG_FILE);
     if (key+store_length < key_end)
       fputc('/',DBUG_FILE);
   }

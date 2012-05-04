@@ -7789,7 +7789,10 @@ int get_part_iter_for_interval_cols_via_map(partition_info *part_info,
     DBUG_ASSERT(part_info->num_list_values);
   }
   else
+  {
+    get_col_endpoint= NULL;
     assert(0);
+  }
 
   if (flags & NO_MIN_RANGE)
     part_iter->part_nums.start= part_iter->part_nums.cur= 0;

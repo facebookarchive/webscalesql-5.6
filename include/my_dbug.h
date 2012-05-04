@@ -67,6 +67,7 @@ extern  FILE *_db_fp_(void);
 extern  void _db_flush_();
 extern  const char* _db_get_func_(void);
 
+#define DBUG_ONLY
 #define DBUG_ENTER(a) struct _db_stack_frame_ _db_stack_frame_; \
         _db_enter_ (a,__FILE__,__LINE__,&_db_stack_frame_)
 #define DBUG_LEAVE _db_return_ (__LINE__, &_db_stack_frame_)
@@ -150,6 +151,7 @@ extern void _db_flush_gcov_();
 
 #else                                           /* No debugger */
 
+#define DBUG_ONLY			__attribute__((unused))
 #define DBUG_ENTER(a1)
 #define DBUG_LEAVE
 #define DBUG_RETURN(a1)                 do { return(a1); } while(0)

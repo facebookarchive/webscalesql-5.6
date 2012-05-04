@@ -294,9 +294,9 @@ uint32 wt_wait_stats[WT_WAIT_STATS+1];
 uint32 wt_cycle_stats[2][WT_CYCLE_STATS+1];
 uint32 wt_success_stats;
 
+#ifdef SAFE_STATISTICS
 static my_atomic_rwlock_t cycle_stats_lock, wait_stats_lock, success_stats_lock;
 
-#ifdef SAFE_STATISTICS
 #define incr(VAR, LOCK)                           \
   do {                                            \
     my_atomic_rwlock_wrlock(&(LOCK));             \
@@ -554,9 +554,11 @@ void wt_init()
       DBUG_ASSERT(i == 0 || wt_wait_table[i-1] != wt_wait_table[i]);
     }
   }
+#ifdef SAFE_STATISTICS
   my_atomic_rwlock_init(&cycle_stats_lock);
   my_atomic_rwlock_init(&success_stats_lock);
   my_atomic_rwlock_init(&wait_stats_lock);
+#endif
   DBUG_VOID_RETURN;
 }
 
@@ -566,9 +568,11 @@ void wt_end()
 
   DBUG_ASSERT(reshash.count == 0);
   lf_hash_destroy(&reshash);
+#ifdef SAFE_STATISTICS
   my_atomic_rwlock_destroy(&cycle_stats_lock);
   my_atomic_rwlock_destroy(&success_stats_lock);
   my_atomic_rwlock_destroy(&wait_stats_lock);
+#endif
   DBUG_VOID_RETURN;
 }
 

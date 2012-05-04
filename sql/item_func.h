@@ -26,6 +26,12 @@ extern "C"				/* Bug in BSDI include file */
 }
 #endif
 
+#ifdef __cplusplus
+#if defined(__GXX_EXPERIMENTAL_CXX0X__) || (__cplusplus >= 201103L)
+using std::isfinite;
+#endif
+#endif
+
 class Item_func :public Item_result_field
 {
 protected:

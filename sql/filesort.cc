@@ -1020,7 +1020,7 @@ void make_sortkey(Sort_param *param, uchar *to, uchar *ref_pos)
         if (sort_field->need_strxnfrm)
         {
           char *from=(char*) res->ptr();
-          uint tmp_length;
+          uint DBUG_ONLY tmp_length;
           if ((uchar*) from == to)
           {
             DBUG_ASSERT(sort_field->length >= length);

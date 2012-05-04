@@ -43,6 +43,10 @@
 #endif
 
 #define bfill please_use_memset_rather_than_bfill()
+
+#if defined(bzero)
+#undef bzero
+#endif
 #define bzero please_use_memset_rather_than_bzero()
 
 #if !defined(HAVE_MEMCPY) && !defined(HAVE_MEMMOVE)

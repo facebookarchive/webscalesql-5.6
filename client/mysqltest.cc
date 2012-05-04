@@ -50,6 +50,8 @@
 
 #include <algorithm>
 
+#include "blind_fwrite.h"
+
 using std::min;
 using std::max;
 
@@ -764,7 +766,7 @@ public:
     }
 
     while ((bytes= fread(buf, 1, sizeof(buf), m_file)) > 0)
-      fwrite(buf, 1, bytes, stderr);
+      blind_fwrite(buf, 1, bytes, stderr);
 
     if (!lines)
     {

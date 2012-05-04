@@ -21,7 +21,7 @@
 
 #include "runtime.hpp"
 #include "file.hpp"
-
+#include "blind_fwrite.h"
 
 namespace TaoCrypt {
 
@@ -100,7 +100,7 @@ FileSink::~FileSink()
 // fill source from file sink
 void FileSink::put(Source& source)
 {
-    fwrite(source.get_buffer(), 1, source.size(), file_);
+    blind_fwrite(source.get_buffer(), 1, source.size(), file_);
 }
 
 

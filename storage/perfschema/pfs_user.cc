@@ -346,9 +346,7 @@ void purge_user(PFS_thread *thread, PFS_user *user)
                     user->m_key.m_hash_key, user->m_key.m_key_length));
   if (entry && (entry != MY_ERRPTR))
   {
-    PFS_user *pfs;
-    pfs= *entry;
-    DBUG_ASSERT(pfs == user);
+    DBUG_ASSERT(((PFS_user *)(*entry)) == user);
     if (user->get_refcount() == 0)
     {
       lf_hash_delete(&user_hash, pins,

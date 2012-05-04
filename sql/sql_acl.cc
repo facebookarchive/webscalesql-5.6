@@ -11714,7 +11714,12 @@ private:
         filesize= ftell(key_file);
         fseek(key_file, 0, SEEK_SET);
         *key_text_buffer= new char[filesize+1];
-        (void) fread(*key_text_buffer, filesize, 1, key_file);
+        if(fread(*key_text_buffer, filesize, 1, key_file) != 1)
+        {
+          sql_print_error("Failure in fread() of key_text_buffer.");
+          fclose(key_file);
+          return true;
+        }
         (*key_text_buffer)[filesize]= '\0';
       }
       fclose(key_file);

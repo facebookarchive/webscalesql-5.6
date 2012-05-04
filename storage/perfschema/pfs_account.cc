@@ -527,9 +527,7 @@ void purge_account(PFS_thread *thread, PFS_account *account,
                     account->m_key.m_key_length));
   if (entry && (entry != MY_ERRPTR))
   {
-    PFS_account *pfs;
-    pfs= *entry;
-    DBUG_ASSERT(pfs == account);
+    DBUG_ASSERT(((PFS_account *)(*entry)) == account);
     if (account->get_refcount() == 0)
     {
       lf_hash_delete(&account_hash, pins,

@@ -16741,7 +16741,12 @@ ib_senderrf(
 	str[size - 1] = 0x0;
 	vsnprintf(str, size, format, args);
 #elif HAVE_VASPRINTF
-	(void) vasprintf(&str, format, args);
+	if (vasprintf(&str, format, args) == -1)
+	{
+		/* In case of failure use a fixed length string */
+		str = static_cast<char*>(malloc(BUFSIZ));
+		my_vsnprintf(str, BUFSIZ, format, args);
+	}
 #else
 	/* Use a fixed length string. */
 	str = static_cast<char*>(malloc(BUFSIZ));
@@ -16817,7 +16822,12 @@ ib_errf(
 	str[size - 1] = 0x0;
 	vsnprintf(str, size, format, args);
 #elif HAVE_VASPRINTF
-	(void) vasprintf(&str, format, args);
+	if (vasprintf(&str, format, args) == -1)
+	{
+		/* In case of failure use a fixed length string */
+		str = static_cast<char*>(malloc(BUFSIZ));
+		my_vsnprintf(str, BUFSIZ, format, args);
+	}
 #else
 	/* Use a fixed length string. */
 	str = static_cast<char*>(malloc(BUFSIZ));
@@ -16851,7 +16861,12 @@ ib_logf(
 	str[size - 1] = 0x0;
 	vsnprintf(str, size, format, args);
 #elif HAVE_VASPRINTF
-	(void) vasprintf(&str, format, args);
+	if (vasprintf(&str, format, args) == -1)
+	{
+		/* In case of failure use a fixed length string */
+		str = static_cast<char*>(malloc(BUFSIZ));
+		my_vsnprintf(str, BUFSIZ, format, args);
+	}
 #else
 	/* Use a fixed length string. */
 	str = static_cast<char*>(malloc(BUFSIZ));

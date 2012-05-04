@@ -6219,7 +6219,7 @@ end:
 ha_rows DsMrr_impl::dsmrr_info(uint keyno, uint n_ranges, uint rows,
                                uint *bufsz, uint *flags, Cost_estimate *cost)
 {  
-  ha_rows res;
+  ha_rows DBUG_ONLY res;
   uint def_flags= *flags;
   uint def_bufsz= *bufsz;
 

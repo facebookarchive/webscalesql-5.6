@@ -234,7 +234,7 @@ static bool check_partition_column_order(List<Create_field> *create_list,
 
   Field **f_ptr;
   List_iterator_fast<Create_field> new_field_it;
-  Create_field *new_field;
+  Create_field *new_field = nullptr;
   new_field_it.init(*create_list);
 
   for (f_ptr= field_arary ; *f_ptr; f_ptr++)
@@ -4357,7 +4357,7 @@ int ha_partition::truncate_partition(Alter_info *alter_info, bool *binlog_stmt)
       {
         List_iterator<partition_element>
                                     subpart_it(part_elem->subpartitions);
-        partition_element *sub_elem;
+        partition_element DBUG_ONLY *sub_elem;
         uint j= 0, part;
         do
         {

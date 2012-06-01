@@ -3,7 +3,7 @@
 # server has been restored or timeout occurs
 --disable_result_log
 --disable_query_log
-let $counter= 500;
+let $counter= 3000;
 let $mysql_errno= 9999;
 while ($mysql_errno)
 {

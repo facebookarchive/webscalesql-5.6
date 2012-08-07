@@ -47,7 +47,7 @@ show create table `a/a`;
 create table t1 like `a/a`;
 drop table `a/a`;
 drop table `t1`;
---error 1103
+--error ER_TOO_LONG_IDENT
 create table `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa int);
 --error 1059
 create table a (`aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` int);
@@ -396,7 +396,7 @@ explain t2;
 select * from t2;
 drop table t1, t2;
 
-create table t1 (a tinyint, b smallint, c mediumint, d int, e bigint, f float(3,2), g double(4,3), h decimal(5,4), i year, j date, k timestamp, l datetime, m enum('a','b'), n set('a','b'), o char(10));
+create table t1 (a tinyint, b smallint, c mediumint, d int, e bigint, f float(3,2), g double(4,3), h decimal(5,4), i year, j date, k timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, l datetime, m enum('a','b'), n set('a','b'), o char(10));
 create table t2 select ifnull(a,a), ifnull(b,b), ifnull(c,c), ifnull(d,d), ifnull(e,e), ifnull(f,f), ifnull(g,g), ifnull(h,h), ifnull(i,i), ifnull(j,j), ifnull(k,k), ifnull(l,l), ifnull(m,m), ifnull(n,n), ifnull(o,o) from t1;
 show create table t2;
 drop table t1,t2;
@@ -1276,9 +1276,9 @@ drop table t1,t2;
 # Test incorrect database names
 #
 
---error 1102
+--error ER_TOO_LONG_IDENT
 CREATE DATABASE aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
---error 1102
+--error ER_TOO_LONG_IDENT
 DROP DATABASE aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
 
 # TODO: enable these tests when RENAME DATABASE is implemented.
@@ -1291,9 +1291,9 @@ DROP DATABASE aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 # RENAME DATABASE mysqltest TO aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
 # drop database mysqltest;
 
---error 1102
+--error ER_TOO_LONG_IDENT
 USE aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
---error 1102
+--error ER_TOO_LONG_IDENT
 SHOW CREATE DATABASE aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
 
 #
@@ -1475,19 +1475,19 @@ DROP TABLE IF EXISTS t3;
 
 --echo
 
-CREATE TABLE t1(c1 TIMESTAMP, c2 TIMESTAMP);
+CREATE TABLE t1(c1 TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, c2 TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00');
 
 --echo
 
 SET sql_mode = NO_ZERO_DATE;
 
 --echo
---error ER_INVALID_DEFAULT
 CREATE TABLE t2(c1 TIMESTAMP, c2 TIMESTAMP DEFAULT 0);
+DROP TABLE t2;
 
 --echo
 --error ER_INVALID_DEFAULT
-CREATE TABLE t2(c1 TIMESTAMP, c2 TIMESTAMP);
+CREATE TABLE t2(c1 TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, c2 TIMESTAMP NOT NULL);
 
 --echo
 --echo # -- Check that NULL column still can be created.
@@ -1495,7 +1495,6 @@ CREATE TABLE t2(c1 TIMESTAMP NULL);
 
 --echo
 --echo # -- Check ALTER TABLE.
---error ER_INVALID_DEFAULT
 ALTER TABLE t1 ADD INDEX(c1);
 
 --echo
@@ -2087,3 +2086,13 @@ drop function f;
 
 --error ER_TOO_BIG_ROWSIZE
 CREATE TABLE t1 (v varchar(65535));
+
+--echo #
+--echo # Bug#11746295 - 25168: "INCORRECT TABLE NAME" INSTEAD OF "IDENTIFIER TOO
+--echo #                       LONG" IF TABLE NAME > 64 CHARACTERS
+--echo #
+
+--error ER_TOO_LONG_IDENT
+CREATE TABLE t01234567890123456789012345678901234567890123456789012345678901234567890123456789(a int);
+--error ER_TOO_LONG_IDENT
+CREATE DATABASE t01234567890123456789012345678901234567890123456789012345678901234567890123456789;

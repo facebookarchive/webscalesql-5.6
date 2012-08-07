@@ -1,7 +1,7 @@
 #ifndef ITEM_CMPFUNC_INCLUDED
 #define ITEM_CMPFUNC_INCLUDED
 
-/* Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -513,7 +513,8 @@ public:
   {}
   longlong val_int() { return *trig_var ? args[0]->val_int() : 1; }
   enum Functype functype() const { return TRIG_COND_FUNC; };
-  const char *func_name() const { return "trigcond"; };
+  /// '<if>', to distinguish from the if() SQL function
+  const char *func_name() const { return "<if>"; };
   bool const_item() const { return FALSE; }
   bool *get_trig_var() { return trig_var; }
   /* The following is needed for ICP: */
@@ -546,6 +547,30 @@ public:
   void set_sum_test(Item_sum_hybrid *item) { test_sum_item= item; };
   void set_sub_test(Item_maxmin_subselect *item) { test_sub_item= item; };
   void set_subselect(Item_subselect *item) { subselect= item; }
+  table_map not_null_tables() const
+  {
+    /*
+      See handling of not_null_tables_cache in
+      Item_in_optimizer::fix_fields().
+
+      This item is the result of a transformation from an ALL clause
+      such as
+          left-expr < ALL(subquery)
+      into
+          <not>(left-expr >= (subquery)
+
+      An inequality usually rejects NULLs from both operands, so the
+      not_null_tables() of the inequality is the union of the
+      null-rejecting tables of both operands. However, since this is a
+      transformed ALL clause that should return true if the subquery
+      is empty (even if left-expr is NULL), it is not null rejecting
+      for left-expr. The not null tables mask for left-expr should be
+      removed, leaving only the null-rejecting tables of the
+      subquery. Item_subselect::not_null_tables() always returns 0 (no
+      null-rejecting tables). Therefore, always return 0.
+    */
+    return 0;
+  }
   bool empty_underlying_subquery();
   Item *neg_transformer(THD *thd);
 };
@@ -558,6 +583,7 @@ public:
   Item_func_nop_all(Item *a) :Item_func_not_all(a) {}
   longlong val_int();
   const char *func_name() const { return "<nop>"; }
+  table_map not_null_tables() const { return not_null_tables_cache; }
   Item *neg_transformer(THD *thd);
 };
 
@@ -1459,6 +1485,7 @@ public:
     {
       args[0]->update_used_tables();
       with_subselect= args[0]->has_subquery();
+      with_stored_program= args[0]->has_stored_program();
 
       if ((const_item_cache= !(used_tables_cache= args[0]->used_tables()) &&
           !with_subselect))
@@ -1495,11 +1522,12 @@ public:
   longlong val_int();
   const char *func_name() const { return "<is_not_null_test>"; }
   void update_used_tables();
-  /*
-    we add RAND_TABLE_BIT to prevent moving this item from HAVING to WHERE
+  /**
+    We add RAND_TABLE_BIT to prevent moving this item from HAVING to WHERE.
+     
+    @retval Always RAND_TABLE_BIT
   */
-  table_map used_tables() const
-    { return used_tables_cache | RAND_TABLE_BIT; }
+  table_map get_initial_pseudo_tables() const { return RAND_TABLE_BIT; }
 };
 
 
@@ -1561,6 +1589,11 @@ public:
   const char *func_name() const { return "like"; }
   bool fix_fields(THD *thd, Item **ref);
   void cleanup();
+  /**
+    @retval true non default escape char specified
+                 using "expr LIKE pat ESCAPE 'escape_char'" syntax
+  */
+  bool escape_was_used_in_parsing() const { return escape_used_in_parsing; }
 };
 
 

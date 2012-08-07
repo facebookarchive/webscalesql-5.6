@@ -1,4 +1,4 @@
-/* Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -349,20 +349,19 @@ bool key_cmp_if_same(TABLE *table,const uchar *key,uint idx,uint key_length)
   @param
      table	Table to use
   @param
-     idx	Key number
+     key	Key
 */
 
-void key_unpack(String *to,TABLE *table,uint idx)
+void key_unpack(String *to, TABLE *table, KEY *key)
 {
-  KEY_PART_INFO *key_part,*key_part_end;
   Field *field;
   String tmp;
   my_bitmap_map *old_map= dbug_tmp_use_all_columns(table, table->read_set);
   DBUG_ENTER("key_unpack");
 
   to->length(0);
-  for (key_part=table->key_info[idx].key_part,key_part_end=key_part+
-	 table->key_info[idx].key_parts ;
+  KEY_PART_INFO *key_part_end= key->key_part + key->key_parts;
+  for (KEY_PART_INFO *key_part= key->key_part;
        key_part < key_part_end;
        key_part++)
   {
@@ -561,8 +560,8 @@ int key_rec_cmp(void *key_p, uchar *first_rec, uchar *second_rec)
       if (key_part->null_bit)
       {
         /* The key_part can contain NULL values */
-        bool first_is_null= field->is_null_in_record_with_offset(first_diff);
-        bool sec_is_null= field->is_null_in_record_with_offset(sec_diff);
+        bool first_is_null= field->is_real_null(first_diff);
+        bool sec_is_null= field->is_real_null(sec_diff);
         /*
           NULL is smaller then everything so if first is NULL and the other
           not then we know that we should return -1 and for the opposite

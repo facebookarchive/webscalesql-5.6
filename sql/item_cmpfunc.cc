@@ -451,7 +451,8 @@ static bool convert_constant_item(THD *thd, Item_field *field_item,
       orig_field_val= field->val_int();
     int rc;
     if (!(*item)->is_null() &&
-        (((rc= (*item)->save_in_field(field, 1)) == 0) || rc == 3)) // TS-TODO
+        (((rc= (*item)->save_in_field(field, 1)) == TYPE_OK) ||
+         rc == TYPE_NOTE_TIME_TRUNCATED)) // TS-TODO
     {
       int field_cmp= 0;
       /*
@@ -532,23 +533,13 @@ void Item_bool_func2::fix_length_and_dec()
 
   DBUG_ENTER("Item_bool_func2::fix_length_and_dec");
 
-  /* 
-    We allow to convert to Unicode character sets in some cases.
-    The conditions when conversion is possible are:
-    - arguments A and B have different charsets
-    - A wins according to coercibility rules
-    - character set of A is superset for character set of B
-   
-    If all of the above is true, then it's possible to convert
-    B into the character set of A, and then compare according
-    to the collation of A.
+  /*
+    See agg_item_charsets() in item.cc for comments
+    on character set and collation aggregation.
   */
-
-  
-  DTCollation coll;
   if (args[0]->result_type() == STRING_RESULT &&
       args[1]->result_type() == STRING_RESULT &&
-      agg_arg_charsets_for_comparison(coll, args, 2))
+      agg_arg_charsets_for_comparison(cmp.cmp_collation, args, 2))
     DBUG_VOID_RETURN;
     
   args[0]->cmp_context= args[1]->cmp_context=
@@ -894,7 +885,7 @@ Arg_comparator::can_compare_as_dates(Item *a, Item *b, ulonglong *const_value)
       str_val= str_arg->val_str(&tmp);
       if (str_arg->null_value)
         return CMP_DATE_DFLT;
-      value= get_date_from_str(thd, str_val, t_type, date_arg->name, &error);
+      value= get_date_from_str(thd, str_val, t_type, date_arg->item_name.ptr(), &error);
       if (error)
         return CMP_DATE_DFLT;
       if (const_value)
@@ -996,7 +987,6 @@ int Arg_comparator::set_cmp_func(Item_result_field *owner_arg,
   set_null= set_null && owner_arg;
   a= a1;
   b= a2;
-  thd= current_thd;
 
   if ((cmp_type= can_compare_as_dates(*a, *b, &const_value)))
   {
@@ -1222,7 +1212,7 @@ get_datetime_value(THD *thd, Item ***item_arg, Item **cache_arg,
     enum_field_types f_type= warn_item->field_type();
     timestamp_type t_type= f_type ==
       MYSQL_TYPE_DATE ? MYSQL_TIMESTAMP_DATE : MYSQL_TIMESTAMP_DATETIME;
-    value= (longlong) get_date_from_str(thd, str, t_type, warn_item->name, &error);
+    value= (longlong) get_date_from_str(thd, str, t_type, warn_item->item_name.ptr(), &error);
     /*
       If str did not contain a valid date according to the current
       SQL_MODE, get_date_from_str() has already thrown a warning,
@@ -1925,7 +1915,7 @@ void Item_in_optimizer::fix_after_pullout(st_select_lex *parent_select,
                                           st_select_lex *removed_select,
                                           Item **ref)
 {
-  used_tables_cache=0;
+  used_tables_cache= get_initial_pseudo_tables();
   not_null_tables_cache= 0;
   const_item_cache= 1;
 
@@ -2160,7 +2150,7 @@ Item *Item_in_optimizer::transform(Item_transformer transformer, uchar *argument
   DBUG_ASSERT(arg_count == 2);
 
   /* Transform the left IN operand. */
-  new_item= (*args)->transform(transformer, argument);
+  new_item= args[0]->transform(transformer, argument);
   if (!new_item)
     return 0;
   /*
@@ -2169,7 +2159,7 @@ Item *Item_in_optimizer::transform(Item_transformer transformer, uchar *argument
     Otherwise we'll be allocating a lot of unnecessary memory for
     change records at each execution.
   */
-  if ((*args) != new_item)
+  if (args[0] != new_item)
     current_thd->change_item_tree(args, new_item);
 
   /*
@@ -2188,7 +2178,9 @@ Item *Item_in_optimizer::transform(Item_transformer transformer, uchar *argument
                Item_subselect::ANY_SUBS));
 
   Item_in_subselect *in_arg= (Item_in_subselect*)args[1];
-  in_arg->left_expr= args[0];
+
+  if (in_arg->left_expr != args[0])
+    current_thd->change_item_tree(&in_arg->left_expr, args[0]);
 
   return (this->*transformer)(argument);
 }
@@ -2759,6 +2751,7 @@ Item_func_ifnull::fix_length_and_dec()
 {
   uint32 char_length;
   agg_result_type(&hybrid_type, args, 2);
+  cached_field_type= agg_field_type(args, 2);
   maybe_null=args[1]->maybe_null;
   decimals= max(args[0]->decimals, args[1]->decimals);
   unsigned_flag= args[0]->unsigned_flag && args[1]->unsigned_flag;
@@ -2778,7 +2771,7 @@ Item_func_ifnull::fix_length_and_dec()
 
   switch (hybrid_type) {
   case STRING_RESULT:
-    if (agg_arg_charsets_for_comparison(collation, args, arg_count))
+    if (count_string_result_length(cached_field_type, args, arg_count))
       return;
     break;
   case DECIMAL_RESULT:
@@ -2792,7 +2785,6 @@ Item_func_ifnull::fix_length_and_dec()
     DBUG_ASSERT(0);
   }
   fix_char_length(char_length);
-  cached_field_type= agg_field_type(args, 2);
 }
 
 
@@ -2972,20 +2964,20 @@ Item_func_if::fix_length_and_dec()
   }
 
   agg_result_type(&cached_result_type, args + 1, 2);
+  cached_field_type= agg_field_type(args + 1, 2);
   maybe_null= args[1]->maybe_null || args[2]->maybe_null;
   decimals= max(args[1]->decimals, args[2]->decimals);
   unsigned_flag=args[1]->unsigned_flag && args[2]->unsigned_flag;
 
   if (cached_result_type == STRING_RESULT)
   {
-    if (agg_arg_charsets_for_string_result(collation, args + 1, 2))
+    if (count_string_result_length(cached_field_type, args + 1, 2))
       return;
   }
   else
   {
     collation.set_numeric(); // Number
   }
-  cached_field_type= agg_field_type(args + 1, 2);
 
   uint32 char_length;
   if ((cached_result_type == DECIMAL_RESULT )
@@ -4808,6 +4800,7 @@ Item_cond::fix_fields(THD *thd, Item **ref)
       not_null_tables_cache&= item->not_null_tables();
     with_sum_func|=  item->with_sum_func;
     with_subselect|= item->has_subquery();
+    with_stored_program|= item->has_stored_program();
     if (item->maybe_null)
       maybe_null= true;
   }
@@ -4826,7 +4819,7 @@ void Item_cond::fix_after_pullout(st_select_lex *parent_select,
   List_iterator<Item> li(list);
   Item *item;
 
-  used_tables_cache= 0;
+  used_tables_cache= get_initial_pseudo_tables();
   const_item_cache= true;
 
   if (functype() == COND_AND_FUNC && abort_on_null)
@@ -4922,15 +4915,16 @@ Item *Item_cond::transform(Item_transformer transformer, uchar *arg)
                        nodes of the tree of the object
   @param arg_t         parameter to be passed to the transformer
 
-  @return
-    Item returned as the result of transformation of the root node 
+  @return              Item returned as result of transformation of the node,
+                       the same item if no transformation applied, or NULL if
+                       transformation caused an error.
 */
 
 Item *Item_cond::compile(Item_analyzer analyzer, uchar **arg_p,
                          Item_transformer transformer, uchar *arg_t)
 {
   if (!(this->*analyzer)(arg_p))
-    return 0;
+    return this;
   
   List_iterator<Item> li(list);
   Item *item;
@@ -4942,7 +4936,9 @@ Item *Item_cond::compile(Item_analyzer analyzer, uchar **arg_p,
     */   
     uchar *arg_v= *arg_p;
     Item *new_item= item->compile(analyzer, &arg_v, transformer, arg_t);
-    if (new_item && new_item != item)
+    if (new_item == NULL)
+      return NULL;
+    if (new_item != item)
       current_thd->change_item_tree(li.ref(), new_item);
   }
   return Item_func::transform(transformer, arg_t);
@@ -5007,12 +5003,14 @@ void Item_cond::update_used_tables()
   used_tables_cache=0;
   const_item_cache=1;
   with_subselect= false;
+  with_stored_program= false;
   while ((item=li++))
   {
     item->update_used_tables();
     used_tables_cache|= item->used_tables();
     const_item_cache&= item->const_item();
     with_subselect|= item->has_subquery();
+    with_stored_program|= item->has_stored_program();
   }
 }
 
@@ -5189,22 +5187,20 @@ longlong Item_is_not_null_test::val_int()
 */
 void Item_is_not_null_test::update_used_tables()
 {
+  const table_map initial_pseudo_tables= get_initial_pseudo_tables();
+  used_tables_cache= initial_pseudo_tables;
   if (!args[0]->maybe_null)
   {
-    used_tables_cache= 0;			/* is always true */
-    cached_value= (longlong) 1;
+    cached_value= 1;
+    return;
   }
-  else
-  {
-    args[0]->update_used_tables();
-    with_subselect= args[0]->has_subquery();
-
-    if (!(used_tables_cache=args[0]->used_tables()) && !with_subselect)
-    {
-      /* Remember if the value is always NULL or never NULL */
-      cached_value= (longlong) !args[0]->is_null();
-    }
-  }
+  args[0]->update_used_tables();
+  with_subselect= args[0]->has_subquery();
+  with_stored_program= args[0]->has_stored_program();
+  used_tables_cache|= args[0]->used_tables();
+  if (used_tables_cache == initial_pseudo_tables && !with_subselect)
+    /* Remember if the value is always NULL or never NULL */
+    cached_value= !args[0]->is_null();
 }
 
 
@@ -5365,8 +5361,8 @@ bool Item_func_like::fix_fields(THD *thd, Item **ref)
       }
       if (canDoTurboBM)
       {
-        pattern     = first + 1;
         pattern_len = (int) len - 2;
+        pattern     = thd->strmake(first + 1, pattern_len);
         DBUG_PRINT("info", ("Initializing pattern: '%s'", first));
         int *suff = (int*) thd->alloc((int) (sizeof(int)*
                                       ((pattern_len + 1)*2+
@@ -6198,6 +6194,7 @@ void Item_equal::update_used_tables()
   if ((const_item_cache= cond_false))
     return;
   with_subselect= false;
+  with_stored_program= false;
   while ((item=li++))
   {
     item->update_used_tables();
@@ -6205,6 +6202,7 @@ void Item_equal::update_used_tables()
     /* see commentary at Item_equal::update_const() */
     const_item_cache&= item->const_item() && !item->is_outer_field();
     with_subselect|= item->has_subquery();
+    with_stored_program|= item->has_stored_program();
   }
 }
 
@@ -6300,13 +6298,13 @@ void Item_func_trig_cond::print(String *str, enum_query_type query_type)
 {
   /*
     Print:
-    trigcond_if(<property><(optional list of source tables)>, condition, TRUE)
+    <if>(<property><(optional list of source tables)>, condition, TRUE)
     which means: if a certain property (<property>) is true, then return
     the value of <condition>, else return TRUE. If source tables are
     present, they are the owner of the property.
   */
   str->append(func_name());
-  str->append("_if(");
+  str->append("(");
   switch(trig_type)
   {
   case IS_NOT_NULL_COMPL:
@@ -6366,7 +6364,13 @@ Item_field* Item_equal::get_subst_item(const Item_field *field)
 
   const JOIN_TAB *field_tab= field->field->table->reginfo.join_tab;
 
-  if (sj_is_materialize_strategy(field_tab->get_sj_strategy()))
+  /*
+    field_tab is NULL if this function was not called from
+    JOIN::optimize() but from e.g. mysql_delete() or mysql_update().
+    In these cases there is only one table and no semijoin
+  */
+  if (field_tab &&
+      sj_is_materialize_strategy(field_tab->get_sj_strategy()))
   {
     /*
       It's a field from a materialized semijoin. We can substitute it only

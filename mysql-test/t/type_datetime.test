@@ -32,7 +32,7 @@ drop table t1;
 # Test insert of now() and curtime()
 #
 
-CREATE TABLE t1 (a timestamp, b date, c time, d datetime);
+CREATE TABLE t1 (a timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, b date, c time, d datetime);
 insert into t1 (b,c,d) values(now(),curtime(),now());
 select date_format(a,"%Y-%m-%d")=b,right(a+0,6)=c+0,a=d+0 from t1;
 drop table t1;
@@ -182,7 +182,7 @@ if (`SELECT CURTIME() > SEC_TO_TIME(24 * 3600 - 5)`)
    # So a sleep time of 5 seconds brings us between '00:00:01' and '00:00:04'.
    --real_sleep 5
 }
-create table t1 (f1 date, f2 datetime, f3 timestamp);
+create table t1 (f1 date, f2 datetime, f3 timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
 insert into t1(f1) values(curdate());
 select curdate() < now(), f1 < now(), cast(f1 as date) < now() from t1;
 delete from t1;
@@ -201,7 +201,7 @@ drop table t1;
 #
 # Bug#16377: Wrong DATE/DATETIME comparison in BETWEEN function.
 #
-create table t1 (f1 date, f2 datetime, f3 timestamp);
+create table t1 (f1 date, f2 datetime, f3 timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
 insert into t1 values('2001-01-01','2001-01-01 01:01:01','2001-01-01 01:01:01');
 insert into t1 values('2001-02-05','2001-02-05 00:00:00','2001-02-05 01:01:01');
 insert into t1 values('2001-03-10','2001-03-09 01:01:01','2001-03-10 01:01:01');
@@ -557,6 +557,70 @@ INSERT INTO t1 VALUES ('2001-01-01 10:10:10.9999994'), ('2001-01-01 10:10:10.999
 INSERT INTO t1 VALUES (20010101101010.9999994), (20010101101010.9999995);
 SELECT * FROM t1;
 DROP TABLE t1;
+
+--echo #
+--echo # Test for bug#11747847 - 34280: create table fails if NO_ZERO_DATE
+--echo # or NO_ZERO_IN_DATE SQL mode is set.
+
+--disable_warnings
+DROP TABLE if EXISTS t1, t2, t3;
+--enable_warnings
+SET @org_mode=@@sql_mode;
+
+--echo #Table creation in strict mode
+SET @@sql_mode='NO_ZERO_DATE,STRICT_ALL_TABLES';
+--error ER_INVALID_DEFAULT
+CREATE TABLE t1 (c1 DATETIME DEFAULT 0);
+--error ER_INVALID_DEFAULT
+CREATE TABLE t1 (c1 DATETIME DEFAULT '0000-00-00 00:00:00');
+SET @@sql_mode='NO_ZERO_IN_DATE,STRICT_ALL_TABLES';
+--error ER_INVALID_DEFAULT
+CREATE TABLE t1 (c1 DATETIME DEFAULT '2012-02-00 12:12:12');
+
+--echo #Table creation in non-strict mode but with NO_ZERO_DATE/NO_ZERO_IN_DATE
+SET @@sql_mode='NO_ZERO_DATE';
+CREATE TABLE t1 (c1 DATETIME DEFAULT 0);
+CREATE TABLE t2 (c1 DATETIME DEFAULT '0000-00-00 00:00:00');
+SET @@sql_mode='NO_ZERO_IN_DATE';
+CREATE TABLE t3 (c1 DATETIME DEFAULT '2012-02-00 12:12:12');
+DROP TABLE t1, t2, t3;
+
+--echo #Table creation with out any SQL modes
+SET @@sql_mode='';
+CREATE TABLE t1 (c1 DATETIME DEFAULT 0);
+CREATE TABLE t2 (c1 DATETIME DEFAULT '0000-00-00 00:00:00');
+CREATE TABLE t3 (c1 DATETIME DEFAULT '2012-02-00 12:12:12');
+DROP TABLE t1, t2, t3;
+
+CREATE TABLE t1 (c1 int);
+--echo #Alter table in strict mode with NO_ZERO_DATE/NO_ZERO_IN_DATE
+SET @@sql_mode='NO_ZERO_DATE,STRICT_ALL_TABLES';
+--error ER_INVALID_DEFAULT
+ALTER TABLE t1 ADD c2 DATETIME DEFAULT 0;
+--error ER_INVALID_DEFAULT
+ALTER TABLE t1 ADD c2 DATETIME DEFAULT '0000-00-00';
+SET @@sql_mode='NO_ZERO_IN_DATE,STRICT_ALL_TABLES';
+--error ER_INVALID_DEFAULT
+ALTER TABLE t1 ADD c2 DATETIME DEFAULT '2012-02-00';
+
+--echo #Alter table in non-strict mode but with NO_ZERO_DATE/NO_ZERO_IN_DATE
+SET @@sql_mode='NO_ZERO_DATE';
+ALTER TABLE t1 ADD c2 DATETIME DEFAULT 0;
+ALTER TABLE t1 ADD c3 DATETIME DEFAULT '0000-00-00';
+SET @@sql_mode='NO_ZERO_IN_DATE';
+ALTER TABLE t1 ADD c4 DATETIME DEFAULT '2012-02-00';
+DROP TABLE t1;
+
+CREATE TABLE t1 (c1 INT);
+--echo #Alter table with out any SQL modes
+SET @@sql_mode='';
+ALTER TABLE t1 ADD c2 DATETIME DEFAULT 0;
+ALTER TABLE t1 ADD c3 DATETIME DEFAULT '0000-00-00';
+ALTER TABLE t1 ADD c4 DATETIME DEFAULT '2012-02-00';
+DROP TABLE t1;
+
+SET @@sql_mode= @org_mode;
+--echo # END of Test for bug#11747847 - 34280
 
 --echo #
 --echo # End of 5.6 tests

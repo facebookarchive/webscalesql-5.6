@@ -99,36 +99,17 @@ static handler *example_create_handler(handlerton *hton,
 
 handlerton *example_hton;
 
-/* Variables for example share methods */
-
-/* 
-   Hash used to track the number of open tables; variable for example share
-   methods
-*/
-static HASH example_open_tables;
-
-/* The mutex used to init the hash; variable for example share methods */
-mysql_mutex_t example_mutex;
-
-/**
-  @brief
-  Function we use in the creation of our hash to get key.
-*/
-
-static uchar* example_get_key(EXAMPLE_SHARE *share, size_t *length,
-                             my_bool not_used __attribute__((unused)))
-{
-  *length=share->table_name_length;
-  return (uchar*) share->table_name;
-}
-
+/* Interface to mysqld, to check system tables supported by SE */
+static const char* example_system_database();
+static bool example_is_supported_system_table(const char *db,
+                                      const char *table_name,
+                                      bool is_sql_layer_system_table);
 #ifdef HAVE_PSI_INTERFACE
-static PSI_mutex_key ex_key_mutex_example, ex_key_mutex_EXAMPLE_SHARE_mutex;
+static PSI_mutex_key ex_key_mutex_Example_share_mutex;
 
 static PSI_mutex_info all_example_mutexes[]=
 {
-  { &ex_key_mutex_example, "example", PSI_FLAG_GLOBAL},
-  { &ex_key_mutex_EXAMPLE_SHARE_mutex, "EXAMPLE_SHARE::mutex", 0}
+  { &ex_key_mutex_Example_share_mutex, "Example_share::mutex", 0}
 };
 
 static void init_example_psi_keys()
@@ -141,6 +122,13 @@ static void init_example_psi_keys()
 }
 #endif
 
+Example_share::Example_share()
+{
+  thr_lock_init(&lock);
+  mysql_mutex_init(ex_key_mutex_Example_share_mutex,
+                   &mutex, MY_MUTEX_INIT_FAST);
+}
+
 
 static int example_init_func(void *p)
 {
@@ -151,29 +139,13 @@ static int example_init_func(void *p)
 #endif
 
   example_hton= (handlerton *)p;
-  mysql_mutex_init(ex_key_mutex_example, &example_mutex, MY_MUTEX_INIT_FAST);
-  (void) my_hash_init(&example_open_tables,system_charset_info,32,0,0,
-                      (my_hash_get_key) example_get_key,0,0);
-
-  example_hton->state=   SHOW_OPTION_YES;
-  example_hton->create=  example_create_handler;
-  example_hton->flags=   HTON_CAN_RECREATE;
+  example_hton->state=                     SHOW_OPTION_YES;
+  example_hton->create=                    example_create_handler;
+  example_hton->flags=                     HTON_CAN_RECREATE;
+  example_hton->system_database=   example_system_database;
+  example_hton->is_supported_system_table= example_is_supported_system_table;
 
   DBUG_RETURN(0);
-}
-
-
-static int example_done_func(void *p)
-{
-  int error= 0;
-  DBUG_ENTER("example_done_func");
-
-  if (example_open_tables.records)
-    error= 1;
-  my_hash_free(&example_open_tables);
-  mysql_mutex_destroy(&example_mutex);
-
-  DBUG_RETURN(error);
 }
 
 
@@ -185,72 +157,26 @@ static int example_done_func(void *p)
   they are needed to function.
 */
 
-static EXAMPLE_SHARE *get_share(const char *table_name, TABLE *table)
+Example_share *ha_example::get_share()
 {
-  EXAMPLE_SHARE *share;
-  uint length;
-  char *tmp_name;
+  Example_share *tmp_share;
 
-  mysql_mutex_lock(&example_mutex);
-  length=(uint) strlen(table_name);
+  DBUG_ENTER("ha_example::get_share()");
 
-  if (!(share=(EXAMPLE_SHARE*) my_hash_search(&example_open_tables,
-                                              (uchar*) table_name,
-                                              length)))
+  lock_shared_ha_data();
+  if (!(tmp_share= static_cast<Example_share*>(get_ha_share_ptr())))
   {
-    if (!(share=(EXAMPLE_SHARE *)
-          my_multi_malloc(MYF(MY_WME | MY_ZEROFILL),
-                          &share, sizeof(*share),
-                          &tmp_name, length+1,
-                          NullS)))
-    {
-      mysql_mutex_unlock(&example_mutex);
-      return NULL;
-    }
+    tmp_share= new Example_share;
+    if (!tmp_share)
+      goto err;
 
-    share->use_count=0;
-    share->table_name_length=length;
-    share->table_name=tmp_name;
-    strmov(share->table_name,table_name);
-    if (my_hash_insert(&example_open_tables, (uchar*) share))
-      goto error;
-    thr_lock_init(&share->lock);
-    mysql_mutex_init(ex_key_mutex_EXAMPLE_SHARE_mutex,
-                     &share->mutex, MY_MUTEX_INIT_FAST);
+    set_ha_share_ptr(static_cast<Handler_share*>(tmp_share));
   }
-  share->use_count++;
-  mysql_mutex_unlock(&example_mutex);
-
-  return share;
-
-error:
-  mysql_mutex_destroy(&share->mutex);
-  my_free(share);
-
-  return NULL;
+err:
+  unlock_shared_ha_data();
+  DBUG_RETURN(tmp_share);
 }
 
-
-/**
-  @brief
-  Free lock controls. We call this whenever we close a table. If the table had
-  the last reference to the share, then we free memory associated with it.
-*/
-
-static int free_share(EXAMPLE_SHARE *share)
-{
-  mysql_mutex_lock(&example_mutex);
-  if (!--share->use_count)
-  {
-    my_hash_delete(&example_open_tables, (uchar*) share);
-    thr_lock_delete(&share->lock);
-    mysql_mutex_destroy(&share->mutex);
-    my_free(share);
-  }
-  mysql_mutex_unlock(&example_mutex);
-
-  return 0;
-}
 
 static handler* example_create_handler(handlerton *hton,
                                        TABLE_SHARE *table, 
@@ -291,6 +217,65 @@ const char **ha_example::bas_ext() const
   return ha_example_exts;
 }
 
+/*
+  Following handler function provides access to
+  system database specific to SE. This interface
+  is optional, so every SE need not implement it.
+*/
+const char* ha_example_system_database= NULL;
+const char* example_system_database()
+{
+  return ha_example_system_database;
+}
+
+/*
+  List of all system tables specific to the SE.
+  Array element would look like below,
+     { "<database_name>", "<system table name>" },
+  The last element MUST be,
+     { (const char*)NULL, (const char*)NULL }
+
+  This array is optional, so every SE need not implement it.
+*/
+static st_system_tablename ha_example_system_tables[]= {
+  {(const char*)NULL, (const char*)NULL}
+};
+
+/**
+  @brief Check if the given db.tablename is a system table for this SE.
+
+  @param db                         Database name to check.
+  @param table_name                 table name to check.
+  @param is_sql_layer_system_table  if the supplied db.table_name is a SQL
+                                    layer system table.
+
+  @return
+    @retval TRUE   Given db.table_name is supported system table.
+    @retval FALSE  Given db.table_name is not a supported system table.
+*/
+static bool example_is_supported_system_table(const char *db,
+                                              const char *table_name,
+                                              bool is_sql_layer_system_table)
+{
+  st_system_tablename *systab;
+
+  // Does this SE support "ALL" SQL layer system tables ?
+  if (is_sql_layer_system_table)
+    return false;
+
+  // Check if this is SE layer system tables
+  systab= ha_example_system_tables;
+  while (systab && systab->db)
+  {
+    if (systab->db == db &&
+        strcmp(systab->tablename, table_name) == 0)
+      return true;
+    systab++;
+  }
+
+  return false;
+}
+
 
 /**
   @brief
@@ -312,7 +297,7 @@ int ha_example::open(const char *name, int mode, uint test_if_locked)
 {
   DBUG_ENTER("ha_example::open");
 
-  if (!(share = get_share(name, table)))
+  if (!(share = get_share()))
     DBUG_RETURN(1);
   thr_lock_data_init(&share->lock,&lock,NULL);
 
@@ -322,8 +307,7 @@ int ha_example::open(const char *name, int mode, uint test_if_locked)
 
 /**
   @brief
-  Closes a table. We call the free_share() function to free any resources
-  that we have allocated in the "shared" structure.
+  Closes a table.
 
   @details
   Called from sql_base.cc, sql_select.cc, and table.cc. In sql_select.cc it is
@@ -339,7 +323,7 @@ int ha_example::open(const char *name, int mode, uint test_if_locked)
 int ha_example::close(void)
 {
   DBUG_ENTER("ha_example::close");
-  DBUG_RETURN(free_share(share));
+  DBUG_RETURN(0);
 }
 
 
@@ -998,7 +982,7 @@ mysql_declare_plugin(example)
   "Example storage engine",
   PLUGIN_LICENSE_GPL,
   example_init_func,                            /* Plugin Init */
-  example_done_func,                            /* Plugin Deinit */
+  NULL,                                         /* Plugin Deinit */
   0x0001 /* 0.1 */,
   func_status,                                  /* status variables */
   example_system_variables,                     /* system variables */

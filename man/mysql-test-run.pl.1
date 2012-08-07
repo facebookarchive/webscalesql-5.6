@@ -2,12 +2,12 @@
 .\"     Title: \fBmysql-test-run.pl\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 03/20/2012
+.\"      Date: 07/13/2012
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL
 .\"  Language: English
 .\"
-.TH "\FBMYSQL\-TEST\-RUN\" "1" "03/20/2012" "MySQL" "MySQL Database System"
+.TH "\FBMYSQL\-TEST\-RUN\" "1" "07/13/2012" "MySQL" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -238,6 +238,8 @@ l l
 l l
 l l
 l l
+l l
+l l
 l l.
 T{
 MTR_VERSION
@@ -283,9 +285,24 @@ Setting of a timeout in minutes or seconds, corresponding to command
                 MySQL 5\&.1\&.44\&.
 T}
 T{
+MYSQL_CONFIG_EDITOR
+T}:T{
+Path name to \fBmysql_config_editor\fR binary\&. Supported as
+                of MySQL 5\&.6\&.6\&.
+T}
+T{
 MYSQL_TEST
 T}:T{
 Path name to \fBmysqltest\fR binary
+T}
+T{
+MYSQL_TEST_LOGIN_FILE
+T}:T{
+Path name to login file used by \fBmysql_config_editor\fR\&.
+                If not set, the default is
+                $HOME/\&.mylogin\&.cnf, or
+                %APPDATA%\eMySQL\e\&.mylogin\&.cnf on
+                Windows\&. Supported as of MySQL 5\&.6\&.6\&.
 T}
 T{
 MYSQLD_BOOTSTRAP
@@ -300,14 +317,14 @@ T}
 T{
 MYSQLD
 T}:T{
-Full path to server executable used in tests\&. Supported from MySQL
+Full path to server executable used in tests\&. Supported as of MySQL
                 5\&.5\&.17\&.
 T}
 T{
 MYSQLD_CMD
 T}:T{
 Command line for starting server as used in tests, with the minimum set
-                of required arguments\&. Supported from MySQL 5\&.5\&.17\&.
+                of required arguments\&. Supported as of MySQL 5\&.5\&.17\&.
 T}
 T{
 MYSQLTEST_VARDIR
@@ -2052,7 +2069,38 @@ sorts the list of names of the test cases to be run, and then begins with
 Create
 \fBstrace\fR
 output for
-\fBmysqltest\fR\&.
+\fBmysqltest\fR\&. Will produce default
+\fBstrace\fR
+output as
+mysqltest\&.strace\&. Note that this will be overwritten for each new test case, so it\'s most useful for running only one test\&.
+.sp
+The
+\fBstrace\-client\fR
+option is functional from MySQL 5\&.5\&.20, and only supported on Linux\&. The option was available in earlier versions too, but was not working properly\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysql-test-run.pl: strace-server option
+.\" strace-server option: mysql-test-run.pl
+\fB\-\-strace\-server\fR
+.sp
+Create
+\fBstrace\fR
+output for the server\&. Will produce default
+\fBstrace\fR
+output as
+mysqld\&.1\&.strace\&. Note that this will be overwritten each time the server is restarted, so it\'s most useful for running a single test, or if you want trace from the first test that fails\&.
+.sp
+The
+\fBstrace\-server\fR
+option is available from MySQL 5\&.5\&.20, on Linux only\&.
 .RE
 .sp
 .RS 4

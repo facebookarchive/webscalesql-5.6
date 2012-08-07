@@ -1,4 +1,4 @@
-/* Copyright (c) 2010, 2011, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2010, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -410,7 +410,7 @@ static bool mysql_admin_table(THD* thd, TABLE_LIST* tables,
         */
         Alter_info *alter_info= &lex->alter_info;
 
-        if (alter_info->flags & ALTER_ADMIN_PARTITION)
+        if (alter_info->flags & Alter_info::ALTER_ADMIN_PARTITION)
         {
           if (!table->table->part_info)
           {
@@ -897,8 +897,8 @@ send_result_message:
       }
     }
     /* Error path, a admin command failed. */
-    trans_commit_stmt(thd);
-    trans_commit_implicit(thd);
+    if (trans_commit_stmt(thd) || trans_commit_implicit(thd))
+      goto err;
     close_thread_tables(thd);
     thd->mdl_context.release_transactional_locks();
 
@@ -1069,7 +1069,7 @@ bool Sql_cmd_optimize_table::execute(THD *thd)
                          FALSE, UINT_MAX, FALSE))
     goto error; /* purecov: inspected */
   thd->enable_slow_log= opt_log_slow_admin_statements;
-  res= (specialflag & (SPECIAL_SAFE_MODE | SPECIAL_NO_NEW_FUNC)) ?
+  res= (specialflag & SPECIAL_NO_NEW_FUNC) ?
     mysql_recreate_table(thd, first_table) :
     mysql_admin_table(thd, first_table, &thd->lex->check_opt,
                       "optimize", TL_WRITE, 1, 0, 0, 0,

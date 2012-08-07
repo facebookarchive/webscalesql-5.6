@@ -9,6 +9,35 @@ drop table if exists t1, t2;
 let $MYSQLD_DATADIR= `SELECT @@datadir`;
 
 --echo #
+--echo # Bug#13694811: THE OPTIMIZER WRONGLY USES THE FIRST
+--echo #               INNODB PARTITION STATISTICS
+--echo #
+
+CREATE TABLE t1
+(a INT,
+ b varchar(64),
+ PRIMARY KEY (a),
+ KEY (b))
+ENGINE = InnoDB
+PARTITION BY RANGE (a)
+SUBPARTITION BY HASH (a) SUBPARTITIONS 10
+(PARTITION pNeg VALUES LESS THAN (0),
+ PARTITION p0 VALUES LESS THAN (1000),
+ PARTITION pMAX VALUES LESS THAN MAXVALUE);
+
+--echo # Only one row in the first 10 subpartitions
+INSERT INTO t1 VALUES (-1, 'Only negative pk value');
+
+INSERT INTO t1 VALUES (0, 'Mod Zero'), (1, 'One'), (2, 'Two'), (3, 'Three'),
+(10, 'Zero'), (11, 'Mod One'), (12, 'Mod Two'), (13, 'Mod Three'),
+(20, '0'), (21, '1'), (22, '2'), (23, '3'),
+(4, '4'), (5, '5'), (6, '6'), (7, '7'), (8, '8'), (9, '9');
+INSERT INTO t1 SELECT a + 30, b FROM t1 WHERE a >= 0;
+ANALYZE TABLE t1;
+EXPLAIN SELECT b FROM t1 WHERE b between 'L' and 'N' AND a > -100;
+DROP TABLE t1;
+
+--echo #
 --echo # Bug#13007154: Crash in keys_to_use_for_scanning with ORDER BY
 --echo #               and PARTITIONING
 --echo #
@@ -170,6 +199,7 @@ INSERT INTO t1 VALUES (90);
 INSERT INTO t1 VALUES (100);
 --error ER_NO_PARTITION_FOR_GIVEN_VALUE
 insert INTO t1 VALUES (110);
+ANALYZE TABLE t1;
 EXPLAIN PARTITIONS SELECT * FROM t1 WHERE a > 90;
 EXPLAIN PARTITIONS SELECT * FROM t1 WHERE a >= 90;
 EXPLAIN PARTITIONS SELECT * FROM t1 WHERE a = 90;
@@ -388,6 +418,7 @@ partition by key (a);
 --replace_column 6 # 7 # 10 #
 show table status;
 insert into t1 values (0), (1), (2), (3);
+analyze table t1;
 # Avg_row_length (col 6) and Data_length (col 7) vary depending
 # on the page size.  Data_free for InnoDB tablespace varies
 # depending on which tests have been run before this one.
@@ -404,12 +435,14 @@ partition by key (a);
 --replace_column 6 # 7 # 10 #
 show table status;
 insert into t1 values (NULL), (NULL), (NULL), (NULL);
+analyze table t1;
 # Avg_row_length (col 6) and Data_length (col 7) vary depending
 # on the page size.  Data_free for InnoDB tablespace varies
 # depending on which tests have been run before this one.
 --replace_column 6 # 7 # 10 #
 show table status;
 insert into t1 values (NULL), (NULL), (NULL), (NULL);
+analyze table t1;
 # Avg_row_length (col 6) and Data_length (col 7) vary depending
 # on the page size.  Data_free for InnoDB tablespace varies
 # depending on which tests have been run before this one.
@@ -448,17 +481,17 @@ drop table t1;
 #
 # Bug 20397: Partitions: Crash when using non-existing engine
 #
+--error ER_UNKNOWN_STORAGE_ENGINE
 create table t1 (a int)
 engine = x
 partition by key (a);
-show create table t1;
-drop table t1;
 
 create table t1 (a int)
 engine = innodb
 partition by list (a)
 (partition p0 values in (0));
 
+--error ER_UNKNOWN_STORAGE_ENGINE
 alter table t1 engine = x;
 show create table t1;
 drop table t1;

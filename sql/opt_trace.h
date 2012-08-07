@@ -1,4 +1,4 @@
-/* Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2011, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ struct st_schema_table;
 struct TABLE_LIST;
 struct TABLE;
 class sp_head;
-class sp_instr;
+class sp_printable;
 class set_var_base;
 
 /**
@@ -309,17 +309,11 @@ class set_var_base;
   All memory allocations (with exceptions: see below) in the Optimizer trace
   use @c my_error() to report errors, which itself calls @c
   error_handler_hook. It is the responsibility of the API user to set up a
-  proper @c error_handler_hook which will alter her/him of the OOM
+  proper @c error_handler_hook which will alert her/him of the OOM
   problem. When in the server, this is already the case (@c error_handler_hook
   is @c my_message_sql() which makes the statement fail).
   Note that the debug binary may crash if OOM (OOM can cause syntax
   errors...).
-  @todo @c new error handling. In released and pushbuild2 builds, @c
-  my_new.cc:new has traditionally been used, which was broken (BUG#11822322).
-  In builds with g++, the standard @c new doesn't work either
-  (it throws an exception but as we do not catch it, it will kill the program).
-  As we don't support exceptions, we need new(std::nothrow) in order to be
-  able to handle OOM.
 
   @section TRACE_SECURITY Description of trace-induced security checks.
 
@@ -1018,7 +1012,7 @@ public:
                   enum enum_sql_command sql_command,
                   List<set_var_base> *set_vars,
                   const char *query, size_t query_length,
-                  sp_instr *instr,
+                  sp_printable *instr,
                   const CHARSET_INFO *query_charset);
   ~Opt_trace_start();
 private:
@@ -1203,7 +1197,7 @@ public:
                   enum enum_sql_command sql_command,
                   List<set_var_base> *set_vars,
                   const char *query, size_t query_length,
-                  sp_instr *instr,
+                  sp_printable *instr,
                   const CHARSET_INFO *query_charset) {}
 };
 

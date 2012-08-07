@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-Copyright (c) 1996, 2011, Oracle and/or its affiliates. All Rights Reserved.
+Copyright (c) 1996, 2012, Oracle and/or its affiliates. All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -146,8 +146,8 @@ trx_create(void)
 	trx->lock.table_locks = ib_vector_create(
 		heap_alloc, sizeof(void**), 32);
 
-	/* For non-locking selects we avoid calling ut_time() too frequently.
-	Set the time here for new transactions. */
+	/* Avoid calling ut_time() too frequently. Set the time here
+	for new transactions. */
 	trx->start_time = ut_time();
 
 	return(trx);
@@ -184,8 +184,6 @@ trx_allocate_for_mysql(void)
 
 	mutex_enter(&trx_sys->mutex);
 
-	trx_sys->n_mysql_trx++;
-
 	ut_d(trx->in_mysql_trx_list = TRUE);
 	UT_LIST_ADD_FIRST(mysql_trx_list, trx_sys->mysql_trx_list, trx);
 
@@ -205,6 +203,7 @@ trx_free(
 	ut_a(trx->magic_n == TRX_MAGIC_N);
 	ut_ad(!trx->in_ro_trx_list);
 	ut_ad(!trx->in_rw_trx_list);
+	ut_ad(!trx->in_mysql_trx_list);
 
 	mutex_free(&trx->undo_mutex);
 
@@ -233,8 +232,10 @@ trx_free(
 	/* We allocated a dedicated heap for the vector. */
 	ib_vector_free(trx->autoinc_locks);
 
-	/* We allocated a dedicated heap for the vector. */
-	ib_vector_free(trx->lock.table_locks);
+	if (trx->lock.table_locks != NULL) {
+		/* We allocated a dedicated heap for the vector. */
+		ib_vector_free(trx->lock.table_locks);
+	}
 
 	mutex_free(&trx->mutex);
 
@@ -249,11 +250,12 @@ trx_free_for_background(
 /*====================*/
 	trx_t*	trx)	/*!< in, own: trx object */
 {
-	if (UNIV_UNLIKELY(trx->declared_to_be_inside_innodb)) {
-		ut_print_timestamp(stderr);
-		fputs("  InnoDB: Error: Freeing a trx which is declared"
-		      " to be processing\n"
-		      "InnoDB: inside InnoDB.\n", stderr);
+	if (trx->declared_to_be_inside_innodb) {
+
+		ib_logf(IB_LOG_LEVEL_ERROR,
+			"Freeing a trx (%p, " TRX_ID_FMT ") which is declared "
+			"to be processing inside InnoDB", trx, trx->id);
+
 		trx_print(stderr, trx, 600);
 		putc('\n', stderr);
 
@@ -262,16 +264,16 @@ trx_free_for_background(
 		srv_conc_force_exit_innodb(trx);
 	}
 
-	if (UNIV_UNLIKELY(trx->n_mysql_tables_in_use != 0
-			  || trx->mysql_n_tables_locked != 0)) {
+	if (trx->n_mysql_tables_in_use != 0
+	    || trx->mysql_n_tables_locked != 0) {
 
-		ut_print_timestamp(stderr);
-		fprintf(stderr,
-			"  InnoDB: Error: MySQL is freeing a thd\n"
-			"InnoDB: though trx->n_mysql_tables_in_use is %lu\n"
-			"InnoDB: and trx->mysql_n_tables_locked is %lu.\n",
+		ib_logf(IB_LOG_LEVEL_ERROR,
+			"MySQL is freeing a thd though "
+			"trx->n_mysql_tables_in_use is %lu and "
+			"trx->mysql_n_tables_locked is %lu.",
 			(ulong) trx->n_mysql_tables_in_use,
 			(ulong) trx->mysql_n_tables_locked);
+
 		trx_print(stderr, trx, 600);
 		ut_print_buf(stderr, trx, sizeof(trx_t));
 		putc('\n', stderr);
@@ -325,8 +327,6 @@ trx_free_for_mysql(
 	UT_LIST_REMOVE(mysql_trx_list, trx_sys->mysql_trx_list, trx);
 
 	ut_ad(trx_sys_validate_trx_list());
-
-	trx_sys->n_mysql_trx--;
 
 	mutex_exit(&trx_sys->mutex);
 
@@ -620,10 +620,10 @@ trx_lists_init_at_db_start(void)
 /******************************************************************//**
 Assigns a rollback segment to a transaction in a round-robin fashion.
 @return	assigned rollback segment instance */
-UNIV_INLINE
+static
 trx_rseg_t*
-trx_assign_rseg(
-/*============*/
+trx_assign_rseg_low(
+/*================*/
 	ulong	max_undo_logs,	/*!< in: maximum number of UNDO logs to use */
 	ulint	n_tablespaces)	/*!< in: number of rollback tablespaces */
 {
@@ -668,6 +668,23 @@ trx_assign_rseg(
 }
 
 /****************************************************************//**
+Assign a read-only transaction a rollback-segment, if it is attempting
+to write to a TEMPORARY table. */
+UNIV_INTERN
+void
+trx_assign_rseg(
+/*============*/
+	trx_t*		trx)		/*!< A read-only transaction that
+					needs to be assigned a RBS. */
+{
+	ut_a(trx->rseg == 0);
+	ut_a(trx->read_only);
+	ut_a(!trx_is_autocommit_non_locking(trx));
+
+	trx->rseg = trx_assign_rseg_low(srv_undo_logs, srv_undo_tablespaces);
+}
+
+/****************************************************************//**
 Starts a transaction. */
 static
 void
@@ -675,9 +692,8 @@ trx_start_low(
 /*==========*/
 	trx_t*	trx)		/*!< in: transaction */
 {
-	static ulint	n_start_times;
-
 	ut_ad(trx->rseg == NULL);
+	ut_ad(trx->start_time != 0);
 
 	ut_ad(!trx->is_recovered);
 	ut_ad(trx_state_eq(trx, TRX_STATE_NOT_STARTED));
@@ -695,14 +711,8 @@ trx_start_low(
 	}
 
 	if (!trx->read_only) {
-		trx->rseg = trx_assign_rseg(
+		trx->rseg = trx_assign_rseg_low(
 			srv_undo_logs, srv_undo_tablespaces);
-	}
-
-	/* Avoid making an unnecessary system call, for non-locking
-	auto-commit selects we reuse the start_time for every 32  starts. */
-	if (!trx_is_autocommit_non_locking(trx) || !(n_start_times++ % 32)) {
-		trx->start_time = ut_time();
 	}
 
 	/* The initial value for trx->no: IB_ULONGLONG_MAX is used in
@@ -750,6 +760,12 @@ trx_start_low(
 	ut_ad(trx_sys_validate_trx_list());
 
 	mutex_exit(&trx_sys->mutex);
+
+	/* Avoid making an unnecessary system call, we reuse the start_time
+	for every 32  starts. */
+	if (!(trx->id % 32)) {
+		trx->start_time = ut_time();
+	}
 
 	MONITOR_INC(MONITOR_TRX_ACTIVE);
 }
@@ -971,6 +987,51 @@ trx_finalize_for_fts(
 	trx->fts_trx = NULL;
 }
 
+/**********************************************************************//**
+If required, flushes the log to disk based on the value of
+innodb_flush_log_at_trx_commit. */
+static __attribute__((nonnull))
+void
+trx_flush_log_if_needed_low(
+/*========================*/
+	lsn_t	lsn)	/*!< in: lsn up to which logs are to be
+			flushed. */
+{
+	switch (srv_flush_log_at_trx_commit) {
+	case 0:
+		/* Do nothing */
+		break;
+	case 1:
+		/* Write the log and optionally flush it to disk */
+		log_write_up_to(lsn, LOG_WAIT_ONE_GROUP,
+				srv_unix_file_flush_method != SRV_UNIX_NOSYNC);
+		break;
+	case 2:
+		/* Write the log but do not flush it to disk */
+		log_write_up_to(lsn, LOG_WAIT_ONE_GROUP, FALSE);
+
+		break;
+	default:
+		ut_error;
+	}
+}
+
+/**********************************************************************//**
+If required, flushes the log to disk based on the value of
+innodb_flush_log_at_trx_commit. */
+static __attribute__((nonnull))
+void
+trx_flush_log_if_needed(
+/*====================*/
+	lsn_t	lsn,	/*!< in: lsn up to which logs are to be
+			flushed. */
+	trx_t*	trx)	/*!< in/out: transaction */
+{
+	trx->op_info = "flushing log";
+	trx_flush_log_if_needed_low(lsn);
+	trx->op_info = "";
+}
+
 /****************************************************************//**
 Commits a transaction. */
 UNIV_INTERN
@@ -987,7 +1048,7 @@ trx_commit(
 	ut_ad(!trx_state_eq(trx, TRX_STATE_COMMITTED_IN_MEMORY));
 
 	/* undo_no is non-zero if we're doing the final commit. */
-	if (trx->fts_trx && (trx->undo_no != 0)) {
+	if (trx->fts_trx && trx->undo_no != 0) {
 		ulint   error;
 
 		ut_a(!trx_is_autocommit_non_locking(trx));
@@ -1043,6 +1104,8 @@ trx_commit(
 
 		trx->state = TRX_STATE_NOT_STARTED;
 
+		read_view_remove(trx->global_read_view, false);
+
 		MONITOR_INC(MONITOR_TRX_NL_RO_COMMIT);
 	} else {
 		lock_trx_release_locks(trx);
@@ -1057,7 +1120,6 @@ trx_commit(
 		assert_trx_in_list(trx);
 
 		if (trx->read_only) {
-			ut_ad(trx->rseg == NULL);
 			UT_LIST_REMOVE(trx_list, trx_sys->ro_trx_list, trx);
 			ut_d(trx->in_ro_trx_list = FALSE);
 			MONITOR_INC(MONITOR_TRX_RO_COMMIT);
@@ -1075,13 +1137,16 @@ trx_commit(
 
 		trx->state = TRX_STATE_NOT_STARTED;
 
+		/* We already own the trx_sys_t::mutex, by doing it here we
+		avoid a potential context switch later. */
+		read_view_remove(trx->global_read_view, true);
+
 		ut_ad(trx_sys_validate_trx_list());
 
 		mutex_exit(&trx_sys->mutex);
 	}
 
 	if (trx->global_read_view != NULL) {
-		read_view_remove(trx->global_read_view);
 
 		mem_heap_empty(trx->global_read_view_heap);
 
@@ -1127,27 +1192,12 @@ trx_commit(
 		if (trx->flush_log_later) {
 			/* Do nothing yet */
 			trx->must_flush_log_later = TRUE;
-		} else if (srv_flush_log_at_trx_commit == 0) {
+		} else if (srv_flush_log_at_trx_commit == 0
+			   || thd_requested_durability(trx->mysql_thd)
+			   == HA_IGNORE_DURABILITY) {
 			/* Do nothing */
-		} else if (srv_flush_log_at_trx_commit == 1) {
-			if (srv_unix_file_flush_method == SRV_UNIX_NOSYNC) {
-				/* Write the log but do not flush it to disk */
-
-				log_write_up_to(lsn, LOG_WAIT_ONE_GROUP,
-						FALSE);
-			} else {
-				/* Write the log to the log files AND flush
-				them to disk */
-
-				log_write_up_to(lsn, LOG_WAIT_ONE_GROUP, TRUE);
-			}
-		} else if (srv_flush_log_at_trx_commit == 2) {
-
-			/* Write the log but do not flush it to disk */
-
-			log_write_up_to(lsn, LOG_WAIT_ONE_GROUP, FALSE);
 		} else {
-			ut_error;
+			trx_flush_log_if_needed(lsn, trx);
 		}
 
 		trx->commit_lsn = lsn;
@@ -1173,6 +1223,8 @@ trx_commit(
 	ut_ad(UT_LIST_GET_LEN(trx->lock.trx_locks) == 0);
 	ut_ad(!trx->in_ro_trx_list);
 	ut_ad(!trx->in_rw_trx_list);
+
+	trx->dict_operation = TRX_DICT_OP_NONE;
 
 	trx->error_state = DB_SUCCESS;
 
@@ -1364,7 +1416,7 @@ trx_commit_step(
 Does the transaction commit for MySQL.
 @return	DB_SUCCESS or error number */
 UNIV_INTERN
-ulint
+dberr_t
 trx_commit_for_mysql(
 /*=================*/
 	trx_t*	trx)	/*!< in/out: transaction */
@@ -1406,49 +1458,24 @@ trx_commit_for_mysql(
 
 /**********************************************************************//**
 If required, flushes the log to disk if we called trx_commit_for_mysql()
-with trx->flush_log_later == TRUE.
-@return	0 or error number */
+with trx->flush_log_later == TRUE. */
 UNIV_INTERN
-ulint
+void
 trx_commit_complete_for_mysql(
 /*==========================*/
-	trx_t*	trx)	/*!< in: trx handle */
+	trx_t*	trx)	/*!< in/out: transaction */
 {
-	lsn_t	lsn	= trx->commit_lsn;
-
 	ut_a(trx);
 
-	trx->op_info = "flushing log";
-
-	if (!trx->must_flush_log_later) {
-		/* Do nothing */
-	} else if (srv_flush_log_at_trx_commit == 0) {
-		/* Do nothing */
-	} else if (srv_flush_log_at_trx_commit == 1) {
-		if (srv_unix_file_flush_method == SRV_UNIX_NOSYNC) {
-			/* Write the log but do not flush it to disk */
-
-			log_write_up_to(lsn, LOG_WAIT_ONE_GROUP, FALSE);
-		} else {
-			/* Write the log to the log files AND flush them to
-			disk */
-
-			log_write_up_to(lsn, LOG_WAIT_ONE_GROUP, TRUE);
-		}
-	} else if (srv_flush_log_at_trx_commit == 2) {
-
-		/* Write the log but do not flush it to disk */
-
-		log_write_up_to(lsn, LOG_WAIT_ONE_GROUP, FALSE);
-	} else {
-		ut_error;
+	if (!trx->must_flush_log_later
+	    || thd_requested_durability(trx->mysql_thd)
+	       == HA_IGNORE_DURABILITY) {
+		return;
 	}
 
+	trx_flush_log_if_needed(trx->commit_lsn, trx);
+
 	trx->must_flush_log_later = FALSE;
-
-	trx->op_info = "";
-
-	return(0);
 }
 
 /**********************************************************************//**
@@ -1821,28 +1848,7 @@ trx_prepare(
 		TODO: find out if MySQL holds some mutex when calling this.
 		That would spoil our group prepare algorithm. */
 
-		if (srv_flush_log_at_trx_commit == 0) {
-			/* Do nothing */
-		} else if (srv_flush_log_at_trx_commit == 1) {
-			if (srv_unix_file_flush_method == SRV_UNIX_NOSYNC) {
-				/* Write the log but do not flush it to disk */
-
-				log_write_up_to(lsn, LOG_WAIT_ONE_GROUP,
-						FALSE);
-			} else {
-				/* Write the log to the log files AND flush
-				them to disk */
-
-				log_write_up_to(lsn, LOG_WAIT_ONE_GROUP, TRUE);
-			}
-		} else if (srv_flush_log_at_trx_commit == 2) {
-
-			/* Write the log but do not flush it to disk */
-
-			log_write_up_to(lsn, LOG_WAIT_ONE_GROUP, FALSE);
-		} else {
-			ut_error;
-		}
+		trx_flush_log_if_needed(lsn, trx);
 	}
 }
 
@@ -1930,12 +1936,12 @@ trx_recover_for_mysql(
 	if (count > 0){
 		ut_print_timestamp(stderr);
 		fprintf(stderr,
-			"  InnoDB: %lu transactions in prepared state"
+			"  InnoDB: %d transactions in prepared state"
 			" after recovery\n",
-			(ulong) count);
+			int (count));
 	}
 
-	return ((int) count);
+	return(int (count));
 }
 
 /*******************************************************************//**
@@ -2052,8 +2058,8 @@ trx_start_if_not_started_xa(
 Starts the transaction if it is not yet started. */
 UNIV_INTERN
 void
-trx_start_if_not_started(
-/*=====================*/
+trx_start_if_not_started_low(
+/*=========================*/
 	trx_t*	trx)	/*!< in: transaction */
 {
 	switch (trx->state) {
@@ -2069,3 +2075,24 @@ trx_start_if_not_started(
 
 	ut_error;
 }
+
+/*************************************************************//**
+Starts the transaction for a DDL operation. */
+UNIV_INTERN
+void
+trx_start_for_ddl_low(
+/*==================*/
+	trx_t*		trx,	/*!< in/out: transaction */
+	trx_dict_op_t	op)	/*!< in: dictionary operation type */
+{
+	/* Flag this transaction as a dictionary operation, so that
+	the data dictionary will be locked in crash recovery. */
+
+	trx_set_dict_operation(trx, op);
+
+	/* Ensure it is not flagged as an auto-commit-non-locking transation. */
+	trx->will_lock = 1;
+
+	trx_start_low(trx);
+}
+

@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-Copyright (c) 1996, 2011, Oracle and/or its affiliates. All Rights Reserved.
+Copyright (c) 1996, 2012, Oracle and/or its affiliates. All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -252,7 +252,7 @@ dict_boot(void)
 	dict_hdr_t*	dict_hdr;
 	mem_heap_t*	heap;
 	mtr_t		mtr;
-	ulint		error;
+	dberr_t		error;
 
 	/* Be sure these constants do not ever change.  To avoid bloat,
 	only check the *NUM_FIELDS* in each table */
@@ -307,9 +307,7 @@ dict_boot(void)
 	dict_mem_table_add_col(table, heap, "ID", DATA_BINARY, 0, 0);
 	/* ROW_FORMAT = (N_COLS >> 31) ? COMPACT : REDUNDANT */
 	dict_mem_table_add_col(table, heap, "N_COLS", DATA_INT, 0, 4);
-	/* If the format is UNIV_FORMAT_A, table->flags == 0, and
-	TYPE == 1, which is defined as SYS_TABLE_TYPE_ANTELOPE.
-	The low order bit of TYPE is always set to 1.  If the format
+	/* The low order bit of TYPE is always set to 1.  If the format
 	is UNIV_FORMAT_B or higher, this field matches table->flags. */
 	dict_mem_table_add_col(table, heap, "TYPE", DATA_INT, 0, 4);
 	dict_mem_table_add_col(table, heap, "MIX_ID", DATA_BINARY, 0, 0);
@@ -476,7 +474,7 @@ dict_insert_initial_data(void)
 }
 
 /*****************************************************************//**
-Creates and initializes the data dictionary at the database creation. */
+Creates and initializes the data dictionary at the server bootstrap. */
 UNIV_INTERN
 void
 dict_create(void)

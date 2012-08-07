@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-Copyright (c) 1997, 2011, Oracle and/or its affiliates. All Rights Reserved.
+Copyright (c) 1997, 2012, Oracle and/or its affiliates. All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -155,27 +155,16 @@ row_vers_impl_x_locked_low(
 
 		vers_del = rec_get_deleted_flag(prev_version, comp);
 
-		prev_trx_id = row_get_rec_trx_id(
-			prev_version, clust_index, clust_offsets);
-
-		/* If trx_id differs from prev_trx_id and if the
-		prev_version is marked deleted then the prev_trx_id
-		must have already committed for the trx_id to be able
-		to modify the row. Therefore, prev_trx_id cannot hold
-		any implicit lock. */
-
-		if (vers_del && trx_id != prev_trx_id) {
-
-			trx_id = 0;
-			break;
-		}
+		prev_trx_id = row_get_rec_trx_id(prev_version, clust_index,
+						 clust_offsets);
 
 		/* The stack of versions is locked by mtr.  Thus, it
 		is safe to fetch the prefixes for externally stored
 		columns. */
 
 		row = row_build(ROW_COPY_POINTERS, clust_index, prev_version,
-				clust_offsets, NULL, &ext, heap);
+				clust_offsets,
+				NULL, NULL, NULL, &ext, heap);
 
 		entry = row_build_index_entry(row, ext, index, heap);
 
@@ -395,7 +384,8 @@ row_vers_old_has_index_entry(
 		Thus, it is safe to fetch the prefixes for
 		externally stored columns. */
 		row = row_build(ROW_COPY_POINTERS, clust_index,
-				rec, clust_offsets, NULL, &ext, heap);
+				rec, clust_offsets,
+				NULL, NULL, NULL, &ext, heap);
 		entry = row_build_index_entry(row, ext, index, heap);
 
 		/* If entry == NULL, the record contains unset BLOB
@@ -456,7 +446,7 @@ row_vers_old_has_index_entry(
 			externally stored columns. */
 			row = row_build(ROW_COPY_POINTERS, clust_index,
 					prev_version, clust_offsets,
-					NULL, &ext, heap);
+					NULL, NULL, NULL, &ext, heap);
 			entry = row_build_index_entry(row, ext, index, heap);
 
 			/* If entry == NULL, the record contains unset
@@ -489,7 +479,7 @@ read should see. We assume that the trx id stored in rec is such that
 the consistent read should not see rec in its present version.
 @return	DB_SUCCESS or DB_MISSING_HISTORY */
 UNIV_INTERN
-ulint
+dberr_t
 row_vers_build_for_consistent_read(
 /*===============================*/
 	const rec_t*	rec,	/*!< in: record in a clustered index; the
@@ -516,7 +506,7 @@ row_vers_build_for_consistent_read(
 	trx_id_t	trx_id;
 	mem_heap_t*	heap		= NULL;
 	byte*		buf;
-	ulint		err;
+	dberr_t		err;
 
 	ut_ad(dict_index_is_clust(index));
 	ut_ad(mtr_memo_contains_page(mtr, rec, MTR_MEMO_PAGE_X_FIX)
@@ -632,7 +622,7 @@ Constructs the last committed version of a clustered index record,
 which should be seen by a semi-consistent read.
 @return	DB_SUCCESS or DB_MISSING_HISTORY */
 UNIV_INTERN
-ulint
+dberr_t
 row_vers_build_for_semi_consistent_read(
 /*====================================*/
 	const rec_t*	rec,	/*!< in: record in a clustered index; the
@@ -656,7 +646,7 @@ row_vers_build_for_semi_consistent_read(
 	const rec_t*	version;
 	mem_heap_t*	heap		= NULL;
 	byte*		buf;
-	ulint		err;
+	dberr_t		err;
 	trx_id_t	rec_trx_id	= 0;
 
 	ut_ad(dict_index_is_clust(index));

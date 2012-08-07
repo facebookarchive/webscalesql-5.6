@@ -1,7 +1,7 @@
 include/master-slave.inc
 Warnings:
-Note	1756	Sending passwords in plain text without SSL/TLS is extremely insecure.
-Note	1757	Storing MySQL user name or password information in the master.info repository is not secure and is therefore not recommended. Please see the MySQL Manual for more about this issue and possible alternatives.
+Note	####	Sending passwords in plain text without SSL/TLS is extremely insecure.
+Note	####	Storing MySQL user name or password information in the master.info repository is not secure and is therefore not recommended. Please see the MySQL Manual for more about this issue and possible alternatives.
 [connection master]
 # Test non-transaction
 create table t1(a int, b int) engine= myisam;
@@ -47,6 +47,8 @@ set DEBUG_SYNC= 'before_write_delayed SIGNAL before_insert EXECUTE 3';
 set DEBUG_SYNC= 'after_write_delayed WAIT_FOR inserts_handled EXECUTE 3';
 # Test insert delayed ...
 insert delayed into t3(a,b) values(1,5),(1,6),(1,7);
+Warnings:
+Warning	1287	'INSERT DELAYED' is deprecated and will be removed in a future release. Please use INSERT instead
 SET @@global.debug= @old_debug;
 FLUSH TABLES t3;
 # Assert that no delayed thread handlers exist for table t3
@@ -172,7 +174,7 @@ use test/*!*/;
 SET TIMESTAMP=t/*!*/;
 SET @@session.pseudo_thread_id=#/*!*/;
 SET @@session.foreign_key_checks=1, @@session.sql_auto_is_null=0, @@session.unique_checks=1, @@session.autocommit=1/*!*/;
-SET @@session.sql_mode=0/*!*/;
+SET @@session.sql_mode=1073741824/*!*/;
 SET @@session.auto_increment_increment=1, @@session.auto_increment_offset=1/*!*/;
 /*!\C latin1 *//*!*/;
 SET @@session.character_set_client=8,@@session.collation_connection=8,@@session.collation_server=8/*!*/;

@@ -176,7 +176,7 @@
         %endif
       %else
         %if %(test -f /etc/SuSE-release && echo 1 || echo 0)
-          %define susever %(rpm -qf --qf '%%{version}\\n' /etc/SuSE-release)
+          %define susever %(rpm -qf --qf '%%{version}\\n' /etc/SuSE-release | cut -d. -f1)
           %if "%susever" == "10"
             %define distro_description    SUSE Linux Enterprise Server 10
             %define distro_releasetag     sles10
@@ -1020,6 +1020,7 @@ echo "====="                                     >> $STATUS_HISTORY
 %attr(755, root, root) %{_sbindir}/mysqld-debug
 %attr(755, root, root) %{_sbindir}/rcmysql
 %attr(755, root, root) %{_libdir}/mysql/plugin/daemon_example.ini
+%attr(755, root, root) %{_bindir}/innodb_memcached_config.sql
 
 %if %{WITH_TCMALLOC}
 %attr(755, root, root) %{_libdir}/mysql/%{malloc_lib_target}
@@ -1048,6 +1049,7 @@ echo "====="                                     >> $STATUS_HISTORY
 %attr(755, root, root) %{_bindir}/mysqlimport
 %attr(755, root, root) %{_bindir}/mysqlshow
 %attr(755, root, root) %{_bindir}/mysqlslap
+%attr(755, root, root) %{_bindir}/mysql_config_editor
 
 %doc %attr(644, root, man) %{_mandir}/man1/msql2mysql.1*
 %doc %attr(644, root, man) %{_mandir}/man1/mysql.1*
@@ -1061,6 +1063,7 @@ echo "====="                                     >> $STATUS_HISTORY
 %doc %attr(644, root, man) %{_mandir}/man1/mysqlimport.1*
 %doc %attr(644, root, man) %{_mandir}/man1/mysqlshow.1*
 %doc %attr(644, root, man) %{_mandir}/man1/mysqlslap.1*
+%doc %attr(644, root, man) %{_mandir}/man1/mysql_config_editor.1*
 
 # ----------------------------------------------------------------------------
 %files -n MySQL-devel%{product_suffix} -f optional-files-devel
@@ -1114,6 +1117,10 @@ echo "====="                                     >> $STATUS_HISTORY
 # merging BK trees)
 ##############################################################################
 %changelog
+* Mon Jul 16 2012 Joerg Bruehe <joerg.bruehe@oracle.com>
+
+- Add the man page for the "mysql_config_editor".
+
 * Wed Feb 29 2012 Brajmohan Saxena <brajmohan.saxena@oracle.com>
 
 - Removal all traces of the readline library from mysql (BUG 13738013)

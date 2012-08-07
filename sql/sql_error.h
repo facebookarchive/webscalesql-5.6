@@ -16,7 +16,7 @@
 #ifndef SQL_ERROR_H
 #define SQL_ERROR_H
 
-#include "sql_list.h" /* Sql_alloc, MEM_ROOT */
+#include "sql_list.h"
 #include "m_string.h" /* LEX_STRING */
 #include "sql_string.h"                        /* String */
 #include "sql_plist.h" /* I_P_List */
@@ -526,13 +526,13 @@ private:
   friend class Diagnostics_area;
 };
 
-uint err_conv(char *buff, uint to_length, const char *from,
-              uint from_length, const CHARSET_INFO *from_cs);
+uint err_conv(char *buff, size_t to_length, const char *from,
+              size_t from_length, const CHARSET_INFO *from_cs);
 
 class ErrConvString
 {
   char err_buffer[MYSQL_ERRMSG_SIZE];
-  uint buf_length;
+  size_t buf_length;
 public:
   ErrConvString(String *str)
   {
@@ -573,7 +573,7 @@ public:
  
   ~ErrConvString() { };
   char *ptr() { return err_buffer; }
-  uint length() const { return buf_length; }
+  size_t length() const { return buf_length; }
 };
 
 ///////////////////////////////////////////////////////////////////////////

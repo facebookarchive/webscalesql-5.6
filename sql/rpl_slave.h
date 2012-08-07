@@ -1,4 +1,4 @@
-/* Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -57,7 +57,14 @@ typedef enum { SLAVE_THD_IO, SLAVE_THD_SQL, SLAVE_THD_WORKER } SLAVE_THD_TYPE;
 
 #define MTS_WORKER_UNDEF ((ulong) -1)
 #define MTS_MAX_WORKERS  1024
-#define MTS_MAX_BITS_IN_GROUP ((1L << 19) - 1) /* 524287 */
+
+/* 
+   When using tables to store the slave workers bitmaps,
+   we use a BLOB field. The maximum size of a BLOB is:
+
+   2^16-1 = 65535 bytes => (2^16-1) * 8 = 524280 bits
+*/
+#define MTS_MAX_BITS_IN_GROUP ((1L << 19) - 8) /* 524280 */
 
 // Forward declarations
 class Relay_log_info;
@@ -115,13 +122,114 @@ extern bool server_id_supplied;
   see Master_info
   However, note that run_lock does not protect
   Relay_log_info.run_state; that is protected by data_lock.
-  
-  Order of acquisition: if you want to have LOCK_active_mi and a run_lock, you
-  must acquire LOCK_active_mi first.
 
   In MYSQL_BIN_LOG: LOCK_log, LOCK_index of the binlog and the relay log
   LOCK_log: when you write to it. LOCK_index: when you create/delete a binlog
   (so that you have to update the .index file).
+  
+  ==== Order of acquisition ====
+
+  Here, we list most major functions that acquire multiple locks.
+
+  Notation: For each function, we list the locks it takes, in the
+  order it takes them.  If a function holds lock A while taking lock
+  B, then we write "A, B".  If a function locks A, unlocks A, then
+  locks B, then we write "A | B".  If function F1 invokes function F2,
+  then we write F2's name in parentheses in the list of locks for F1.
+
+    show_master_info:
+      mi.data_lock, rli.data_lock, mi.err_lock, rli.err_lock
+
+    stop_slave:
+      LOCK_active_mi,
+      ( mi.run_lock, thd.LOCK_thd_data
+      | rli.run_lock, thd.LOCK_thd_data
+      | relay.LOCK_log
+      )
+
+    start_slave:
+      mi.run_lock, rli.run_lock, rli.data_lock, global_sid_lock.wrlock
+
+    reset_logs:
+      LOCK_thread_count, .LOCK_log, .LOCK_index, global_sid_lock.wrlock
+
+    purge_relay_logs:
+      rli.data_lock, (relay.reset_logs) LOCK_thread_count,
+      relay.LOCK_log, relay.LOCK_index, global_sid_lock.wrlock
+
+    reset_master:
+      (binlog.reset_logs) LOCK_thread_count, binlog.LOCK_log,
+      binlog.LOCK_index, global_sid_lock.wrlock
+
+    reset_slave:
+      mi.run_lock, rli.run_lock, (purge_relay_logs) rli.data_lock,
+      LOCK_thread_count, relay.LOCK_log, relay.LOCK_index,
+      global_sid_lock.wrlock
+
+    purge_logs:
+      .LOCK_index, LOCK_thread_count, thd.linfo.lock
+
+      [Note: purge_logs contains a known bug: LOCK_index should not be
+      taken before LOCK_thread_count.  This implies that, e.g.,
+      purge_master_logs can deadlock with reset_master.  However,
+      although purge_first_log and reset_slave take locks in reverse
+      order, they cannot deadlock because they both first acquire
+      rli.data_lock.]
+
+    purge_master_logs, purge_master_logs_before_date, purge:
+      (binlog.purge_logs) binlog.LOCK_index, LOCK_thread_count, thd.linfo.lock
+
+    purge_first_log:
+      rli.data_lock, relay.LOCK_index, rli.log_space_lock,
+      (relay.purge_logs) LOCK_thread_count, thd.linfo.lock
+
+    MYSQL_BIN_LOG::new_file_impl:
+      .LOCK_log, .LOCK_index,
+      ( [ if binlog: LOCK_prep_xids ]
+      | global_sid_lock.wrlock
+      )
+
+    rotate_relay_log:
+      (relay.new_file_impl) relay.LOCK_log, relay.LOCK_index,
+      global_sid_lock.wrlock
+
+    kill_zombie_dump_threads:
+      LOCK_thread_count, thd.LOCK_thd_data
+
+    init_relay_log_pos:
+      rli.data_lock, relay.log_lock
+
+    rli_init_info:
+      rli.data_lock,
+      ( relay.log_lock
+      | global_sid_lock.wrlock
+      | (relay.open_binlog)
+      | (init_relay_log_pos) rli.data_lock, relay.log_lock
+      )
+
+    change_master:
+      mi.run_lock, rli.run_lock, (init_relay_log_pos) rli.data_lock,
+      relay.log_lock
+
+  So the DAG of lock acquisition order (not counting the buggy
+  purge_logs) is, empirically:
+
+    LOCK_active_mi, mi.run_lock, rli.run_lock,
+      ( rli.data_lock,
+        ( LOCK_thread_count,
+          (
+            ( binlog.LOCK_log, binlog.LOCK_index
+            | relay.LOCK_log, relay.LOCK_index
+            ),
+            ( rli.log_space_lock | global_sid_lock.wrlock )
+          | binlog.LOCK_log, binlog.LOCK_index, LOCK_prep_xids
+          | thd.LOCK_data
+          )
+        | mi.err_lock, rli.err_lock
+        )
+      )
+    )
+    | mi.data_lock, rli.data_lock
 */
 
 extern ulong master_retry_count;
@@ -167,15 +275,16 @@ bool change_master(THD* thd, Master_info* mi);
 int reset_slave(THD *thd, Master_info* mi);
 int init_slave();
 int init_recovery(Master_info* mi, const char** errmsg);
-int init_info(Master_info* mi, bool ignore_if_no_info, int thread_mask);
+int global_init_info(Master_info* mi, bool ignore_if_no_info, int thread_mask);
 void end_info(Master_info* mi);
 int remove_info(Master_info* mi);
 int flush_master_info(Master_info* mi, bool force);
-void init_slave_skip_errors(const char* arg);
+void add_slave_skip_errors(const char* arg);
+void set_slave_skip_errors(char** slave_skip_errors_ptr);
 int register_slave_on_master(MYSQL* mysql);
 int terminate_slave_threads(Master_info* mi, int thread_mask,
-			     bool skip_lock = 0);
-int start_slave_threads(bool need_slave_mutex, bool wait_for_start,
+                            bool need_lock_term= true);
+int start_slave_threads(bool need_lock_slave, bool wait_for_start,
 			Master_info* mi, int thread_mask);
 /*
   cond_lock is usually same as start_lock. It is needed for the case when
@@ -199,7 +308,7 @@ int start_slave_thread(
 int fetch_master_table(THD* thd, const char* db_name, const char* table_name,
 		       Master_info* mi, MYSQL* mysql, bool overwrite);
 
-bool show_master_info(THD* thd, Master_info* mi);
+bool show_slave_status(THD* thd, Master_info* mi);
 bool rpl_master_has_bug(const Relay_log_info *rli, uint bug_id, bool report,
                         bool (*pred)(const void *), const void *param);
 bool rpl_master_erroneous_autoinc(THD* thd);
@@ -240,11 +349,9 @@ extern my_bool master_ssl;
 extern char *master_ssl_ca, *master_ssl_capath, *master_ssl_cert;
 extern char *master_ssl_cipher, *master_ssl_key;
        
-extern I_List<THD> threads;
-
-bool mts_recovery_groups(Relay_log_info *rli, MY_BITMAP *groups);
+int mts_recovery_groups(Relay_log_info *rli);
 bool mts_checkpoint_routine(Relay_log_info *rli, ulonglong period,
-                            bool force, bool locked);
+                            bool force, bool need_data_lock);
 #endif /* HAVE_REPLICATION */
 
 /* masks for start/stop operations on io and sql slave threads */

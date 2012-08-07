@@ -588,6 +588,7 @@ trx_undo_page_report_modify(
 	/* Store first some general parameters to the undo log */
 
 	if (!update) {
+		ut_ad(!rec_get_deleted_flag(rec, dict_table_is_comp(table)));
 		type_cmpl = TRX_UNDO_DEL_MARK_REC;
 	} else if (rec_get_deleted_flag(rec, dict_table_is_comp(table))) {
 		type_cmpl = TRX_UNDO_UPD_DEL_REC;
@@ -1040,8 +1041,9 @@ trx_undo_update_rec_get_update(
 }
 
 /*******************************************************************//**
-Builds a partial row from an update undo log record. It contains the
-columns which occur as ordering in any index of the table.
+Builds a partial row from an update undo log record, for purge.
+It contains the columns which occur as ordering in any index of the table.
+Any missing columns are indicated by col->mtype == DATA_MISSING.
 @return	pointer to remaining part of undo record */
 UNIV_INTERN
 byte*
@@ -1075,7 +1077,12 @@ trx_undo_rec_get_partial_row(
 
 	*row = dtuple_create(heap, row_len);
 
-	dict_table_copy_types(*row, index->table);
+	/* Mark all columns in the row uninitialized, so that
+	we can distinguish missing fields from fields that are SQL NULL. */
+	for (ulint i = 0; i < row_len; i++) {
+		dfield_get_type(dtuple_get_nth_field(*row, i))
+			->mtype = DATA_MISSING;
+	}
 
 	end_ptr = ptr + mach_read_from_2(ptr);
 	ptr += 2;
@@ -1097,7 +1104,9 @@ trx_undo_rec_get_partial_row(
 		ptr = trx_undo_rec_get_col_val(ptr, &field, &len, &orig_len);
 
 		dfield = dtuple_get_nth_field(*row, col_no);
-
+		dict_col_copy_type(
+			dict_table_get_nth_col(index->table, col_no),
+			dfield_get_type(dfield));
 		dfield_set_data(dfield, field, len);
 
 		if (len != UNIV_SQL_NULL
@@ -1177,7 +1186,7 @@ transaction and in consistent reads that must look to the history of this
 transaction.
 @return	DB_SUCCESS or error code */
 UNIV_INTERN
-ulint
+dberr_t
 trx_undo_report_row_operation(
 /*==========================*/
 	ulint		flags,		/*!< in: if BTR_NO_UNDO_LOG_FLAG bit is
@@ -1196,6 +1205,7 @@ trx_undo_report_row_operation(
 	const rec_t*	rec,		/*!< in: in case of an update or delete
 					marking, the record in the clustered
 					index, otherwise NULL */
+	const ulint*	offsets,	/*!< in: rec_get_offsets(rec) */
 	roll_ptr_t*	roll_ptr)	/*!< out: rollback pointer to the
 					inserted undo log record,
 					0 if BTR_NO_UNDO_LOG
@@ -1207,16 +1217,13 @@ trx_undo_report_row_operation(
 	buf_block_t*	undo_block;
 	trx_rseg_t*	rseg;
 	mtr_t		mtr;
-	ulint		err		= DB_SUCCESS;
-	mem_heap_t*	heap		= NULL;
-	ulint		offsets_[REC_OFFS_NORMAL_SIZE];
-	ulint*		offsets		= offsets_;
+	dberr_t		err		= DB_SUCCESS;
 #ifdef UNIV_DEBUG
 	int		loop_count	= 0;
 #endif /* UNIV_DEBUG */
-	rec_offs_init(offsets_);
 
 	ut_a(dict_index_is_clust(index));
+	ut_ad(!rec || rec_offs_validate(rec, index, offsets));
 
 	if (flags & BTR_NO_UNDO_LOG_FLAG) {
 
@@ -1230,6 +1237,16 @@ trx_undo_report_row_operation(
 	      || (clust_entry && !update && !rec));
 
 	trx = thr_get_trx(thr);
+
+	/* This table is visible only to the session that created it. */
+	if (trx->read_only) {
+		/* MySQL should block writes to non-temporary tables. */
+		ut_a(DICT_TF2_FLAG_IS_SET(index->table, DICT_TF2_TEMPORARY));
+		if (trx->rseg == 0) {
+			trx_assign_rseg(trx);
+		}
+	}
+
 	rseg = trx->rseg;
 
 	mtr_start(&mtr);
@@ -1272,8 +1289,6 @@ trx_undo_report_row_operation(
 		}
 
 		ut_ad(err == DB_SUCCESS);
-		offsets = rec_get_offsets(rec, index, offsets,
-					  ULINT_UNDEFINED, &heap);
 	}
 
 	page_no = undo->last_page_no;
@@ -1352,8 +1367,7 @@ trx_undo_report_row_operation(
 			*roll_ptr = trx_undo_build_roll_ptr(
 				op_type == TRX_UNDO_INSERT_OP,
 				rseg->id, page_no, offset);
-			err = DB_SUCCESS;
-			goto func_exit;
+			return(DB_SUCCESS);
 		}
 
 		ut_ad(page_no == undo->last_page_no);
@@ -1380,10 +1394,6 @@ trx_undo_report_row_operation(
 err_exit:
 	mutex_exit(&trx->undo_mutex);
 	mtr_commit(&mtr);
-func_exit:
-	if (UNIV_LIKELY_NULL(heap)) {
-		mem_heap_free(heap);
-	}
 	return(err);
 }
 
@@ -1433,8 +1443,8 @@ purge_view.
 
 @return DB_SUCCESS, or DB_MISSING_HISTORY if the undo log has been
 truncated and we cannot fetch the old version */
-static
-ulint
+static __attribute__((nonnull, warn_unused_result))
+dberr_t
 trx_undo_get_undo_rec(
 /*==================*/
 	roll_ptr_t	roll_ptr,	/*!< in: roll pointer to record */
@@ -1477,7 +1487,7 @@ purge_sys->view.
 @return DB_SUCCESS, or DB_MISSING_HISTORY if the previous version is
 earlier than purge_view, which means that it may have been removed */
 UNIV_INTERN
-ulint
+dberr_t
 trx_undo_prev_version_build(
 /*========================*/
 	const rec_t*	index_rec ATTRIB_USED_ONLY_IN_DEBUG,
@@ -1511,7 +1521,7 @@ trx_undo_prev_version_build(
 	ulint		cmpl_info;
 	ibool		dummy_extern;
 	byte*		buf;
-	ulint		err;
+	dberr_t		err;
 #ifdef UNIV_SYNC_DEBUG
 	ut_ad(!rw_lock_own(&purge_sys->latch, RW_LOCK_SHARED));
 #endif /* UNIV_SYNC_DEBUG */
@@ -1548,6 +1558,14 @@ trx_undo_prev_version_build(
 	ptr = trx_undo_rec_get_pars(undo_rec, &type, &cmpl_info,
 				    &dummy_extern, &undo_no, &table_id);
 
+	if (table_id != index->table->id) {
+		/* The table should have been rebuilt, but purge has
+		not yet removed the undo log records for the
+		now-dropped old table (table_id). */
+		ut_a(!index->trx_id || index->trx_id > rec_trx_id);
+		return(DB_SUCCESS);
+	}
+
 	ptr = trx_undo_update_rec_get_sys_cols(ptr, &trx_id, &roll_ptr,
 					       &info_bits);
 
@@ -1578,7 +1596,6 @@ trx_undo_prev_version_build(
 	ptr = trx_undo_update_rec_get_update(ptr, index, type, trx_id,
 					     roll_ptr, info_bits,
 					     NULL, heap, &update);
-	ut_a(table_id == index->table->id);
 	ut_a(ptr);
 
 # if defined UNIV_DEBUG || defined UNIV_BLOB_LIGHT_DEBUG
@@ -1594,8 +1611,8 @@ trx_undo_prev_version_build(
 		those fields that update updates to become externally stored
 		fields. Store the info: */
 
-		entry = row_rec_to_index_entry(ROW_COPY_DATA, rec, index,
-					       offsets, &n_ext, heap);
+		entry = row_rec_to_index_entry(
+			rec, index, offsets, &n_ext, heap);
 		n_ext += btr_push_update_extern_fields(entry, update, heap);
 		/* The page containing the clustered index record
 		corresponding to entry is latched in mtr.  Thus the

@@ -1,7 +1,7 @@
 include/master-slave.inc
 Warnings:
-Note	1756	Sending passwords in plain text without SSL/TLS is extremely insecure.
-Note	1757	Storing MySQL user name or password information in the master.info repository is not secure and is therefore not recommended. Please see the MySQL Manual for more about this issue and possible alternatives.
+Note	####	Sending passwords in plain text without SSL/TLS is extremely insecure.
+Note	####	Storing MySQL user name or password information in the master.info repository is not secure and is therefore not recommended. Please see the MySQL Manual for more about this issue and possible alternatives.
 [connection master]
 ## coverage purposes - Field_bits 
 ##                     1 X bit + 2 Null bits + 5 bits => last_null_bit_pos==0
@@ -36,11 +36,5 @@ INSERT INTO t1(c1) VALUES (10);
 INSERT INTO t1(c1) VALUES (NULL);
 UPDATE t1 SET c1= 0;
 include/diff_tables.inc [master:t1, slave:t1]
-DROP TABLE t1;
-include/rpl_reset.inc
-CREATE TABLE t1 (c1 int(11) NOT NULL, c2 int(11) NOT NULL, c3 int(11) DEFAULT '-1') ENGINE=MyISAM DEFAULT CHARSET=latin1;
-INSERT INTO t1 VALUES (1,2,NULL);
-UPDATE t1 SET c1=1, c2=2, c3=-1 WHERE c1=1 AND c2=2 AND ISNULL(c3);
-include/diff_tables.inc [master:test.t1, slave:test.t1]
 DROP TABLE t1;
 include/rpl_end.inc

@@ -2430,10 +2430,12 @@ hex(concat(a))	a
 30303030303030303030303030303031303030302E31	00000000000000010000.1
 drop table t1;
 create table t1 (a year(2));
+Warnings:
+Warning	1818	YEAR(2) column type is deprecated. Creating YEAR(4) column instead.
 insert into t1 values (1);
 select hex(concat(a)) from t1;
 hex(concat(a))
-3031
+32303031
 create table t2 as select concat(a) from t1;
 show create table t2;
 Table	Create Table
@@ -2465,7 +2467,7 @@ t2	CREATE TABLE `t2` (
   `concat(a)` varbinary(64) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1
 drop table t1, t2;
-create table t1 (a timestamp);
+create table t1 (a timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
 insert into t1 values (0);
 insert into t1 values (20010203040506);
 insert into t1 values (19800203040506);
@@ -2743,6 +2745,8 @@ hex(a)
 drop table t1;
 drop view v1;
 create table t1 (a year(2));
+Warnings:
+Warning	1818	YEAR(2) column type is deprecated. Creating YEAR(4) column instead.
 insert into t1 values (1);
 create view v1(a) as select concat(a) from t1;
 show columns from v1;
@@ -2750,7 +2754,7 @@ Field	Type	Null	Key	Default	Extra
 a	varchar(4)	YES		NULL	
 select hex(a) from v1;
 hex(a)
-3031
+32303031
 drop table t1;
 drop view v1;
 create table t1 (a year);
@@ -2775,7 +2779,7 @@ hex(a)
 0000000000000001
 drop table t1;
 drop view v1;
-create table t1 (a timestamp);
+create table t1 (a timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
 insert into t1 values (0);
 insert into t1 values (20010203040506);
 insert into t1 values (19800203040506);
@@ -3284,4 +3288,29 @@ COALESCE(IF(test1=1, NULL, 1), test2)
 DROP TABLE t1;
 #
 # End of 5.5 tests
+#
+#
+# Start of 5.6 tests
+#
+SET NAMES cp1251;
+SELECT is_ipv4(inet_ntoa('1'));
+is_ipv4(inet_ntoa('1'))
+1
+SELECT is_ipv6(inet_ntoa('1'));
+is_ipv6(inet_ntoa('1'))
+0
+SELECT inet6_aton(inet_ntoa('1'));
+inet6_aton(inet_ntoa('1'))
+   
+SELECT inet6_ntoa(inet_ntoa('1'));
+inet6_ntoa(inet_ntoa('1'))
+NULL
+#
+# Bug#14040277 UNINITIALIZED VALUE REFERENCED IN STR_TO_IPV6
+#
+SELECT inet6_aton(soundex('a'));
+inet6_aton(soundex('a'))
+NULL
+#
+# End of 5.6 tests
 #

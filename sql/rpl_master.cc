@@ -147,7 +147,7 @@ int register_slave(THD* thd, uchar* packet, uint packet_length)
   si->thd= thd;
 
   mysql_mutex_lock(&LOCK_slave_list);
-  unregister_slave(thd,0,0);
+  unregister_slave(thd, false, false/*need_lock_slave_list=false*/);
   res= my_hash_insert(&slave_list, (uchar*) si);
   mysql_mutex_unlock(&LOCK_slave_list);
   return res;
@@ -159,12 +159,14 @@ err2:
   return 1;
 }
 
-void unregister_slave(THD* thd, bool only_mine, bool need_mutex)
+void unregister_slave(THD* thd, bool only_mine, bool need_lock_slave_list)
 {
   if (thd->server_id)
   {
-    if (need_mutex)
+    if (need_lock_slave_list)
       mysql_mutex_lock(&LOCK_slave_list);
+    else
+      mysql_mutex_assert_owner(&LOCK_slave_list);
 
     SLAVE_INFO* old_si;
     if ((old_si = (SLAVE_INFO*)my_hash_search(&slave_list,
@@ -172,7 +174,7 @@ void unregister_slave(THD* thd, bool only_mine, bool need_mutex)
 	(!only_mine || old_si->thd == thd))
     my_hash_delete(&slave_list, (uchar*)old_si);
 
-    if (need_mutex)
+    if (need_lock_slave_list)
       mysql_mutex_unlock(&LOCK_slave_list);
   }
 }
@@ -651,7 +653,7 @@ bool com_binlog_dump(THD *thd, char *packet)
   mysql_binlog_send(thd, thd->strdup(packet + 10), (my_off_t) pos,
                     flags);
 
-  unregister_slave(thd, 1, 1);
+  unregister_slave(thd, true, true/*need_lock_slave_list=true*/);
   /*  fake COM_QUIT -- if we get here, the thread needs to terminate */
   DBUG_RETURN(true);
 }
@@ -725,7 +727,7 @@ bool com_binlog_dump_gtid(THD *thd, char *packet)
   my_free(gtid_string);
   mysql_binlog_send(thd, name, (my_off_t) pos, flags, &slave_gtid_done);
 
-  unregister_slave(thd, 1, 1);
+  unregister_slave(thd, true, true/*need_lock_slave_list=true*/);
   /*  fake COM_QUIT -- if we get here, the thread needs to terminate */
   DBUG_RETURN(true);
 }
@@ -802,7 +804,8 @@ void mysql_binlog_send(THD* thd, char* log_ident, my_off_t pos,
     heartbeat_ts= &heartbeat_buf;
     set_timespec_nsec(*heartbeat_ts, 0);
   }
-  sql_print_information("Start binlog_dump to master_thread_id(%lu) slave_server(%d), pos(%s, %lu)",
+  if (log_warnings > 1)
+    sql_print_information("Start binlog_dump to master_thread_id(%lu) slave_server(%d), pos(%s, %lu)",
                         thd->thread_id, thd->server_id, log_ident, (ulong)pos);
   if (RUN_HOOK(binlog_transmit, transmit_start, (thd, flags, log_ident, pos)))
   {
@@ -927,7 +930,7 @@ impossible position";
     this larger than the corresponding packet (query) sent 
     from client to master.
   */
-  thd->variables.max_allowed_packet+= MAX_LOG_EVENT_HEADER;
+  thd->variables.max_allowed_packet= MAX_MAX_ALLOWED_PACKET;
 
   /*
     We can set log_lock now, it does not move (it's a member of
@@ -1644,18 +1647,19 @@ void kill_zombie_dump_threads(String *slave_uuid)
   DBUG_ASSERT(slave_uuid->length() == UUID_LENGTH);
 
   mysql_mutex_lock(&LOCK_thread_count);
-  I_List_iterator<THD> it(threads);
-  THD *tmp;
-
-  while ((tmp=it++))
+  THD *tmp= NULL;
+  Thread_iterator it= global_thread_list_begin();
+  Thread_iterator end= global_thread_list_end();
+  for (; it != end; ++it)
   {
-    if (tmp != current_thd && (tmp->get_command() == COM_BINLOG_DUMP ||
-        tmp->get_command() == COM_BINLOG_DUMP_GTID))
+    if ((*it) != current_thd && ((*it)->get_command() == COM_BINLOG_DUMP ||
+                                 (*it)->get_command() == COM_BINLOG_DUMP_GTID))
     {
       String tmp_uuid;
-      if (get_slave_uuid(tmp, &tmp_uuid) != NULL &&
+      if (get_slave_uuid((*it), &tmp_uuid) != NULL &&
           !strncmp(slave_uuid->c_ptr(), tmp_uuid.c_ptr(), UUID_LENGTH))
       {
+        tmp= *it;
         mysql_mutex_lock(&tmp->LOCK_thd_data);	// Lock from delete
         break;
       }
@@ -1709,7 +1713,7 @@ int reset_master(THD* thd)
   @retval FALSE success
   @retval TRUE failure
 */
-bool show_binlog_info(THD* thd)
+bool show_master_status(THD* thd)
 {
   Protocol *protocol= thd->protocol;
   char* gtid_set_buffer= NULL;

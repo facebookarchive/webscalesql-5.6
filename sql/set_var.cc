@@ -747,7 +747,7 @@ int set_var_user::update(THD *thd)
 
 void set_var_user::print(THD *thd, String *str)
 {
-  user_var_item->print(str, QT_ORDINARY);
+  user_var_item->print_assignment(str, QT_ORDINARY);
 }
 
 
@@ -772,7 +772,7 @@ int set_var_password::check(THD *thd)
       user->host.length= 1;
     }
   }
-  if (!user->user.str)
+  if (user->user.length == 0)
   {
     DBUG_ASSERT(thd->security_ctx->user);
     user->user.str= (char *) thd->security_ctx->user;

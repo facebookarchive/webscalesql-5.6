@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqlbinlog\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 03/29/2012
+.\"      Date: 07/17/2012
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLBINLOG\FR" "1" "03/29/2012" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLBINLOG\FR" "1" "07/17/2012" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -34,7 +34,7 @@ utility\&. You can also use
 \fBmysqlbinlog\fR
 to display the contents of relay log files written by a slave server in a replication setup because relay logs have the same format as binary logs\&. The binary log and relay log are discussed further in
 Section\ \&5.2.4, \(lqThe Binary Log\(rq, and
-Section\ \&15.2.2, \(lqReplication Relay and Status Logs\(rq\&.
+Section\ \&16.2.2, \(lqReplication Relay and Status Logs\(rq\&.
 .PP
 Invoke
 \fBmysqlbinlog\fR
@@ -65,7 +65,7 @@ shell> \fBmysqlbinlog binlog\&.0000003\fR
 .PP
 The output includes events contained in
 binlog\&.000003\&. For statement\-based logging, event information includes the SQL statement, the ID of the server on which it was executed, the timestamp when the statement was executed, how much time it took, and so forth\&. For row\-based logging, the event indicates a row change rather than an SQL statement\&. See
-Section\ \&15.1.2, \(lqReplication Formats\(rq, for information about logging modes\&.
+Section\ \&16.1.2, \(lqReplication Formats\(rq, for information about logging modes\&.
 .PP
 Events are preceded by header comments that provide additional information\&. For example:
 .sp
@@ -103,7 +103,7 @@ The output from
 \fBmysqlbinlog\fR
 can be re\-executed (for example, by using it as input to
 \fBmysql\fR) to redo the statements in the log\&. This is useful for recovery operations after a server crash\&. For other usage examples, see the discussion later in this section and in
-Section\ \&6.5, \(lqPoint-in-Time (Incremental) Recovery Using the Binary Log\(rq\&.
+Section\ \&7.5, \(lqPoint-in-Time (Incremental) Recovery Using the Binary Log\(rq\&.
 .PP
 Normally, you use
 \fBmysqlbinlog\fR
@@ -336,7 +336,7 @@ Specify the maximum size of a row\-based binary log event, in bytes\&. Rows are 
 \fB\-\-character\-sets\-dir=\fR\fB\fIpath\fR\fR
 .sp
 The directory where character sets are installed\&. See
-Section\ \&9.5, \(lqCharacter Set Configuration\(rq\&.
+Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&.
 .RE
 .sp
 .RS 4
@@ -551,7 +551,7 @@ Print debugging information and memory and CPU usage statistics when the program
 \fB\-\-default\-auth=\fR\fB\fIplugin\fR\fR
 .sp
 The client\-side authentication plugin to use\&. See
-Section\ \&5.5.6, \(lqPluggable Authentication\(rq\&.
+Section\ \&6.3.6, \(lqPluggable Authentication\(rq\&.
 .sp
 This option was added in MySQL 5\&.6\&.2\&.
 .RE
@@ -584,6 +584,22 @@ SET
 statement is ineffective unless you have the
 SUPER
 privilege\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysqlbinlog: exclude-gtids option
+.\" exclude-gtids option: mysqlbinlog
+\fB\-\-exclude\-gtids=\fR\fB\fIgtid_set\fR\fR
+.sp
+Do not display any of the groups listed in the
+\fIgtid_set\fR\&. Added in MySQL 5\&.6\&.5\&.
 .RE
 .sp
 .RS 4
@@ -637,6 +653,22 @@ the section called \(lqMYSQLBINLOG HEX DUMP FORMAT\(rq\&. The hex output can be 
 \fB\-h \fR\fB\fIhost_name\fR\fR
 .sp
 Get the binary log from the MySQL server on the given host\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysqlbinlog: include-gtids option
+.\" include-gtids option: mysqlbinlog
+\fB\-\-include\-gtids=\fR\fB\fIgtid_set\fR\fR
+.sp
+Display only the groups listed in the
+\fIgtid_set\fR\&. Added in MySQL 5\&.6\&.5\&.
 .RE
 .sp
 .RS 4
@@ -718,7 +750,7 @@ option on the command line,
 prompts for one\&.
 .sp
 Specifying a password on the command line should be considered insecure\&. See
-Section\ \&5.3.2.2, \(lqEnd-User Guidelines for Password Security\(rq\&. You can use an option file to avoid giving the password on the command line\&.
+Section\ \&6.1.2.2, \(lqEnd-User Guidelines for Password Security\(rq\&. You can use an option file to avoid giving the password on the command line\&.
 .RE
 .sp
 .RS 4
@@ -738,7 +770,7 @@ The directory in which to look for plugins\&. It may be necessary to specify thi
 option is used to specify an authentication plugin but
 \fBmysqlbinlog\fR
 does not find it\&. See
-Section\ \&5.5.6, \(lqPluggable Authentication\(rq\&.
+Section\ \&6.3.6, \(lqPluggable Authentication\(rq\&.
 .sp
 This option was added in MySQL 5\&.6\&.2\&.
 .RE
@@ -920,6 +952,21 @@ Display only the statements contained in the log, without any extra information 
 .sp -1
 .IP \(bu 2.3
 .\}
+.\" mysqlbinlog: skip-gtids option
+.\" skip-gtids option: mysqlbinlog
+\fB\-\-skip\-gtids[=(true|false)]\fR
+.sp
+Do not display any GTIDs\&. Not recommended in production\&. Added in MySQL 5\&.6\&.5\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
 .\" mysqlbinlog: socket option
 .\" socket option: mysqlbinlog
 \fB\-\-socket=\fR\fB\fIpath\fR\fR,
@@ -963,7 +1010,7 @@ shell> \fBmysqlbinlog \-\-start\-datetime="2005\-12\-25 11:25:56" binlog\&.00000
 .\}
 .sp
 This option is useful for point\-in\-time recovery\&. See
-Section\ \&6.3, \(lqExample Backup and Recovery Strategy\(rq\&.
+Section\ \&7.3, \(lqExample Backup and Recovery Strategy\(rq\&.
 .RE
 .sp
 .RS 4
@@ -983,7 +1030,7 @@ Start reading the binary log at the first event having a position equal to or gr
 \fIN\fR\&. This option applies to the first log file named on the command line\&.
 .sp
 This option is useful for point\-in\-time recovery\&. See
-Section\ \&6.3, \(lqExample Backup and Recovery Strategy\(rq\&.
+Section\ \&7.3, \(lqExample Backup and Recovery Strategy\(rq\&.
 .RE
 .sp
 .RS 4
@@ -1007,7 +1054,7 @@ option for information about the
 value\&.
 .sp
 This option is useful for point\-in\-time recovery\&. See
-Section\ \&6.3, \(lqExample Backup and Recovery Strategy\(rq\&.
+Section\ \&7.3, \(lqExample Backup and Recovery Strategy\(rq\&.
 .RE
 .sp
 .RS 4
@@ -1083,7 +1130,7 @@ Stop reading the binary log at the first event having a position equal to or gre
 \fIN\fR\&. This option applies to the last log file named on the command line\&.
 .sp
 This option is useful for point\-in\-time recovery\&. See
-Section\ \&6.3, \(lqExample Backup and Recovery Strategy\(rq\&.
+Section\ \&7.3, \(lqExample Backup and Recovery Strategy\(rq\&.
 .RE
 .sp
 .RS 4
@@ -1181,7 +1228,7 @@ You can pipe the output of
 into the
 \fBmysql\fR
 client to execute the events contained in the binary log\&. This technique is used to recover from a crash when you have an old backup (see
-Section\ \&6.5, \(lqPoint-in-Time (Incremental) Recovery Using the Binary Log\(rq)\&. For example:
+Section\ \&7.5, \(lqPoint-in-Time (Incremental) Recovery Using the Binary Log\(rq)\&. For example:
 .sp
 .if n \{\
 .RS 4
@@ -1317,7 +1364,7 @@ statements (that is, it adds
 LOCAL), both the client and the server that you use to process the statements must be configured with the
 LOCAL
 capability enabled\&. See
-Section\ \&5.3.5, \(lqSecurity Issues with LOAD DATA LOCAL\(rq\&.
+Section\ \&6.1.6, \(lqSecurity Issues with LOAD DATA LOCAL\(rq\&.
 .if n \{\
 .sp
 .\}

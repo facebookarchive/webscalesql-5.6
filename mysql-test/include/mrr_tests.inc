@@ -91,6 +91,12 @@ insert into t4 (a,b,c,filler)
 insert into t4 (a,b,c,filler) 
   select 'zz-1',NULL,'cc-2', 'filler-data' from t2 order by a limit 500;
 
+-- disable_query_log
+-- disable_result_log
+ANALYZE TABLE t4;
+-- enable_result_log
+-- enable_query_log
+
 explain 
   select * from t4 where a IS NULL and b IS NULL and (c IS NULL or c='no-such-row1'
                                                       or c='no-such-row2');
@@ -166,6 +172,13 @@ CREATE TABLE t2 (
 );
 INSERT INTO t2 VALUES (1,1),(2,6),(3,0);
 
+-- disable_query_log
+-- disable_result_log
+ANALYZE TABLE t1;
+ANALYZE TABLE t2;
+-- enable_result_log
+-- enable_query_log
+
 EXPLAIN EXTENDED
 SELECT MIN(t1.pk)
 FROM t1 WHERE EXISTS (
@@ -186,6 +199,12 @@ create table t1 (a int, b char(20), filler char(200), key(a,b(10)));
 insert into t1 select A.a + 10*(B.a + 10*C.a), 'bbb','filler' from t0 A, t0 B, t0 C;
 update t1 set b=repeat(char(65+a), 20) where a < 25;
 
+-- disable_query_log
+-- disable_result_log
+ANALYZE TABLE t1;
+-- enable_result_log
+-- enable_query_log
+
 --echo This must show range + using index condition:
 --replace_column 9 x
 explain select * from t1 where a < 10 and b = repeat(char(65+a), 20);
@@ -199,6 +218,11 @@ create table t0 (a int);
 insert into t0 values (0),(1),(2),(3),(4),(5),(6),(7),(8),(9);
 create table t1 (a int, b int, key(a));
 insert into t1 select A.a + 10 *(B.a + 10*C.a), A.a + 10 *(B.a + 10*C.a) from t0 A, t0 B, t0 C; 
+-- disable_query_log
+-- disable_result_log
+ANALYZE TABLE t1;
+-- enable_result_log
+-- enable_query_log
 -- echo This mustn't show "Using MRR":
 explain select * from t1 where a < 20  order by a;
 drop table t0, t1;
@@ -242,6 +266,11 @@ drop table t2;
 create table t2 (a char(100), b char(100), c char(100), d int, 
                  filler char(10), key(d), primary key (a,b,c));
 insert into t2 select A.a, B.a, B.a, A.a, 'filler' from t1 A, t1 B;
+-- disable_query_log
+-- disable_result_log
+ANALYZE TABLE t2;
+-- enable_result_log
+-- enable_query_log
 --replace_column 9 #
 explain select * from t2 force index (d) where d < 10;
 drop table t2;
@@ -323,6 +352,12 @@ insert into t1 (id, parent_id, name) values
 (60,40,'F'),
 (70,NULL,'J');
 
+-- disable_query_log
+-- disable_result_log
+ANALYZE TABLE t1;
+-- enable_result_log
+-- enable_query_log
+
 SELECT id FROM t1 WHERE parent_id IS NOT NULL ORDER BY id DESC LIMIT 1;
 --echo This must show type=index, extra=Using where
 explain SELECT * FROM t1 WHERE parent_id IS NOT NULL ORDER BY id DESC LIMIT 1;
@@ -378,6 +413,13 @@ CREATE TABLE t2 (
 
 INSERT INTO t2 VALUES (3, 9, 1, NULL);
 
+-- disable_query_log
+-- disable_result_log
+ANALYZE TABLE t1;
+ANALYZE TABLE t2;
+-- enable_result_log
+-- enable_query_log
+
 let query=
 SELECT i1
 FROM t1 LEFT JOIN t2 ON t1.pk = t2.i2
@@ -410,6 +452,13 @@ CREATE TABLE t2 (
 
 INSERT INTO t2 VALUES ('v'), ('c');
 
+-- disable_query_log
+-- disable_result_log
+ANALYZE TABLE t1;
+ANALYZE TABLE t2;
+-- enable_result_log
+-- enable_query_log
+
 let query=
 SELECT STRAIGHT_JOIN t1.c1
 FROM t1 RIGHT OUTER JOIN t2 ON t1.c1 = t2.c1
@@ -440,6 +489,12 @@ CREATE TABLE t1 (
 
 INSERT INTO t1 VALUES (0,1),(1,2),(2,3);
 
+-- disable_query_log
+-- disable_result_log
+ANALYZE TABLE t1;
+-- enable_result_log
+-- enable_query_log
+
 let query=
 SELECT i1
 FROM t1
@@ -452,3 +507,87 @@ DROP TABLE t1;
 
 set @@read_rnd_buffer_size= @read_rnd_buffer_size_save;
 select @@read_rnd_buffer_size;
+
+--echo #
+--echo # Bug 12365385 STRAIGHT_JOIN QUERY QUICKLY EXHAUSTS SYSTEM+VIRT. 
+--echo #              MEMORY LEADING TO SYSTEM CRASH
+--echo #
+
+CREATE TABLE ten (a INTEGER);
+INSERT INTO ten VALUES (0),(1),(2),(3),(4),(5),(6),(7),(8),(9);
+
+CREATE TABLE t1 (
+  pk INTEGER NOT NULL,
+  i1 INTEGER NOT NULL,
+  c1 VARCHAR(10) NOT NULL,
+  PRIMARY KEY (pk)
+);
+
+INSERT INTO t1
+  SELECT a, 1, 'MySQL' FROM ten;
+
+CREATE TABLE t2 (
+  pk INTEGER NOT NULL,
+  c1 VARCHAR(10) NOT NULL,
+  c2 varchar(10) NOT NULL,
+  PRIMARY KEY (pk)
+);
+
+INSERT INTO t2
+  SELECT a, 'MySQL', 'MySQL' FROM ten;
+
+CREATE TABLE t3 (
+  pk INTEGER NOT NULL,
+  c1 VARCHAR(10) NOT NULL,
+  PRIMARY KEY (pk)
+);
+
+INSERT INTO t3
+  SELECT a, 'MySQL' FROM ten;
+
+CREATE TABLE t4 (
+  pk int(11) NOT NULL,
+  c1_key varchar(10) CHARACTER SET utf8 NOT NULL,
+  c2 varchar(10) NOT NULL,
+  c3 varchar(10) NOT NULL,
+  PRIMARY KEY (pk),
+  KEY k1 (c1_key)
+);
+
+# t4 is empty
+
+CREATE TABLE t5 (
+  pk INTEGER NOT NULL,
+  c1 VARCHAR(10) NOT NULL,
+  PRIMARY KEY (pk)
+);
+
+INSERT INTO t5
+  SELECT a, 'MySQL' FROM ten;
+
+-- disable_query_log
+-- disable_result_log
+ANALYZE TABLE t1;
+ANALYZE TABLE t2;
+ANALYZE TABLE t3;
+ANALYZE TABLE t4;
+ANALYZE TABLE t5;
+-- enable_result_log
+-- enable_query_log
+
+let query=
+SELECT STRAIGHT_JOIN *
+FROM 
+  (t1 LEFT JOIN 
+     (t2 LEFT JOIN
+       (t3 LEFT OUTER JOIN t4 ON t3.c1 <= t4.c1_key)
+      ON t2.c1 = t4.c3) 
+   ON t1.c1 = t4.c2)
+  RIGHT OUTER JOIN t5 ON t2.c2 <= t5.c1
+WHERE t1.i1 = 1;
+
+eval EXPLAIN $query;
+eval $query;
+
+DROP TABLE ten, t1, t2, t3, t4, t5;
+

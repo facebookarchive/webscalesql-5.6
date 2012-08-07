@@ -1227,8 +1227,8 @@ EXPLAIN EXTENDED DELETE   FROM t1 WHERE i > 10 AND i <= 18 ORDER BY i LIMIT 5;
 id	select_type	table	type	possible_keys	key	key_len	ref	rows	filtered	Extra
 1	SIMPLE	t1	ALL	i	NULL	NULL	NULL	26	100.00	Using where; Using filesort
 Warnings:
-Warning	1736	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
-Warning	1736	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
+Warning	1739	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
+Warning	1739	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
 # Status of EXPLAIN EXTENDED query
 Variable_name	Value
 FLUSH STATUS;
@@ -1237,10 +1237,10 @@ EXPLAIN EXTENDED SELECT * FROM t1 WHERE i > 10 AND i <= 18 ORDER BY i LIMIT 5;
 id	select_type	table	type	possible_keys	key	key_len	ref	rows	filtered	Extra
 1	SIMPLE	t1	ALL	i	NULL	NULL	NULL	26	100.00	Using where; Using filesort
 Warnings:
-Warning	1736	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
-Warning	1736	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
-Warning	1736	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
-Warning	1736	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
+Warning	1739	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
+Warning	1739	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
+Warning	1739	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
+Warning	1739	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
 Note	1003	/* select#1 */ select `test`.`t1`.`a` AS `a`,`test`.`t1`.`i` AS `i` from `test`.`t1` where ((`test`.`t1`.`i` > 10) and (`test`.`t1`.`i` <= 18)) order by `test`.`t1`.`i` limit 5
 # Status of EXPLAIN EXTENDED "equivalent" SELECT query execution
 Variable_name	Value
@@ -1364,7 +1364,7 @@ EXPLAIN EXTENDED DELETE   FROM t2 WHERE b = 10 ORDER BY a, c LIMIT 5;
 id	select_type	table	type	possible_keys	key	key_len	ref	rows	filtered	Extra
 1	SIMPLE	t2	ALL	a	NULL	NULL	NULL	26	100.00	Using where; Using filesort
 Warnings:
-Warning	1736	Cannot use range access on index 'a' due to type or collation conversion on field 'b'
+Warning	1739	Cannot use range access on index 'a' due to type or collation conversion on field 'b'
 # Status of EXPLAIN EXTENDED query
 Variable_name	Value
 FLUSH STATUS;
@@ -1411,7 +1411,7 @@ EXPLAIN EXTENDED DELETE   FROM t2 WHERE b = 10 ORDER BY a, c LIMIT 5;
 id	select_type	table	type	possible_keys	key	key_len	ref	rows	filtered	Extra
 1	SIMPLE	t2	ALL	a	NULL	NULL	NULL	26	100.00	Using where; Using filesort
 Warnings:
-Warning	1736	Cannot use range access on index 'a' due to type or collation conversion on field 'b'
+Warning	1739	Cannot use range access on index 'a' due to type or collation conversion on field 'b'
 # Status of EXPLAIN EXTENDED query
 Variable_name	Value
 FLUSH STATUS;
@@ -1442,7 +1442,8 @@ DROP TABLE t1, t2;
 CREATE TABLE t1 (i INT);
 INSERT INTO t1 (i) VALUES (10),(11),(12),(13),(14),(15),(16),(17),(18),(19),
 (20),(21),(22),(23),(24),(25),(26),(27),(28),(29),
-(30),(31),(32),(33),(34),(35);
+(30),(31),(32),(33),(34),(35),(36),(37),(38),(39),
+(40),(41),(42);
 CREATE TABLE t2 (i INT, key1 INT, key2 INT, INDEX (key1), INDEX (key2));
 INSERT INTO t2 (key1, key2) SELECT i, i FROM t1;
 #
@@ -1674,8 +1675,8 @@ EXPLAIN EXTENDED UPDATE t2 SET a = 10 WHERE i > 10 AND i <= 18 ORDER BY i LIMIT 
 id	select_type	table	type	possible_keys	key	key_len	ref	rows	filtered	Extra
 1	SIMPLE	t2	ALL	i	NULL	NULL	NULL	26	100.00	Using where; Using filesort
 Warnings:
-Warning	1736	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
-Warning	1736	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
+Warning	1739	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
+Warning	1739	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
 # Status of EXPLAIN EXTENDED query
 Variable_name	Value
 FLUSH STATUS;
@@ -1684,10 +1685,10 @@ EXPLAIN EXTENDED SELECT * FROM t2     WHERE i > 10 AND i <= 18 ORDER BY i LIMIT 
 id	select_type	table	type	possible_keys	key	key_len	ref	rows	filtered	Extra
 1	SIMPLE	t2	ALL	i	NULL	NULL	NULL	26	100.00	Using where; Using filesort
 Warnings:
-Warning	1736	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
-Warning	1736	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
-Warning	1736	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
-Warning	1736	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
+Warning	1739	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
+Warning	1739	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
+Warning	1739	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
+Warning	1739	Cannot use range access on index 'i' due to type or collation conversion on field 'i'
 Note	1003	/* select#1 */ select `test`.`t2`.`a` AS `a`,`test`.`t2`.`i` AS `i` from `test`.`t2` where ((`test`.`t2`.`i` > 10) and (`test`.`t2`.`i` <= 18)) order by `test`.`t2`.`i` limit 5
 # Status of EXPLAIN EXTENDED "equivalent" SELECT query execution
 Variable_name	Value
@@ -1812,7 +1813,7 @@ EXPLAIN EXTENDED UPDATE t2 SET d = 10 WHERE b = 10 ORDER BY a, c LIMIT 5;
 id	select_type	table	type	possible_keys	key	key_len	ref	rows	filtered	Extra
 1	SIMPLE	t2	ALL	a	NULL	NULL	NULL	26	100.00	Using where; Using filesort
 Warnings:
-Warning	1736	Cannot use range access on index 'a' due to type or collation conversion on field 'b'
+Warning	1739	Cannot use range access on index 'a' due to type or collation conversion on field 'b'
 # Status of EXPLAIN EXTENDED query
 Variable_name	Value
 FLUSH STATUS;
@@ -1858,7 +1859,7 @@ EXPLAIN EXTENDED UPDATE t2 SET d = 10 WHERE b = 10 ORDER BY a, c LIMIT 5;
 id	select_type	table	type	possible_keys	key	key_len	ref	rows	filtered	Extra
 1	SIMPLE	t2	ALL	a	NULL	NULL	NULL	26	100.00	Using where; Using filesort
 Warnings:
-Warning	1736	Cannot use range access on index 'a' due to type or collation conversion on field 'b'
+Warning	1739	Cannot use range access on index 'a' due to type or collation conversion on field 'b'
 # Status of EXPLAIN EXTENDED query
 Variable_name	Value
 FLUSH STATUS;
@@ -1888,7 +1889,8 @@ DROP TABLE t1, t2;
 CREATE TABLE t1 (i INT);
 INSERT INTO t1 VALUES (10),(11),(12),(13),(14),(15),(16),(17),(18),(19),
 (20),(21),(22),(23),(24),(25),(26),(27),(28),(29),
-(30),(31),(32),(33),(34),(35);
+(30),(31),(32),(33),(34),(35),(36),(37),(38),(39),
+(40),(41),(42);
 CREATE TABLE t2 (i INT, key1 INT, key2 INT, INDEX (key1), INDEX (key2));
 INSERT INTO t2 (key1, key2) SELECT i, i FROM t1;
 #
@@ -2641,6 +2643,8 @@ CREATE TABLE t1 (i INT);
 EXPLAIN INSERT DELAYED INTO t1 VALUES (1);
 id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
 1	SIMPLE	NULL	NULL	NULL	NULL	NULL	NULL	NULL	No tables used
+Warnings:
+Warning	1287	'INSERT DELAYED' is deprecated and will be removed in a future release. Please use INSERT instead
 DROP TABLE t1;
 #69
 CREATE TABLE t1 (a INT);
@@ -2654,14 +2658,14 @@ INSERT INTO t2 VALUES (1), (2), (3);
 EXPLAIN UPDATE        t1 SET a = 10 WHERE a IN (SELECT * FROM (SELECT b FROM t2 ORDER BY b LIMIT 2,2) x);
 id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
 1	PRIMARY	t1	ALL	NULL	NULL	NULL	NULL	3	Using where
-2	DEPENDENT SUBQUERY	<derived3>	ALL	NULL	NULL	NULL	NULL	3	Using where
+2	DEPENDENT SUBQUERY	<derived3>	index_subquery	auto_key0	auto_key0	5	func	2	Using index
 3	DERIVED	t2	ALL	NULL	NULL	NULL	NULL	3	Using filesort
 FLUSH STATUS;
 FLUSH TABLES;
 EXPLAIN EXTENDED UPDATE        t1 SET a = 10 WHERE a IN (SELECT * FROM (SELECT b FROM t2 ORDER BY b LIMIT 2,2) x);
 id	select_type	table	type	possible_keys	key	key_len	ref	rows	filtered	Extra
 1	PRIMARY	t1	ALL	NULL	NULL	NULL	NULL	3	100.00	Using where
-2	DEPENDENT SUBQUERY	<derived3>	ALL	NULL	NULL	NULL	NULL	3	100.00	Using where
+2	DEPENDENT SUBQUERY	<derived3>	index_subquery	auto_key0	auto_key0	5	func	2	100.00	Using index
 3	DERIVED	t2	ALL	NULL	NULL	NULL	NULL	3	100.00	Using filesort
 # Status of EXPLAIN EXTENDED query
 Variable_name	Value
@@ -2685,7 +2689,8 @@ Sort_rows	3
 Sort_scan	1
 # Status of testing query execution:
 Variable_name	Value
-Handler_read_rnd_next	13
+Handler_read_key	3
+Handler_read_rnd_next	8
 Handler_update	1
 Handler_write	1
 Sort_rows	3

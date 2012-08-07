@@ -39,13 +39,13 @@ typedef struct st_slave_info
 void init_slave_list();
 void end_slave_list();
 int register_slave(THD* thd, uchar* packet, uint packet_length);
-void unregister_slave(THD* thd, bool only_mine, bool need_mutex);
+void unregister_slave(THD* thd, bool only_mine, bool need_lock_slave_list);
 bool show_slave_hosts(THD* thd);
 bool com_binlog_dump_gtid(THD *thd, char *packet);
 bool com_binlog_dump(THD *thd, char *packet);
 
 String *get_slave_uuid(THD *thd, String *value);
-bool show_binlog_info(THD* thd);
+bool show_master_status(THD* thd);
 bool show_binlogs(THD* thd);
 void kill_zombie_dump_threads(String *slave_uuid);
 void mysql_binlog_send(THD* thd, char* log_ident, my_off_t pos,

@@ -19,10 +19,6 @@
   The following is needed to not cause conflicts when we include mysqld.cc
 */
 
-#define main main1
-#define mysql_unix_port mysql_inix_port1
-#define mysql_port mysql_port1
-
 extern "C"
 {
   extern unsigned long max_allowed_packet, net_buffer_length;
@@ -30,24 +26,28 @@ extern "C"
 
 #include "../sql/mysqld.cc"
 
-C_MODE_START
+extern "C" {
 
 #include <mysql.h>
 #undef ER
 #include "errmsg.h"
 #include "embedded_priv.h"
 
+} // extern "C"
+
 #include <algorithm>
 
 using std::min;
 using std::max;
+
+extern "C" {
 
 extern unsigned int mysql_server_last_errno;
 extern char mysql_server_last_error[MYSQL_ERRMSG_SIZE];
 static my_bool emb_read_query_result(MYSQL *mysql);
 
 
-extern "C" void unireg_clear(int exit_code)
+void unireg_clear(int exit_code)
 {
   DBUG_ENTER("unireg_clear");
   clean_up(!opt_help && (exit_code || !opt_bootstrap)); /* purecov: inspected */
@@ -349,6 +349,8 @@ static int emb_stmt_execute(MYSQL_STMT *stmt)
     set_stmt_errmsg(stmt, net);
     DBUG_RETURN(1);
   }
+  else if (stmt->mysql->status == MYSQL_STATUS_GET_RESULT)
+           stmt->mysql->status= MYSQL_STATUS_STATEMENT_GET_RESULT;
   DBUG_RETURN(0);
 }
 
@@ -420,9 +422,13 @@ static void emb_free_embedded_thd(MYSQL *mysql)
 {
   THD *thd= (THD*)mysql->thd;
   thd->clear_data_list();
-  thread_count--;
   thd->store_globals();
-  thd->unlink();
+  thd->release_resources();
+
+  mysql_mutex_lock(&LOCK_thread_count);
+  remove_global_thread(thd);
+  mysql_mutex_unlock(&LOCK_thread_count);
+
   delete thd;
   my_pthread_setspecific_ptr(THR_THD,  0);
   mysql->thd=0;
@@ -443,7 +449,8 @@ static MYSQL_RES * emb_store_result(MYSQL *mysql)
 int emb_read_change_user_result(MYSQL *mysql)
 {
   mysql->net.read_pos= (uchar*)""; // fake an OK packet
-  return mysql_errno(mysql) ? packet_error : 1 /* length of the OK packet */;
+  return mysql_errno(mysql) ? static_cast<int>packet_error :
+                              1 /* length of the OK packet */;
 }
 
 MYSQL_METHODS embedded_methods= 
@@ -551,6 +558,16 @@ int init_embedded_server(int argc, char **argv, char **groups)
   system_charset_info= &my_charset_utf8_general_ci;
   sys_var_init();
 
+  int ho_error= handle_early_options();
+  if (ho_error != 0)
+  {
+    buffered_logs.print();
+    buffered_logs.cleanup();
+    return 1;
+  }
+
+  adjust_related_options();
+
   if (init_common_variables())
   {
     mysql_server_end();
@@ -635,6 +652,23 @@ int init_embedded_server(int argc, char **argv, char **groups)
   }
 
   execute_ddl_log_recovery();
+
+  /* Signal successful initialization */
+  mysql_mutex_lock(&LOCK_server_started);
+  mysqld_server_started= 1;
+  mysql_cond_signal(&COND_server_started);
+  mysql_mutex_unlock(&LOCK_server_started);
+
+#ifdef WITH_NDBCLUSTER_STORAGE_ENGINE
+  /* engine specific hook, to be made generic */
+  if (ndb_wait_setup_func && ndb_wait_setup_func(opt_ndb_wait_setup))
+  {
+    sql_print_warning("NDB : Tables not available after %lu seconds."
+                      "  Consider increasing --ndb-wait-setup value",
+                      opt_ndb_wait_setup);
+  }
+#endif
+
   return 0;
 }
 
@@ -701,13 +735,36 @@ void *create_embedded_thd(int client_flag)
   thd->data_tail= &thd->first_data;
   memset(&thd->net, 0, sizeof(thd->net));
 
-  thread_count++;
-  threads.push_front(thd);
+  mysql_mutex_lock(&LOCK_thread_count);
+  add_global_thread(thd);
+  mysql_mutex_unlock(&LOCK_thread_count);
   thd->mysys_var= 0;
   return thd;
 err:
   delete(thd);
   return NULL;
+}
+
+
+static void
+emb_transfer_connect_attrs(MYSQL *mysql)
+{
+#ifdef HAVE_PSI_THREAD_INTERFACE
+  if (mysql->options.extension &&
+      mysql->options.extension->connection_attributes_length)
+  {
+    uchar *buf, *ptr;
+    THD *thd= (THD*)mysql->thd;
+    size_t length= mysql->options.extension->connection_attributes_length;
+
+    /* 9 = max length of the serialized length */
+    ptr= buf= (uchar *) my_alloca(length + 9);
+    send_client_connect_attrs(mysql, buf);
+    net_field_length_ll(&ptr);
+    PSI_THREAD_CALL(set_thread_connect_attrs)((char *) ptr, length, thd->charset());
+    my_afree(buf);
+  }
+#endif
 }
 
 
@@ -717,6 +774,10 @@ int check_embedded_connection(MYSQL *mysql, const char *db)
   int result;
   LEX_STRING db_str = { (char*)db, db ? strlen(db) : 0 };
   THD *thd= (THD*)mysql->thd;
+
+  /* the server does the same as the client */
+  mysql->server_capabilities= mysql->client_flag;
+
   thd_init_client_charset(thd, mysql->charset->number);
   thd->update_charset();
   Security_context *sctx= thd->security_ctx;
@@ -726,6 +787,7 @@ int check_embedded_connection(MYSQL *mysql, const char *db)
   sctx->user= my_strdup(mysql->user, MYF(0));
   sctx->proxy_user[0]= 0;
   sctx->master_access= GLOBAL_ACLS;       // Full rights
+  emb_transfer_connect_attrs(mysql);
   /* Change database if necessary */
   if (!(result= (db && db[0] && mysql_change_db(thd, &db_str, FALSE))))
     my_ok(thd);
@@ -741,11 +803,17 @@ int check_embedded_connection(MYSQL *mysql, const char *db)
     we emulate a COM_CHANGE_USER user here,
     it's easier than to emulate the complete 3-way handshake
   */
-  char buf[USERNAME_LENGTH + SCRAMBLE_LENGTH + 1 + 2*NAME_LEN + 2], *end;
+  char *buf, *end;
   NET *net= &mysql->net;
   THD *thd= (THD*)mysql->thd;
   Security_context *sctx= thd->security_ctx;
+  size_t connect_attrs_len=
+    (mysql->server_capabilities & CLIENT_CONNECT_ATTRS &&
+     mysql->options.extension) ?
+    mysql->options.extension->connection_attributes_length : 0;
 
+  buf= my_alloca(USERNAME_LENGTH + SCRAMBLE_LENGTH + 1 + 2*NAME_LEN + 2 +
+                 connect_attrs_len + 2);
   if (mysql->options.client_ip)
   {
     sctx->host= my_strdup(mysql->options.client_ip, MYF(0));
@@ -778,6 +846,13 @@ int check_embedded_connection(MYSQL *mysql, const char *db)
   int2store(end, (ushort) mysql->charset->number);
   end+= 2;
 
+  end= strmake(end, "mysql_native_password", NAME_LEN) + 1;
+
+  /* the server does the same as the client */
+  mysql->server_capabilities= mysql->client_flag;
+
+  end= (char *) send_client_connect_attrs(mysql, (uchar *) end);
+
   /* acl_authenticate() takes the data from thd->net->read_pos */
   thd->net.read_pos= (uchar*)buf;
 
@@ -786,17 +861,20 @@ int check_embedded_connection(MYSQL *mysql, const char *db)
     x_free(thd->security_ctx->user);
     goto err;
   }
+  my_afree(buf);
   return 0;
 err:
   strmake(net->last_error, thd->main_da.message(), sizeof(net->last_error)-1);
   memcpy(net->sqlstate,
          mysql_errno_to_sqlstate(thd->main_da.sql_errno()),
          sizeof(net->sqlstate)-1);
+  my_afree(buf);
   return 1;
 }
 #endif
 
-C_MODE_END
+} // extern "C"
+
 
 void THD::clear_data_list()
 {
@@ -900,7 +978,7 @@ write_eof_packet(THD *thd, uint server_status, uint statement_warn_count)
     is cleared between substatements, and mysqltest gets confused
   */
   thd->cur_data->embedded_info->warning_count=
-    (thd->spcont ? 0 : min(statement_warn_count, 65535U));
+    (thd->sp_runtime_ctx ? 0 : min(statement_warn_count, 65535U));
   return FALSE;
 }
 

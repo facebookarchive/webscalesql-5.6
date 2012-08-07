@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # -*- cperl -*-
 
-# Copyright (c) 2004, 2011, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2004, 2012, Oracle and/or its affiliates. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -296,7 +296,7 @@ my $opt_valgrind_path;
 my $valgrind_reports= 0;
 my $opt_callgrind;
 my %mysqld_logs;
-my $opt_debug_sync_timeout= 300; # Default timeout for WAIT_FOR actions.
+my $opt_debug_sync_timeout= 600; # Default timeout for WAIT_FOR actions.
 
 sub testcase_timeout ($) {
   my ($tinfo)= @_;
@@ -411,7 +411,6 @@ sub main {
     unshift(@$tests, $tinfo);
   }
 
-  print "vardir: $opt_vardir\n";
   initialize_servers();
 
   #######################################################################
@@ -505,15 +504,17 @@ sub main {
   # Send Ctrl-C to any children still running
   kill("INT", keys(%children));
 
-  # Wait for childs to exit
-  foreach my $pid (keys %children)
-  {
-    my $ret_pid= waitpid($pid, 0);
-    if ($ret_pid != $pid){
-      mtr_report("Unknown process $ret_pid exited");
-    }
-    else {
-      delete $children{$ret_pid};
+  if (!IS_WINDOWS) {
+    # Wait for children to exit
+    foreach my $pid (keys %children)
+    {
+      my $ret_pid= waitpid($pid, 0);
+      if ($ret_pid != $pid){
+        mtr_report("Unknown process $ret_pid exited");
+      }
+      else {
+        delete $children{$ret_pid};
+      }
     }
   }
 
@@ -1454,7 +1455,7 @@ sub command_line_setup {
 
   # We make the path absolute, as the server will do a chdir() before usage
   unless ( $opt_vardir =~ m,^/, or
-           (IS_WINDOWS and $opt_vardir =~ m,^[a-z]:/,i) )
+           (IS_WINDOWS and $opt_vardir =~ m,^[a-z]:[/\\],i) )
   {
     # Make absolute path, relative test dir
     $opt_vardir= "$glob_mysql_test_dir/$opt_vardir";
@@ -1693,7 +1694,7 @@ sub command_line_setup {
     $opt_testcase_timeout*= 10;
     $opt_suite_timeout*= 6;
     $opt_start_timeout*= 10;
-
+    $opt_debug_sync_timeout*= 10;
   }
   elsif ( $opt_valgrind_mysqld )
   {
@@ -1734,6 +1735,10 @@ sub command_line_setup {
 
     mtr_report("Running valgrind with options \"",
 	       join(" ", @valgrind_args), "\"");
+    
+    # Turn off check testcases to save time
+    mtr_report("Turning off --check-testcases to save time when valgrinding");
+    $opt_check_testcases = 0; 
   }
 
   if ($opt_debug_common)
@@ -2114,6 +2119,14 @@ sub client_arguments ($;$) {
   return mtr_args2str($client_exe, @$args);
 }
 
+sub client_arguments_no_grp_suffix($) {
+  my $client_name= shift;
+  my $client_exe= mtr_exe_exists("$path_client_bindir/$client_name");
+  my $args;
+
+  return mtr_args2str($client_exe, @$args);
+}
+
 
 sub mysqlslap_arguments () {
   my $exe= mtr_exe_maybe_exists("$path_client_bindir/mysqlslap");
@@ -2297,7 +2310,9 @@ sub environment_setup {
   # --------------------------------------------------------------------------
   if ( !$opt_skip_ndbcluster )
   {
-    push(@ld_library_paths,  "$basedir/storage/ndb/src/.libs");
+    push(@ld_library_paths,  
+	 "$basedir/storage/ndb/src/.libs",
+	 "$basedir/storage/ndb/src");
   }
 
   # Plugin settings should no longer be added here, instead
@@ -2373,10 +2388,14 @@ sub environment_setup {
   if (IS_WINDOWS)
   {
     $ENV{'SECURE_LOAD_PATH'}= $glob_mysql_test_dir."\\std_data";
+    $ENV{'MYSQL_TEST_LOGIN_FILE'}=
+                              $opt_tmpdir . "\\.mylogin.cnf";
   }
   else
   {
     $ENV{'SECURE_LOAD_PATH'}= $glob_mysql_test_dir."/std_data";
+    $ENV{'MYSQL_TEST_LOGIN_FILE'}=
+                              $opt_tmpdir . "/.mylogin.cnf";
   }
     
 
@@ -2390,9 +2409,37 @@ sub environment_setup {
 		  ["storage/ndb/src/mgmclient", "bin"],
 		  "ndb_mgm");
 
-    $ENV{'NDB_TOOLS_DIR'}=
-      my_find_dir($bindir,
-		  ["storage/ndb/tools", "bin"]);
+    $ENV{'NDB_WAITER'}= $exe_ndb_waiter;
+
+    $ENV{'NDB_RESTORE'}=
+      my_find_bin($bindir,
+		  ["storage/ndb/tools", "bin"],
+		  "ndb_restore");
+
+    $ENV{'NDB_CONFIG'}=
+      my_find_bin($bindir,
+		  ["storage/ndb/tools", "bin"],
+		  "ndb_config");
+
+    $ENV{'NDB_SELECT_ALL'}=
+      my_find_bin($bindir,
+		  ["storage/ndb/tools", "bin"],
+		  "ndb_select_all");
+
+    $ENV{'NDB_DROP_TABLE'}=
+      my_find_bin($bindir,
+		  ["storage/ndb/tools", "bin"],
+		  "ndb_drop_table");
+
+    $ENV{'NDB_DESC'}=
+      my_find_bin($bindir,
+		  ["storage/ndb/tools", "bin"],
+		  "ndb_desc");
+
+    $ENV{'NDB_SHOW_TABLES'}=
+      my_find_bin($bindir,
+		  ["storage/ndb/tools", "bin"],
+		  "ndb_show_tables");
 
     $ENV{'NDB_EXAMPLES_DIR'}=
       my_find_dir($basedir,
@@ -2417,6 +2464,7 @@ sub environment_setup {
   $ENV{'MYSQL_SLAP'}=               mysqlslap_arguments();
   $ENV{'MYSQL_IMPORT'}=             client_arguments("mysqlimport");
   $ENV{'MYSQL_SHOW'}=               client_arguments("mysqlshow");
+  $ENV{'MYSQL_CONFIG_EDITOR'}=      client_arguments_no_grp_suffix("mysql_config_editor");
   $ENV{'MYSQL_BINLOG'}=             client_arguments("mysqlbinlog");
   $ENV{'MYSQL'}=                    client_arguments("mysql");
   $ENV{'MYSQL_SLAVE'}=              client_arguments("mysql", ".2");
@@ -2449,7 +2497,10 @@ sub environment_setup {
   my $file_mysql_fix_privilege_tables=
     mtr_file_exists("$basedir/scripts/mysql_fix_privilege_tables.sql",
 		    "$basedir/share/mysql_fix_privilege_tables.sql",
-		    "$basedir/share/mysql/mysql_fix_privilege_tables.sql");
+		    "$basedir/share/mysql/mysql_fix_privilege_tables.sql",
+                    "$bindir/scripts/mysql_fix_privilege_tables.sql",
+		    "$bindir/share/mysql_fix_privilege_tables.sql",
+		    "$bindir/share/mysql/mysql_fix_privilege_tables.sql");
   $ENV{'MYSQL_FIX_PRIVILEGE_TABLES'}=  $file_mysql_fix_privilege_tables;
 
   # ----------------------------------------------------
@@ -2787,7 +2838,7 @@ sub check_ndbcluster_support ($) {
     mtr_report(" - MySQL Cluster");
     # Enable ndb engine and add more test suites
     $opt_include_ndbcluster = 1;
-    $DEFAULT_SUITES.=",ndb";
+    $DEFAULT_SUITES.=",ndb,ndb_binlog,rpl_ndb,ndb_rpl,ndb_memcache";
   }
 
   if ($opt_include_ndbcluster)
@@ -2876,6 +2927,41 @@ sub ndbcluster_wait_started($$){
 }
 
 
+sub ndbcluster_dump($) {
+  my ($cluster)= @_;
+
+  print "\n== Dumping cluster log files\n\n";
+
+  # ndb_mgmd(s)
+  foreach my $ndb_mgmd ( in_cluster($cluster, ndb_mgmds()) )
+  {
+    my $datadir = $ndb_mgmd->value('DataDir');
+
+    # Should find ndb_<nodeid>_cluster.log and ndb_mgmd.log
+    foreach my $file ( glob("$datadir/ndb*.log") )
+    {
+      print "$file:\n";
+      mtr_printfile("$file");
+      print "\n";
+    }
+  }
+
+  # ndb(s)
+  foreach my $ndbd ( in_cluster($cluster, ndbds()) )
+  {
+    my $datadir = $ndbd->value('DataDir');
+
+    # Should find ndbd.log
+    foreach my $file ( glob("$datadir/ndbd.log") )
+    {
+      print "$file:\n";
+      mtr_printfile("$file");
+      print "\n";
+    }
+  }
+}
+
+
 sub ndb_mgmd_wait_started($) {
   my ($cluster)= @_;
 
@@ -2938,6 +3024,7 @@ sub ndb_mgmd_start ($$) {
   mtr_add_arg($args, "--defaults-group-suffix=%s", $cluster->suffix());
   mtr_add_arg($args, "--mycnf");
   mtr_add_arg($args, "--nodaemon");
+  mtr_add_arg($args, "--configdir=%s", "$dir");
 
   my $path_ndb_mgmd_log= "$dir/ndb_mgmd.log";
 
@@ -3013,6 +3100,126 @@ sub ndbd_start {
   $ndbd->{proc}= $proc;
 
   return;
+}
+
+
+sub memcached_start {
+  my ($cluster, $memcached) = @_;
+
+  my $name = $memcached->name();
+  mtr_verbose("memcached_start '$name'");
+
+  my $found_perl_source = my_find_file($basedir,
+     ["storage/ndb/memcache",        # source
+      "mysql-test/lib",              # install
+      "share/mysql-test/lib"],       # install
+      "memcached_path.pl", NOT_REQUIRED);
+
+  mtr_verbose("Found memcache script: '$found_perl_source'");
+  $found_perl_source ne "" or return;
+
+  my $found_so = my_find_file($bindir,
+    ["storage/ndb/memcache",        # source or build
+     "lib", "lib64"],               # install
+    "ndb_engine.so");
+  mtr_verbose("Found memcache plugin: '$found_so'");
+
+  require "$found_perl_source";
+  if(! memcached_is_available())
+  {
+    mtr_error("Memcached not available.");
+  }
+  my $exe = "";
+  if(memcached_is_bundled())
+  {
+    $exe = my_find_bin($bindir,
+    ["libexec", "sbin", "bin", "storage/ndb/memcache/extra/memcached"],
+    "memcached", NOT_REQUIRED);
+  }
+  else
+  {
+    $exe = get_memcached_exe_path();
+  }
+  $exe ne "" or mtr_error("Failed to find memcached.");
+
+  my $args;
+  mtr_init_args(\$args);
+  # TCP port number to listen on
+  mtr_add_arg($args, "-p %d", $memcached->value('port'));
+  # Max simultaneous connections
+  mtr_add_arg($args, "-c %d", $memcached->value('max_connections'));
+  # Load engine as storage engine, ie. /path/ndb_engine.so
+  mtr_add_arg($args, "-E");
+  mtr_add_arg($args, $found_so);
+  # Config options for loaded storage engine
+  {
+    my @opts;
+    push(@opts, "connectstring=" . $memcached->value('ndb_connectstring'));
+    push(@opts, $memcached->if_exist("options"));
+    mtr_add_arg($args, "-e");
+    mtr_add_arg($args, join(";", @opts));
+  }
+
+  if($opt_gdb)
+  {
+    gdb_arguments(\$args, \$exe, "memcached");
+  }
+
+  my $proc = My::SafeProcess->new
+  ( name     =>  $name,
+    path     =>  $exe,
+    args     => \$args,
+    output   =>  "$opt_vardir/log/$name.out",
+    error    =>  "$opt_vardir/log/$name.out",
+    append   =>  1,
+    verbose  => $opt_verbose,
+  );
+  mtr_verbose("Started $proc");
+
+  $memcached->{proc} = $proc;
+
+  return;
+}
+
+
+sub memcached_load_metadata($) {
+  my $cluster= shift;
+
+  foreach my $mysqld (mysqlds())
+  {
+    if(-d $mysqld->value('datadir') . "/" . "ndbmemcache")
+    {
+      mtr_verbose("skipping memcache metadata (already stored)");
+      return;
+    }
+  }
+
+  my $sql_script= my_find_file($bindir,
+                              ["share/mysql/memcache-api", # RPM install
+                               "share/memcache-api",       # Other installs
+                               "scripts"                   # Build tree
+                              ],
+                              "ndb_memcache_metadata.sql", NOT_REQUIRED);
+  mtr_verbose("memcached_load_metadata: '$sql_script'");
+  if (-f $sql_script )
+  {
+    my $args;
+    mtr_init_args(\$args);
+    mtr_add_arg($args, "--defaults-file=%s", $path_config_file);
+    mtr_add_arg($args, "--defaults-group-suffix=%s", $cluster->suffix());
+    mtr_add_arg($args, "--connect-timeout=20");
+    if ( My::SafeProcess->run(
+           name   => "ndbmemcache config loader",
+           path   => $exe_mysql,
+           args   => \$args,
+           input  => $sql_script,
+           output => "$opt_vardir/log/memcache_config.log",
+           error  => "$opt_vardir/log/memcache_config.log"
+       ) != 0)
+    {
+      mtr_error("Could not load ndb_memcache_metadata.sql file");
+    }
+  }
 }
 
 
@@ -3835,6 +4042,8 @@ sub resfile_report_test ($) {
 sub run_testcase ($) {
   my $tinfo=  shift;
 
+  my $print_freq=20;
+
   mtr_verbose("Running test:", $tinfo->{name});
   resfile_report_test($tinfo) if $opt_resfile;
 
@@ -3993,6 +4202,7 @@ sub run_testcase ($) {
   my $test= start_mysqltest($tinfo);
   # Set only when we have to keep waiting after expectedly died server
   my $keep_waiting_proc = 0;
+  my $print_timeout= start_timer($print_freq * 60);
 
   while (1)
   {
@@ -4017,7 +4227,22 @@ sub run_testcase ($) {
     }
     if (! $keep_waiting_proc)
     {
-      $proc= My::SafeProcess->wait_any_timeout($test_timeout);
+      if($test_timeout > $print_timeout)
+      {
+         $proc= My::SafeProcess->wait_any_timeout($print_timeout);
+         if ( $proc->{timeout} )
+         {
+            #print out that the test is still on
+            mtr_print("Test still running: $tinfo->{name}");
+            #reset the timer
+            $print_timeout= start_timer($print_freq * 60);
+            next;
+         }
+      }
+      else
+      {
+         $proc= My::SafeProcess->wait_any_timeout($test_timeout);
+      }
     }
 
     # Will be restored if we need to keep waiting
@@ -4170,7 +4395,7 @@ sub run_testcase ($) {
     }
 
     # Try to dump core for mysqltest and all servers
-    foreach my $proc ($test, started(all_servers())) 
+    foreach my $proc ($test, started(all_servers()))
     {
       mtr_print("Trying to dump core for $proc");
       if ($proc->dump_core())
@@ -5196,8 +5421,8 @@ sub mysqlds { return _like('mysqld.'); }
 sub ndbds   { return _like('cluster_config.ndbd.');}
 sub ndb_mgmds { return _like('cluster_config.ndb_mgmd.'); }
 sub clusters  { return _like('mysql_cluster.'); }
-sub all_servers { return ( mysqlds(), ndb_mgmds(), ndbds() ); }
-
+sub memcacheds { return _like('memcached.'); }
+sub all_servers { return ( mysqlds(), ndb_mgmds(), ndbds(), memcacheds() ); }
 
 #
 # Filter a list of servers and return only those that are part
@@ -5269,7 +5494,7 @@ sub stop_servers($$) {
 
     # cluster processes
     My::SafeProcess::shutdown( $opt_shutdown_timeout,
-			       started(ndbds(), ndb_mgmds()) );
+			       started(ndbds(), ndb_mgmds(), memcacheds()) );
   }
   else
   {
@@ -5429,6 +5654,13 @@ sub start_servers($) {
     {
       # failed to start
       $tinfo->{'comment'}= "Start of '".$cluster->name()."' cluster failed";
+
+      #
+      # Dump cluster log files to log file to help analyze the
+      # cause of the failed start
+      #
+      ndbcluster_dump($cluster);
+
       return 1;
     }
   }
@@ -5457,6 +5689,23 @@ sub start_servers($) {
       return 1;
     }
   }
+
+  # Start memcached(s) for each cluster
+  foreach my $cluster ( clusters() )
+  {
+    next if !in_cluster($cluster, memcacheds());
+
+    # Load the memcache metadata into this cluster
+    memcached_load_metadata($cluster);
+
+    # Start memcached(s)
+    foreach my $memcached ( in_cluster($cluster, memcacheds()))
+    {
+      next if started($memcached);
+      memcached_start($cluster, $memcached);
+    }
+  }
+
   return 0;
 }
 

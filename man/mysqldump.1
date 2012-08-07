@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqldump\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 03/29/2012
+.\"      Date: 07/17/2012
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLDUMP\FR" "1" "03/29/2012" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLDUMP\FR" "1" "07/17/2012" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -36,6 +36,17 @@ client is a utility that performs
 logical backups, producing a set of SQL statements that can be run to reproduce the original schema objects, table data, or both\&. It dumps one or more MySQL database for backup or transfer to another SQL server\&. The
 \fBmysqldump\fR
 command can also generate output in CSV, other delimited text, or XML format\&.
+.PP
+\fBmysqldump\fR
+requires at least the
+SELECT
+privilege for dumped tables,
+SHOW VIEW
+for dumped views, and
+LOCK TABLES
+if the
+\fB\-\-single\-transaction\fR
+option is not used\&. Certain options might require other privileges as noted in the option descriptions\&.
         Performance and Scalability Considerations
       .PP
 mysqldump
@@ -110,7 +121,7 @@ option\&.
 .PP
 For additional information about
 \fBmysqldump\fR, see
-Section\ \&6.4, \(lqUsing mysqldump for Backups\(rq\&.
+Section\ \&7.4, \(lqUsing mysqldump for Backups\(rq\&.
         Syntax
       .PP
 There are three general ways to invoke
@@ -202,7 +213,7 @@ Compress all information sent between the client and the server if both support 
 \fB\-\-default\-auth=\fR\fB\fIplugin\fR\fR
 .sp
 The client\-side authentication plugin to use\&. See
-Section\ \&5.5.6, \(lqPluggable Authentication\(rq\&.
+Section\ \&6.3.6, \(lqPluggable Authentication\(rq\&.
 .RE
 .sp
 .RS 4
@@ -248,7 +259,7 @@ option on the command line,
 prompts for one\&.
 .sp
 Specifying a password on the command line should be considered insecure\&. See
-Section\ \&5.3.2.2, \(lqEnd-User Guidelines for Password Security\(rq\&. You can use an option file to avoid giving the password on the command line\&.
+Section\ \&6.1.2.2, \(lqEnd-User Guidelines for Password Security\(rq\&. You can use an option file to avoid giving the password on the command line\&.
 .RE
 .sp
 .RS 4
@@ -284,7 +295,7 @@ The directory in which to look for plugins\&. It may be necessary to specify thi
 option is used to specify an authentication plugin but
 \fBmysqldump\fR
 does not find it\&. See
-Section\ \&5.5.6, \(lqPluggable Authentication\(rq\&.
+Section\ \&6.3.6, \(lqPluggable Authentication\(rq\&.
 .RE
 .sp
 .RS 4
@@ -351,7 +362,7 @@ localhost, the Unix socket file to use, or, on Windows, the name of the named pi
 Options that begin with
 \fB\-\-ssl\fR
 specify whether to connect to the server using SSL and indicate where to find SSL keys and certificates\&. See
-Section\ \&5.5.8.3, \(lqSSL Command Options\(rq\&.
+Section\ \&6.3.8.3, \(lqSSL Command Options\(rq\&.
 .RE
 .sp
 .RS 4
@@ -853,7 +864,7 @@ command represents character data with national language settings\&.
 \fB\-\-character\-sets\-dir=\fR\fB\fIpath\fR\fR
 .sp
 The directory where character sets are installed\&. See
-Section\ \&9.5, \(lqCharacter Set Configuration\(rq\&.
+Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&.
 .RE
 .sp
 .RS 4
@@ -871,7 +882,7 @@ Section\ \&9.5, \(lqCharacter Set Configuration\(rq\&.
 Use
 \fIcharset_name\fR
 as the default character set\&. See
-Section\ \&9.5, \(lqCharacter Set Configuration\(rq\&. If no character set is specified,
+Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&. If no character set is specified,
 \fBmysqldump\fR
 uses
 utf8, and earlier versions use
@@ -1200,7 +1211,7 @@ to point the slave to the correct master server host\&. Add any such parameters 
 .RE
 .RS 4
 Prior to MySQL 5\&.6\&.4, this option was required for dumping the replication log tables (see
-Section\ \&15.2.2, \(lqReplication Relay and Status Logs\(rq)\&.
+Section\ \&16.2.2, \(lqReplication Relay and Status Logs\(rq)\&.
 .RE
         Format Options
       .PP
@@ -1324,7 +1335,7 @@ option and have the same meaning as the corresponding
 FIELDS
 clauses for
 LOAD DATA INFILE\&. See
-Section\ \&12.2.6, \(lqLOAD DATA INFILE Syntax\(rq\&.
+Section\ \&13.2.6, \(lqLOAD DATA INFILE Syntax\(rq\&.
 .RE
 .sp
 .RS 4
@@ -1368,7 +1379,7 @@ option and has the same meaning as the corresponding
 LINES
 clause for
 LOAD DATA INFILE\&. See
-Section\ \&12.2.6, \(lqLOAD DATA INFILE Syntax\(rq\&.
+Section\ \&13.2.6, \(lqLOAD DATA INFILE Syntax\(rq\&.
 .RE
 .sp
 .RS 4
@@ -1607,11 +1618,11 @@ Collation="latin1_swedish_ci" Create_options="" Comment="" />
 .if n \{\
 .RE
 .\}
-.RE
-.PP
+.sp
 Prior to MySQL 5\&.6\&.5, this option prevented the
 \fB\-\-routines\fR
 option from working correctly\(emthat is, no stored routines, triggers, or events could be dumped in XML format\&. (Bug #11760384, Bug #52792)
+.RE
         Filtering Options
       .PP
 The following options control which kinds of schema objects are written to the dump file: by category, such as triggers or events; by name, for example, choosing which databases and tables to dump; or even filtering rows from the table data using a
@@ -1640,7 +1651,7 @@ slave_master_info
 and
 slave_relay_log_info
 tables (see
-Section\ \&15.2.2, \(lqReplication Relay and Status Logs\(rq) were not included by this option\&.
+Section\ \&16.2.2, \(lqReplication Relay and Status Logs\(rq) were not included by this option\&.
 .RE
 .sp
 .RS 4
@@ -2003,7 +2014,7 @@ LOCK TABLES
 and
 UNLOCK TABLES
 statements\&. This results in faster inserts when the dump file is reloaded\&. See
-Section\ \&7.2.2.1, \(lqSpeed of INSERT Statements\(rq\&.
+Section\ \&8.2.2.1, \(lqSpeed of INSERT Statements\(rq\&.
 .RE
 .sp
 .RS 4
@@ -2375,8 +2386,8 @@ InnoDB
 storage engine\&.
 .PP
 For more information on making backups, see
-Section\ \&6.2, \(lqDatabase Backup Methods\(rq, and
-Section\ \&6.3, \(lqExample Backup and Recovery Strategy\(rq\&.
+Section\ \&7.2, \(lqDatabase Backup Methods\(rq, and
+Section\ \&7.3, \(lqExample Backup and Recovery Strategy\(rq\&.
 .sp
 .RS 4
 .ie n \{\
@@ -2433,6 +2444,21 @@ option\&.
 never dumps the
 performance_schema
 database\&.
+.PP
+Before MySQL 5\&.6\&.6,
+\fBmysqldump\fR
+does not dump the
+general_log
+or
+slow_query_log
+tables for dumps of the
+mysql
+database\&. As of 5\&.6\&.6, the dump includes statements to recreate those tables so that they are not missing after reloading the dump file\&. Log table contents are not dumped\&.
+.PP
+It is not recommended to restore from a dump made using
+\fBmysqldump\fR
+to a MySQL Server that has GTIDs enabled\&. See
+Section\ \&16.1.3.3, \(lqRestrictions on Replication with GTIDs\(rq\&.
 .PP
 If you encounter problems backing up views due to insufficient privileges, see
 Section\ \&E.5, \(lqRestrictions on Views\(rq

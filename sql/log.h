@@ -1,4 +1,4 @@
-/* Copyright (c) 2005, 2011, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2005, 2011, 2012 Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -19,9 +19,31 @@
 #include "unireg.h"                    // REQUIRED: for other includes
 #include "handler.h"                            /* my_xid */
 
-/*
-  Transaction Coordinator log - a base abstract class
-  for two different implementations
+/**
+  the struct aggregates two paramenters that identify an event
+  uniquely in scope of communication of a particular master and slave couple.
+  I.e there can not be 2 events from the same staying connected master which
+  have the same coordinates.
+  @note
+  Such identifier is not yet unique generally as the event originating master
+  is resetable. Also the crashed master can be replaced with some other.
+*/
+typedef struct event_coordinates
+{
+  char * file_name; // binlog file name (directories stripped)
+  my_off_t  pos;       // event's position in the binlog file
+} LOG_POS_COORD;
+
+/**
+  Transaction Coordinator Log.
+
+  A base abstract class for three different implementations of the
+  transaction coordinator.
+
+  The server uses the transaction coordinator to order transactions
+  correctly and there are three different implementations: one using
+  an in-memory structure, one dummy that does not do anything, and one
+  using the binary log for transaction coordination.
 */
 class TC_LOG
 {
@@ -30,11 +52,58 @@ class TC_LOG
   TC_LOG() {}
   virtual ~TC_LOG() {}
 
+  enum enum_result {
+    RESULT_SUCCESS,
+    RESULT_ABORTED,
+    RESULT_INCONSISTENT
+  };
+
   virtual int open(const char *opt_name)=0;
   virtual void close()=0;
-  virtual int log_xid(THD *thd, my_xid xid)=0;
-  virtual int unlog(ulong cookie, my_xid xid)=0;
+
+  /**
+     Log a commit record of the transaction to the transaction
+     coordinator log.
+
+     When the function returns, the transaction commit is properly
+     logged to the transaction coordinator log and can be committed in
+     the storage engines.
+
+     @param thd Session to log transaction for.
+     @param all @c True if this is a "real" commit, @c false if it is a "statement" commit.
+
+     @return Error code on failure, zero on success.
+   */
+  virtual enum_result commit(THD *thd, bool all) = 0;
+
+  /**
+     Log a rollback record of the transaction to the transaction
+     coordinator log.
+
+     When the function returns, the transaction have been aborted in
+     the transaction coordinator log.
+
+     @param thd Session to log transaction record for.
+
+     @param all @c true if an explicit commit or an implicit commit
+     for a statement, @c false if an internal commit of the statement.
+
+     @return Error code on failure, zero on success.
+   */
+  virtual int rollback(THD *thd, bool all) = 0;
+  /**
+     Log a prepare record of the transaction to the storage engines.
+
+     @param thd Session to log transaction record for.
+
+     @param all @c true if an explicit commit or an implicit commit
+     for a statement, @c false if an internal commit of the statement.
+
+     @return Error code on failure, zero on success.
+   */
+  virtual int prepare(THD *thd, bool all) = 0;
 };
+
 
 class TC_LOG_DUMMY: public TC_LOG // use it to disable the logging
 {
@@ -42,8 +111,15 @@ public:
   TC_LOG_DUMMY() {}
   int open(const char *opt_name)        { return 0; }
   void close()                          { }
-  int log_xid(THD *thd, my_xid xid)         { return 1; }
-  int unlog(ulong cookie, my_xid xid)  { return 0; }
+  enum_result commit(THD *thd, bool all) {
+    return ha_commit_low(thd, all) ? RESULT_ABORTED : RESULT_SUCCESS;
+  }
+  int rollback(THD *thd, bool all) {
+    return ha_rollback_low(thd, all);
+  }
+  int prepare(THD *thd, bool all) {
+    return ha_prepare_low(thd, all);
+  }
 };
 
 #ifdef HAVE_MMAP
@@ -87,11 +163,14 @@ class TC_LOG_MMAP: public TC_LOG
   TC_LOG_MMAP(): inited(0) {}
   int open(const char *opt_name);
   void close();
-  int log_xid(THD *thd, my_xid xid);
-  int unlog(ulong cookie, my_xid xid);
+  enum_result commit(THD *thd, bool all);
+  int rollback(THD *thd, bool all)      { return ha_rollback_low(thd, all); }
+  int prepare(THD *thd, bool all)       { return ha_prepare_low(thd, all); }
   int recover();
 
-  private:
+private:
+  int log_xid(THD *thd, my_xid xid);
+  int unlog(ulong cookie, my_xid xid);
   void get_active_from_pool();
   int sync();
   int overflow();
@@ -137,6 +216,11 @@ extern TC_LOG_DUMMY tc_log_dummy;
 extern PSI_mutex_key key_LOG_INFO_lock;
 #endif
 
+/*
+  Note that we destroy the lock mutex in the desctructor here.
+  This means that object instances cannot be destroyed/go out of scope,
+  until we have reset thd->current_linfo to NULL;
+ */
 typedef struct st_log_info
 {
   char log_file_name[FN_REFLEN];
@@ -213,6 +297,8 @@ public:
 #ifdef HAVE_PSI_INTERFACE
   /** Instrumentation key to use for file io in @c log_file */
   PSI_file_key m_log_file_key;
+  /** The instrumentation key to use for @ LOCK_log. */
+  PSI_mutex_key m_key_LOCK_log;
 #endif
 };
 
@@ -313,8 +399,6 @@ int check_if_log_table(size_t db_len, const char *db, size_t table_name_len,
 
 class Log_to_csv_event_handler: public Log_event_handler
 {
-  friend class LOGGER;
-
 public:
   Log_to_csv_event_handler();
   ~Log_to_csv_event_handler();

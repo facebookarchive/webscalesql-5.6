@@ -51,7 +51,7 @@ create table t1 like `a/a`;
 drop table `a/a`;
 drop table `t1`;
 create table `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa int);
-ERROR 42000: Incorrect table name 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+ERROR 42000: Identifier name 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' is too long
 create table a (`aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` int);
 ERROR 42000: Identifier name 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' is too long
 create table t1 (a int default 100 auto_increment);
@@ -458,7 +458,7 @@ a	b	c	d	e	f	g	h	dd
 1	-7	7	2000-01-01	b	2000-01-01 00:00:00	05:04:03	yet another binary data	02:00:00
 2	-2	2	1825-12-14	a	2003-01-01 03:02:01	04:03:02	binary data	02:00:00
 drop table t1, t2;
-create table t1 (a tinyint, b smallint, c mediumint, d int, e bigint, f float(3,2), g double(4,3), h decimal(5,4), i year, j date, k timestamp, l datetime, m enum('a','b'), n set('a','b'), o char(10));
+create table t1 (a tinyint, b smallint, c mediumint, d int, e bigint, f float(3,2), g double(4,3), h decimal(5,4), i year, j date, k timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, l datetime, m enum('a','b'), n set('a','b'), o char(10));
 create table t2 select ifnull(a,a), ifnull(b,b), ifnull(c,c), ifnull(d,d), ifnull(e,e), ifnull(f,f), ifnull(g,g), ifnull(h,h), ifnull(i,i), ifnull(j,j), ifnull(k,k), ifnull(l,l), ifnull(m,m), ifnull(n,n), ifnull(o,o) from t1;
 show create table t2;
 Table	Create Table
@@ -1616,13 +1616,13 @@ a	b
 1	1
 drop table t1,t2;
 CREATE DATABASE aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
-ERROR 42000: Incorrect database name 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+ERROR 42000: Identifier name 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' is too long
 DROP DATABASE aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
-ERROR 42000: Incorrect database name 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+ERROR 42000: Identifier name 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' is too long
 USE aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
-ERROR 42000: Incorrect database name 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+ERROR 42000: Identifier name 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' is too long
 SHOW CREATE DATABASE aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
-ERROR 42000: Incorrect database name 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+ERROR 42000: Identifier name 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' is too long
 set names utf8;
 create database имя_базы_в_кодировке_утф8_длиной_больше_чем_45;
 use имя_базы_в_кодировке_утф8_длиной_больше_чем_45;
@@ -1819,14 +1819,16 @@ DROP TABLE IF EXISTS t1;
 DROP TABLE IF EXISTS t2;
 DROP TABLE IF EXISTS t3;
 
-CREATE TABLE t1(c1 TIMESTAMP, c2 TIMESTAMP);
+CREATE TABLE t1(c1 TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, c2 TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00');
 
 SET sql_mode = NO_ZERO_DATE;
 
 CREATE TABLE t2(c1 TIMESTAMP, c2 TIMESTAMP DEFAULT 0);
-ERROR 42000: Invalid default value for 'c2'
+Warnings:
+Warning	1264	Out of range value for column 'c2' at row 1
+DROP TABLE t2;
 
-CREATE TABLE t2(c1 TIMESTAMP, c2 TIMESTAMP);
+CREATE TABLE t2(c1 TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, c2 TIMESTAMP NOT NULL);
 ERROR 42000: Invalid default value for 'c2'
 
 # -- Check that NULL column still can be created.
@@ -1834,7 +1836,8 @@ CREATE TABLE t2(c1 TIMESTAMP NULL);
 
 # -- Check ALTER TABLE.
 ALTER TABLE t1 ADD INDEX(c1);
-ERROR 42000: Invalid default value for 'c2'
+Warnings:
+Warning	1264	Out of range value for column 'c2' at row 1
 
 # -- Check DATETIME.
 SET sql_mode = '';
@@ -2453,3 +2456,11 @@ drop function f;
 #
 CREATE TABLE t1 (v varchar(65535));
 ERROR 42000: Row size too large. The maximum row size for the used table type, not counting BLOBs, is 65535. This includes storage overhead, check the manual. You have to change some columns to TEXT or BLOBs
+#
+# Bug#11746295 - 25168: "INCORRECT TABLE NAME" INSTEAD OF "IDENTIFIER TOO
+#                       LONG" IF TABLE NAME > 64 CHARACTERS
+#
+CREATE TABLE t01234567890123456789012345678901234567890123456789012345678901234567890123456789(a int);
+ERROR 42000: Identifier name 't01234567890123456789012345678901234567890123456789012345678901234567890123456789' is too long
+CREATE DATABASE t01234567890123456789012345678901234567890123456789012345678901234567890123456789;
+ERROR 42000: Identifier name 't01234567890123456789012345678901234567890123456789012345678901234567890123456789' is too long

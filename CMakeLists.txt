@@ -1,4 +1,4 @@
-# Copyright (c) 2006, 2011, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2006, 2012, Oracle and/or its affiliates. All rights reserved.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -92,10 +92,20 @@ ELSE()
 ENDIF()
 PROJECT(${MYSQL_PROJECT_NAME})
 
+OPTION(WITH_DEFAULT_COMPILER_OPTIONS
+  "Use flags from cmake/build_configurations/compiler_options.cmake"
+  ON)
+OPTION(WITH_DEFAULT_FEATURE_SET
+  "Use feature set in cmake/build_configurations/feature_set.cmake"
+  ON)
 IF(BUILD_CONFIG)
   INCLUDE(
   ${CMAKE_SOURCE_DIR}/cmake/build_configurations/${BUILD_CONFIG}.cmake)
 ENDIF()
+
+#cmake on 64 bit windows doesn't set CMAKE_SYSTEM_PROCESSOR correctly
+SET(MYSQL_MACHINE_TYPE ${CMAKE_SYSTEM_PROCESSOR})
+
 
 # Include the platform-specific file. To allow exceptions, this code
 # looks for files in order of how specific they are. If there is, for
@@ -115,11 +125,27 @@ FOREACH(_base
 ENDFOREACH()
 
 
-
+IF(UNIX)
+  OPTION(WITH_INNODB_MEMCACHED "" OFF)
+  OPTION(ENABLE_MEMCACHED_SASL "Enable SASL on InnoDB Memcached" OFF)
+  OPTION(ENABLE_MEMCACHED_SASL_PWDB "Enable SASL on InnoDB Memcached" OFF)
+ELSE()
+  OPTION(WITH_INNODB_MEMCACHED "" OFF)
+ENDIF()
+ 
 # Following autotools tradition, add preprocessor definitions
 # specified in environment variable CPPFLAGS
 IF(DEFINED ENV{CPPFLAGS})
   ADD_DEFINITIONS($ENV{CPPFLAGS})
+ENDIF()
+
+INCLUDE(CheckTypeSize)
+CHECK_TYPE_SIZE("void *" SIZEOF_VOIDP)
+IF(WITH_DEFAULT_COMPILER_OPTIONS)
+  INCLUDE(${CMAKE_SOURCE_DIR}/cmake/build_configurations/compiler_options.cmake)
+ENDIF()
+IF(WITH_DEFAULT_FEATURE_SET)
+  INCLUDE(${CMAKE_SOURCE_DIR}/cmake/build_configurations/feature_set.cmake)
 ENDIF()
 
 #
@@ -134,7 +160,11 @@ OPTION(MYSQL_MAINTAINER_MODE
 # Whether the maintainer mode compiler options should be enabled.
 IF(MYSQL_MAINTAINER_MODE)
   IF(CMAKE_C_COMPILER_ID MATCHES "GNU")
-    SET_MYSQL_MAINTAINER_GNU_C_OPTIONS()
+    IF(WITH_INNODB_MEMCACHED)
+      SET_MYSQL_MAINTAINER_GNU_C_OPTIONS_NO_WERROR()
+    ELSE()
+      SET_MYSQL_MAINTAINER_GNU_C_OPTIONS()
+    ENDIF()
   ENDIF()
   IF(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     SET_MYSQL_MAINTAINER_GNU_CXX_OPTIONS()
@@ -149,7 +179,9 @@ ENDIF()
 
 # Add macros
 INCLUDE(character_sets)
+INCLUDE(cpu_info)
 INCLUDE(zlib)
+INCLUDE(libevent)
 INCLUDE(ssl)
 INCLUDE(readline)
 INCLUDE(mysql_version)
@@ -176,18 +208,32 @@ ENDIF()
 OPTION (WITH_UNIT_TESTS "Compile MySQL with unit tests" ON)
 MARK_AS_ADVANCED(CYBOZU BACKUP_TEST WITHOUT_SERVER DISABLE_SHARED)
 
- 
 OPTION(ENABLE_DEBUG_SYNC "Enable debug sync (debug builds only)" ON) 
 IF(ENABLE_DEBUG_SYNC) 
   SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DENABLED_DEBUG_SYNC") 
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DENABLED_DEBUG_SYNC") 
 ENDIF() 
  
+# Older versions of ccache must be disabled: export CCACHE_DISABLE=1
+# See http://www.cmake.org/Wiki/CTest/Coverage
 OPTION(ENABLE_GCOV "Enable gcov (debug, Linux builds only)" OFF)
 IF (ENABLE_GCOV AND NOT WIN32 AND NOT APPLE)
-  SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
-  SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
-  SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage -lgcov")
+  SET(CMAKE_CXX_FLAGS_DEBUG
+    "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage -DHAVE_GCOV")
+  SET(CMAKE_C_FLAGS_DEBUG
+    "${CMAKE_C_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage -DHAVE_GCOV")
+  SET(CMAKE_EXE_LINKER_FLAGS_DEBUG
+    "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage -lgcov")
+ENDIF()
+
+OPTION(ENABLE_GPROF "Enable gprof (optimized, Linux builds only)" OFF)
+IF (ENABLE_GPROF AND NOT WIN32 AND NOT APPLE)
+  SET(CMAKE_C_FLAGS_RELWITHDEBINFO
+    "${CMAKE_C_FLAGS_RELWITHDEBINFO} -pg")
+  SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO
+    "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -pg")
+  SET(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO
+    "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} -pg")
 ENDIF()
 
 OPTION(ENABLED_LOCAL_INFILE
@@ -228,7 +274,7 @@ ENDIF()
 
 # Add safemutex for debug configurations, except on Windows
 # (safemutex has never worked on Windows)
-IF(WITH_DEBUG AND NOT WIN32)
+IF(WITH_DEBUG AND NOT WIN32 AND NOT WITH_INNODB_MEMCACHED)
   FOREACH(LANG C CXX)
       SET(CMAKE_${LANG}_FLAGS_DEBUG
           "${CMAKE_${LANG}_FLAGS_DEBUG} -DSAFE_MUTEX")
@@ -267,15 +313,20 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # Add bundled or system zlib.
 MYSQL_CHECK_ZLIB_WITH_COMPRESS()
-# Optionally add bundled yassl/taocrypt or system openssl.
+# Add bundled yassl/taocrypt or system openssl.
 MYSQL_CHECK_SSL()
 # Add readline or libedit.
 MYSQL_CHECK_READLINE()
+# Add libevent
+MYSQL_CHECK_LIBEVENT()
 
 #
 # Setup maintainer mode options by the end. Platform checks are
 # not run with the warning options as to not perturb fragile checks
 # (i.e. do not make warnings into errors).
+#
+# Why doesn't these flags affect the entire build?
+# Because things may already have been included with ADD_SUBDIRECTORY
 #
 IF(MYSQL_MAINTAINER_MODE)
   # Set compiler flags required under maintainer mode.
@@ -309,6 +360,7 @@ ADD_SUBDIRECTORY(strings)
 ADD_SUBDIRECTORY(vio)
 ADD_SUBDIRECTORY(regex)
 ADD_SUBDIRECTORY(mysys)
+ADD_SUBDIRECTORY(mysys_ssl)
 ADD_SUBDIRECTORY(libmysql)
 
 IF(WITH_UNIT_TESTS)

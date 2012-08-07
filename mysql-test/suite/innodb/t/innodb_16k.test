@@ -1,3 +1,5 @@
+#Want to skip this test from daily Valgrind execution
+--source include/no_valgrind_without_big.inc
 # Tests for setting innodb-page-size=16k; default value
 
 --source include/have_innodb.inc
@@ -5,6 +7,8 @@
 SET default_storage_engine=InnoDB;
 
 --disable_query_log
+let $MYSQLD_DATADIR= `select @@datadir`;
+
 # These values can change during the test
 let $innodb_file_format_orig = `SELECT @@innodb_file_format`;
 let $innodb_file_format_max_orig = `SELECT @@innodb_file_format_max`;
@@ -25,8 +29,9 @@ SELECT variable_value FROM information_schema.global_status
 SELECT variable_value FROM information_schema.global_status
        WHERE LOWER(variable_name) = 'innodb_buffer_pool_pages_total';
 
---echo # Test 3) The root page numbers are dependent upon the page size.
---echo #         Pulled from innodb-system-table-view.test
+--echo # Test 3) Query some information_shema tables that are dependent upon
+--echo #         the page size.
+# Pulled from innodb-system-table-view.test
 # The IDs of mysql.innodb_table_stats and mysql.innodb_index_stats are
 # unpredictable, probably they on whether mtr has created the database for
 # this test from scratch or is using a previously created database where
@@ -37,8 +42,26 @@ SELECT variable_value FROM information_schema.global_status
 --disable_query_log
 --let table_stats_id = `SELECT table_id FROM information_schema.innodb_sys_tables WHERE name = 'mysql/innodb_table_stats'`
 --let index_stats_id = `SELECT table_id FROM information_schema.innodb_sys_tables WHERE name = 'mysql/innodb_index_stats'`
---eval SELECT * FROM INFORMATION_SCHEMA.INNODB_SYS_INDEXES WHERE table_id NOT IN ($table_stats_id, $index_stats_id)
+--let $rep_table_1 = `SELECT table_id FROM information_schema.innodb_sys_tables WHERE name = 'mysql/slave_master_info'`
+--let $rep_table_2 = `SELECT table_id FROM information_schema.innodb_sys_tables WHERE name = 'mysql/slave_relay_log_info'`
+--let $rep_table_3 = `SELECT table_id FROM information_schema.innodb_sys_tables WHERE name = 'mysql/slave_worker_info'`
+--eval SELECT * FROM INFORMATION_SCHEMA.INNODB_SYS_INDEXES WHERE table_id NOT IN ($table_stats_id, $index_stats_id, $rep_table_1, $rep_table_2, $rep_table_3)
 --enable_query_log
+CREATE TABLE t1 (a INT KEY, b TEXT) ROW_FORMAT=REDUNDANT ENGINE=innodb;
+CREATE TABLE t2 (a INT KEY, b TEXT) ROW_FORMAT=COMPACT ENGINE=innodb;
+CREATE TABLE t3 (a INT KEY, b TEXT) ROW_FORMAT=COMPRESSED ENGINE=innodb;
+CREATE TABLE t4 (a INT KEY, b TEXT) ROW_FORMAT=DYNAMIC ENGINE=innodb;
+--replace_column 1 {id} 5 {id}
+SELECT * FROM INFORMATION_SCHEMA.INNODB_SYS_TABLES
+       WHERE name LIKE 'test%' ORDER BY table_id;
+--replace_column 1 {id}
+SELECT * FROM INFORMATION_SCHEMA.INNODB_SYS_TABLESPACES
+       WHERE name LIKE 'test%' ORDER BY space;
+--replace_column 1 {id}
+--replace_result  ./ MYSQLD_DATADIR/  $MYSQLD_DATADIR MYSQLD_DATADIR
+SELECT * FROM INFORMATION_SCHEMA.INNODB_SYS_DATAFILES
+       WHERE path LIKE '%test%' ORDER BY space;
+DROP TABLE t1, t2, t3, t4;
 
 --echo # Test 4) The maximum row size is dependent upon the page size.
 --echo #         Redundant: 8123, Compact: 8126.
@@ -263,19 +286,19 @@ DROP TABLE t1;
 SET SESSION innodb_strict_mode = ON;
 SET GLOBAL innodb_file_per_table = OFF;
 SHOW VARIABLES LIKE 'innodb_file_per_table';
---error ER_CANT_CREATE_TABLE
+--error ER_GET_ERRNO
 CREATE TABLE t4 (id int PRIMARY KEY) ENGINE=innodb KEY_BLOCK_SIZE=8;
 SHOW WARNINGS;
---error ER_CANT_CREATE_TABLE
+--error ER_GET_ERRNO
 CREATE TABLE t5 (id int PRIMARY KEY) ENGINE=innodb KEY_BLOCK_SIZE=16;
 SHOW WARNINGS;
 SET GLOBAL innodb_file_per_table = ON;
 SET GLOBAL innodb_file_format = `Antelope`;
 SHOW VARIABLES LIKE 'innodb_file%';
---error ER_CANT_CREATE_TABLE
+--error ER_GET_ERRNO
 CREATE TABLE t4 (id int PRIMARY KEY) ENGINE=innodb KEY_BLOCK_SIZE=8;
 SHOW WARNINGS;
---error ER_CANT_CREATE_TABLE
+--error ER_GET_ERRNO
 CREATE TABLE t5 (id int PRIMARY KEY) ENGINE=innodb KEY_BLOCK_SIZE=16;
 SHOW WARNINGS;
 SET GLOBAL innodb_file_format = `Barracuda`;
@@ -296,55 +319,26 @@ INSERT INTO t2 VALUES ('jejdkrun87'),('adfd72nh9k'),
 ('adfdpplkeock'),('adfdijnmnb78k'),('adfdijn0loKNHJik');
 
 CREATE TABLE t1(a int, b blob, c text, d text NOT NULL)
-	ENGINE=innodb DEFAULT CHARSET=utf8;
+ENGINE=innodb DEFAULT CHARSET=utf8 STATS_PERSISTENT=0;
 
-# r2667 The following test is disabled because MySQL behavior changed.
-# r2667 The test was added with this comment:
-# r2667
-# r2667 ------------------------------------------------------------------------
-# r2667 r1699 | marko | 2007-08-10 19:53:19 +0300 (Fri, 10 Aug 2007) | 5 lines
-# r2667
-# r2667 branches/zip: Add changes that accidentally omitted from r1698:
-# r2667
-# r2667 innodb-index.test, innodb-index.result: Add a test for creating
-# r2667 a PRIMARY KEY on a column that contains a NULL value.
-# r2667 ------------------------------------------------------------------------
-# r2667
-# r2667 but in BZR-r2667:
-# r2667 http://bazaar.launchpad.net/~mysql/mysql-server/mysql-5.1/revision/davi%40mysql.com-20080617141221-8yre8ys9j4uw3xx5?start_revid=joerg%40mysql.com-20080630105418-7qoe5ehomgrcdb89
-# r2667 MySQL changed the behavior to do full table copy when creating PRIMARY INDEX
-# r2667 on a non-NULL column instead of calling ::add_index() which would fail (and
-# r2667 this is what we were testing here). Before r2667 the code execution path was
-# r2667 like this (when adding PRIMARY INDEX on a non-NULL column with ALTER TABLE):
-# r2667
-# r2667 mysql_alter_table()
-# r2667   compare_tables()  // would return ALTER_TABLE_INDEX_CHANGED
-# r2667   ::add_index()  // would fail with "primary index cannot contain NULL"
-# r2667
-# r2667 after r2667 the code execution path is the following:
-# r2667
-# r2667 mysql_alter_table()
-# r2667   compare_tables()  // returns ALTER_TABLE_DATA_CHANGED
-# r2667   full copy is done, without calling ::add_index()
-# r2667
-# r2667 To enable, remove "# r2667: " below.
-# r2667
-# r2667: INSERT INTO t1 VALUES (null,null,null,'null');
 INSERT INTO t1
 SELECT a,LEFT(REPEAT(d,100*a),65535),REPEAT(d,20*a),d FROM t2,t3;
 DROP TABLE t2, t3;
 SELECT COUNT(*) FROM t1 WHERE a=44;
-SELECT a,LENGTH(b),b=LEFT(REPEAT(d,100*a),65535),LENGTH(c),c=REPEAT(d,20*a),d FROM t1;
-# r2667: --error ER_PRIMARY_CANT_HAVE_NULL
-# r2667: ALTER TABLE t1 ADD PRIMARY KEY (a), ADD KEY (b(20));
-# r2667: DELETE FROM t1 WHERE d='null';
+SELECT a,
+LENGTH(b),b=LEFT(REPEAT(d,100*a),65535),LENGTH(c),c=REPEAT(d,20*a),d FROM t1;
+# in-place alter table should trigger ER_PRIMARY_CANT_HAVE_NULL
+--error ER_DUP_ENTRY
+ALTER TABLE t1 ADD PRIMARY KEY (a), ADD KEY (b(20));
+DELETE FROM t1 WHERE d='null';
 --error ER_DUP_ENTRY
 ALTER TABLE t1 ADD PRIMARY KEY (a), ADD KEY (b(20));
 DELETE FROM t1 WHERE a%2;
 CHECK TABLE t1;
 ALTER TABLE t1 ADD PRIMARY KEY (a,b(255),c(255)), ADD KEY (b(767));
 SELECT COUNT(*) FROM t1 WHERE a=44;
-SELECT a, LENGTH(b), b=LEFT(REPEAT(d,100*a), 65535),LENGTH(c), c=REPEAT(d,20*a), d FROM t1;
+SELECT a,
+LENGTH(b), b=LEFT(REPEAT(d,100*a), 65535),LENGTH(c), c=REPEAT(d,20*a), d FROM t1;
 SHOW CREATE TABLE t1;
 CHECK TABLE t1;
 EXPLAIN SELECT * FROM t1 WHERE b LIKE 'adfd%';
@@ -494,9 +488,9 @@ UPDATE t1 SET t=@e;
 # The function dict_index_too_big_for_undo() prevents us from adding
 # one more index.  But it is too late.  The record is already too big.
 # See bug#12953735
---error 139
+--error ER_TOO_BIG_ROWSIZE
 CREATE INDEX t1u ON t1 (u(767));
---error 139
+--error ER_TOO_BIG_ROWSIZE
 CREATE INDEX t1ut ON t1 (u(767), t(767));
 CREATE INDEX t1st ON t1 (s(767), t(767));
 

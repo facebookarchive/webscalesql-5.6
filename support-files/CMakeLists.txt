@@ -32,6 +32,8 @@ ELSE()
   SET(HOSTNAME "hostname")
 ENDIF()
 
+  SET(dictionary "${CMAKE_INSTALL_PREFIX}/${INSTALL_SHAREDIR}/dictionary.txt" )
+
 # XXX: shouldn't we just have variables for all this stuff and centralise
 # XXX: their configuration in install_layout.cmake?
 IF(WIN32)
@@ -69,7 +71,14 @@ IF(UNIX)
   INSTALL(FILES mysql.m4 DESTINATION ${INSTALL_SHAREDIR}/aclocal COMPONENT Development)
   CONFIGURE_FILE(MySQL-shared-compat.spec.sh ${CMAKE_CURRENT_BINARY_DIR}/MySQL-shared-compat.spec @ONLY)
   CONFIGURE_FILE(mysql.spec.sh ${CMAKE_CURRENT_BINARY_DIR}/mysql.spec @ONLY)
-  CONFIGURE_FILE(mysql.spec.sh ${CMAKE_CURRENT_BINARY_DIR}/mysql.${VERSION}.spec @ONLY)
+  
+  SET(SPECFILENAME "mysql.${VERSION}.spec")
+  IF("${VERSION}" MATCHES "-ndb-")
+    STRING(REGEX REPLACE "^.*-ndb-" "" NDBVERSION "${VERSION}")
+    SET(SPECFILENAME "mysql-cluster-${NDBVERSION}.spec")
+  ENDIF()
+  CONFIGURE_FILE(mysql.spec.sh ${CMAKE_CURRENT_BINARY_DIR}/${SPECFILENAME} @ONLY)
+  
   CONFIGURE_FILE(MySQL-shared-compat.spec.sh ${CMAKE_CURRENT_BINARY_DIR}/MySQL-shared-compat.spec @ONLY)
 
   SET(bindir ${prefix}/${INSTALL_BINDIR})

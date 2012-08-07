@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+   Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@
 #define MYSQL_CLIENT
 #undef MYSQL_SERVER
 #include "client_priv.h"
+#include "my_default.h"
 #include <my_time.h>
 /* That one is necessary for defines of OPTION_NO_FOREIGN_KEY_CHECKS etc */
 #include "sql_priv.h"
@@ -150,6 +151,8 @@ static ulonglong rec_count= 0;
 static ushort binlog_flags = 0; 
 static MYSQL* mysql = NULL;
 static char* dirname_for_local_load= 0;
+static uint opt_server_id_bits = 0;
+static ulong opt_server_id_mask = 0;
 
 /**
   Pointer to the Format_description_log_event of the currently active binlog.
@@ -776,6 +779,7 @@ Exit_status process_event(PRINT_EVENT_INFO *print_event_info, Log_event *ev,
   DBUG_ENTER("process_event");
   print_event_info->short_form= short_form;
   Exit_status retval= OK_CONTINUE;
+  IO_CACHE *const head= &print_event_info->head_cache;
 
   /*
     Format events are not concerned by --offset and such, we always need to
@@ -853,6 +857,8 @@ Exit_status process_event(PRINT_EVENT_INFO *print_event_info, Log_event *ev,
       if (parent_query_skips)
         goto end;
       ev->print(result_file, print_event_info);
+      if (head->error == -1)
+        goto err;
       break;
       
       destroy_evt= TRUE;
@@ -927,6 +933,8 @@ Exit_status process_event(PRINT_EVENT_INFO *print_event_info, Log_event *ev,
         output of Append_block_log_event::print is only a comment.
       */
       ev->print(result_file, print_event_info);
+      if (head->error == -1)
+        goto err;
       if ((retval= load_processor.process((Append_block_log_event*) ev)) !=
           OK_CONTINUE)
         goto end;
@@ -935,6 +943,8 @@ Exit_status process_event(PRINT_EVENT_INFO *print_event_info, Log_event *ev,
     case EXEC_LOAD_EVENT:
     {
       ev->print(result_file, print_event_info);
+      if (head->error == -1)
+        goto err;
       Execute_load_log_event *exv= (Execute_load_log_event*)ev;
       Create_file_log_event *ce= load_processor.grab_event(exv->file_id);
       /*
@@ -964,6 +974,8 @@ Exit_status process_event(PRINT_EVENT_INFO *print_event_info, Log_event *ev,
       print_event_info->common_header_len=
         glob_description_event->common_header_len;
       ev->print(result_file, print_event_info);
+      if (head->error == -1)
+        goto err;
       if (opt_remote_proto == BINLOG_LOCAL)
       {
         ev->free_temp_buf(); // free memory allocated in dump_local_log_entries
@@ -993,6 +1005,8 @@ Exit_status process_event(PRINT_EVENT_INFO *print_event_info, Log_event *ev,
       break;
     case BEGIN_LOAD_QUERY_EVENT:
       ev->print(result_file, print_event_info);
+      if (head->error == -1)
+        goto err;
       if ((retval= load_processor.process((Begin_load_query_log_event*) ev)) !=
           OK_CONTINUE)
         goto end;
@@ -1032,6 +1046,9 @@ Exit_status process_event(PRINT_EVENT_INFO *print_event_info, Log_event *ev,
     case WRITE_ROWS_EVENT:
     case DELETE_ROWS_EVENT:
     case UPDATE_ROWS_EVENT:
+    case WRITE_ROWS_EVENT_V1:
+    case UPDATE_ROWS_EVENT_V1:
+    case DELETE_ROWS_EVENT_V1:
     case PRE_GA_WRITE_ROWS_EVENT:
     case PRE_GA_DELETE_ROWS_EVENT:
     case PRE_GA_UPDATE_ROWS_EVENT:
@@ -1040,7 +1057,10 @@ Exit_status process_event(PRINT_EVENT_INFO *print_event_info, Log_event *ev,
       Table_map_log_event *ignored_map= NULL;
       if (ev_type == WRITE_ROWS_EVENT ||
           ev_type == DELETE_ROWS_EVENT ||
-          ev_type == UPDATE_ROWS_EVENT)
+          ev_type == UPDATE_ROWS_EVENT ||
+          ev_type == WRITE_ROWS_EVENT_V1 ||
+          ev_type == DELETE_ROWS_EVENT_V1 ||
+          ev_type == UPDATE_ROWS_EVENT_V1)
       {
         Rows_log_event *new_ev= (Rows_log_event*) ev;
         if (new_ev->get_flags(Rows_log_event::STMT_END_F))
@@ -1130,6 +1150,8 @@ Exit_status process_event(PRINT_EVENT_INFO *print_event_info, Log_event *ev,
     }
     default:
       ev->print(result_file, print_event_info);
+      if (head->error == -1)
+        goto err;
     }
     /* Flush head cache to result_file for every event */
     if (copy_event_cache_to_file_and_reinit(&print_event_info->head_cache,
@@ -1266,6 +1288,11 @@ static struct my_option my_long_options[] =
    "Extract only binlog entries created by the server having the given id.",
    &server_id, &server_id, 0, GET_ULONG,
    REQUIRED_ARG, 0, 0, 0, 0, 0, 0},
+  {"server-id-bits", 0,
+   "Set number of significant bits in server-id",
+   &opt_server_id_bits, &opt_server_id_bits,
+   /* Default + Max 32 bits, minimum 7 bits */
+   0, GET_UINT, REQUIRED_ARG, 32, 7, 32, 0, 0, 0},
   {"set-charset", OPT_SET_CHARSET,
    "Add 'SET NAMES character_set' to the output.", &charset,
    &charset, 0, GET_STR, REQUIRED_ARG, 0, 0, 0, 0, 0, 0},
@@ -1623,6 +1650,9 @@ static Exit_status safe_connect()
     mysql_options(mysql, MYSQL_SHARED_MEMORY_BASE_NAME,
                   shared_memory_base_name);
 #endif
+  mysql_options(mysql, MYSQL_OPT_CONNECT_ATTR_RESET, 0);
+  mysql_options4(mysql, MYSQL_OPT_CONNECT_ATTR_ADD,
+                 "program_name", "mysqlbinlog");
   if (!mysql_real_connect(mysql, host, user, pass, 0, port, sock, 0))
   {
     error("Failed on connect: %s", mysql_error(mysql));
@@ -2440,7 +2470,13 @@ err:
 end:
   if (fd >= 0)
     my_close(fd, MYF(MY_WME));
-  end_io_cache(file);
+  /*
+    Since the end_io_cache() writes to the
+    file errors may happen.
+   */
+  if (end_io_cache(file))
+    retval= ERROR_STOP;
+
   return retval;
 }
 
@@ -2574,6 +2610,9 @@ int main(int argc, char** argv)
 
   if (opt_base64_output_mode == BASE64_OUTPUT_UNSPEC)
     opt_base64_output_mode= BASE64_OUTPUT_AUTO;
+
+  opt_server_id_mask = (opt_server_id_bits == 32)?
+    ~ ulong(0) : (1 << opt_server_id_bits) -1;
 
   my_set_max_open_files(open_files_limit);
 

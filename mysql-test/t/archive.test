@@ -1771,6 +1771,7 @@ SELECT * FROM t1;
 # Test check table after upgrade
 CHECK TABLE t1;
 DROP TABLE t1;
+remove_file $MYSQLD_DATADIR/test/t1.ARM;
 
 --echo #
 --echo # BUG 11757503 - 49556: ERROR 1005 (HY000): CAN'T CREATE TABLE '#SQL-B7C_3' (ERRNO: -1)
@@ -1783,7 +1784,7 @@ CREATE TABLE t1 (c1 decimal(19,14) NOT NULL) ENGINE=ARCHIVE;
 #Suppressing error message in server error log.
 CALL mtr.add_suppression("Found wrong key definition in #sql.* Please do \"ALTER TABLE `#sql.*` FORCE \" to fix it!");
 --replace_regex /#sql-[0-9a-f_]*/#sql-temporary/
---error ER_CANT_CREATE_TABLE
+--error ER_GET_ERRNO
 CREATE INDEX i1 ON t1(c1);
 --replace_regex /#sql-[0-9a-f_]*/#sql-temporary/
 SHOW WARNINGS; 
@@ -1802,3 +1803,11 @@ CHECKSUM TABLE t1 EXTENDED;
 FLUSH TABLE t1;
 OPTIMIZE TABLE t1;
 DROP TABLE t1;
+
+--echo #
+--echo # Bug#13907676: HA_ARCHIVE::INFO
+--echo #
+CREATE TABLE t1 (a INT) ENGINE=ARCHIVE;
+CREATE TABLE t2 SELECT * FROM t1;
+SELECT * FROM t2;
+DROP TABLE t1, t2;

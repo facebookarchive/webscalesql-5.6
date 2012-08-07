@@ -1,4 +1,4 @@
-/* Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -54,10 +54,6 @@
 
 using std::min;
 using std::max;
-
-#ifdef NO_EMBEDDED_ACCESS_CHECKS
-#define sp_restore_security_context(A,B) while (0) {}
-#endif
 
 bool check_reserved_words(LEX_STRING *name)
 {
@@ -174,15 +170,18 @@ bool
 Item_func::fix_fields(THD *thd, Item **ref)
 {
   DBUG_ASSERT(fixed == 0 || basic_const_item());
+
   Item **arg,**arg_end;
   uchar buff[STACK_BUFF_ALLOC];			// Max argument in function
+
   st_select_lex::Resolve_place save_resolve= st_select_lex::RESOLVE_NONE;
   if (thd->lex->current_select != NULL)
   {
     save_resolve= thd->lex->current_select->resolve_place;
     thd->lex->current_select->resolve_place= st_select_lex::RESOLVE_NONE;
   }
-  used_tables_cache= not_null_tables_cache= 0;
+  used_tables_cache= get_initial_pseudo_tables();
+  not_null_tables_cache= 0;
   const_item_cache=1;
 
   /*
@@ -228,6 +227,7 @@ Item_func::fix_fields(THD *thd, Item **ref)
       not_null_tables_cache|= item->not_null_tables();
       const_item_cache&=      item->const_item();
       with_subselect|=        item->has_subquery();
+      with_stored_program|=   item->has_stored_program();
     }
   }
   fix_length_and_dec();
@@ -246,7 +246,8 @@ void Item_func::fix_after_pullout(st_select_lex *parent_select,
 {
   Item **arg,**arg_end;
 
-  used_tables_cache= not_null_tables_cache= 0;
+  used_tables_cache= get_initial_pseudo_tables();
+  not_null_tables_cache= 0;
   const_item_cache=1;
 
   if (arg_count)
@@ -371,15 +372,16 @@ Item *Item_func::transform(Item_transformer transformer, uchar *argument)
                        nodes of the tree of the object
   @param arg_t         parameter to be passed to the transformer
 
-  @return
-    Item returned as the result of transformation of the root node
+  @return              Item returned as result of transformation of the node,
+                       the same item if no transformation applied, or NULL if
+                       transformation caused an error.
 */
 
 Item *Item_func::compile(Item_analyzer analyzer, uchar **arg_p,
                          Item_transformer transformer, uchar *arg_t)
 {
   if (!(this->*analyzer)(arg_p))
-    return 0;
+    return this;
   if (arg_count)
   {
     Item **arg,**arg_end;
@@ -391,7 +393,9 @@ Item *Item_func::compile(Item_analyzer analyzer, uchar **arg_p,
       */   
       uchar *arg_v= *arg_p;
       Item *new_item= (*arg)->compile(analyzer, &arg_v, transformer, arg_t);
-      if (new_item && *arg != new_item)
+      if (new_item == NULL)
+        return NULL;
+      if (*arg != new_item)
         current_thd->change_item_tree(arg, new_item);
     }
   }
@@ -413,15 +417,17 @@ void Item_func::split_sum_func(THD *thd, Ref_ptr_array ref_pointer_array,
 
 void Item_func::update_used_tables()
 {
-  used_tables_cache=0;
+  used_tables_cache= get_initial_pseudo_tables();
   const_item_cache=1;
   with_subselect= false;
+  with_stored_program= false;
   for (uint i=0 ; i < arg_count ; i++)
   {
     args[i]->update_used_tables();
     used_tables_cache|=args[i]->used_tables();
     const_item_cache&=args[i]->const_item();
     with_subselect|= args[i]->has_subquery();
+    with_stored_program|= args[i]->has_stored_program();
   }
 }
 
@@ -503,14 +509,14 @@ Field *Item_func::tmp_table_field(TABLE *table)
   switch (result_type()) {
   case INT_RESULT:
     if (max_char_length() > MY_INT32_NUM_DECIMAL_DIGITS)
-      field= new Field_longlong(max_char_length(), maybe_null, name,
+      field= new Field_longlong(max_char_length(), maybe_null, item_name.ptr(),
                                 unsigned_flag);
     else
-      field= new Field_long(max_char_length(), maybe_null, name,
+      field= new Field_long(max_char_length(), maybe_null, item_name.ptr(),
                             unsigned_flag);
     break;
   case REAL_RESULT:
-    field= new Field_double(max_char_length(), maybe_null, name, decimals);
+    field= new Field_double(max_char_length(), maybe_null, item_name.ptr(), decimals);
     break;
   case STRING_RESULT:
     return make_string_field(table);
@@ -1271,7 +1277,7 @@ err:
   push_warning_printf(current_thd, Sql_condition::WARN_LEVEL_WARN,
                       ER_WARN_DATA_OUT_OF_RANGE,
                       ER(ER_WARN_DATA_OUT_OF_RANGE),
-                      name, 1L);
+                      item_name.ptr(), 1L);
   return dec;
 }
 
@@ -2619,7 +2625,7 @@ bool Item_func_rand::fix_fields(THD *thd,Item **ref)
 {
   if (Item_real_func::fix_fields(thd, ref))
     return TRUE;
-  used_tables_cache|= RAND_TABLE_BIT;
+
   if (arg_count)
   {					// Only use argument once in query
     /*
@@ -2650,12 +2656,6 @@ bool Item_func_rand::fix_fields(THD *thd,Item **ref)
     rand= &thd->rand;
   }
   return FALSE;
-}
-
-void Item_func_rand::update_used_tables()
-{
-  Item_real_func::update_used_tables();
-  used_tables_cache|= RAND_TABLE_BIT;
 }
 
 
@@ -3224,6 +3224,13 @@ void Item_func_locate::print(String *str, enum_query_type query_type)
 }
 
 
+longlong Item_func_validate_password_strength::val_int()
+{
+  String *field= args[0]->val_str(&value);
+  return (check_password_strength(field));
+}
+
+
 longlong Item_func_field::val_int()
 {
   DBUG_ASSERT(fixed == 1);
@@ -3581,8 +3588,8 @@ udf_handler::fix_fields(THD *thd, Item_result_field *func,
 
       f_args.lengths[i]= arguments[i]->max_length;
       f_args.maybe_null[i]= (char) arguments[i]->maybe_null;
-      f_args.attributes[i]= arguments[i]->name;
-      f_args.attribute_lengths[i]= arguments[i]->name_length;
+      f_args.attributes[i]= (char*) arguments[i]->item_name.ptr();
+      f_args.attribute_lengths[i]= arguments[i]->item_name.length();
 
       if (arguments[i]->const_item())
       {
@@ -4047,7 +4054,8 @@ longlong Item_master_pos_wait::val_int()
 #ifdef HAVE_REPLICATION
   longlong pos = (ulong)args[1]->val_int();
   longlong timeout = (arg_count==3) ? args[2]->val_int() : 0 ;
-  if ((event_count = active_mi->rli->wait_for_pos(thd, log_name, pos, timeout)) == -2)
+  if (active_mi == NULL ||
+      (event_count = active_mi->rli->wait_for_pos(thd, log_name, pos, timeout)) == -2)
   {
     null_value = 1;
     event_count=0;
@@ -4542,23 +4550,23 @@ longlong Item_func_sleep::val_int()
 
 #define extra_size sizeof(double)
 
-static user_var_entry *get_variable(HASH *hash, LEX_STRING &name,
+static user_var_entry *get_variable(HASH *hash, Name_string &name,
 				    bool create_if_not_exists)
 {
   user_var_entry *entry;
 
-  if (!(entry = (user_var_entry*) my_hash_search(hash, (uchar*) name.str,
-                                                 name.length)) &&
+  if (!(entry = (user_var_entry*) my_hash_search(hash, (uchar*) name.ptr(),
+                                                 name.length())) &&
       create_if_not_exists)
   {
-    uint size=ALIGN_SIZE(sizeof(user_var_entry))+name.length+1+extra_size;
+    uint size=ALIGN_SIZE(sizeof(user_var_entry))+name.length()+1+extra_size;
     if (!my_hash_inited(hash))
       return 0;
     if (!(entry = (user_var_entry*) my_malloc(size,MYF(MY_WME | ME_FATALERROR))))
       return 0;
     entry->name.str=(char*) entry+ ALIGN_SIZE(sizeof(user_var_entry))+
       extra_size;
-    entry->name.length=name.length;
+    entry->name.length= name.length();
     entry->value=0;
     entry->length=0;
     entry->update_query_id=0;
@@ -4576,7 +4584,7 @@ static user_var_entry *get_variable(HASH *hash, LEX_STRING &name,
     */
     entry->used_query_id=current_thd->query_id;
     entry->type=STRING_RESULT;
-    memcpy(entry->name.str, name.str, name.length+1);
+    name.strcpy(entry->name.str);
     if (my_hash_insert(hash,(uchar*) entry))
     {
       my_free(entry);
@@ -4779,9 +4787,14 @@ Item_func_set_user_var::update_hash(void *ptr, uint length,
     If we set a variable explicitely to NULL then keep the old
     result type of the variable
   */
-  if ((null_value= args[0]->null_value) && null_item)
+  // args[0]->null_value could be outdated
+  if (args[0]->type() == Item::FIELD_ITEM)
+    null_value= ((Item_field*)args[0])->field->is_null();
+  else
+    null_value= args[0]->null_value;
+  if (null_value && null_item)
     res_type= entry->type;                      // Don't change type of item
-  if (::update_hash(entry, (null_value= args[0]->null_value),
+  if (::update_hash(entry, null_value,
                     ptr, length, res_type, cs, dv, unsigned_arg))
   {
     null_value= 1;
@@ -5154,25 +5167,22 @@ bool Item_func_set_user_var::is_null_result()
   return is_null();
 }
 
-
-void Item_func_set_user_var::print(String *str, enum_query_type query_type)
+// just the assignment, for use in "SET @a:=5" type self-prints
+void Item_func_set_user_var::print_assignment(String *str,
+                                              enum_query_type query_type)
 {
-  str->append(STRING_WITH_LEN("(@"));
-  str->append(name.str, name.length);
+  str->append(STRING_WITH_LEN("@"));
+  str->append(name);
   str->append(STRING_WITH_LEN(":="));
   args[0]->print(str, query_type);
-  str->append(')');
 }
 
-
-void Item_func_set_user_var::print_as_stmt(String *str,
-                                           enum_query_type query_type)
+// parenthesize assignment for use in "EXPLAIN EXTENDED SELECT (@e:=80)+5"
+void Item_func_set_user_var::print(String *str, enum_query_type query_type)
 {
-  str->append(STRING_WITH_LEN("set @"));
-  str->append(name.str, name.length);
-  str->append(STRING_WITH_LEN(":="));
-  args[0]->print(str, query_type);
-  str->append(')');
+  str->append(STRING_WITH_LEN("("));
+  print_assignment(str, query_type);
+  str->append(STRING_WITH_LEN(")"));
 }
 
 bool Item_func_set_user_var::send(Protocol *protocol, String *str_arg)
@@ -5192,8 +5202,8 @@ void Item_func_set_user_var::make_field(Send_field *tmp_field)
   {
     result_field->make_field(tmp_field);
     DBUG_ASSERT(tmp_field->table_name != 0);
-    if (Item::name)
-      tmp_field->col_name=Item::name;               // Use user supplied name
+    if (Item::item_name.is_set())
+      tmp_field->col_name=Item::item_name.ptr();    // Use user supplied name
   }
   else
     Item::make_field(tmp_field);
@@ -5238,12 +5248,13 @@ void Item_func_set_user_var::make_field(Send_field *tmp_field)
     TRUE        Error
 */
 
-int Item_func_set_user_var::save_in_field(Field *field, bool no_conversions,
-                                          bool can_use_result_field)
+type_conversion_status
+Item_func_set_user_var::save_in_field(Field *field, bool no_conversions,
+                                      bool can_use_result_field)
 {
   bool use_result_field= (!can_use_result_field ? 0 :
                           (result_field && result_field != field));
-  int error;
+  type_conversion_status error;
 
   /* Update the value of the user variable */
   check(use_result_field);
@@ -5361,7 +5372,7 @@ longlong Item_func_get_user_var::val_int()
 
 static int
 get_var_with_binlog(THD *thd, enum_sql_command sql_command,
-                    LEX_STRING &name, user_var_entry **out_entry)
+                    Name_string &name, user_var_entry **out_entry)
 {
   BINLOG_USER_VAR_EVENT *user_var_event;
   user_var_entry *var_entry;
@@ -5544,7 +5555,7 @@ enum Item_result Item_func_get_user_var::result_type() const
 void Item_func_get_user_var::print(String *str, enum_query_type query_type)
 {
   str->append(STRING_WITH_LEN("(@"));
-  str->append(name.str,name.length);
+  str->append(name);
   str->append(')');
 }
 
@@ -5559,15 +5570,14 @@ bool Item_func_get_user_var::eq(const Item *item, bool binary_cmp) const
       ((Item_func*) item)->functype() != functype())
     return 0;
   Item_func_get_user_var *other=(Item_func_get_user_var*) item;
-  return (name.length == other->name.length &&
-	  !memcmp(name.str, other->name.str, name.length));
+  return name.eq_bin(other->name);
 }
 
 
 bool Item_func_get_user_var::set_value(THD *thd,
                                        sp_rcontext * /*ctx*/, Item **it)
 {
-  Item_func_set_user_var *suv= new Item_func_set_user_var(get_name(), *it);
+  Item_func_set_user_var *suv= new Item_func_set_user_var(name, *it);
   /*
     Item_func_set_user_var is not fixed after construction, call
     fix_fields().
@@ -5643,7 +5653,7 @@ my_decimal* Item_user_var_as_out_param::val_decimal(my_decimal *decimal_buffer)
 void Item_user_var_as_out_param::print(String *str, enum_query_type query_type)
 {
   str->append('@');
-  str->append(name.str,name.length);
+  str->append(name);
 }
 
 
@@ -5654,8 +5664,8 @@ Item_func_get_system_var(sys_var *var_arg, enum_var_type var_type_arg,
   :var(var_arg), var_type(var_type_arg), orig_var_type(var_type_arg),
   component(*component_arg), cache_present(0)
 {
-  /* set_name() will allocate the name */
-  set_name(name_arg, (uint) name_len_arg, system_charset_info);
+  /* copy() will allocate the name */
+  item_name.copy(name_arg, (uint) name_len_arg);
 }
 
 
@@ -5760,7 +5770,7 @@ void Item_func_get_system_var::fix_length_and_dec()
 
 void Item_func_get_system_var::print(String *str, enum_query_type query_type)
 {
-  str->append(name, name_length);
+  str->append(item_name);
 }
 
 
@@ -6323,9 +6333,11 @@ err:
 
 bool Item_func_match::eq(const Item *item, bool binary_cmp) const
 {
+  /* We ignore FT_SORTED flag when checking for equality since result is
+     equvialent regardless of sorting */
   if (item->type() != FUNC_ITEM ||
       ((Item_func*)item)->functype() != FT_FUNC ||
-      flags != ((Item_func_match*)item)->flags)
+      (flags | FT_SORTED) != (((Item_func_match*)item)->flags | FT_SORTED))
     return 0;
 
   Item_func_match *ifm=(Item_func_match*) item;
@@ -6521,6 +6533,7 @@ Item_func_sp::Item_func_sp(Name_resolution_context *context_arg, sp_name *name)
   m_name->init_qname(current_thd);
   dummy_table= (TABLE*) sql_calloc(sizeof(TABLE)+ sizeof(TABLE_SHARE));
   dummy_table->s= (TABLE_SHARE*) (dummy_table+1);
+  with_stored_program= true;
 }
 
 
@@ -6532,6 +6545,7 @@ Item_func_sp::Item_func_sp(Name_resolution_context *context_arg,
   m_name->init_qname(current_thd);
   dummy_table= (TABLE*) sql_calloc(sizeof(TABLE)+ sizeof(TABLE_SHARE));
   dummy_table->s= (TABLE_SHARE*) (dummy_table+1);
+  with_stored_program= true;
 }
 
 
@@ -6546,6 +6560,8 @@ Item_func_sp::cleanup()
   m_sp= NULL;
   dummy_table->alias= NULL;
   Item_func::cleanup();
+  tables_locked_cache= false;
+  with_stored_program= true;
 }
 
 const char *
@@ -6571,6 +6587,12 @@ Item_func_sp::func_name() const
   }
   append_identifier(thd, &qname, m_name->m_name.str, m_name->m_name.length);
   return qname.ptr();
+}
+
+
+table_map Item_func_sp::get_initial_pseudo_tables() const
+{
+  return m_sp->m_chistics->detistic ? 0 : RAND_TABLE_BIT;
 }
 
 
@@ -6611,7 +6633,7 @@ Item_func_sp::init_result_field(THD *thd)
   DBUG_ASSERT(m_sp == NULL);
   DBUG_ASSERT(sp_result_field == NULL);
 
-  if (!(m_sp= sp_find_routine(thd, TYPE_ENUM_FUNCTION, m_name,
+  if (!(m_sp= sp_find_routine(thd, SP_TYPE_FUNCTION, m_name,
                                &thd->sp_func_cache, TRUE)))
   {
     my_missing_function_error (m_name->m_name, m_name->m_qname.str);
@@ -6633,7 +6655,7 @@ Item_func_sp::init_result_field(THD *thd)
   share->table_cache_key = empty_name;
   share->table_name = empty_name;
 
-  if (!(sp_result_field= m_sp->create_result_field(max_length, name,
+  if (!(sp_result_field= m_sp->create_result_field(max_length, item_name.ptr(),
                                                    dummy_table)))
   {
    DBUG_RETURN(TRUE);
@@ -6649,8 +6671,7 @@ Item_func_sp::init_result_field(THD *thd)
   else
     sp_result_field->move_field(result_buf);
   
-  sp_result_field->null_ptr= (uchar *) &null_value;
-  sp_result_field->null_bit= 1;
+  sp_result_field->set_null_ptr((uchar *) &null_value, 1);
   DBUG_RETURN(FALSE);
 }
 
@@ -6801,8 +6822,8 @@ Item_func_sp::make_field(Send_field *tmp_field)
   DBUG_ENTER("Item_func_sp::make_field");
   DBUG_ASSERT(sp_result_field);
   sp_result_field->make_field(tmp_field);
-  if (name)
-    tmp_field->col_name= name;
+  if (item_name.is_set())
+    tmp_field->col_name= item_name.ptr();
   DBUG_VOID_RETURN;
 }
 
@@ -6922,6 +6943,11 @@ Item_func_sp::fix_fields(THD *thd, Item **ref)
 
   res= Item_func::fix_fields(thd, ref);
 
+  /* These is reset/set by Item_func::fix_fields. */
+  with_stored_program= true;
+  if (!m_sp->m_chistics->detistic || !tables_locked_cache)
+    const_item_cache= false;
+
   if (res)
     DBUG_RETURN(res);
 
@@ -6943,17 +6969,11 @@ Item_func_sp::fix_fields(THD *thd, Item **ref)
       Try to set and restore the security context to see whether it's valid
     */
     Security_context *save_secutiry_ctx;
-    res= set_routine_security_ctx(thd, m_sp, false, &save_secutiry_ctx);
+    res= m_sp->set_security_ctx(thd, &save_secutiry_ctx);
     if (!res)
       m_sp->m_security_ctx.restore_security_context(thd, save_secutiry_ctx);
     
 #endif /* ! NO_EMBEDDED_ACCESS_CHECKS */
-  }
-
-  if (!m_sp->m_chistics->detistic)
-  {
-    used_tables_cache |= RAND_TABLE_BIT;
-    const_item_cache= FALSE;
   }
 
   DBUG_RETURN(res);
@@ -6965,10 +6985,10 @@ void Item_func_sp::update_used_tables()
   Item_func::update_used_tables();
 
   if (!m_sp->m_chistics->detistic)
-  {
-    used_tables_cache |= RAND_TABLE_BIT;
-    const_item_cache= FALSE;
-  }
+    const_item_cache= false;
+
+  /* This is reset by Item_func::update_used_tables(). */
+  with_stored_program= true;
 }
 
 

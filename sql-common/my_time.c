@@ -122,12 +122,16 @@ my_bool check_date(const MYSQL_TIME *ltime, my_bool not_zero_date,
 {
   if (not_zero_date)
   {
-    if ((((flags & TIME_NO_ZERO_IN_DATE) || !(flags & TIME_FUZZY_DATE)) &&
-         (ltime->month == 0 || ltime->day == 0)) ||
-        (!(flags & TIME_INVALID_DATES) &&
-         ltime->month && ltime->day > days_in_month[ltime->month-1] &&
-         (ltime->month != 2 || calc_days_in_year(ltime->year) != 366 ||
-          ltime->day != 29)))
+    if (((flags & TIME_NO_ZERO_IN_DATE) || !(flags & TIME_FUZZY_DATE)) &&
+        (ltime->month == 0 || ltime->day == 0))
+    {
+      *was_cut= MYSQL_TIME_WARN_ZERO_IN_DATE;
+      return TRUE;
+    }
+    else if ((!(flags & TIME_INVALID_DATES) &&
+              ltime->month && ltime->day > days_in_month[ltime->month-1] &&
+              (ltime->month != 2 || calc_days_in_year(ltime->year) != 366 ||
+               ltime->day != 29)))
     {
       *was_cut= MYSQL_TIME_WARN_OUT_OF_RANGE;
       return TRUE;
@@ -820,11 +824,14 @@ fractional:
 }
 
 
-/*
-  Convert numer to TIME
+/**
+  Convert number to TIME
   @param nr            Number to convert.
   @param OUT ltime     Variable to convert to.
   @param OUT warnings  Warning vector.
+
+  @retval false OK
+  @retval true No. is out of range
 */
 my_bool
 number_to_time(longlong nr, MYSQL_TIME *ltime, int *warnings)
@@ -1196,8 +1203,8 @@ my_system_gmt_sec(const MYSQL_TIME *t_src, long *my_timezone,
 static inline int
 my_useconds_to_str(char *to, ulong useconds, uint dec)
 {
-  DBUG_ASSERT(dec > 0 && dec <= DATETIME_MAX_DECIMALS);
-  return sprintf(to, ".%0*lu", dec,
+  DBUG_ASSERT(dec <= DATETIME_MAX_DECIMALS);
+  return sprintf(to, ".%0*lu", (int) dec,
                  useconds / (ulong) log_10_int[DATETIME_MAX_DECIMALS - dec]);
 }
 
@@ -1381,6 +1388,12 @@ int my_timeval_to_str(const struct timeval *tm, char *to, uint dec)
     -1              Timestamp with wrong values
     anything else   DATETIME as integer in YYYYMMDDHHMMSS format
     Datetime value in YYYYMMDDHHMMSS format.
+
+    was_cut         if return value -1: one of
+                      - MYSQL_TIME_WARN_OUT_OF_RANGE
+                      - MYSQL_TIME_WARN_ZERO_DATE
+                      - MYSQL_TIME_WARN_TRUNCATED
+                    otherwise 0.
 */
 
 longlong number_to_datetime(longlong nr, MYSQL_TIME *time_res,
@@ -1462,7 +1475,7 @@ longlong number_to_datetime(longlong nr, MYSQL_TIME *time_res,
     return LL(-1);
 
  err:
-  *was_cut= 1;
+  *was_cut= MYSQL_TIME_WARN_TRUNCATED;
   return LL(-1);
 }
 

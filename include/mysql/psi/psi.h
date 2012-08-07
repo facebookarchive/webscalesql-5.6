@@ -958,6 +958,8 @@ struct PSI_digest_storage
 {
   my_bool m_full;
   int m_byte_count;
+  /** Character set. */
+  const void *m_charset;
   unsigned char m_token_array[PSI_MAX_DIGEST_STORAGE_SIZE];
 };
 typedef struct PSI_digest_storage PSI_digest_storage;
@@ -1632,11 +1634,12 @@ typedef void (*end_stage_v1_t) (void);
   Get a statement instrumentation locker.
   @param state data storage for the locker
   @param key the statement instrumentation key
+  @param charset client character set
   @return a statement locker, or NULL
 */
 typedef struct PSI_statement_locker* (*get_thread_statement_locker_v1_t)
   (struct PSI_statement_locker_state_v1 *state,
-   PSI_statement_key key);
+   PSI_statement_key key, const void *charset);
 
 /**
   Refine a statement locker to a more specific key.
@@ -1871,6 +1874,19 @@ typedef struct PSI_digest_locker* (*digest_add_token_v1_t)
   (struct PSI_digest_locker *locker, uint token, struct OPAQUE_LEX_YYSTYPE *yylval);
 
 /**
+  Stores an array of connection attributes
+  @param buffer         char array of length encoded connection attributes
+                        in network format
+  @param length         legnth of the data in buffer
+  @param from_cs        charset in which @buffer is encodded
+  @return state
+    @retval  non-0    attributes truncated
+    @retval  0        stored the attribute
+*/
+typedef int (*set_thread_connect_attrs_v1_t)(const char *buffer, uint length,
+                                             const void *from_cs);
+
+/**
   Performance Schema Interface, version 1.
   @since PSI_VERSION_1
 */
@@ -2065,6 +2081,8 @@ struct PSI_v1
   digest_start_v1_t digest_start;
   /** @sa digest_add_token_v1_t. */
   digest_add_token_v1_t digest_add_token;
+  /** @sa set_thread_connect_attrs_v1_t. */
+  set_thread_connect_attrs_v1_t set_thread_connect_attrs;
 };
 
 /** @} (end of group Group_PSI_v1) */
@@ -2318,7 +2336,54 @@ typedef struct PSI_stage_info_none PSI_stage_info;
 
 extern MYSQL_PLUGIN_IMPORT PSI *PSI_server;
 
-#define PSI_CALL(M) PSI_server->M
+/*
+  Allow to override PSI_XXX_CALL at compile time
+  with more efficient implementations, if available.
+  If nothing better is available,
+  make a dynamic call using the PSI_server function pointer.
+*/
+
+#ifndef PSI_MUTEX_CALL
+#define PSI_MUTEX_CALL(M) PSI_DYNAMIC_CALL(M)
+#endif
+
+#ifndef PSI_RWLOCK_CALL
+#define PSI_RWLOCK_CALL(M) PSI_DYNAMIC_CALL(M)
+#endif
+
+#ifndef PSI_COND_CALL
+#define PSI_COND_CALL(M) PSI_DYNAMIC_CALL(M)
+#endif
+
+#ifndef PSI_THREAD_CALL
+#define PSI_THREAD_CALL(M) PSI_DYNAMIC_CALL(M)
+#endif
+
+#ifndef PSI_FILE_CALL
+#define PSI_FILE_CALL(M) PSI_DYNAMIC_CALL(M)
+#endif
+
+#ifndef PSI_SOCKET_CALL
+#define PSI_SOCKET_CALL(M) PSI_DYNAMIC_CALL(M)
+#endif
+
+#ifndef PSI_STAGE_CALL
+#define PSI_STAGE_CALL(M) PSI_DYNAMIC_CALL(M)
+#endif
+
+#ifndef PSI_STATEMENT_CALL
+#define PSI_STATEMENT_CALL(M) PSI_DYNAMIC_CALL(M)
+#endif
+
+#ifndef PSI_TABLE_CALL
+#define PSI_TABLE_CALL(M) PSI_DYNAMIC_CALL(M)
+#endif
+
+#ifndef PSI_IDLE_CALL
+#define PSI_IDLE_CALL(M) PSI_DYNAMIC_CALL(M)
+#endif
+
+#define PSI_DYNAMIC_CALL(M) PSI_server->M
 
 /** @} */
 

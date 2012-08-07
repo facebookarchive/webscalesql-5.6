@@ -1,4 +1,4 @@
-/* Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -119,11 +119,6 @@
 
 using std::min;
 using std::max;
-
-#ifndef EXTRA_DEBUG
-#define test_rb_tree(A,B) {}
-#define test_use_count(A) {}
-#endif
 
 /*
   Convert double value to #rows. Currently this does floor(), and we
@@ -394,7 +389,17 @@ public:
   */
   SEL_ARG *next_key_part; 
   enum leaf_color { BLACK,RED } color;
-  enum Type { IMPOSSIBLE, MAYBE, MAYBE_KEY, KEY_RANGE } type;
+
+  /**
+    Starting an effort to document this field:
+
+    IMPOSSIBLE: if the range predicate for this index is always false.
+
+    ALWAYS: if the range predicate for this index is always true.
+
+    KEY_RANGE: if there is a range predicate that can be used on this index.
+  */
+  enum Type { IMPOSSIBLE, ALWAYS, MAYBE, MAYBE_KEY, KEY_RANGE } type;
 
   enum { MAX_SEL_ARGS = 16000 };
 
@@ -612,10 +617,8 @@ public:
   SEL_ARG *find_range(SEL_ARG *key);
   SEL_ARG *rb_insert(SEL_ARG *leaf);
   friend SEL_ARG *rb_delete_fixup(SEL_ARG *root,SEL_ARG *key, SEL_ARG *par);
-#ifdef EXTRA_DEBUG
   friend int test_rb_tree(SEL_ARG *element,SEL_ARG *parent);
   void test_use_count(SEL_ARG *root);
-#endif
   SEL_ARG *first();
   SEL_ARG *last();
   void make_root();
@@ -628,7 +631,6 @@ public:
     if (next_key_part)
     {
       next_key_part->use_count+=count;
-      count*= (next_key_part->use_count-count);
       for (SEL_ARG *pos=next_key_part->first(); pos ; pos=pos->next)
 	if (pos->next_key_part)
 	  pos->increment_use_count(count);
@@ -699,10 +701,28 @@ class SEL_IMERGE;
 class SEL_TREE :public Sql_alloc
 {
 public:
-  /*
+  /**
     Starting an effort to document this field:
-    (for some i, keys[i]->type == SEL_ARG::IMPOSSIBLE) => 
-       (type == SEL_TREE::IMPOSSIBLE)
+
+    IMPOSSIBLE: if keys[i]->type == SEL_ARG::IMPOSSIBLE for some i,
+      then type == SEL_TREE::IMPOSSIBLE. Rationale: if the predicate for
+      one of the indexes is always false, then the full predicate is also
+      always false.
+
+    ALWAYS: if either (keys[i]->type == SEL_ARG::ALWAYS) or 
+      (keys[i] == NULL) for all i, then type == SEL_TREE::ALWAYS. 
+      Rationale: the range access method will not be able to filter
+      out any rows when there are no range predicates that can be used
+      to filter on any index.
+
+    KEY: There are range predicates that can be used on at least one
+      index.
+      
+    KEY_SMALLER: There are range predicates that can be used on at
+      least one index. In addition, there are predicates that cannot
+      be directly utilized by range access on key parts in the same
+      index. These unused predicates makes it probable that the row
+      estimate for range access on this index is too pessimistic.
   */
   enum Type { IMPOSSIBLE, ALWAYS, MAYBE, KEY, KEY_SMALLER } type;
   SEL_TREE(enum Type type_arg) :type(type_arg) {}
@@ -884,11 +904,15 @@ static void trace_range_all_keyparts(Opt_trace_array &trace_range,
                                      const String *range_so_far,
                                      SEL_ARG *keypart_root,
                                      const KEY_PART_INFO *key_parts);
-static void append_range(String *out,
-                         const KEY_PART_INFO *key_parts,
-                         const uchar *min_key, const uchar *max_key,
-                         const uint flag);
 #endif
+static inline void dbug_print_tree(const char *tree_name,
+                                   SEL_TREE *tree, 
+                                   const RANGE_OPT_PARAM *param);
+
+void append_range(String *out,
+                  const KEY_PART_INFO *key_parts,
+                  const uchar *min_key, const uchar *max_key,
+                  const uint flag);
 
 static SEL_TREE *tree_and(RANGE_OPT_PARAM *param,SEL_TREE *tree1,SEL_TREE *tree2);
 static SEL_TREE *tree_or(RANGE_OPT_PARAM *param,SEL_TREE *tree1,SEL_TREE *tree2);
@@ -1326,7 +1350,7 @@ int QUICK_RANGE_SELECT::init()
 {
   DBUG_ENTER("QUICK_RANGE_SELECT::init");
 
-  if (file->inited != handler::NONE)
+  if (file->inited)
     file->ha_index_or_rnd_end();
   DBUG_RETURN(FALSE);
 }
@@ -1334,7 +1358,7 @@ int QUICK_RANGE_SELECT::init()
 
 void QUICK_RANGE_SELECT::range_end()
 {
-  if (file->inited != handler::NONE)
+  if (file->inited)
     file->ha_index_or_rnd_end();
 }
 
@@ -1585,6 +1609,7 @@ failure:
 */
 int QUICK_ROR_INTERSECT_SELECT::init_ror_merged_scan(bool reuse_handler)
 {
+  int error;
   List_iterator_fast<QUICK_RANGE_SELECT> quick_it(quick_selects);
   QUICK_RANGE_SELECT* quick;
   DBUG_ENTER("QUICK_ROR_INTERSECT_SELECT::init_ror_merged_scan");
@@ -1598,8 +1623,8 @@ int QUICK_ROR_INTERSECT_SELECT::init_ror_merged_scan(bool reuse_handler)
       There is no use of this->file. Use it for the first of merged range
       selects.
     */
-    if (quick->init_ror_merged_scan(TRUE))
-      DBUG_RETURN(1);
+    if ((error= quick->init_ror_merged_scan(TRUE)))
+      DBUG_RETURN(error);
     quick->file->extra(HA_EXTRA_KEYREAD_PRESERVE_FIELDS);
   }
   while ((quick= quick_it++))
@@ -1608,8 +1633,8 @@ int QUICK_ROR_INTERSECT_SELECT::init_ror_merged_scan(bool reuse_handler)
     const MY_BITMAP * const save_read_set= quick->head->read_set;
     const MY_BITMAP * const save_write_set= quick->head->write_set;
 #endif
-    if (quick->init_ror_merged_scan(FALSE))
-      DBUG_RETURN(1);
+    if ((error= quick->init_ror_merged_scan(FALSE)))
+      DBUG_RETURN(error);
     quick->file->extra(HA_EXTRA_KEYREAD_PRESERVE_FIELDS);
     // Sets are shared by all members of "quick_selects" so must not change
     DBUG_ASSERT(quick->head->read_set == save_read_set);
@@ -1618,10 +1643,10 @@ int QUICK_ROR_INTERSECT_SELECT::init_ror_merged_scan(bool reuse_handler)
     quick->record= head->record[0];
   }
 
-  if (need_to_fetch_row && head->file->ha_rnd_init(1))
+  if (need_to_fetch_row && (error= head->file->ha_rnd_init(1)))
   {
     DBUG_PRINT("error", ("ROR index_merge rnd_init call failed"));
-    DBUG_RETURN(1);
+    DBUG_RETURN(error);
   }
   DBUG_RETURN(0);
 }
@@ -1677,7 +1702,7 @@ QUICK_ROR_INTERSECT_SELECT::~QUICK_ROR_INTERSECT_SELECT()
   quick_selects.delete_elements();
   delete cpk_quick;
   free_root(&alloc,MYF(0));
-  if (need_to_fetch_row && head->file->inited != handler::NONE)
+  if (need_to_fetch_row && head->file->inited)
     head->file->ha_rnd_end();
   DBUG_VOID_RETURN;
 }
@@ -1781,8 +1806,8 @@ int QUICK_ROR_UNION_SELECT::reset()
   List_iterator_fast<QUICK_SELECT_I> it(quick_selects);
   while ((quick= it++))
   {
-    if (quick->reset())
-      DBUG_RETURN(1);
+    if ((error= quick->reset()))
+      DBUG_RETURN(error);
     if ((error= quick->get_next()))
     {
       if (error == HA_ERR_END_OF_FILE)
@@ -1793,10 +1818,10 @@ int QUICK_ROR_UNION_SELECT::reset()
     queue_insert(&queue, (uchar*)quick);
   }
 
-  if (head->file->ha_rnd_init(1))
+  if ((error= head->file->ha_rnd_init(1)))
   {
     DBUG_PRINT("error", ("ROR index_merge rnd_init call failed"));
-    DBUG_RETURN(1);
+    DBUG_RETURN(error);
   }
 
   DBUG_RETURN(0);
@@ -1814,7 +1839,7 @@ QUICK_ROR_UNION_SELECT::~QUICK_ROR_UNION_SELECT()
   DBUG_ENTER("QUICK_ROR_UNION_SELECT::~QUICK_ROR_UNION_SELECT");
   delete_queue(&queue);
   quick_selects.delete_elements();
-  if (head->file->inited != handler::NONE)
+  if (head->file->inited)
     head->file->ha_rnd_end();
   free_root(&alloc,MYF(0));
   DBUG_VOID_RETURN;
@@ -2734,8 +2759,13 @@ int SQL_SELECT::test_quick_select(THD *thd, key_map keys_to_use,
         It is possible to use a range-based quick select (but it might be
         slower than 'all' table scan).
       */
-      if (tree->merges.is_empty())
+      dbug_print_tree("final_tree", tree, &param);
+
       {
+        /*
+          Calculate cost of single index range scan and possible
+          intersections of these
+        */
         Opt_trace_object trace_range(trace,
                                      "analyzing_range_alternatives",
                                      Opt_trace_context::RANGE_OPTIMIZER);
@@ -2784,18 +2814,19 @@ int SQL_SELECT::test_quick_select(THD *thd, key_map keys_to_use,
           }
         }
       }
-      else
+
+      // Here we calculate cost of union index merge
+      if (!tree->merges.is_empty())
       {
         // Cannot return rows in descending order.
         if (thd->optimizer_switch_flag(OPTIMIZER_SWITCH_INDEX_MERGE) &&
-            interesting_order != ORDER::ORDER_DESC)
+            interesting_order != ORDER::ORDER_DESC &&
+            param.table->file->stats.records)
         {
           /* Try creating index_merge/ROR-union scan. */
           SEL_IMERGE *imerge;
           TABLE_READ_PLAN *best_conj_trp= NULL, *new_conj_trp;
           LINT_INIT(new_conj_trp); /* no empty index_merge lists possible */
-          DBUG_PRINT("info",("No range reads possible,"
-                             " trying to construct index_merge"));
           List_iterator_fast<SEL_IMERGE> it(tree->merges);
           Opt_trace_array trace_idx_merge(trace,
                                           "analyzing_index_merge",
@@ -2831,8 +2862,9 @@ int SQL_SELECT::test_quick_select(THD *thd, key_map keys_to_use,
     }
 
 free_mem:
-    if (unlikely(quick && trace->is_started()))
+    if (unlikely(quick && trace->is_started() && best_trp))
     {
+      // best_trp cannot be NULL if quick is set, done to keep fortify happy
       Opt_trace_object trace_range_summary(trace,
                                            "chosen_range_access_summary");
       {
@@ -3033,46 +3065,61 @@ static void dbug_print_singlepoint_range(SEL_ARG **start, uint num);
 #endif
 
 
-/*
+/**
   Perform partition pruning for a given table and condition.
 
-  SYNOPSIS
-    prune_partitions()
-      thd           Thread handle
-      table         Table to perform partition pruning for
-      pprune_cond   Condition to use for partition pruning
+  @param      thd            Thread handle
+  @param      table          Table to perform partition pruning for
+  @param      pprune_cond    Condition to use for partition pruning
   
-  DESCRIPTION
-    This function assumes that all partitions are marked as unused when it
-    is invoked. The function analyzes the condition, finds partitions that
-    need to be used to retrieve the records that match the condition, and 
-    marks them as used by setting appropriate bit in part_info->read_partitions
-    In the worst case all partitions are marked as used.
+  @note This function assumes that lock_partitions are setup when it
+  is invoked. The function analyzes the condition, finds partitions that
+  need to be used to retrieve the records that match the condition, and 
+  marks them as used by setting appropriate bit in part_info->read_partitions
+  In the worst case all partitions are marked as used. If the table is not
+  yet locked, it will also unset bits in part_info->lock_partitions that is
+  not set in read_partitions.
 
-  NOTE
-    This function returns promptly if called for non-partitioned table.
+  This function returns promptly if called for non-partitioned table.
 
-  RETURN
-    TRUE   We've inferred that no partitions need to be used (i.e. no table
-           records will satisfy pprune_cond)
-    FALSE  Otherwise
+  @return Operation status
+    @retval true  Failure
+    @retval false Success
 */
 
 bool prune_partitions(THD *thd, TABLE *table, Item *pprune_cond)
 {
-  bool retval= FALSE;
   partition_info *part_info = table->part_info;
   DBUG_ENTER("prune_partitions");
+  table->all_partitions_pruned_away= false;
 
   if (!part_info)
     DBUG_RETURN(FALSE); /* not a partitioned table */
-  
+
   if (!pprune_cond)
   {
     mark_all_partitions_as_used(part_info);
     DBUG_RETURN(FALSE);
   }
   
+  /* No need to continue pruning if there is no more partitions to prune! */
+  if (bitmap_is_clear_all(&part_info->lock_partitions))
+    bitmap_clear_all(&part_info->read_partitions);
+  if (bitmap_is_clear_all(&part_info->read_partitions))
+  {
+    table->all_partitions_pruned_away= true;
+    DBUG_RETURN(false);
+  }
+
+  /*
+    If the prepare stage already have completed pruning successfully,
+    it is no use of running prune_partitions() again on the same condition.
+    Since it will not be able to prune anything more than the previous call
+    from the prepare step.
+  */
+  if (part_info->is_pruning_completed)
+    DBUG_RETURN(false);
+
   PART_PRUNE_PARAM prune_param;
   MEM_ROOT alloc;
   RANGE_OPT_PARAM  *range_par= &prune_param.range_param;
@@ -3119,7 +3166,8 @@ bool prune_partitions(THD *thd, TABLE *table, Item *pprune_cond)
 
   if (tree->type == SEL_TREE::IMPOSSIBLE)
   {
-    retval= TRUE;
+    /* Cannot improve the pruning any further. */
+    part_info->is_pruning_completed= true;
     goto end;
   }
 
@@ -3175,27 +3223,49 @@ bool prune_partitions(THD *thd, TABLE *table, Item *pprune_cond)
   }
   
   /*
-    res == 0 => no used partitions => retval=TRUE
-    res == 1 => some used partitions => retval=FALSE
-    res == -1 - we jump over this line to all_used:
+    If the condition can be evaluated now, we are done with pruning.
+
+    During the prepare phase, before locking, subqueries and stored programs
+    are not evaluated. So we need to run prune_partitions() a second time in
+    the optimize phase to prune partitions for reading, when subqueries and
+    stored programs may be evaluated.
   */
-  retval= test(!res);
+  if (pprune_cond->can_be_evaluated_now())
+    part_info->is_pruning_completed= true;
   goto end;
 
 all_used:
-  retval= FALSE; // some partitions are used
   mark_all_partitions_as_used(prune_param.part_info);
 end:
   dbug_tmp_restore_column_maps(table->read_set, table->write_set, old_sets);
   thd->no_errors=0;
   thd->mem_root= range_par->old_root;
   free_root(&alloc,MYF(0));			// Return memory & allocator
-  /* Must be a subset of the locked partitions */
-  bitmap_intersect(&(prune_param.part_info->read_partitions),
-                   &(prune_param.part_info->lock_partitions));
+  /*
+    Must be a subset of the locked partitions.
+    lock_partitions contains the partitions marked by explicit partition
+    selection (... t PARTITION (pX) ...) and we must only use partitions
+    within that set.
+  */
+  bitmap_intersect(&prune_param.part_info->read_partitions,
+                   &prune_param.part_info->lock_partitions);
+  /*
+    If not yet locked, also prune partitions to lock if not UPDATEing
+    partition key fields. This will also prune lock_partitions if we are under
+    LOCK TABLES, so prune away calls to start_stmt().
+    TODO: enhance this prune locking to also allow pruning of
+    'UPDATE t SET part_key = const WHERE cond_is_prunable' so it adds
+    a lock for part_key partition.
+  */
+  if (!thd->lex->is_query_tables_locked() &&
+      !partition_key_modified(table, table->write_set))
+  {
+    bitmap_copy(&prune_param.part_info->lock_partitions,
+                &prune_param.part_info->read_partitions);
+  }
   if (bitmap_is_clear_all(&(prune_param.part_info->read_partitions)))
-    retval= TRUE;
-  DBUG_RETURN(retval);
+    table->all_partitions_pruned_away= true;
+  DBUG_RETURN(false);
 }
 
 
@@ -4188,6 +4258,8 @@ TABLE_READ_PLAN *get_best_disjunct_quick(PARAM *param, SEL_IMERGE *imerge,
   DBUG_ENTER("get_best_disjunct_quick");
   DBUG_PRINT("info", ("Full table scan cost: %g", read_time));
 
+  DBUG_ASSERT(param->table->file->stats.records);
+
   Opt_trace_context * const trace= &param->thd->opt_trace;
   Opt_trace_object trace_best_disjunct(trace);
   if (!(range_scans= (TRP_RANGE**)alloc_root(param->mem_root,
@@ -4825,8 +4897,7 @@ static double ror_scan_selectivity(const ROR_INTERSECT_INFO *info,
                      rec_per_key[tuple_arg->part]))    // (3)
       {
         DBUG_EXECUTE_IF("crash_records_in_range", DBUG_SUICIDE(););
-        // Fails - reintroduce when fixed
-        // DBUG_ASSERT(min_range.length > 0);
+        DBUG_ASSERT(min_range.length > 0);
         records= (table->file->
                   records_in_range(scan->keynr, &min_range, &max_range));
       }
@@ -5494,7 +5565,6 @@ static TRP_RANGE *get_key_scans_params(PARAM *param, SEL_TREE *tree,
       if (found_records != HA_POS_ERROR &&
           param->thd->opt_trace.is_started())
       {
-        trace_idx.add("index_dives_for_eq_ranges", !param->use_index_statistics);
         Opt_trace_array trace_range(&param->thd->opt_trace, "ranges");
 
         const KEY &cur_key= param->table->key_info[keynr];
@@ -5503,21 +5573,23 @@ static TRP_RANGE *get_key_scans_params(PARAM *param, SEL_TREE *tree,
         String range_info;
         range_info.set_charset(system_charset_info);
         trace_range_all_keyparts(trace_range, &range_info, *key, key_part);
+        trace_range.end(); // NOTE: ends the tracing scope
+
+        trace_idx.add("index_dives_for_eq_ranges", !param->use_index_statistics).
+          add("rowid_ordered", param->is_ror_scan).
+          add("using_mrr", !(mrr_flags & HA_MRR_USE_DEFAULT_IMPL)).
+          add("index_only", read_index_only).
+          add("rows", found_records).
+          add("cost", cost.total_cost());
       }
 #endif
 
-      trace_idx.add("index_only", read_index_only).
-        add("rows", found_records).
-        add("cost", cost.total_cost());
-
       if ((found_records != HA_POS_ERROR) && param->is_ror_scan)
       {
-        trace_idx.add("rowid_ordered", true);
         tree->n_ror_scans++;
         tree->ror_scans_map.set_bit(idx);
       }
-      else
-        trace_idx.add("rowid_ordered", false);
+
 
       if (found_records != HA_POS_ERROR &&
           read_time > (found_read_time= cost.total_cost()))
@@ -5530,7 +5602,9 @@ static TRP_RANGE *get_key_scans_params(PARAM *param, SEL_TREE *tree,
         best_buf_size=  buf_size;
       }
       else
-        trace_idx.add("chosen", false).add_alnum("cause", "cost");
+        trace_idx.add("chosen", false).
+          add_alnum("cause",
+                    (found_records == HA_POS_ERROR) ? "unknown" : "cost");
 
     }
   }
@@ -5667,6 +5741,33 @@ QUICK_SELECT_I *TRP_ROR_UNION::make_quick(PARAM *param,
 }
 
 
+/**
+   If EXPLAIN EXTENDED, add a warning that the index cannot be
+   used for range access due to either type conversion or different
+   collations on the field used for comparison
+
+   @param param              PARAM from SQL_SELECT::test_quick_select
+   @param key_num            Key number
+   @param field              Field in the predicate
+ */
+static void 
+if_extended_explain_warn_index_not_applicable(const RANGE_OPT_PARAM *param,
+                                              const uint key_num,
+                                              const Field *field)
+{
+  if (param->using_real_indexes &&
+      param->thd->lex->describe & DESCRIBE_EXTENDED)
+    push_warning_printf(
+            param->thd,
+            Sql_condition::WARN_LEVEL_WARN, 
+            ER_WARN_INDEX_NOT_APPLICABLE,
+            ER(ER_WARN_INDEX_NOT_APPLICABLE),
+            "range",
+            field->table->key_info[param->real_keynr[key_num]].name,
+            field->field_name);
+}
+
+
 /*
   Build a SEL_TREE for <> or NOT BETWEEN predicate
  
@@ -5683,7 +5784,6 @@ QUICK_SELECT_I *TRP_ROR_UNION::make_quick(PARAM *param,
     #  Pointer to tree built tree
     0  on error
 */
-
 static SEL_TREE *get_ne_mm_tree(RANGE_OPT_PARAM *param, Item_func *cond_func, 
                                 Field *field,
                                 Item *lt_value, Item *gt_value,
@@ -5951,7 +6051,8 @@ static SEL_TREE *get_func_mm_tree(RANGE_OPT_PARAM *param, Item_func *cond_func,
       param       PARAM from SQL_SELECT::test_quick_select
       cond_func   item for the predicate
       field_item  field in the predicate
-      value       constant in the predicate
+      value       constant in the predicate (or a field already read from 
+                  a table in the case of dynamic range access)
                   (for BETWEEN it contains the number of the field argument,
                    for IN it's always 0) 
       inv         TRUE <> NOT cond_func is considered
@@ -6081,6 +6182,7 @@ static SEL_TREE *get_mm_tree(RANGE_OPT_PARAM *param,Item *cond)
             param->alloced_sel_args > SEL_ARG::MAX_SEL_ARGS)
 	  DBUG_RETURN(0);	// out of memory
 	tree=tree_and(param,tree,new_tree);
+        dbug_print_tree("after_and", tree, param);
 	if (tree && tree->type == SEL_TREE::IMPOSSIBLE)
 	  break;
       }
@@ -6097,11 +6199,13 @@ static SEL_TREE *get_mm_tree(RANGE_OPT_PARAM *param,Item *cond)
 	  if (!new_tree)
 	    DBUG_RETURN(0);	// out of memory
 	  tree=tree_or(param,tree,new_tree);
+          dbug_print_tree("after_or", tree, param);
 	  if (!tree || tree->type == SEL_TREE::ALWAYS)
 	    break;
 	}
       }
     }
+    dbug_print_tree("tree_returned", tree, param);
     DBUG_RETURN(tree);
   }
   /* 
@@ -6122,6 +6226,7 @@ static SEL_TREE *get_mm_tree(RANGE_OPT_PARAM *param,Item *cond)
     tree= cond->val_int() ? new(tmp_root) SEL_TREE(SEL_TREE::ALWAYS) :
                             new(tmp_root) SEL_TREE(SEL_TREE::IMPOSSIBLE);
     param->thd->mem_root= tmp_root;
+    dbug_print_tree("tree_returned", tree, param);
     DBUG_RETURN(tree);
   }
 
@@ -6224,26 +6329,44 @@ static SEL_TREE *get_mm_tree(RANGE_OPT_PARAM *param,Item *cond)
       }
     }
     
+    dbug_print_tree("tree_returned", ftree, param);
     DBUG_RETURN(ftree);
   }
   default:
+
+    DBUG_ASSERT (!ftree);
     if (cond_func->arguments()[0]->real_item()->type() == Item::FIELD_ITEM)
     {
       field_item= (Item_field*) (cond_func->arguments()[0]->real_item());
-      value= cond_func->arg_count > 1 ? cond_func->arguments()[1] : 0;
+      value= cond_func->arg_count > 1 ? cond_func->arguments()[1] : NULL;
+      ftree= get_full_func_mm_tree(param, cond_func, field_item, value, inv);
     }
-    else if (cond_func->have_rev_func() &&
-             cond_func->arguments()[1]->real_item()->type() ==
-                                                            Item::FIELD_ITEM)
+    /*
+      Even if get_full_func_mm_tree() was executed above and did not
+      return a range predicate it may still be possible to create one
+      by reversing the order of the operands. Note that this only
+      applies to predicates where both operands are fields. Example: A
+      query of the form
+
+         WHERE t1.a OP t2.b
+
+      In this case, arguments()[0] == t1.a and arguments()[1] == t2.b.
+      When creating range predicates for t2, get_full_func_mm_tree()
+      above will return NULL because 'field' belongs to t1 and only
+      predicates that applies to t2 are of interest. In this case a
+      call to get_full_func_mm_tree() with reversed operands (see
+      below) may succeed.
+     */
+    if (!ftree && cond_func->have_rev_func() &&
+        cond_func->arguments()[1]->real_item()->type() == Item::FIELD_ITEM)
     {
       field_item= (Item_field*) (cond_func->arguments()[1]->real_item());
       value= cond_func->arguments()[0];
+      ftree= get_full_func_mm_tree(param, cond_func, field_item, value, inv);
     }
-    else
-      DBUG_RETURN(0);
-    ftree= get_full_func_mm_tree(param, cond_func, field_item, value, inv);
   }
 
+  dbug_print_tree("tree_returned", ftree, param);
   DBUG_RETURN(ftree);
 }
 
@@ -6299,6 +6422,210 @@ get_mm_parts(RANGE_OPT_PARAM *param, Item *cond_func, Field *field,
   DBUG_RETURN(tree);
 }
 
+/**
+  Saves 'value' in 'field' and handles potential type conversion
+  problems.
+
+  @param tree [out]                 The SEL_ARG leaf under construction. If 
+                                    an always false predicate is found it is 
+                                    modified to point to a SEL_ARG with
+                                    type == SEL_ARG::IMPOSSIBLE 
+  @param value                      The Item that contains a value that shall
+                                    be stored in 'field'.
+  @param comp_op                    Comparison operator: >, >=, <=> etc.
+  @param field                      The field that 'value' is stored into.
+  @param impossible_cond_cause[out] Set to a descriptive string if an
+                                    impossible condition is found.
+  @param memroot                    Memroot for creation of new SEL_ARG.
+
+  @retval false  if saving went fine and it makes sense to continue
+                 optimizing for this predicate.
+  @retval true   if always true/false predicate was found, in which
+                 case 'tree' has been modified to reflect this: NULL
+                 pointer if always true, SEL_ARG with type IMPOSSIBLE
+                 if always false.
+*/
+static bool save_value_and_handle_conversion(SEL_ARG **tree,
+                                             Item *value,
+                                             const Item_func::Functype comp_op,
+                                             Field *field,
+                                             const char **impossible_cond_cause,
+                                             MEM_ROOT *memroot)
+{
+  // A SEL_ARG should not have been created for this predicate yet.
+  DBUG_ASSERT(*tree == NULL);
+
+  if (!value->can_be_evaluated_now())
+  {
+    /*
+      We cannot evaluate the value yet (i.e. required tables are not yet
+      locked.)
+      This is the case of prune_partitions() called during JOIN::prepare().
+    */
+    return true;
+  }
+
+  // For comparison purposes allow invalid dates like 2000-01-32
+  const sql_mode_t orig_sql_mode= field->table->in_use->variables.sql_mode;
+  field->table->in_use->variables.sql_mode|= MODE_INVALID_DATES;
+
+  /*
+    We want to change "field > value" to "field OP V"
+    where:
+    * V is what is in "field" after we stored "value" in it via
+    save_in_field_no_warning() (such store operation may have done
+    rounding...)
+    * OP is > or >=, depending on what's correct.
+    For example, if c is an INT column,
+    "c > 2.9" is changed to "c OP 3"
+    where OP is ">=" (">" would not be correct, as 3 > 2.9, a comparison
+    done with stored_field_cmp_to_item()). And
+    "c > 3.1" is changed to "c OP 3" where OP is ">" (3 < 3.1...).
+  */
+
+  // Note that value may be a stored function call, executed here.
+  const type_conversion_status err= value->save_in_field_no_warnings(field, 1);
+  field->table->in_use->variables.sql_mode= orig_sql_mode;
+
+  switch (err) {
+  case TYPE_OK:
+  case TYPE_NOTE_TRUNCATED:
+    return false;
+  case TYPE_ERR_BAD_VALUE:
+    /*
+      In the case of incompatible values, MySQL's SQL dialect has some
+      strange interpretations. For example,
+
+          "int_col > 'foo'" is interpreted as "int_col > 0"
+
+      instead of always false. Because of this, we assume that the
+      range predicate is always true instead of always false and let
+      evaluate_join_record() decide the outcome.
+    */
+    return true;
+  case TYPE_ERR_NULL_CONSTRAINT_VIOLATION:
+    // Checking NULL value on a field that cannot contain NULL.
+    *impossible_cond_cause= "null_field_in_non_null_column";
+    goto impossible_cond;
+  case TYPE_WARN_OUT_OF_RANGE:
+    /*
+      value to store was either higher than field::max_value or lower
+      than field::min_value. The field's max/min value has been stored
+      instead.
+     */
+    if (comp_op == Item_func::EQUAL_FUNC || comp_op == Item_func::EQ_FUNC)
+    {
+      /*
+        Independent of data type, "out_of_range_value =/<=> field" is
+        always false.
+      */
+      *impossible_cond_cause= "value_out_of_range";
+      goto impossible_cond;
+    }
+
+    // If the field is numeric, we can interpret the out of range value.
+    if (field->result_type() == REAL_RESULT ||
+        field->result_type() == INT_RESULT ||
+        field->result_type() == DECIMAL_RESULT)
+    {
+      /*
+        value to store was higher than field::max_value if
+           a) field has a value greater than 0, or
+           b) if field is unsigned and has a negative value (which, when
+              cast to unsigned, means some value higher than LONGLONG_MAX).
+      */
+      if ((field->val_int() > 0) ||                              // a)
+          (static_cast<Field_num*>(field)->unsigned_flag &&
+           field->val_int() < 0))                                // b)
+      {
+        if (comp_op == Item_func::LT_FUNC || comp_op == Item_func::LE_FUNC)
+        {
+          /*
+            '<' or '<=' compared to a value higher than the field
+            can store is always true.
+          */
+          return true;
+        }
+        if (comp_op == Item_func::GT_FUNC || comp_op == Item_func::GE_FUNC)
+        {
+          /*
+            '>' or '>=' compared to a value higher than the field can
+            store is always false.
+          */
+          *impossible_cond_cause= "value_out_of_range";
+          goto impossible_cond;
+        }
+      }
+      else // value is lower than field::min_value
+      {
+        if (comp_op == Item_func::GT_FUNC || comp_op == Item_func::GE_FUNC)
+        {
+          /*
+            '>' or '>=' compared to a value lower than the field
+            can store is always true.
+          */
+          return true;
+        }
+        if (comp_op == Item_func::LT_FUNC || comp_op == Item_func::LE_FUNC)
+        {
+          /*
+            '<' or '=' compared to a value lower than the field can
+            store is always false.
+          */
+          *impossible_cond_cause= "value_out_of_range";
+          goto impossible_cond;
+        }
+      }
+    }
+    /*
+      Value is out of range on a datatype where it can't be decided if
+      it was underflow or overflow. It is therefore not possible to
+      determine whether or not the condition is impossible or always
+      true and we have to assume always true.
+    */
+    return true;
+  case TYPE_NOTE_TIME_TRUNCATED:
+    if (field->type() == FIELD_TYPE_DATE &&
+        (comp_op == Item_func::GT_FUNC || comp_op == Item_func::GE_FUNC ||
+         comp_op == Item_func::LT_FUNC || comp_op == Item_func::LE_FUNC))
+    {
+      /*
+        We were saving DATETIME into a DATE column, the conversion went ok
+        but a non-zero time part was cut off.
+
+        In MySQL's SQL dialect, DATE and DATETIME are compared as datetime
+        values. Index over a DATE column uses DATE comparison. Changing
+        from one comparison to the other is possible:
+
+        datetime(date_col)< '2007-12-10 12:34:55' -> date_col<='2007-12-10'
+        datetime(date_col)<='2007-12-10 12:34:55' -> date_col<='2007-12-10'
+
+        datetime(date_col)> '2007-12-10 12:34:55' -> date_col>='2007-12-10'
+        datetime(date_col)>='2007-12-10 12:34:55' -> date_col>='2007-12-10'
+
+        but we'll need to convert '>' to '>=' and '<' to '<='. This will
+        be done together with other types at the end of get_mm_leaf()
+        (grep for stored_field_cmp_to_item)
+      */
+      return false;
+    }
+    if (comp_op == Item_func::EQ_FUNC || comp_op == Item_func::EQUAL_FUNC)
+    {
+      // Equality comparison is always false when time info has been truncated.
+      goto impossible_cond;
+    }
+    // Fall through
+  default:
+    return true;
+  }
+
+  DBUG_ASSERT(FALSE); // Should never get here.
+
+impossible_cond:
+  *tree= new (memroot) SEL_ARG(field, 0, 0);
+  (*tree)->type= SEL_ARG::IMPOSSIBLE;
+  return true;
+}
 
 static SEL_ARG *
 get_mm_leaf(RANGE_OPT_PARAM *param, Item *conf_func, Field *field,
@@ -6309,9 +6636,7 @@ get_mm_leaf(RANGE_OPT_PARAM *param, Item *conf_func, Field *field,
   SEL_ARG *tree= 0;
   MEM_ROOT *alloc= param->mem_root;
   uchar *str;
-  sql_mode_t orig_sql_mode;
-  int err;
-  const char* impossible_cond_cause= NULL;
+  const char *impossible_cond_cause= NULL;
   DBUG_ENTER("get_mm_leaf");
 
   /*
@@ -6353,10 +6678,6 @@ get_mm_leaf(RANGE_OPT_PARAM *param, Item *conf_func, Field *field,
        WHERE latin1_swedish_ci_column = 'a' COLLATE lati1_bin;
 
        WHERE latin1_swedish_ci_colimn = BINARY 'a '
-
-    3. Grep for IndexedTimeComparedToDate. If 'value' is a DATETIME part,
-       using the index on the TIME column would retain only the TIME part of
-       'value', giving false comparison results.
   */
   if ((field->result_type() == STRING_RESULT &&
        field->match_collation_to_optimize_range() &&
@@ -6364,19 +6685,39 @@ get_mm_leaf(RANGE_OPT_PARAM *param, Item *conf_func, Field *field,
        key_part->image_type == Field::itRAW &&
        field->charset() != conf_func->compare_collation() &&
        !(conf_func->compare_collation()->state & MY_CS_BINSORT &&
-         (type == Item_func::EQUAL_FUNC || type == Item_func::EQ_FUNC))) ||
-      field_time_cmp_date(field, value))
+         (type == Item_func::EQUAL_FUNC || type == Item_func::EQ_FUNC))))
   {
-    if (param->using_real_indexes &&
-        param->thd->lex->describe & DESCRIBE_EXTENDED)
-      push_warning_printf(
-              param->thd,
-              Sql_condition::WARN_LEVEL_WARN, 
-              ER_WARN_INDEX_NOT_APPLICABLE,
-              ER(ER_WARN_INDEX_NOT_APPLICABLE),
-              "range",
-              field->table->key_info[param->real_keynr[key_part->key]].name,
-              field->field_name);
+    if_extended_explain_warn_index_not_applicable(param, key_part->key, field);
+    goto end;
+  }
+
+  /*
+    Temporal values: Cannot use range access if:
+      1) 'temporal_value = indexed_varchar_column' because there are
+         many ways to represent the same date as a string. A few
+         examples: "01-01-2001", "1-1-2001", "2001-01-01",
+         "2001#01#01". The same problem applies to time. Thus, we
+         cannot create a usefull range predicate for temporal values
+         into VARCHAR column indexes. @see add_key_field()
+      2) 'temporal_value_with_date_part = indexed_time' because: 
+         - without index, a TIME column with value '48:00:00' is 
+           equal to a DATETIME column with value 
+           'CURDATE() + 2 days' 
+         - with range access into the TIME column, CURDATE() + 2 
+           days becomes "00:00:00" (Field_timef::store_internal() 
+           simply extracts the time part from the datetime) which 
+           is a lookup key which does not match "48:00:00"; so 
+           ref access is not be able to give the same result as 
+           On the other hand, we can do ref access for
+           IndexedDatetimeComparedToTime because
+           Field_temporal_with_date::store_time() will convert
+           48:00:00 to CURDATE() + 2 days which is the correct
+           lookup key.
+   */
+  if ((!field->is_temporal() && value->is_temporal()) ||   // 1)
+      field_time_cmp_date(field, value))                   // 2)
+  {
+    if_extended_explain_warn_index_not_applicable(param, key_part->key, field);
     goto end;
   }
 
@@ -6500,120 +6841,13 @@ get_mm_leaf(RANGE_OPT_PARAM *param, Item *conf_func, Field *field,
       value->result_type() != STRING_RESULT &&
       field->cmp_type() != value->result_type())
   {
-    if (param->using_real_indexes &&
-        param->thd->lex->describe & DESCRIBE_EXTENDED)
-      push_warning_printf(
-              param->thd,
-              Sql_condition::WARN_LEVEL_WARN, 
-              ER_WARN_INDEX_NOT_APPLICABLE,
-              ER(ER_WARN_INDEX_NOT_APPLICABLE),
-              "range",
-              field->table->key_info[param->real_keynr[key_part->key]].name,
-              field->field_name);
+    if_extended_explain_warn_index_not_applicable(param, key_part->key, field);
     goto end;
   }
-  /* For comparison purposes allow invalid dates like 2000-01-32 */
-  orig_sql_mode= field->table->in_use->variables.sql_mode;
-  if (value->real_item()->type() == Item::STRING_ITEM &&
-      (field->type() == MYSQL_TYPE_DATE ||
-       field->type() == MYSQL_TYPE_DATETIME))
-    field->table->in_use->variables.sql_mode|= MODE_INVALID_DATES;
 
-  /*
-    We want to change "field > value" to "field OP V"
-    where:
-    * V is what is in "field" after we stored "value" in it via
-    save_in_field_no_warning() (such store operation may have done
-    rounding...)
-    * OP is > or >=, depending on what's correct.
-    For example, if c is an INT column,
-    "c > 2.9" is changed to "c OP 3"
-    where OP is ">=" (">" would not be correct, as 3 > 2.9, a comparison
-    done with stored_field_cmp_to_item()). And
-    "c > 3.1" is changed to "c OP 3" where OP is ">" (3 < 3.1...).
-  */
-
-  // Note that value may be a stored function call, executed here.
-  err= value->save_in_field_no_warnings(field, 1);
-
-  if (err > 0)
-  {
-    if (field->cmp_type() != value->result_type())
-    {
-      if ((type == Item_func::EQ_FUNC || type == Item_func::EQUAL_FUNC) &&
-          value->result_type() == item_cmp_type(field->result_type(),
-                                                value->result_type()))
-      {
-        impossible_cond_cause= "incomparable_types";
-        tree= new (alloc) SEL_ARG(field, 0, 0);
-        tree->type= SEL_ARG::IMPOSSIBLE;
-        field->table->in_use->variables.sql_mode= orig_sql_mode;
-        goto end;
-      }
-      else
-      {
-        /*
-          TODO: We should return trees of the type SEL_ARG::IMPOSSIBLE
-          for the cases like int_field > 999999999999999999999999 as well.
-        */
-        tree= 0;
-        if (err == 3 && field->type() == FIELD_TYPE_DATE &&
-            (type == Item_func::GT_FUNC || type == Item_func::GE_FUNC ||
-             type == Item_func::LT_FUNC || type == Item_func::LE_FUNC) )
-        {
-          /*
-            We were saving DATETIME into a DATE column, the conversion went ok
-            but a non-zero time part was cut off.
-
-            In MySQL's SQL dialect, DATE and DATETIME are compared as datetime
-            values. Index over a DATE column uses DATE comparison. Changing 
-            from one comparison to the other is possible:
-
-            datetime(date_col)< '2007-12-10 12:34:55' -> date_col<='2007-12-10'
-            datetime(date_col)<='2007-12-10 12:34:55' -> date_col<='2007-12-10'
-
-            datetime(date_col)> '2007-12-10 12:34:55' -> date_col>='2007-12-10'
-            datetime(date_col)>='2007-12-10 12:34:55' -> date_col>='2007-12-10'
-
-            but we'll need to convert '>' to '>=' and '<' to '<='. This will
-            be done together with other types at the end of this function
-            (grep for stored_field_cmp_to_item)
-          */
-        }
-        else
-        {
-          field->table->in_use->variables.sql_mode= orig_sql_mode;
-          goto end;
-        }
-      }
-    }
-
-    /*
-      guaranteed at this point:  err > 0; field and const of same type
-      If an integer got bounded (e.g. to within 0..255 / -128..127)
-      for < or >, set flags as for <= or >= (no NEAR_MAX / NEAR_MIN)
-    */
-    else if (err == 1 && field->result_type() == INT_RESULT)
-    {
-      if (type == Item_func::LT_FUNC && (value->val_int() > 0))
-        type = Item_func::LE_FUNC;
-      else if (type == Item_func::GT_FUNC &&
-               (field->type() != FIELD_TYPE_BIT) &&
-               !((Field_num*)field)->unsigned_flag &&
-               !((Item_int*)value)->unsigned_flag &&
-               (value->val_int() < 0))
-        type = Item_func::GE_FUNC;
-    }
-  }
-  else if (err < 0)
-  {
-    impossible_cond_cause= "null_field_in_non_null_column";
-    field->table->in_use->variables.sql_mode= orig_sql_mode;
-    /* This happens when we try to insert a NULL field in a not null column */
-    tree= &null_element;                        // cmp with NULL is never TRUE
+  if (save_value_and_handle_conversion(&tree, value, type, field,
+                                       &impossible_cond_cause, alloc))
     goto end;
-  }
-  field->table->in_use->variables.sql_mode= orig_sql_mode;
 
   /*
     Any sargable predicate except "<=>" involving NULL as a constant is always
@@ -6738,7 +6972,7 @@ get_mm_leaf(RANGE_OPT_PARAM *param, Item *conf_func, Field *field,
   }
 
 end:
-  if (impossible_cond_cause)
+  if (impossible_cond_cause != NULL)
   {
     Opt_trace_object wrapper (&param->thd->opt_trace);
     Opt_trace_object (&param->thd->opt_trace, "impossible_condition",
@@ -6825,6 +7059,10 @@ tree_and(RANGE_OPT_PARAM *param,SEL_TREE *tree1,SEL_TREE *tree2)
     tree1->type=SEL_TREE::KEY_SMALLER;
     DBUG_RETURN(tree1);
   }
+
+  dbug_print_tree("tree1", tree1, param);
+  dbug_print_tree("tree2", tree2, param);
+
   key_map  result_keys;
   
   /* Join the trees key per key */
@@ -6846,19 +7084,13 @@ tree_and(RANGE_OPT_PARAM *param,SEL_TREE *tree1,SEL_TREE *tree2)
         DBUG_RETURN(tree1);
       }
       result_keys.set_bit(key1 - tree1->keys);
-#ifdef EXTRA_DEBUG
+#ifndef DBUG_OFF
         if (*key1 && param->alloced_sel_args < SEL_ARG::MAX_SEL_ARGS) 
           (*key1)->test_use_count(*key1);
 #endif
     }
   }
   tree1->keys_map= result_keys;
-  /* dispose index_merge if there is a "range" option */
-  if (!result_keys.is_clear_all())
-  {
-    tree1->merges.empty();
-    DBUG_RETURN(tree1);
-  }
 
   /* ok, both trees are index_merge trees */
   imerge_list_and_list(&tree1->merges, &tree2->merges);
@@ -6879,6 +7111,9 @@ bool sel_trees_can_be_ored(SEL_TREE *tree1, SEL_TREE *tree2,
   DBUG_ENTER("sel_trees_can_be_ored");
   common_keys.intersect(tree2->keys_map);
 
+  dbug_print_tree("tree1", tree1, param);
+  dbug_print_tree("tree2", tree2, param);
+
   if (common_keys.is_clear_all())
     DBUG_RETURN(FALSE);
 
@@ -6891,9 +7126,7 @@ bool sel_trees_can_be_ored(SEL_TREE *tree1, SEL_TREE *tree2,
       key1= tree1->keys + key_no;
       key2= tree2->keys + key_no;
       if ((*key1)->part == (*key2)->part)
-      {
         DBUG_RETURN(TRUE);
-      }
     }
   }
   DBUG_RETURN(FALSE);
@@ -7004,7 +7237,7 @@ tree_or(RANGE_OPT_PARAM *param,SEL_TREE *tree1,SEL_TREE *tree2)
       {
         result=tree1;				// Added to tree1
         result_keys.set_bit(key1 - tree1->keys);
-#ifdef EXTRA_DEBUG
+#ifndef DBUG_OFF
         if (param->alloced_sel_args < SEL_ARG::MAX_SEL_ARGS) 
           (*key1)->test_use_count(*key1);
 #endif
@@ -7484,6 +7717,8 @@ key_or(RANGE_OPT_PARAM *param, SEL_ARG *key1, SEL_ARG *key2)
           // cur_key2 is full range: [-inf <= cur_key2 <= +inf]
           key1->free_tree();
           key2->free_tree();
+          key1->type= SEL_ARG::ALWAYS;
+          key2->type= SEL_ARG::ALWAYS;
           if (key1->maybe_flag)
             return new SEL_ARG(SEL_ARG::MAYBE_KEY);
           return 0;
@@ -7649,11 +7884,15 @@ key_or(RANGE_OPT_PARAM *param, SEL_ARG *key1, SEL_ARG *key2)
         cur_key1= last;
 
         /*
-          We need the minimum endpoint of first so we can compare it
-          with the minimum endpoint of the enclosing cur_key2 range.
+          Extend last to cover the entire range of
+          [min(first.min_value,cur_key2.min_value)...last.max_value].
+          If this forms a full range (the range covers all possible
+          values) we return no SEL_ARG RB-tree.
         */
-        last->copy_min(first);
-        bool full_range= last->copy_min(cur_key2);
+        bool full_range= last->copy_min(first);
+        if (!full_range)
+          full_range= last->copy_min(cur_key2);
+
         if (!full_range)
         {
           if (last->next && cur_key2->cmp_max_to_min(last->next) >= 0)
@@ -7688,6 +7927,8 @@ key_or(RANGE_OPT_PARAM *param, SEL_ARG *key1, SEL_ARG *key2)
         if (full_range)
         {                                       // Full range
           key1->free_tree();
+          key1->type= SEL_ARG::ALWAYS;
+          key2->type= SEL_ARG::ALWAYS;
           for (; cur_key2 ; cur_key2= cur_key2->next)
             cur_key2->increment_use_count(-1);  // Free not used tree
           if (key1->maybe_flag)
@@ -8289,7 +8530,6 @@ SEL_ARG *rb_delete_fixup(SEL_ARG *root,SEL_ARG *key,SEL_ARG *par)
 
 	/* Test that the properties for a red-black tree hold */
 
-#ifdef EXTRA_DEBUG
 int test_rb_tree(SEL_ARG *element,SEL_ARG *parent)
 {
   int count_l,count_r;
@@ -8405,6 +8645,7 @@ void SEL_ARG::test_use_count(SEL_ARG *root)
   if (this == root && use_count != 1)
   {
     sql_print_information("Use_count: Wrong count %lu for root",use_count);
+    // DBUG_ASSERT(false); // Todo - enable and clean up mess
     return;
   }
   if (this->type != SEL_ARG::KEY_RANGE)
@@ -8420,17 +8661,20 @@ void SEL_ARG::test_use_count(SEL_ARG *root)
         sql_print_information("Use_count: Wrong count for key at 0x%lx, %lu "
                               "should be %lu", (long unsigned int)pos,
                               pos->next_key_part->use_count, count);
+        // DBUG_ASSERT(false); // Todo - enable and clean up mess
 	return;
       }
       pos->next_key_part->test_use_count(root);
     }
   }
   if (e_count != elements)
+  {
     sql_print_warning("Wrong use count: %u (should be %u) for tree at 0x%lx",
                       e_count, elements, (long unsigned int) this);
+    // DBUG_ASSERT(false); // Todo - enable and clean up mess
+  }
 }
 
-#endif
 
 /****************************************************************************
   MRR Range Sequence Interface implementation that walks a SEL_ARG* tree.
@@ -9548,7 +9792,7 @@ int QUICK_INDEX_MERGE_SELECT::read_keys_and_merge()
       if (!cur_quick)
         break;
 
-      if (cur_quick->file->inited != handler::NONE) 
+      if (cur_quick->file->inited) 
         cur_quick->file->ha_index_end();
       if (cur_quick->init() || cur_quick->reset())
         DBUG_RETURN(1);
@@ -9797,7 +10041,7 @@ int QUICK_RANGE_SELECT::reset()
   last_range= NULL;
   cur_range= (QUICK_RANGE**) ranges.buffer;
 
-  if (file->inited == handler::NONE)
+  if (!file->inited)
   {
     if (in_ror_merged_scan)
       head->column_bitmaps_set_no_signal(&column_bitmap, &column_bitmap);
@@ -10778,9 +11022,6 @@ get_best_group_min_max(PARAM *param, SEL_TREE *tree, double read_time)
   }
 
   /* Check (SA1,SA4) and store the only MIN/MAX argument - the C attribute.*/
-  if (join->make_sum_func_list(join->all_fields, join->fields_list, 1))
-    DBUG_RETURN(NULL);
-
   is_agg_distinct = is_indexed_agg_distinct(join, &agg_distinct_flds);
 
   if ((!join->group_list) && /* Neither GROUP BY nor a DISTINCT query. */
@@ -11999,7 +12240,7 @@ int QUICK_GROUP_MIN_MAX_SELECT::init()
 QUICK_GROUP_MIN_MAX_SELECT::~QUICK_GROUP_MIN_MAX_SELECT()
 {
   DBUG_ENTER("QUICK_GROUP_MIN_MAX_SELECT::~QUICK_GROUP_MIN_MAX_SELECT");
-  if (head->file->inited != handler::NONE) 
+  if (head->file->inited) 
     head->file->ha_index_end();
   if (min_max_arg_part)
     delete_dynamic(&min_max_ranges);
@@ -12365,7 +12606,7 @@ int QUICK_GROUP_MIN_MAX_SELECT::next_min()
     if (min_max_arg_part && min_max_arg_part->field->is_null())
     {
       /* Find the first subsequent record without NULL in the MIN/MAX field. */
-      key_copy(tmp_record, record, index_info, 0);
+      key_copy(tmp_record, record, index_info, max_used_key_length);
       result= head->file->ha_index_read_map(record, tmp_record,
                                             make_keypart_map(real_key_parts),
                                             HA_READ_AFTER_KEY);
@@ -13012,8 +13253,6 @@ static void print_ror_scans_arr(TABLE *table, const char *msg,
 
 #endif /* !DBUG_OFF */
 
-#ifdef OPTIMIZER_TRACE
-
 /**
   Print a key to a string
 
@@ -13025,7 +13264,10 @@ static void print_ror_scans_arr(TABLE *table, const char *msg,
 static void
 print_key_value(String *out, const KEY_PART_INFO *key_part, const uchar *key)
 {
-  String tmp;
+  char buff[128];
+  String tmp(buff, sizeof(buff), system_charset_info);
+  tmp.length(0);
+
   uint store_length;
   TABLE *table= key_part->field->table;
   my_bitmap_map *old_sets[2];
@@ -13072,10 +13314,10 @@ restore_col_map:
   @param[in]     flag         Key range flags defining what min_key
                               and max_key represent @see my_base.h
  */
-static void append_range(String *out,
-                         const KEY_PART_INFO *key_part,
-                         const uchar *min_key, const uchar *max_key,
-                         const uint flag)
+void append_range(String *out,
+                  const KEY_PART_INFO *key_part,
+                  const uchar *min_key, const uchar *max_key,
+                  const uint flag)
 {
   if (out->length() > 0)
     out->append(STRING_WITH_LEN(" AND "));
@@ -13100,6 +13342,9 @@ static void append_range(String *out,
     print_key_value(out, key_part, max_key);
   }
 }
+
+
+#ifdef OPTIMIZER_TRACE
 
 /**
   Traverse an R-B tree of range conditions and append all ranges for this
@@ -13152,10 +13397,183 @@ static void trace_range_all_keyparts(Opt_trace_array &trace_range,
     }
     keypart_range= keypart_range->next;
   }
-
 }
 
 #endif //OPTIMIZER_TRACE
+
+#ifndef DBUG_OFF
+
+/**
+  Traverse an R-B tree of range conditions and append all ranges for
+  this keypart and consecutive keyparts to a String. See description
+  of R-B trees/SEL_ARG for details on how ranges are linked.
+
+  @see trace_range_all_keyparts
+
+  @param[in,out] range_result  The string where range predicates are
+                               appended when the last keypart has
+                               been reached.
+  @param[in]     range_so_far  String containing ranges for keyparts prior
+                               to this keypart.
+  @param[in]     keypart_root  The root of the R-B tree containing intervals
+                               for this keypart.
+  @param[in]     key_parts     Index components description, used when adding
+                               information to the optimizer trace
+*/
+static void print_range_all_keyparts(String *range_result,
+                                     String *range_so_far,
+                                     SEL_ARG *keypart_root,
+                                     const KEY_PART_INFO *key_parts)
+{
+  DBUG_ASSERT(keypart_root && keypart_root != &null_element);
+
+  // Navigate to first interval in red-black tree
+  const KEY_PART_INFO *cur_key_part= key_parts + keypart_root->part;
+  const SEL_ARG *keypart_range= keypart_root->first();
+
+  const uint save_range_so_far_length= range_so_far->length();
+
+  while (keypart_range)
+  {
+    /*
+      Skip the rest if the string becomes too long to avoid OOM.
+      Printing very long range conditions normally doesn't make sense
+      either.
+     */
+    if (range_result->length() > 500)
+    {
+      range_result->append(STRING_WITH_LEN("..."));
+      break;
+    }
+
+    // Append the current range to the range String
+    append_range(range_so_far, cur_key_part,
+                 keypart_range->min_value, keypart_range->max_value,
+                 keypart_range->min_flag | keypart_range->max_flag);
+
+    if (keypart_range->next_key_part)
+    {
+      // Not done - there are ranges in consecutive keyparts as well
+      print_range_all_keyparts(range_result, range_so_far,
+                               keypart_range->next_key_part, key_parts);
+    }
+    else
+    {
+      /*
+        This is the last keypart with a range. Print full range
+        info to range_result
+      */
+      if (range_result->length() == 0)
+        range_result->append(STRING_WITH_LEN("("));
+      else
+        range_result->append(STRING_WITH_LEN(" OR ("));
+
+      range_result->append(range_so_far->ptr(), range_so_far->length());
+      range_result->append(STRING_WITH_LEN(")"));
+    }
+    keypart_range= keypart_range->next;
+    /*
+      Now moving to next range for this keypart, so "reset"
+      range_so_far to include only range description of earlier
+      keyparts
+    */
+    range_so_far->length(save_range_so_far_length);
+  }
+}
+
+#endif // DBUG_OFF
+
+/**
+  Print the ranges in a SEL_TREE to debug log.
+
+  @param tree_name   Descriptive name of the tree
+  @param tree        The SEL_TREE that will be printed to debug log
+  @param param       PARAM from SQL_SELECT::test_quick_select
+*/
+static inline void dbug_print_tree(const char *tree_name,
+                                   SEL_TREE *tree,
+                                   const RANGE_OPT_PARAM *param)
+{
+#ifndef DBUG_OFF
+  if (!param->using_real_indexes)
+  {
+    DBUG_PRINT("info",
+               ("sel_tree: "
+                "%s uses a partitioned index and cannot be printed",
+                tree_name));
+    return;
+  }
+
+  if (!tree)
+  {
+    DBUG_PRINT("info", ("sel_tree: %s is NULL", tree_name));
+    return;
+  }
+
+  if (tree->type == SEL_TREE::IMPOSSIBLE)
+  {
+    DBUG_PRINT("info", ("sel_tree: %s is IMPOSSIBLE", tree_name));
+    return;
+  }
+
+  if (tree->type == SEL_TREE::ALWAYS)
+  {
+    DBUG_PRINT("info", ("sel_tree: %s is ALWAYS", tree_name));
+    return;
+  }
+
+  if (!tree->merges.is_empty())
+  {
+    DBUG_PRINT("info",
+               ("sel_tree: "
+                "%s contains the following merges", tree_name));
+
+    List_iterator<SEL_IMERGE> it(tree->merges);
+    int i= 0;
+    for (SEL_IMERGE *el= it++; el; el= it++, i++)
+    {
+      for (SEL_TREE** current= el->trees;
+           current != el->trees_next;
+           current++)
+        dbug_print_tree("  merge_tree", *current, param);
+    }
+  }
+
+  for (uint i= 0; i< param->keys; i++)
+  {
+    if (tree->keys[i] == NULL || tree->keys[i] == &null_element)
+      continue;
+
+    uint real_key_nr= param->real_keynr[i];
+
+    const KEY &cur_key= param->table->key_info[real_key_nr];
+    const KEY_PART_INFO *key_part= cur_key.key_part;
+
+    /*
+      String holding the final range description from
+      print_range_all_keyparts()
+    */
+    char buff1[512];
+    String range_result(buff1, sizeof(buff1), system_charset_info);
+    range_result.length(0);
+
+    /*
+      Range description up to a certain keypart - used internally in
+      print_range_all_keyparts()
+    */
+    char buff2[128];
+    String range_so_far(buff2, sizeof(buff2), system_charset_info);
+    range_so_far.length(0);
+
+    print_range_all_keyparts(&range_result, &range_so_far,
+                             tree->keys[i], key_part);
+
+    DBUG_PRINT("info",
+               ("sel_tree: %s->keys[%d(real_keynr: %d)]: %s",
+                tree_name, i, real_key_nr, range_result.ptr()));
+  }
+#endif
+}
 
 /*****************************************************************************
 ** Print a quick range for debugging

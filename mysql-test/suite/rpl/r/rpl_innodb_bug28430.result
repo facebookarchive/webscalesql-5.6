@@ -1,20 +1,23 @@
 include/master-slave.inc
 Warnings:
-Note	1756	Sending passwords in plain text without SSL/TLS is extremely insecure.
-Note	1757	Storing MySQL user name or password information in the master.info repository is not secure and is therefore not recommended. Please see the MySQL Manual for more about this issue and possible alternatives.
+Note	####	Sending passwords in plain text without SSL/TLS is extremely insecure.
+Note	####	Storing MySQL user name or password information in the master.info repository is not secure and is therefore not recommended. Please see the MySQL Manual for more about this issue and possible alternatives.
 [connection master]
 use test;
 CREATE TABLE test.regular_tbl(id MEDIUMINT NOT NULL AUTO_INCREMENT,
-dt TIMESTAMP, user CHAR(255), uuidf LONGBLOB,
+dt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON 
+UPDATE CURRENT_TIMESTAMP, user CHAR(255), uuidf LONGBLOB,
 fkid MEDIUMINT, filler VARCHAR(255),
 PRIMARY KEY(id)) ENGINE='innodb';
 CREATE TABLE test.bykey_tbl(id MEDIUMINT NOT NULL AUTO_INCREMENT,
-dt TIMESTAMP, user CHAR(255), uuidf LONGBLOB,
+dt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE 
+CURRENT_TIMESTAMP, user CHAR(255), uuidf LONGBLOB,
 fkid MEDIUMINT, filler VARCHAR(255),
 PRIMARY KEY(id)) ENGINE='innodb'
 PARTITION BY KEY(id) partitions 5;
 CREATE TABLE test.byrange_tbl(id MEDIUMINT NOT NULL AUTO_INCREMENT,
-dt TIMESTAMP, user CHAR(255), uuidf LONGBLOB,
+dt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE 
+CURRENT_TIMESTAMP, user CHAR(255), uuidf LONGBLOB,
 fkid MEDIUMINT, filler VARCHAR(255),
 PRIMARY KEY(id)) ENGINE='innodb'
 PARTITION BY RANGE(id)

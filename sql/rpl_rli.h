@@ -268,6 +268,13 @@ public:
   ulonglong log_space_limit,log_space_total;
   bool ignore_log_space_limit;
 
+  /*
+    Used by the SQL thread to instructs the IO thread to rotate 
+    the logs when the SQL thread needs to purge to release some
+    disk space.
+   */
+  bool sql_force_rotate_relay;
+
   time_t last_master_timestamp;
 
   void clear_until_condition();
@@ -302,29 +309,35 @@ public:
      thread is running).
    */
   enum {UNTIL_NONE= 0, UNTIL_MASTER_POS, UNTIL_RELAY_POS,
-        UNTIL_SQL_BEFORE_GTIDS} until_condition;
+        UNTIL_SQL_BEFORE_GTIDS, UNTIL_SQL_AFTER_GTIDS,
+        UNTIL_SQL_AFTER_MTS_GAPS
+#ifndef DBUG_OFF
+        , UNTIL_DONE
+#endif
+}
+    until_condition;
   char until_log_name[FN_REFLEN];
   ulonglong until_log_pos;
   /* extension extracted from log_name and converted to int */
   ulong until_log_name_extension;
   /**
-    The START SLAVE UNTIL SQL_BEFORE_GTIDS initializes both
-    the until_gtids_obj and request_gtids_obj. Each time a
-    gtid is about to be processed, it is removed from the
-    until_gtids_obj and when until_gtids_obj becomes empty,
-    the SQL Thread is stopped and a message saying that 
-    the condition was reached, i.e. request_gtids_obj, is
-    printed out.
-
-    This is used by the START SLAVE UNTIL SQL_BEFORE_GTIDS.
-    is issued.
+    The START SLAVE UNTIL SQL_*_GTIDS initializes until_sql_gtids.
+    Each time a gtid is about to be processed, we check if it is in the
+    set. Depending on until_condition, SQL thread is stopped before or
+    after applying the gtid.
   */
-  Gtid_set until_gtids_obj;
-  /**
-    This is used when the START SLAVE UNTIL SQL_BEFORE_GTIDS
-    is issued.
+  Gtid_set until_sql_gtids;
+  /*
+    On START SLAVE UNTIL SQL_AFTER_GTIDS this set contains the
+    intersection between logged gtids set and gtids scheduled on MTS
+    worker queues.
   */
-  Gtid_set request_gtids_obj;
+  Gtid_set until_sql_gtids_seen;
+  /*
+    True if the current event is the first gtid event to be processed
+    after executing START SLAVE UNTIL SQL_*_GTIDS.
+  */
+  bool until_sql_gtids_first_event;
   /* 
      Cached result of comparison of until_log_name and current log name
      -2 means unitialised, -1,0,1 are comarison results 
@@ -395,7 +408,7 @@ public:
   }
 
   int inc_group_relay_log_pos(ulonglong log_pos,
-                              bool skip_lock);
+                              bool need_data_lock);
 
   int wait_for_pos(THD* thd, String* log_name, longlong log_pos, 
 		   longlong timeout);
@@ -453,6 +466,19 @@ public:
     The timestamp is set and reset in @c sql_slave_killed().
   */
   time_t last_event_start_time;
+  /*
+    A container to hold on Intvar-, Rand-, Uservar- log-events in case
+    the slave is configured with table filtering rules.
+    The withhold events are executed when their parent Query destiny is
+    determined for execution as well.
+  */
+  Deferred_log_events *deferred_events;
+
+  /*
+    State of the container: true stands for IRU events gathering, 
+    false does for execution, either deferred or direct.
+  */
+  bool deferred_events_collecting;
 
   /*****************************************************************************
     WL#5569 MTS
@@ -505,6 +531,7 @@ public:
   uint checkpoint_seqno;  // counter of groups executed after the most recent CP
   uint checkpoint_group;  // cache for ::opt_mts_checkpoint_group 
   MY_BITMAP recovery_groups;  // bitmap used during recovery
+  bool recovery_groups_inited;
   ulong mts_recovery_group_cnt; // number of groups to execute at recovery
   ulong mts_recovery_index;     // running index of recoverable groups
   bool mts_recovery_group_seen_begin;
@@ -614,12 +641,37 @@ public:
      Coordinator notifies Workers about this event. Coordinator and Workers
      maintain a bitmap of executed group that is reset with a new checkpoint. 
   */
-  void reset_notified_checkpoint(ulong, time_t);
+  void reset_notified_checkpoint(ulong, time_t, bool);
 
+  /**
+     Called when gaps execution is ended so it is crash-safe
+     to reset the last session Workers info.
+  */
+  bool mts_finalize_recovery();
   /*
    * End of MTS section ******************************************************/
 
-
+  /* 
+     Returns true if the argument event resides in the containter;
+     more specifically, the checking is done against the last added event.
+  */
+  bool is_deferred_event(Log_event * ev)
+  {
+    return deferred_events_collecting ? deferred_events->is_last(ev) : false;
+  };
+  /* The general cleanup that slave applier may need at the end of query. */
+  inline void cleanup_after_query()
+  {
+    if (deferred_events)
+      deferred_events->rewind();
+  };
+  /* The general cleanup that slave applier may need at the end of session. */
+  void cleanup_after_session()
+  {
+    if (deferred_events)
+      delete deferred_events;
+  };
+   
   /**
     Helper function to do after statement completion.
 
@@ -685,7 +737,7 @@ public:
 
   int count_relay_log_space();
 
-  int init_info();
+  int rli_init_info();
   void end_info();
   int flush_info(bool force= FALSE);
   int flush_current_log();
@@ -829,7 +881,32 @@ public:
     return long_find_row_note_printed;
   }
 
+public:
+  /**
+    Delete the existing event and set a new one.  This class is
+    responsible for freeing the event, the caller should not do that.
+  */
+  virtual void set_rli_description_event(Format_description_log_event *fdle);
+
+  /**
+    Return the current Format_description_log_event.
+  */
+  Format_description_log_event *get_rli_description_event() const
+  {
+    return rli_description_event;
+  }
+
+  /**
+    adaptation for the slave applier to specific master versions.
+  */
+  void adapt_to_master_version(Format_description_log_event *fdle);
+  uchar slave_version_split[3]; // bytes of the slave server version
+
+protected:
+  Format_description_log_event *rli_description_event;
+
 private:
+
   /**
     Delay slave SQL thread by this amount, compared to master (in
     seconds). This is set with CHANGE MASTER TO MASTER_DELAY=X.
@@ -877,6 +954,13 @@ private:
    */
   time_t row_stmt_start_timestamp;
   bool long_find_row_note_printed;
+
+  /*
+    If on init_info() call error_on_rli_init_info is true that means
+    that previous call to init_info() terminated with an error, RESET
+    SLAVE must be executed and the problem fixed manually.
+   */
+  bool error_on_rli_init_info;
 };
 
 bool mysql_show_relaylog_events(THD* thd);

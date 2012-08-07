@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqlslap\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 03/29/2012
+.\"      Date: 07/17/2012
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLSLAP\FR" "1" "03/29/2012" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLSLAP\FR" "1" "07/17/2012" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -65,7 +65,7 @@ runs in three stages:
 .sp -1
 .IP "  1." 4.2
 .\}
-Create schema, table, and optionally any stored programs or data you want to using for the test\&. This stage uses a single client connection\&.
+Create schema, table, and optionally any stored programs or data to use for the test\&. This stage uses a single client connection\&.
 .RE
 .sp
 .RS 4
@@ -92,14 +92,14 @@ Clean up (disconnect, drop table if specified)\&. This stage uses a single clien
 .PP
 Examples:
 .PP
-Supply your own create and query SQL statements, with 50 clients querying and 200 selects for each:
+Supply your own create and query SQL statements, with 50 clients querying and 200 selects for each (enter the command on a single line):
 .sp
 .if n \{\
 .RS 4
 .\}
 .nf
-mysqlslap \-\-delimiter=";" \e
-  \-\-create="CREATE TABLE a (b int);INSERT INTO a VALUES (23)" \e
+mysqlslap \-\-delimiter=";"
+  \-\-create="CREATE TABLE a (b int);INSERT INTO a VALUES (23)"
   \-\-query="SELECT * FROM a" \-\-concurrency=50 \-\-iterations=200
 .fi
 .if n \{\
@@ -118,8 +118,8 @@ columns\&. Use five clients querying 20 times each\&. Do not create the table or
 .RS 4
 .\}
 .nf
-mysqlslap \-\-concurrency=5 \-\-iterations=20 \e
-  \-\-number\-int\-cols=2 \-\-number\-char\-cols=3 \e
+mysqlslap \-\-concurrency=5 \-\-iterations=20
+  \-\-number\-int\-cols=2 \-\-number\-char\-cols=3
   \-\-auto\-generate\-sql
 .fi
 .if n \{\
@@ -140,8 +140,8 @@ file will have multiple queries delimited by
 .RS 4
 .\}
 .nf
-mysqlslap \-\-concurrency=5 \e
-  \-\-iterations=5 \-\-query=query\&.sql \-\-create=create\&.sql \e
+mysqlslap \-\-concurrency=5
+  \-\-iterations=5 \-\-query=query\&.sql \-\-create=create\&.sql
   \-\-delimiter=";"
 .fi
 .if n \{\
@@ -522,7 +522,7 @@ Print debugging information and memory and CPU usage statistics when the program
 \fB\-\-default\-auth=\fR\fB\fIplugin\fR\fR
 .sp
 The client\-side authentication plugin to use\&. See
-Section\ \&5.5.6, \(lqPluggable Authentication\(rq\&.
+Section\ \&6.3.6, \(lqPluggable Authentication\(rq\&.
 .sp
 This option was added in MySQL 5\&.6\&.2\&.
 .RE
@@ -721,7 +721,7 @@ option on the command line,
 prompts for one\&.
 .sp
 Specifying a password on the command line should be considered insecure\&. See
-Section\ \&5.3.2.2, \(lqEnd-User Guidelines for Password Security\(rq\&. You can use an option file to avoid giving the password on the command line\&.
+Section\ \&6.1.2.2, \(lqEnd-User Guidelines for Password Security\(rq\&. You can use an option file to avoid giving the password on the command line\&.
 .RE
 .sp
 .RS 4
@@ -757,7 +757,7 @@ The directory in which to look for plugins\&. It may be necessary to specify thi
 option is used to specify an authentication plugin but
 \fBmysqlslap\fR
 does not find it\&. See
-Section\ \&5.5.6, \(lqPluggable Authentication\(rq\&.
+Section\ \&6.3.6, \(lqPluggable Authentication\(rq\&.
 .sp
 This option was added in MySQL 5\&.6\&.2\&.
 .RE
@@ -939,7 +939,7 @@ localhost, the Unix socket file to use, or, on Windows, the name of the named pi
 Options that begin with
 \fB\-\-ssl\fR
 specify whether to connect to the server using SSL and indicate where to find SSL keys and certificates\&. See
-Section\ \&5.5.8.3, \(lqSSL Command Options\(rq\&.
+Section\ \&6.3.8.3, \(lqSSL Command Options\(rq\&.
 .RE
 .sp
 .RS 4

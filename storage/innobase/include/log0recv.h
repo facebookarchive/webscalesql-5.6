@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-Copyright (c) 1997, 2010, Oracle and/or its affiliates. All Rights Reserved.
+Copyright (c) 1997, 2012, Oracle and/or its affiliates. All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -128,7 +128,7 @@ recv_recovery_from_checkpoint_finish should be called later to complete
 the recovery and free the resources used in it.
 @return	error code or DB_SUCCESS */
 UNIV_INTERN
-ulint
+dberr_t
 recv_recovery_from_checkpoint_start_func(
 /*=====================================*/
 #ifdef UNIV_LOG_ARCHIVE
@@ -378,7 +378,7 @@ typedef struct recv_sys_struct	recv_sys_t;
 /** Recovery system data structure */
 struct recv_sys_struct{
 #ifndef UNIV_HOTBACKUP
-	mutex_t		mutex;	/*!< mutex protecting the fields apply_log_recs,
+	ib_mutex_t		mutex;	/*!< mutex protecting the fields apply_log_recs,
 				n_addrs, and the state field in each recv_addr
 				struct */
 #endif /* !UNIV_HOTBACKUP */

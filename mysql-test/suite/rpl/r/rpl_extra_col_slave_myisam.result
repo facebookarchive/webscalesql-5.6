@@ -1,7 +1,7 @@
 include/master-slave.inc
 Warnings:
-Note	1756	Sending passwords in plain text without SSL/TLS is extremely insecure.
-Note	1757	Storing MySQL user name or password information in the master.info repository is not secure and is therefore not recommended. Please see the MySQL Manual for more about this issue and possible alternatives.
+Note	####	Sending passwords in plain text without SSL/TLS is extremely insecure.
+Note	####	Storing MySQL user name or password information in the master.info repository is not secure and is therefore not recommended. Please see the MySQL Manual for more about this issue and possible alternatives.
 [connection master]
 call mtr.add_suppression("Slave: Unknown table 'test.t6' Error_code: 1051");
 call mtr.add_suppression("Slave SQL.*Column [0-9] of table .test.t[0-9]*. cannot be converted from type.* Error_code: 1677");
@@ -195,7 +195,8 @@ INSERT INTO t8 () VALUES(1,@b1,'Kyle'),(2,@b1,'JOE'),(3,@b1,'QA');
 DROP TABLE t8;
 STOP SLAVE;
 CREATE TABLE t9 (a INT KEY, b BLOB, c CHAR(5),
-d TIMESTAMP,
+d TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP 
+ON UPDATE CURRENT_TIMESTAMP,
 e INT NOT NULL,
 f text not null,
 g text,

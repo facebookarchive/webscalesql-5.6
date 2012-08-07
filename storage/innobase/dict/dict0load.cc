@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-Copyright (c) 1996, 2011, Oracle and/or its affiliates. All Rights Reserved.
+Copyright (c) 1996, 2012, Oracle and/or its affiliates. All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -41,19 +41,22 @@ Created 4/24/1996 Heikki Tuuri
 #include "rem0cmp.h"
 #include "srv0start.h"
 #include "srv0srv.h"
+#include "dict0crea.h"
 #include "dict0priv.h"
 #include "ha_prototypes.h" /* innobase_casedn_str() */
 #include "fts0priv.h"
 
-
-/** Following are six InnoDB system tables */
+/** Following are the InnoDB system tables. The positions in
+this array are referenced by enum dict_system_table_id. */
 static const char* SYSTEM_TABLE_NAME[] = {
 	"SYS_TABLES",
 	"SYS_INDEXES",
 	"SYS_COLUMNS",
 	"SYS_FIELDS",
 	"SYS_FOREIGN",
-	"SYS_FOREIGN_COLS"
+	"SYS_FOREIGN_COLS",
+	"SYS_TABLESPACES",
+	"SYS_DATAFILES"
 };
 
 /* If this flag is TRUE, then we will load the cluster index's (and tables')
@@ -184,7 +187,7 @@ dict_print(void)
 
 	os_increment_counter_by_amount(
 		server_mutex,
-		srv_fatal_semaphore_wait_threshold, 7200/*2 hours*/);
+		srv_fatal_semaphore_wait_threshold, SRV_SEMAPHORE_WAIT_EXTENSION);
 
 	heap = mem_heap_create(1000);
 	mutex_enter(&(dict_sys->mutex));
@@ -197,13 +200,11 @@ dict_print(void)
 
 		err_msg = static_cast<const char*>(
 			dict_process_sys_tables_rec_and_mtr_commit(
-			heap, rec, &table,
-			static_cast<dict_table_info_t>(
-				DICT_TABLE_LOAD_FROM_CACHE
-				| DICT_TABLE_UPDATE_STATS), &mtr));
+				heap, rec, &table, DICT_TABLE_LOAD_FROM_CACHE,
+				&mtr));
 
 		if (!err_msg) {
-			dict_table_print_low(table);
+			dict_table_print(table);
 		} else {
 			ut_print_timestamp(stderr);
 			fprintf(stderr, "  InnoDB: %s\n", err_msg);
@@ -222,7 +223,7 @@ dict_print(void)
 	/* Restore the fatal semaphore wait timeout */
 	os_decrement_counter_by_amount(
 		server_mutex,
-		srv_fatal_semaphore_wait_threshold, 7200/*2 hours*/);
+		srv_fatal_semaphore_wait_threshold, SRV_SEMAPHORE_WAIT_EXTENSION);
 }
 
 /********************************************************************//**
@@ -308,6 +309,7 @@ dict_getnext_system(
 
 	return(rec);
 }
+
 /********************************************************************//**
 This function processes one SYS_TABLES record and populate the dict_table_t
 struct for the table. Extracted out of dict_print() to be used by
@@ -363,15 +365,6 @@ dict_process_sys_tables_rec_and_mtr_commit(
 		return(err_msg);
 	}
 
-	if ((status & DICT_TABLE_UPDATE_STATS)
-	    && dict_table_get_first_index(*table)) {
-
-		/* Update statistics member fields in *table if
-		DICT_TABLE_UPDATE_STATS is set */
-		ut_ad(mutex_own(&dict_sys->mutex));
-		dict_stats_update(*table, DICT_STATS_FETCH, TRUE);
-	}
-
 	return(NULL);
 }
 
@@ -402,6 +395,7 @@ dict_process_sys_indexes_rec(
 
 	return(err_msg);
 }
+
 /********************************************************************//**
 This function parses a SYS_COLUMNS record and populate a dict_column_t
 structure with the information from the record.
@@ -424,6 +418,7 @@ dict_process_sys_columns_rec(
 
 	return(err_msg);
 }
+
 /********************************************************************//**
 This function parses a SYS_FIELDS record and populates a dict_field_t
 structure with the information from the record.
@@ -476,7 +471,7 @@ dict_process_sys_foreign_rec(
 	const byte*	field;
 	ulint		n_fields_and_type;
 
-	if (UNIV_UNLIKELY(rec_get_deleted_flag(rec, 0))) {
+	if (rec_get_deleted_flag(rec, 0)) {
 		return("delete-marked record in SYS_FOREIGN");
 	}
 
@@ -486,7 +481,7 @@ dict_process_sys_foreign_rec(
 
 	field = rec_get_nth_field_old(
 		rec, DICT_FLD__SYS_FOREIGN__ID, &len);
-	if (UNIV_UNLIKELY(len < 1 || len == UNIV_SQL_NULL)) {
+	if (len == 0 || len == UNIV_SQL_NULL) {
 err_len:
 		return("incorrect column length in SYS_FOREIGN");
 	}
@@ -513,7 +508,7 @@ err_len:
 
 	field = rec_get_nth_field_old(
 		rec, DICT_FLD__SYS_FOREIGN__FOR_NAME, &len);
-	if (len < 1 || len == UNIV_SQL_NULL) {
+	if (len == 0 || len == UNIV_SQL_NULL) {
 		goto err_len;
 	}
 	foreign->foreign_table_name = mem_heap_strdupl(
@@ -521,7 +516,7 @@ err_len:
 
 	field = rec_get_nth_field_old(
 		rec, DICT_FLD__SYS_FOREIGN__REF_NAME, &len);
-	if (len < 1 || len == UNIV_SQL_NULL) {
+	if (len == 0 || len == UNIV_SQL_NULL) {
 		goto err_len;
 	}
 	foreign->referenced_table_name = mem_heap_strdupl(
@@ -569,7 +564,7 @@ dict_process_sys_foreign_col_rec(
 
 	field = rec_get_nth_field_old(
 		rec, DICT_FLD__SYS_FOREIGN_COLS__ID, &len);
-	if (len < 1 || len == UNIV_SQL_NULL) {
+	if (len == 0 || len == UNIV_SQL_NULL) {
 err_len:
 		return("incorrect column length in SYS_FOREIGN_COLS");
 	}
@@ -595,17 +590,138 @@ err_len:
 
 	field = rec_get_nth_field_old(
 		rec, DICT_FLD__SYS_FOREIGN_COLS__FOR_COL_NAME, &len);
-	if (len < 1 || len == UNIV_SQL_NULL) {
+	if (len == 0 || len == UNIV_SQL_NULL) {
 		goto err_len;
 	}
 	*for_col_name = mem_heap_strdupl(heap, (char*) field, len);
 
 	field = rec_get_nth_field_old(
 		rec, DICT_FLD__SYS_FOREIGN_COLS__REF_COL_NAME, &len);
-	if (len < 1 || len == UNIV_SQL_NULL) {
+	if (len == 0 || len == UNIV_SQL_NULL) {
 		goto err_len;
 	}
 	*ref_col_name = mem_heap_strdupl(heap, (char*) field, len);
+
+	return(NULL);
+}
+
+/********************************************************************//**
+This function parses a SYS_TABLESPACES record, extracts necessary
+information from the record and returns to caller.
+@return error message, or NULL on success */
+UNIV_INTERN
+const char*
+dict_process_sys_tablespaces(
+/*=========================*/
+	mem_heap_t*	heap,		/*!< in/out: heap memory */
+	const rec_t*	rec,		/*!< in: current SYS_TABLESPACES rec */
+	ulint*		space,		/*!< out: space id */
+	const char**	name,		/*!< out: tablespace name */
+	ulint*		flags)		/*!< out: tablespace flags */
+{
+	ulint		len;
+	const byte*	field;
+
+	/* Initialize the output values */
+	*space = ULINT_UNDEFINED;
+	*name = NULL;
+	*flags = ULINT_UNDEFINED;
+
+	if (rec_get_deleted_flag(rec, 0)) {
+		return("delete-marked record in SYS_TABLESPACES");
+	}
+
+	if (rec_get_n_fields_old(rec) != DICT_NUM_FIELDS__SYS_TABLESPACES) {
+		return("wrong number of columns in SYS_TABLESPACES record");
+	}
+
+	field = rec_get_nth_field_old(
+		rec, DICT_FLD__SYS_TABLESPACES__SPACE, &len);
+	if (len != DICT_FLD_LEN_SPACE) {
+err_len:
+		return("incorrect column length in SYS_TABLESPACES");
+	}
+	*space = mach_read_from_4(field);
+
+	rec_get_nth_field_offs_old(
+		rec, DICT_FLD__SYS_TABLESPACES__DB_TRX_ID, &len);
+	if (len != DATA_TRX_ID_LEN && len != UNIV_SQL_NULL) {
+		goto err_len;
+	}
+
+	rec_get_nth_field_offs_old(
+		rec, DICT_FLD__SYS_TABLESPACES__DB_ROLL_PTR, &len);
+	if (len != DATA_ROLL_PTR_LEN && len != UNIV_SQL_NULL) {
+		goto err_len;
+	}
+
+	field = rec_get_nth_field_old(
+		rec, DICT_FLD__SYS_TABLESPACES__NAME, &len);
+	if (len == 0 || len == UNIV_SQL_NULL) {
+		goto err_len;
+	}
+	*name = mem_heap_strdupl(heap, (char*) field, len);
+
+	field = rec_get_nth_field_old(
+		rec, DICT_FLD__SYS_TABLESPACES__FLAGS, &len);
+	if (len != DICT_FLD_LEN_FLAGS) {
+		goto err_len;
+	}
+	*flags = mach_read_from_4(field);
+
+	return(NULL);
+}
+
+/********************************************************************//**
+This function parses a SYS_DATAFILES record, extracts necessary
+information from the record and returns it to the caller.
+@return error message, or NULL on success */
+UNIV_INTERN
+const char*
+dict_process_sys_datafiles(
+/*=======================*/
+	mem_heap_t*	heap,		/*!< in/out: heap memory */
+	const rec_t*	rec,		/*!< in: current SYS_DATAFILES rec */
+	ulint*		space,		/*!< out: space id */
+	const char**	path)		/*!< out: datafile paths */
+{
+	ulint		len;
+	const byte*	field;
+
+	if (rec_get_deleted_flag(rec, 0)) {
+		return("delete-marked record in SYS_DATAFILES");
+	}
+
+	if (rec_get_n_fields_old(rec) != DICT_NUM_FIELDS__SYS_DATAFILES) {
+		return("wrong number of columns in SYS_DATAFILES record");
+	}
+
+	field = rec_get_nth_field_old(
+		rec, DICT_FLD__SYS_DATAFILES__SPACE, &len);
+	if (len != DICT_FLD_LEN_SPACE) {
+err_len:
+		return("incorrect column length in SYS_DATAFILES");
+	}
+	*space = mach_read_from_4(field);
+
+	rec_get_nth_field_offs_old(
+		rec, DICT_FLD__SYS_DATAFILES__DB_TRX_ID, &len);
+	if (len != DATA_TRX_ID_LEN && len != UNIV_SQL_NULL) {
+		goto err_len;
+	}
+
+	rec_get_nth_field_offs_old(
+		rec, DICT_FLD__SYS_DATAFILES__DB_ROLL_PTR, &len);
+	if (len != DATA_ROLL_PTR_LEN && len != UNIV_SQL_NULL) {
+		goto err_len;
+	}
+
+	field = rec_get_nth_field_old(
+		rec, DICT_FLD__SYS_DATAFILES__PATH, &len);
+	if (len == 0 || len == UNIV_SQL_NULL) {
+		goto err_len;
+	}
+	*path = mem_heap_strdupl(heap, (char*) field, len);
 
 	return(NULL);
 }
@@ -630,11 +746,9 @@ dict_sys_tables_get_flags(
 	ut_a(len == 4);
 	type = mach_read_from_4(field);
 
-	/* The low order bit of SYS_TABLES.TYPE is always set to 1. If no
-	other bits are used, that is defined as SYS_TABLE_TYPE_ANTELOPE.
-	But in dict_table_t::flags the low order bit is used to determine
-	if the row format is Redundant or Compact when the format is
-	Antelope.
+	/* The low order bit of SYS_TABLES.TYPE is always set to 1. But in
+	dict_table_t::flags the low order bit is used to determine if the
+	row format is Redundant or Compact when the format is Antelope.
 	Read the 4 byte N_COLS field and look at the high order bit.  It
 	should be set for COMPACT and later.  It should not be set for
 	REDUNDANT. */
@@ -646,10 +760,181 @@ dict_sys_tables_get_flags(
 	/* This validation function also combines the DICT_N_COLS_COMPACT
 	flag in n_cols into the type field to effectively make it a
 	dict_table_t::flags. */
-	return(dict_sys_tables_type_validate(type, n_cols));
+
+	if (ULINT_UNDEFINED == dict_sys_tables_type_validate(type, n_cols)) {
+		return(ULINT_UNDEFINED);
+	}
+
+	return(dict_sys_tables_type_to_tf(type, n_cols));
 }
 
 /********************************************************************//**
+Gets the filepath for a spaceid from SYS_DATAFILES and checks it against
+the contents of a link file. This function is called when there is no
+fil_node_t entry for this space ID so both durable locations on  disk
+must be checked and compared.
+We use a temporary heap here for the table lookup, but not for the path
+returned which the caller must free.
+This function can return NULL if the space ID is not found in SYS_DATAFILES,
+then the caller will assume that the ibd file is in the normal datadir.
+@return	own: A copy of the first datafile found in SYS_DATAFILES.PATH for
+the given space ID. NULL if space ID is zero or not found. */
+UNIV_INTERN
+char*
+dict_get_first_path(
+/*================*/
+	ulint		space,	/*!< in: space id */
+	const char*	name)	/*!< in: tablespace name */
+{
+	mtr_t		mtr;
+	dict_table_t*	sys_datafiles;
+	dict_index_t*	sys_index;
+	dtuple_t*	tuple;
+	dfield_t*	dfield;
+	byte*		buf;
+	btr_pcur_t	pcur;
+	const rec_t*	rec;
+	const byte*	field;
+	ulint		len;
+	char*		dict_filepath = NULL;
+	mem_heap_t*	heap = mem_heap_create(1024);
+
+	ut_ad(mutex_own(&(dict_sys->mutex)));
+
+	mtr_start(&mtr);
+
+	sys_datafiles = dict_table_get_low("SYS_DATAFILES");
+	sys_index = UT_LIST_GET_FIRST(sys_datafiles->indexes);
+	ut_ad(!dict_table_is_comp(sys_datafiles));
+	ut_ad(name_of_col_is(sys_datafiles, sys_index,
+			     DICT_FLD__SYS_DATAFILES__SPACE, "SPACE"));
+	ut_ad(name_of_col_is(sys_datafiles, sys_index,
+			     DICT_FLD__SYS_DATAFILES__PATH, "PATH"));
+
+	tuple = dtuple_create(heap, 1);
+	dfield = dtuple_get_nth_field(tuple, DICT_FLD__SYS_DATAFILES__SPACE);
+
+	buf = static_cast<byte*>(mem_heap_alloc(heap, 4));
+	mach_write_to_4(buf, space);
+
+	dfield_set_data(dfield, buf, 4);
+	dict_index_copy_types(tuple, sys_index, 1);
+
+	btr_pcur_open_on_user_rec(sys_index, tuple, PAGE_CUR_GE,
+				  BTR_SEARCH_LEAF, &pcur, &mtr);
+
+	rec = btr_pcur_get_rec(&pcur);
+
+	/* If the file-per-table tablespace was created with
+	an earlier version of InnoDB, then this record is not
+	in SYS_DATAFILES.  But a link file still might exist. */
+
+	if (btr_pcur_is_on_user_rec(&pcur)) {
+		/* A record for this space ID was found. */
+		field = rec_get_nth_field_old(
+			rec, DICT_FLD__SYS_DATAFILES__PATH, &len);
+		ut_a(len > 0 || len == UNIV_SQL_NULL);
+		ut_a(len < OS_FILE_MAX_PATH);
+		dict_filepath = mem_strdupl((char*) field, len);
+		ut_a(dict_filepath);
+	}
+
+	btr_pcur_close(&pcur);
+	mtr_commit(&mtr);
+	mem_heap_free(heap);
+
+	return(dict_filepath);
+}
+
+/********************************************************************//**
+Update the record for space_id in SYS_TABLESPACES to this filepath.
+@return	DB_SUCCESS if OK, dberr_t if the insert failed */
+UNIV_INTERN
+dberr_t
+dict_update_filepath(
+/*=================*/
+	ulint		space_id,	/*!< in: space id */
+	const char*	filepath)	/*!< in: filepath */
+{
+	dberr_t		err = DB_SUCCESS;
+	trx_t*		trx;
+
+	ut_ad(mutex_own(&(dict_sys->mutex)));
+
+	trx = trx_allocate_for_background();
+	trx_start_if_not_started(trx);
+
+	pars_info_t*	info = pars_info_create();
+
+	pars_info_add_int4_literal(info, "space", space_id);
+	pars_info_add_str_literal(info, "path", filepath);
+
+	err = que_eval_sql(info,
+			   "PROCEDURE UPDATE_FILEPATH () IS\n"
+			   "BEGIN\n"
+			   "UPDATE SYS_DATAFILES"
+			   " SET PATH = :path\n"
+			   " WHERE SPACE = :space;\n"
+			   "END;\n", FALSE, trx);
+
+	trx_commit_for_mysql(trx);
+	trx_free_for_background(trx);
+
+	if (err == DB_SUCCESS) {
+		/* We just updated SYS_DATAFILES due to the contents in
+		a link file.  Make a note that we did this. */
+		ib_logf(IB_LOG_LEVEL_INFO,
+			"The InnoDB data dictionary table SYS_DATAFILES "
+			"for tablespace ID %lu was updated to use file %s.\n",
+			(ulong) space_id, filepath);
+	} else {
+		ib_logf(IB_LOG_LEVEL_WARN,
+			"Problem updating InnoDB data dictionary table "
+			"SYS_DATAFILES for tablespace ID %lu to file %s.\n",
+			(ulong) space_id, filepath);
+	}
+
+	return(err);
+}
+
+/********************************************************************//**
+Insert records into SYS_TABLESPACES and SYS_DATAFILES.
+@return	DB_SUCCESS if OK, dberr_t if the insert failed */
+UNIV_INTERN
+dberr_t
+dict_insert_tablespace_and_filepath(
+/*================================*/
+	ulint		space,		/*!< in: space id */
+	const char*	name,		/*!< in: talespace name */
+	const char*	filepath,	/*!< in: filepath */
+	ulint		fsp_flags)	/*!< in: tablespace flags */
+{
+	dberr_t		err = DB_SUCCESS;
+	trx_t*		trx;
+
+	ut_ad(mutex_own(&(dict_sys->mutex)));
+	ut_ad(filepath);
+
+	trx = trx_allocate_for_background();
+	trx_start_if_not_started(trx);
+
+	/* A record for this space ID was not found in
+	SYS_DATAFILES. Assume the record is also missing in
+	SYS_TABLESPACES.  Insert records onto them both. */
+	err = dict_create_add_tablespace_to_dictionary(
+		space, name, fsp_flags, filepath, trx, false);
+
+	trx_commit_for_mysql(trx);
+	trx_free_for_background(trx);
+
+	return(err);
+}
+
+/********************************************************************//**
+This function looks at each table defined in SYS_TABLES.  It checks the
+tablespace for any table with a space_id > 0.  It looks up the tablespace
+in SYS_DATAFILES to ensure the correct path.
+
 In a crash recovery we already have all the tablespace objects created.
 This function compares the space id information in the InnoDB data dictionary
 to what we already read with fil_load_single_table_tablespaces().
@@ -719,7 +1004,13 @@ loop:
 
 		field = rec_get_nth_field_old(
 			rec, DICT_FLD__SYS_TABLES__NAME, &len);
+
 		name = mem_strdupl((char*) field, len);
+
+		char	table_name[MAX_FULL_NAME_LEN + 1];
+
+		innobase_format_name(
+			table_name, sizeof(table_name), name, FALSE);
 
 		flags = dict_sys_tables_get_flags(rec);
 		if (UNIV_UNLIKELY(flags == ULINT_UNDEFINED)) {
@@ -729,13 +1020,9 @@ loop:
 			ut_ad(len == 4); /* this was checked earlier */
 			flags = mach_read_from_4(field);
 
-			ut_print_timestamp(stderr);
-			fputs("  InnoDB: Error: table ", stderr);
-			ut_print_filename(stderr, name);
-			fprintf(stderr, "\n"
-				"InnoDB: in InnoDB data dictionary"
-				" has unknown type %lx.\n",
-				(ulong) flags);
+			ib_logf(IB_LOG_LEVEL_ERROR,
+				"Table '%s' in InnoDB data dictionary"
+				" has unknown type %lx", table_name, flags);
 
 			goto loop;
 		}
@@ -750,43 +1037,78 @@ loop:
 
 		mtr_commit(&mtr);
 
+		/* For tables created with old versions of InnoDB,
+		SYS_TABLES.MIX_LEN may contain garbage.  Such tables
+		would always be in ROW_FORMAT=REDUNDANT. Pretend that
+		all such tables are non-temporary. That is, do not
+		suppress error printouts about temporary or discarded
+		tablespaces not being found. */
+
+		field = rec_get_nth_field_old(
+			rec, DICT_FLD__SYS_TABLES__MIX_LEN, &len);
+
+		bool		is_temp = false;
+		bool		discarded = false;
+		ib_uint32_t	flags2 = mach_read_from_4(field);
+
+		/* Check that the tablespace (the .ibd file) really
+		exists; print a warning to the .err log if not.
+		Do not print warnings for temporary tables or for
+		tablespaces that have been discarded. */
+
+		field = rec_get_nth_field_old(
+			rec, DICT_FLD__SYS_TABLES__N_COLS, &len);
+
+		/* MIX_LEN valid only for ROW_FORMAT > REDUNDANT. */
+		if (mach_read_from_4(field) & DICT_N_COLS_COMPACT) {
+
+			is_temp = !!(flags2 & DICT_TF2_TEMPORARY);
+			discarded = !!(flags2 & DICT_TF2_DISCARDED);
+		}
+
 		if (space_id == 0) {
 			/* The system tablespace always exists. */
+			ut_ad(!discarded);
 		} else if (in_crash_recovery) {
-			/* Check that the tablespace (the .ibd file) really
-			exists; print a warning to the .err log if not.
-			Do not print warnings for temporary tables. */
-			ibool	is_temp;
-
-			field = rec_get_nth_field_old(
-				rec, DICT_FLD__SYS_TABLES__N_COLS, &len);
-			if (mach_read_from_4(field) & DICT_N_COLS_COMPACT) {
-				/* ROW_FORMAT=COMPACT: read the is_temp
-				flag from SYS_TABLES.MIX_LEN. */
-				field = rec_get_nth_field_old(
-					rec, 7/*MIX_LEN*/, &len);
-				is_temp = !!(mach_read_from_4(field)
-					     & DICT_TF2_TEMPORARY);
-			} else {
-				/* For tables created with old versions
-				of InnoDB, SYS_TABLES.MIX_LEN may contain
-				garbage.  Such tables would always be
-				in ROW_FORMAT=REDUNDANT.  Pretend that
-				all such tables are non-temporary.  That is,
-				do not suppress error printouts about
-				temporary tables not being found. */
-				is_temp = FALSE;
-			}
+			/* All tablespaces should have been found in
+			fil_load_single_table_tablespaces(). */
 
 			fil_space_for_table_exists_in_mem(
-				space_id, name, TRUE, !is_temp);
-		} else {
-			/* It is a normal database startup: create the space
-			object and check that the .ibd file exists. */
+				space_id, name, TRUE, !(is_temp || discarded));
 
-			fil_open_single_table_tablespace(
-				FALSE, space_id,
-				dict_tf_to_fsp_flags(flags), name);
+		} else if (!discarded) {
+
+			/* It is a normal database startup: create the
+			space object and check that the .ibd file exists.
+			If the table uses a remote tablespace, look for the
+			space_id in SYS_DATAFILES to find the filepath */
+
+			/* Use the remote filepath if known. */
+			char*	filepath = NULL;
+			if (DICT_TF_HAS_DATA_DIR(flags)) {
+				filepath = dict_get_first_path(
+					space_id, name);
+			}
+
+			/* filepath can be NULL in this call. */
+			dberr_t	err = fil_open_single_table_tablespace(
+				false, true, space_id,
+				dict_tf_to_fsp_flags(flags),
+				name, filepath);
+
+			if (err != DB_SUCCESS) {
+				ib_logf(IB_LOG_LEVEL_ERROR,
+					"Tablespace open failed for '%s', "
+					"ignored.", table_name);
+			}
+
+			if (filepath) {
+				mem_free(filepath);
+			}
+		} else {
+			ib_logf(IB_LOG_LEVEL_INFO,
+				"DISCARD flag set for table '%s', ignored.",
+				table_name);
 		}
 
 		mem_free(name);
@@ -880,7 +1202,7 @@ err_len:
 
 	field = rec_get_nth_field_old(
 		rec, DICT_FLD__SYS_COLUMNS__NAME, &len);
-	if (len < 1 || len == UNIV_SQL_NULL) {
+	if (len == 0 || len == UNIV_SQL_NULL) {
 		goto err_len;
 	}
 
@@ -1004,6 +1326,11 @@ dict_load_columns(
 		err_msg = dict_load_column_low(table, heap, NULL, NULL,
 					       &name, rec);
 
+		if (err_msg) {
+			fprintf(stderr, "InnoDB: %s\n", err_msg);
+			ut_error;
+		}
+
 		/* Note: Currently we have one DOC_ID column that is
 		shared by all FTS indexes on a table. */
 		if (innobase_strcasecmp(name,
@@ -1036,11 +1363,6 @@ dict_load_columns(
 			}
 
 			table->fts->doc_col = i;
-		}
-
-		if (err_msg) {
-			fprintf(stderr, "InnoDB: %s\n", err_msg);
-			ut_error;
 		}
 
 		btr_pcur_move_to_next_user_rec(&pcur, &mtr);
@@ -1155,7 +1477,7 @@ err_len:
 
 	field = rec_get_nth_field_old(
 		rec, DICT_FLD__SYS_FIELDS__COL_NAME, &len);
-	if (len < 1 || len == UNIV_SQL_NULL) {
+	if (len == 0 || len == UNIV_SQL_NULL) {
 		goto err_len;
 	}
 
@@ -1195,7 +1517,7 @@ dict_load_fields(
 	byte*		buf;
 	ulint		i;
 	mtr_t		mtr;
-	ulint		error;
+	dberr_t		error;
 
 	ut_ad(mutex_own(&(dict_sys->mutex)));
 
@@ -1395,8 +1717,8 @@ Loads definitions for table indexes. Adds them to the data dictionary
 cache.
 @return DB_SUCCESS if ok, DB_CORRUPTION if corruption of dictionary
 table or DB_UNSUPPORTED if table has unknown index type */
-static
-ulint
+static __attribute__((nonnull))
+dberr_t
 dict_load_indexes(
 /*==============*/
 	dict_table_t*	table,	/*!< in/out: table */
@@ -1413,7 +1735,7 @@ dict_load_indexes(
 	const rec_t*	rec;
 	byte*		buf;
 	mtr_t		mtr;
-	ulint		error = DB_SUCCESS;
+	dberr_t		error = DB_SUCCESS;
 
 	ut_ad(mutex_own(&(dict_sys->mutex)));
 
@@ -1520,6 +1842,7 @@ dict_load_indexes(
 			dict_mem_index_free(index);
 			goto func_exit;
 		} else if (index->page == FIL_NULL
+			   && !table->ibd_file_missing
 			   && (!(index->type & DICT_FTS))) {
 
 			fprintf(stderr,
@@ -1571,8 +1894,10 @@ corrupted:
 			dict_mem_index_free(index);
 		} else {
 			dict_load_fields(index, heap);
-			error = dict_index_add_to_cache(table, index,
-							index->page, FALSE);
+
+			error = dict_index_add_to_cache(
+				table, index, index->page, FALSE);
+
 			/* The data dictionary tables should never contain
 			invalid index definitions.  If we ignored this error
 			and simply did not load this index definition, the
@@ -1630,7 +1955,7 @@ dict_load_table_low(
 
 	rec_get_nth_field_offs_old(
 		rec, DICT_FLD__SYS_TABLES__NAME, &len);
-	if (len < 1 || len == UNIV_SQL_NULL) {
+	if (len == 0 || len == UNIV_SQL_NULL) {
 err_len:
 		return("incorrect column length in SYS_TABLES");
 	}
@@ -1752,6 +2077,77 @@ err_len:
 }
 
 /********************************************************************//**
+Using the table->heap, copy the null-terminated filepath into
+table->data_dir_path and replace the 'databasename/tablename.ibd'
+portion with 'tablename'.
+This allows SHOW CREATE TABLE to return the correct DATA DIRECTORY path.
+Make this data directory path only if it has not yet been saved. */
+UNIV_INTERN
+void
+dict_save_data_dir_path(
+/*====================*/
+	dict_table_t*	table,		/*!< in/out: table */
+	char*		filepath)	/*!< in: filepath of tablespace */
+{
+	ut_ad(mutex_own(&(dict_sys->mutex)));
+	ut_a(DICT_TF_HAS_DATA_DIR(table->flags));
+
+	ut_a(!table->data_dir_path);
+	ut_a(filepath);
+
+	/* Be sure this filepath is not the default filepath. */
+	char*	default_filepath = fil_make_ibd_name(table->name, false);
+	if (strcmp(filepath, default_filepath)) {
+		ulint pathlen = strlen(filepath);
+		ut_a(pathlen < OS_FILE_MAX_PATH);
+		ut_a(0 == strcmp(filepath + pathlen - 4, ".ibd"));
+
+		table->data_dir_path = mem_heap_strdup(table->heap, filepath);
+		os_file_make_data_dir_path(table->data_dir_path);
+	} else {
+		/* This does not change SYS_DATAFILES or SYS_TABLES
+		or FSP_FLAGS on the header page of the tablespace,
+		but it makes dict_table_t consistent */
+		table->flags &= ~DICT_TF_MASK_DATA_DIR;
+	}
+	mem_free(default_filepath);
+}
+
+/*****************************************************************//**
+Make sure the data_file_name is saved in dict_table_t if needed. Try to
+read it from the file dictionary first, then from SYS_DATAFILES. */
+UNIV_INTERN
+void
+dict_get_and_save_data_dir_path(
+/*============================*/
+	dict_table_t*	table,		/*!< in/out: table */
+	bool		dict_mutex_own)	/*!< in: true if dict_sys->mutex
+					is owned already */
+{
+	if (DICT_TF_HAS_DATA_DIR(table->flags)
+	    && (!table->data_dir_path)) {
+		char*	path = fil_space_get_first_path(table->space);
+
+		if (!dict_mutex_own) {
+			dict_mutex_enter_for_mysql();
+		}
+		if (!path) {
+			path = dict_get_first_path(
+				table->space, table->name);
+		}
+
+		if (path) {
+			dict_save_data_dir_path(table, path);
+		}
+
+		if (!dict_mutex_own) {
+			dict_mutex_exit_for_mysql();
+		}
+		mem_free(path);
+	}
+}
+
+/********************************************************************//**
 Loads a table definition and also all its index definitions, and also
 the cluster definition if the table is a member in a cluster. Also loads
 all foreign key constraints where the foreign key is in the table or where
@@ -1771,6 +2167,7 @@ dict_load_table(
 				/*!< in: error to be ignored when loading
 				table and its indexes' definition */
 {
+	dberr_t		err;
 	dict_table_t*	table;
 	dict_table_t*	sys_tables;
 	btr_pcur_t	pcur;
@@ -1781,7 +2178,7 @@ dict_load_table(
 	const rec_t*	rec;
 	const byte*	field;
 	ulint		len;
-	ulint		err;
+	char*		filepath = NULL;
 	const char*	err_msg;
 	mtr_t		mtr;
 
@@ -1844,32 +2241,56 @@ err_exit:
 		goto err_exit;
 	}
 
+	/* This needs to be added to the table from SYS_DATAFILES */
+	dict_get_and_save_data_dir_path(table, true);
+
+	char	table_name[MAX_FULL_NAME_LEN + 1];
+
+	innobase_format_name(table_name, sizeof(table_name), name, FALSE);
+
 	if (table->space == 0) {
 		/* The system tablespace is always available. */
+	} else if (table->flags2 & DICT_TF2_DISCARDED) {
+
+		ib_logf(IB_LOG_LEVEL_WARN,
+			"Table '%s' tablespace is set as discarded.",
+			table_name);
+
+		table->ibd_file_missing = TRUE;
+
 	} else if (!fil_space_for_table_exists_in_mem(
 			table->space, name, FALSE, FALSE)) {
 
-		if (table->flags2 & DICT_TF2_TEMPORARY) {
+		if (DICT_TF2_FLAG_IS_SET(table, DICT_TF2_TEMPORARY)) {
 			/* Do not bother to retry opening temporary tables. */
 			table->ibd_file_missing = TRUE;
 		} else {
-			ut_print_timestamp(stderr);
-			fprintf(stderr,
-				"  InnoDB: error: space object of table ");
-			ut_print_filename(stderr, name);
-			fprintf(stderr, ",\n"
-				"InnoDB: space id %lu did not exist in memory."
-				" Retrying an open.\n",
-				(ulong) table->space);
+			ib_logf(IB_LOG_LEVEL_ERROR,
+				"Failed to find tablespace for table '%s' "
+				"in the cache. Attempting to load the "
+				"tablespace with space id %lu.",
+				table_name, (ulong) table->space);
+
+			/* Use the remote filepath if needed. */
+			if (DICT_TF_HAS_DATA_DIR(table->flags)) {
+				filepath = dict_get_first_path(
+					table->space, name);
+			}
+
 			/* Try to open the tablespace */
-			if (!fil_open_single_table_tablespace(
-				TRUE, table->space,
+			err = fil_open_single_table_tablespace(
+				true, false, table->space,
 				dict_tf_to_fsp_flags(table->flags),
-				name)) {
+				name, filepath);
+
+			if (err != DB_SUCCESS) {
 				/* We failed to find a sensible
 				tablespace file */
 
 				table->ibd_file_missing = TRUE;
+			}
+			if (filepath) {
+				mem_free(filepath);
 			}
 		}
 	}
@@ -1887,7 +2308,15 @@ err_exit:
 
 	mem_heap_empty(heap);
 
-	err = dict_load_indexes(table, heap, ignore_err);
+	/* If there is no tablespace for the table then we only need to
+	load the index definitions. So that we can IMPORT the tablespace
+	later. */
+	if (table->ibd_file_missing) {
+		err = dict_load_indexes(
+			table, heap, DICT_ERR_IGNORE_ALL);
+	} else {
+		err = dict_load_indexes(table, heap, ignore_err);
+	}
 
 	if (err == DB_INDEX_CORRUPT) {
 		/* Refuse to load the table if the table has a corrupted
@@ -1921,7 +2350,8 @@ err_exit:
 	of the error condition, since the user may want to dump data from the
 	clustered index. However we load the foreign key information only if
 	all indexes were loaded. */
-	if (!cached) {
+	if (!cached || table->ibd_file_missing) {
+		/* Don't attempt to load the indexes from disk. */
 	} else if (err == DB_SUCCESS) {
 		err = dict_load_foreigns(table->name, TRUE, TRUE);
 
@@ -1938,11 +2368,15 @@ err_exit:
 		Otherwise refuse to load the table */
 		index = dict_table_get_first_index(table);
 
-		if (!srv_force_recovery || !index
+		if (!srv_force_recovery
+		    || !index
 		    || !dict_index_is_clust(index)) {
+
 			dict_table_remove_from_cache(table);
 			table = NULL;
-		} else if (dict_index_is_corrupted(index)) {
+
+		} else if (dict_index_is_corrupted(index)
+			   && !table->ibd_file_missing) {
 
 			/* It is possible we force to load a corrupted
 			clustered index if srv_load_corrupted is set.
@@ -1950,35 +2384,22 @@ err_exit:
 			table->corrupted = TRUE;
 		}
 	}
-#if 0
-	if (err != DB_SUCCESS && table != NULL) {
 
-		mutex_enter(&dict_foreign_err_mutex);
-
-		ut_print_timestamp(stderr);
-
-		fprintf(stderr,
-			"  InnoDB: Error: could not make a foreign key"
-			" definition to match\n"
-			"InnoDB: the foreign key table"
-			" or the referenced table!\n"
-			"InnoDB: The data dictionary of InnoDB is corrupt."
-			" You may need to drop\n"
-			"InnoDB: and recreate the foreign key table"
-			" or the referenced table.\n"
-			"InnoDB: Submit a detailed bug report"
-			" to http://bugs.mysql.com\n"
-			"InnoDB: Latest foreign key error printout:\n%s\n",
-			dict_foreign_err_buf);
-
-		mutex_exit(&dict_foreign_err_mutex);
-	}
-#endif /* 0 */
 func_exit:
 	mem_heap_free(heap);
 
-	ut_ad(!table || ignore_err != DICT_ERR_IGNORE_NONE
+	ut_ad(!table
+	      || ignore_err != DICT_ERR_IGNORE_NONE
+	      || table->ibd_file_missing
 	      || !table->corrupted);
+
+	if (table && table->fts) {
+		ut_ad(dict_table_has_fts_index(table)
+		      || DICT_TF2_FLAG_IS_SET(table, DICT_TF2_FTS_HAS_DOC_ID)
+		      || DICT_TF2_FLAG_IS_SET(table, DICT_TF2_FTS_ADD_DOC_ID));
+
+		fts_optimize_add_table(table);
+	}
 
 	return(table);
 }
@@ -2020,6 +2441,7 @@ dict_load_table_on_id(
 	sys_table_ids = dict_table_get_next_index(
 		dict_table_get_first_index(sys_tables));
 	ut_ad(!dict_table_is_comp(sys_tables));
+	ut_ad(!dict_index_is_clust(sys_table_ids));
 	heap = mem_heap_create(256);
 
 	tuple  = dtuple_create(heap, 1);
@@ -2183,8 +2605,8 @@ dict_load_foreign_cols(
 /***********************************************************************//**
 Loads a foreign key constraint to the dictionary cache.
 @return	DB_SUCCESS or error code */
-static
-ulint
+static __attribute__((nonnull, warn_unused_result))
+dberr_t
 dict_load_foreign(
 /*==============*/
 	const char*	id,	/*!< in: foreign constraint id, not
@@ -2372,7 +2794,7 @@ cache already contains all constraints where the other relevant table is
 already in the dictionary cache.
 @return	DB_SUCCESS or error code */
 UNIV_INTERN
-ulint
+dberr_t
 dict_load_foreigns(
 /*===============*/
 	const char*	table_name,	/*!< in: table name */
@@ -2390,7 +2812,7 @@ dict_load_foreigns(
 	const rec_t*	rec;
 	const byte*	field;
 	ulint		len;
-	ulint		err;
+	dberr_t		err;
 	mtr_t		mtr;
 
 	ut_ad(mutex_own(&(dict_sys->mutex)));
@@ -2415,6 +2837,7 @@ dict_load_foreigns(
 
 	sec_index = dict_table_get_next_index(
 		dict_table_get_first_index(sys_foreign));
+	ut_ad(!dict_index_is_clust(sec_index));
 start_load:
 
 	tuple = dtuple_create_from_mem(tuple_buf, sizeof(tuple_buf), 1);

@@ -331,10 +331,37 @@ inline bool sj_is_materialize_strategy(uint strategy)
 enum quick_type { QS_NONE, QS_RANGE, QS_DYNAMIC_RANGE};
 
 struct st_cache_field;
+class QEP_operation;
+class Filesort;
 
 typedef struct st_join_table : public Sql_alloc
 {
   st_join_table();
+
+  table_map prefix_tables() const { return prefix_tables_map; }
+
+  table_map added_tables() const { return added_tables_map; }
+
+  /**
+    Set available tables for a table in a join plan.
+
+    @param prefix_tables: Set of tables available for this plan
+    @param prev_tables: Set of tables available for previous table, used to
+                        calculate set of tables added for this table.
+  */
+  void set_prefix_tables(table_map prefix_tables, table_map prev_tables)
+  {
+    prefix_tables_map= prefix_tables;
+    added_tables_map= prefix_tables & ~prev_tables;
+  }
+
+  /**
+    Add an available set of tables for a table in a join plan.
+
+    @param tables: Set of tables added for this table in plan.
+  */
+  void add_prefix_tables(table_map tables)
+  { prefix_tables_map|= tables; added_tables_map|= tables; }
 
   TABLE		*table;
   Key_use	*keyuse;			/**< pointer to first used key */
@@ -369,6 +396,11 @@ public:
   uint          packed_info;
 
   READ_RECORD::Setup_func materialize_table;
+  /**
+     Initialize table for reading and fetch the first row from the table. If
+     table is a materialized derived one, function must materialize it with
+     prepare_scan().
+  */
   READ_RECORD::Setup_func read_first_record;
   Next_select_func next_select;
   READ_RECORD	read_record;
@@ -407,8 +439,27 @@ public:
     E(#records) is in found_records.
   */
   ha_rows       read_time;
-  
-  table_map	dependent,key_dependent;
+  /**
+    The set of tables that this table depends on. Used for outer join and
+    straight join dependencies.
+  */
+  table_map     dependent;
+  /**
+    The set of tables that are referenced by key from this table.
+  */
+  table_map     key_dependent;
+private:
+  /**
+    The set of all tables available in the join prefix for this table,
+    including the table handled by this JOIN_TAB.
+  */
+  table_map     prefix_tables_map;
+  /**
+    The set of tables added for this table, compared to the previous table
+    in the join prefix.
+  */
+  table_map     added_tables_map;
+public:
   uint		index;
   uint		used_fields,used_fieldlength,used_blobs;
   uint          used_null_fields;
@@ -431,7 +482,7 @@ public:
     After optimization it contains chosen join buffering strategy (if any).
    */
   uint          use_join_cache;
-  JOIN_CACHE	*cache;
+  QEP_operation *op;
   /*
     Index condition for BKA access join
   */
@@ -495,6 +546,39 @@ public:
 
   /* NestedOuterJoins: Bitmap of nested joins this table is part of */
   nested_join_map embedding_map;
+
+  /* Tmp table info */
+  TMP_TABLE_PARAM *tmp_table_param;
+
+  /* Sorting related info */
+  Filesort *filesort;
+
+  /**
+    List of topmost expressions in the select list. The *next* JOIN TAB
+    in the plan should use it to obtain correct values. Same applicable to
+    all_fields. These lists are needed because after tmp tables functions
+    will be turned to fields. These variables are pointing to
+    tmp_fields_list[123]. Valid only for tmp tables and the last non-tmp
+    table in the query plan.
+    @see JOIN::make_tmp_tables_info()
+  */
+  List<Item> *fields;
+  /** List of all expressions in the select list */
+  List<Item> *all_fields;
+  /*
+    Pointer to the ref array slice which to switch to before sending
+    records. Valid only for tmp tables.
+  */
+  Ref_ptr_array *ref_array;
+
+  /** Number of records saved in tmp table */
+  ha_rows send_records;
+
+  /** HAVING condition for checking prior saving a record into tmp table*/
+  Item *having;
+
+  /** TRUE <=> remove duplicates on this table. */
+  bool distinct;
 
   void cleanup();
   inline bool is_using_loose_index_scan()
@@ -572,6 +656,9 @@ public:
   {
     return ref.has_guarded_conds();
   }
+  bool prepare_scan();
+  bool sort_table();
+  bool remove_duplicates();
 } JOIN_TAB;
 
 inline
@@ -611,6 +698,8 @@ st_join_table::st_join_table()
 
     dependent(0),
     key_dependent(0),
+    prefix_tables_map(0),
+    added_tables_map(0),
     index(0),
     used_fields(0),
     used_fieldlength(0),
@@ -626,7 +715,7 @@ st_join_table::st_join_table()
     limit(0),
     ref(),
     use_join_cache(0),
-    cache(NULL),
+    op(NULL),
 
     cache_idx_cond(NULL),
     cache_select(NULL),
@@ -646,7 +735,15 @@ st_join_table::st_join_table()
 
     keep_current_rowid(0),
     copy_current_rowid(NULL),
-    embedding_map(0)
+    embedding_map(0),
+    tmp_table_param(NULL),
+    filesort(NULL),
+    fields(NULL),
+    all_fields(NULL),
+    ref_array(NULL),
+    send_records(0),
+    having(NULL),
+    distinct(false)
 {
   /**
     @todo Add constructor to READ_RECORD.
@@ -810,6 +907,9 @@ public:
      expensive to re-caclulate for every join prefix we consider, so we
      maintain current state in join->positions[#tables_in_prefix]. See
      advance_sj_state() for details.
+
+  This class has to stay a POD, because it is memcpy'd in many places. It
+  however has a no-argument constructor which must be used.
 */
 
 typedef struct st_position : public Sql_alloc
@@ -925,6 +1025,8 @@ typedef struct st_position : public Sql_alloc
     semi-join's ON expression so we can correctly account for fanout.
   */
   table_map sjm_scan_need_tables;
+
+  st_position() : sj_strategy(SJ_OPT_NONE), dups_producing_tables(0) {}
 } POSITION;
 
 
@@ -1009,6 +1111,29 @@ public:
 };
 
 
+static store_key::store_key_result
+type_conversion_status_to_store_key (type_conversion_status ts)
+{
+  switch (ts)
+  {
+  case TYPE_OK:
+    return store_key::STORE_KEY_OK;
+  case TYPE_NOTE_TIME_TRUNCATED:
+    return store_key::STORE_KEY_CONV;
+  case TYPE_WARN_OUT_OF_RANGE:
+  case TYPE_NOTE_TRUNCATED:
+  case TYPE_WARN_TRUNCATED:
+  case TYPE_ERR_NULL_CONSTRAINT_VIOLATION:
+  case TYPE_ERR_BAD_VALUE:
+  case TYPE_ERR_OOM:
+    return store_key::STORE_KEY_FATAL;
+  default:
+    DBUG_ASSERT(false); // not possible
+  }
+
+  return store_key::STORE_KEY_FATAL;
+}
+
 class store_key_field: public store_key
 {
   Copy_field copy_field;
@@ -1061,17 +1186,19 @@ public:
     TABLE *table= to_field->table;
     my_bitmap_map *old_map= dbug_tmp_use_all_columns(table,
                                                      table->write_set);
-    int res= item->save_in_field(to_field, 1);
+    type_conversion_status save_res= item->save_in_field(to_field, true);
+    store_key_result res;
     /*
      Item::save_in_field() may call Item::val_xxx(). And if this is a subquery
      we need to check for errors executing it and react accordingly
     */
-    if (!res && table->in_use->is_error())
-      res= 1; /* STORE_KEY_FATAL */
+    if (save_res != TYPE_OK && table->in_use->is_error())
+      res= STORE_KEY_FATAL;
+    else
+      res= type_conversion_status_to_store_key(save_res);
     dbug_tmp_restore_column_map(table->write_set, old_map);
     null_key= to_field->is_null() || item->null_value;
-    return ((err != 0 || res < 0 || res > 2) ? STORE_KEY_FATAL : 
-            (store_key_result) res);
+    return (err != 0) ? STORE_KEY_FATAL : res;
   }
 };
 
@@ -1095,7 +1222,7 @@ protected:
     if (!inited)
     {
       inited=1;
-      int res= store_key_item::copy_inner();
+      store_key_result res= store_key_item::copy_inner();
       if (res && !err)
         err= res;
     }
@@ -1104,12 +1231,13 @@ protected:
 };
 
 bool error_if_full_join(JOIN *join);
-bool handle_select(THD *thd, LEX *lex, select_result *result,
+bool handle_select(THD *thd, select_result *result,
                    ulong setup_tables_done_option);
 bool mysql_select(THD *thd,
                   TABLE_LIST *tables, uint wild_num,  List<Item> &list,
-                  Item *conds, uint og_num, ORDER *order, ORDER *group,
-                  Item *having, ORDER *proc_param, ulonglong select_type, 
+                  Item *conds, SQL_I_List<ORDER> *order,
+                  SQL_I_List<ORDER> *group,
+                  Item *having, ulonglong select_type, 
                   select_result *result, SELECT_LEX_UNIT *unit, 
                   SELECT_LEX *select_lex);
 void free_underlaid_joins(THD *thd, SELECT_LEX *select);
@@ -1142,20 +1270,6 @@ bool and_conditions(Item **e1, Item *e2);
 static inline Item * and_items(Item* cond, Item *item)
 {
   return (cond? (new Item_cond_and(cond, item)) : item);
-}
-
-/**
-  Printing the transformed query in EXPLAIN EXTENDED or optimizer trace
-  requires non-destroyed JOINs for subquery engines. So items must be
-  preserved until end of mysql_execute_command().
-*/
-static inline bool preserve_items_for_printing(const THD *thd)
-{
-  return (thd->lex->describe
-#ifdef OPTIMIZER_TRACE
-          || thd->opt_trace.support_I_S()
-#endif
-          );
 }
 
 #endif /* SQL_SELECT_INCLUDED */

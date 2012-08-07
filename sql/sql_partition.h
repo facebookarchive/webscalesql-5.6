@@ -20,6 +20,7 @@
 #include "table.h"                              /* TABLE_LIST */
 
 class Alter_info;
+class Alter_table_ctx;
 class Field;
 class String;
 class handler;
@@ -50,7 +51,6 @@ typedef struct st_lock_param_type
   HA_CREATE_INFO *create_info;
   Alter_info *alter_info;
   TABLE *table;
-  TABLE *old_table;
   KEY *key_info_buffer;
   const char *db;
   const char *table_name;
@@ -77,9 +77,6 @@ struct st_partition_iter;
 bool is_partition_in_list(char *part_name, List<char> list_part_names);
 char *are_partitions_in_table(partition_info *new_part_info,
                               partition_info *old_part_info);
-bool check_reorganise_list(partition_info *new_part_info,
-                           partition_info *old_part_info,
-                           List<char> list_part_names);
 handler *get_ha_partition(partition_info *part_info);
 int get_parts_for_update(const uchar *old_data, uchar *new_data,
                          const uchar *rec0, partition_info *part_info,
@@ -124,6 +121,7 @@ bool check_part_func_fields(Field **ptr, bool ok_with_charsets);
 bool field_is_partition_charset(Field *field);
 Item* convert_charset_partition_constant(Item *item, const CHARSET_INFO *cs);
 void mem_alloc_error(size_t size);
+void truncate_partition_filename(char *path);
 
 /*
   A "Get next" function for partition iterator.
@@ -249,18 +247,14 @@ uint fast_alter_partition_table(THD *thd, TABLE *table,
                                 HA_CREATE_INFO *create_info,
                                 TABLE_LIST *table_list,
                                 char *db,
-                                const char *table_name,
-                                TABLE  *fast_alter_table);
+                                const char *table_name);
 bool set_part_state(Alter_info *alter_info, partition_info *tab_part_info,
                     enum partition_state part_state);
 uint prep_alter_part_table(THD *thd, TABLE *table, Alter_info *alter_info,
                            HA_CREATE_INFO *create_info,
-                           handlerton *old_db_type,
+                           Alter_table_ctx *alter_ctx,
                            bool *partition_changed,
-                           char *db,
-                           const char *table_name,
-                           const char *path,
-                           TABLE **fast_alter_table);
+                           bool *fast_alter_table);
 char *generate_partition_syntax(partition_info *part_info,
                                 uint *buf_length, bool use_sql_alloc,
                                 bool show_partition_options,

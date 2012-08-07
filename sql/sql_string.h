@@ -1,7 +1,7 @@
 #ifndef SQL_STRING_INCLUDED
 #define SQL_STRING_INCLUDED
 
-/* Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,6 +21,91 @@
 #include "m_ctype.h"                            /* my_charset_bin */
 #include "my_sys.h"              /* alloc_root, my_free, my_realloc */
 #include "m_string.h"                           /* TRASH */
+
+
+/**
+  A wrapper class for null-terminated constant strings.
+  Constructors make sure that the position of the '\0' terminating byte
+  in m_str is always in sync with m_length.
+
+  This class must stay as small as possible as we often 
+  pass it and its descendants (such as Name_string) into functions
+  using call-by-value evaluation.
+
+  Don't add new members or virual methods into this class!
+*/
+class Simple_cstring
+{
+private:
+  const char *m_str;
+  size_t m_length;
+protected:
+  /**
+    Initialize from a C string whose length is already known.
+  */
+  void set(const char *str_arg, size_t length_arg)
+  {
+    // NULL is allowed only with length==0
+    DBUG_ASSERT(str_arg || length_arg == 0);
+    // For non-NULL, make sure length_arg is in sync with '\0' terminator.
+    DBUG_ASSERT(!str_arg || str_arg[length_arg] == '\0');
+    m_str= str_arg;
+    m_length= length_arg;
+  }
+public:
+  Simple_cstring()
+  {
+    set(NULL, 0);
+  }
+  Simple_cstring(const char *str_arg, size_t length_arg)
+  {
+    set(str_arg, length_arg);
+  }
+  Simple_cstring(const LEX_STRING arg)
+  {
+    set(arg.str, arg.length);
+  }
+  void reset()
+  {
+    set(NULL, 0);
+  }
+  /**
+    Set to a null-terminated string.
+  */
+  void set(const char *str)
+  {
+    set(str, str ? strlen(str) : 0);
+  }
+  /**
+    Return string buffer.
+  */
+  const char *ptr() const { return m_str; }
+  /**
+    Check if m_ptr is set.
+  */
+  bool is_set() const { return m_str != NULL; }
+  /**
+    Return name length.
+  */
+  size_t length() const { return m_length; }
+  /**
+    Compare to another Simple_cstring.
+  */
+  bool eq_bin(const Simple_cstring other) const
+  {
+    return m_length == other.m_length &&
+           memcmp(m_str, other.m_str, m_length) == 0;
+  }
+  /**
+    Copy to the given buffer
+  */
+  void strcpy(char *buff) const
+  {
+    memcpy(buff, m_str, m_length);
+    buff[m_length]= '\0';
+  }
+};
+
 
 class String;
 typedef struct charset_info_st CHARSET_INFO;
@@ -237,8 +322,12 @@ public:
   }
   bool real_alloc(uint32 arg_length);			// Empties old string
   bool realloc(uint32 arg_length);
-  inline void shrink(uint32 arg_length)		// Shrink buffer
+
+  // Shrink the buffer, but only if it is allocated on the heap.
+  inline void shrink(uint32 arg_length)
   {
+    if (!is_alloced())
+      return;
     if (arg_length < Alloced_length)
     {
       char *new_ptr;
@@ -254,7 +343,7 @@ public:
       }
     }
   }
-  bool is_alloced() { return alloced; }
+  bool is_alloced() const { return alloced; }
   inline String& operator = (const String &s)
   {
     if (&s != this)
@@ -288,7 +377,11 @@ public:
   bool append(const char *s);
   bool append(LEX_STRING *ls)
   {
-    return append(ls->str, ls->length);
+    return append(ls->str, (uint32) ls->length);
+  }
+  bool append(Simple_cstring str)
+  {
+    return append(str.ptr(), static_cast<uint>(str.length()));
   }
   bool append(const char *s, uint32 arg_length);
   bool append(const char *s, uint32 arg_length, const CHARSET_INFO *cs);

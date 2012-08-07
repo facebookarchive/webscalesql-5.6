@@ -1,7 +1,7 @@
 include/master-slave.inc
 Warnings:
-Note	1756	Sending passwords in plain text without SSL/TLS is extremely insecure.
-Note	1757	Storing MySQL user name or password information in the master.info repository is not secure and is therefore not recommended. Please see the MySQL Manual for more about this issue and possible alternatives.
+Note	####	Sending passwords in plain text without SSL/TLS is extremely insecure.
+Note	####	Storing MySQL user name or password information in the master.info repository is not secure and is therefore not recommended. Please see the MySQL Manual for more about this issue and possible alternatives.
 [connection master]
 #
 # Uninstall semi-sync plugins on master and slave
@@ -88,7 +88,7 @@ Variable_name	Value
 Rpl_semi_sync_master_no_tx	0
 show status like 'Rpl_semi_sync_master_yes_tx';
 Variable_name	Value
-Rpl_semi_sync_master_yes_tx	1
+Rpl_semi_sync_master_yes_tx	2
 select CONNECTIONS_NORMAL_SLAVE - CONNECTIONS_NORMAL_SLAVE as 'Should be 0';
 Should be 0
 0
@@ -102,7 +102,7 @@ Variable_name	Value
 Rpl_semi_sync_master_no_tx	0
 show status like 'Rpl_semi_sync_master_yes_tx';
 Variable_name	Value
-Rpl_semi_sync_master_yes_tx	301
+Rpl_semi_sync_master_yes_tx	52
 [ on slave ]
 [ slave status after replicated inserts ]
 show status like 'Rpl_semi_sync_slave_status';
@@ -110,13 +110,13 @@ Variable_name	Value
 Rpl_semi_sync_slave_status	ON
 select count(distinct a) from t1;
 count(distinct a)
-300
+50
 select min(a) from t1;
 min(a)
 1
 select max(a) from t1;
 max(a)
-300
+50
 
 # BUG#50157
 # semi-sync replication crashes when replicating a transaction which
@@ -151,7 +151,7 @@ Variable_name	Value
 Rpl_semi_sync_master_no_tx	0
 show status like 'Rpl_semi_sync_master_yes_tx';
 Variable_name	Value
-Rpl_semi_sync_master_yes_tx	304
+Rpl_semi_sync_master_yes_tx	57
 show status like 'Rpl_semi_sync_master_clients';
 Variable_name	Value
 Rpl_semi_sync_master_clients	1
@@ -166,7 +166,7 @@ Variable_name	Value
 Rpl_semi_sync_master_no_tx	1
 show status like 'Rpl_semi_sync_master_yes_tx';
 Variable_name	Value
-Rpl_semi_sync_master_yes_tx	304
+Rpl_semi_sync_master_yes_tx	57
 insert into t1 values (100);
 [ master status should be OFF ]
 show status like 'Rpl_semi_sync_master_status';
@@ -174,10 +174,10 @@ Variable_name	Value
 Rpl_semi_sync_master_status	OFF
 show status like 'Rpl_semi_sync_master_no_tx';
 Variable_name	Value
-Rpl_semi_sync_master_no_tx	302
+Rpl_semi_sync_master_no_tx	52
 show status like 'Rpl_semi_sync_master_yes_tx';
 Variable_name	Value
-Rpl_semi_sync_master_yes_tx	304
+Rpl_semi_sync_master_yes_tx	57
 #
 # Test semi-sync status on master will be ON again when slave catches up
 #
@@ -207,10 +207,10 @@ Variable_name	Value
 Rpl_semi_sync_master_status	ON
 show status like 'Rpl_semi_sync_master_no_tx';
 Variable_name	Value
-Rpl_semi_sync_master_no_tx	302
+Rpl_semi_sync_master_no_tx	52
 show status like 'Rpl_semi_sync_master_yes_tx';
 Variable_name	Value
-Rpl_semi_sync_master_yes_tx	304
+Rpl_semi_sync_master_yes_tx	57
 show status like 'Rpl_semi_sync_master_clients';
 Variable_name	Value
 Rpl_semi_sync_master_clients	1
@@ -226,10 +226,10 @@ include/stop_slave.inc
 [ Semi-sync master status variables before FLUSH STATUS ]
 SHOW STATUS LIKE 'Rpl_semi_sync_master_no_tx';
 Variable_name	Value
-Rpl_semi_sync_master_no_tx	302
+Rpl_semi_sync_master_no_tx	52
 SHOW STATUS LIKE 'Rpl_semi_sync_master_yes_tx';
 Variable_name	Value
-Rpl_semi_sync_master_yes_tx	305
+Rpl_semi_sync_master_yes_tx	59
 FLUSH NO_WRITE_TO_BINLOG STATUS;
 [ Semi-sync master status variables after FLUSH STATUS ]
 SHOW STATUS LIKE 'Rpl_semi_sync_master_no_tx';
@@ -308,7 +308,7 @@ Variable_name	Value
 Rpl_semi_sync_master_no_tx	0
 show status like 'Rpl_semi_sync_master_yes_tx';
 Variable_name	Value
-Rpl_semi_sync_master_yes_tx	3
+Rpl_semi_sync_master_yes_tx	4
 #
 # Start semi-sync replication without SUPER privilege
 #
@@ -322,8 +322,8 @@ grant replication slave on *.* to rpl@127.0.0.1 identified by 'rpl';
 flush privileges;
 change master to master_user='rpl',master_password='rpl';
 Warnings:
-Note	1756	Sending passwords in plain text without SSL/TLS is extremely insecure.
-Note	1757	Storing MySQL user name or password information in the master.info repository is not secure and is therefore not recommended. Please see the MySQL Manual for more about this issue and possible alternatives.
+Note	####	Sending passwords in plain text without SSL/TLS is extremely insecure.
+Note	####	Storing MySQL user name or password information in the master.info repository is not secure and is therefore not recommended. Please see the MySQL Manual for more about this issue and possible alternatives.
 include/start_slave.inc
 show status like 'Rpl_semi_sync_slave_status';
 Variable_name	Value
@@ -412,8 +412,8 @@ Rpl_semi_sync_slave_status	OFF
 # Test non-semi-sync slave connect to semi-sync master
 #
 INSTALL PLUGIN rpl_semi_sync_master SONAME 'SEMISYNC_MASTER_PLUGIN';
-set global rpl_semi_sync_master_timeout= 5000;
-/* 5s */
+set global rpl_semi_sync_master_timeout= 10000;
+/* 10s */
 set global rpl_semi_sync_master_enabled= 1;
 [ on slave ]
 include/stop_slave.inc
@@ -449,8 +449,8 @@ UNINSTALL PLUGIN rpl_semi_sync_slave;
 UNINSTALL PLUGIN rpl_semi_sync_master;
 change master to master_user='root',master_password='';
 Warnings:
-Note	1756	Sending passwords in plain text without SSL/TLS is extremely insecure.
-Note	1757	Storing MySQL user name or password information in the master.info repository is not secure and is therefore not recommended. Please see the MySQL Manual for more about this issue and possible alternatives.
+Note	####	Sending passwords in plain text without SSL/TLS is extremely insecure.
+Note	####	Storing MySQL user name or password information in the master.info repository is not secure and is therefore not recommended. Please see the MySQL Manual for more about this issue and possible alternatives.
 include/start_slave.inc
 drop table t1;
 drop user rpl@127.0.0.1;

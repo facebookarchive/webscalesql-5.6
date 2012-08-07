@@ -1,4 +1,4 @@
-/* Copyright (c) 2009, 2011, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2009, 2011, 2012 Oracle and/or its affiliates. All rights reserved.
  
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -113,6 +113,7 @@
 #cmakedefine HAVE_LIBCRYPT 1
 #cmakedefine HAVE_LIBMTMALLOC 1
 #cmakedefine HAVE_LIBWRAP 1
+#cmakedefine HAVE_LIBRESOLV 1
 /* Does "struct timespec" have a "sec" and "nsec" field? */
 #cmakedefine HAVE_TIMESPEC_TS_SEC 1
 
@@ -127,6 +128,8 @@
 #cmakedefine FIONREAD_IN_SYS_FILIO 1
 
 /* Functions we may want to use. */
+#cmakedefine HAVE_ALIGNED_MALLOC 1
+#cmakedefine HAVE_ALIGNED_FREE 1
 #cmakedefine HAVE_AIOWAIT 1
 #cmakedefine HAVE_ALARM 1
 #cmakedefine HAVE_ALLOCA 1
@@ -202,6 +205,7 @@
 #cmakedefine HAVE_POLL 1
 #cmakedefine HAVE_PORT_CREATE 1
 #cmakedefine HAVE_POSIX_FALLOCATE 1
+#cmakedefine HAVE_POSIX_MEMALIGN 1
 #cmakedefine HAVE_PREAD 1
 #cmakedefine HAVE_PAUSE_INSTRUCTION 1
 #cmakedefine HAVE_FAKE_PAUSE_INSTRUCTION 1
@@ -303,6 +307,26 @@
 #cmakedefine STRUCT_DIRENT_HAS_D_NAMLEN 1
 #cmakedefine SPRINTF_RETURNS_INT 1
 
+#cmakedefine DNS_USE_CPU_CLOCK_FOR_ID 1
+#cmakedefine HAVE_EPOLL 1
+#cmakedefine HAVE_EPOLL_CTL 1
+/* #cmakedefine HAVE_EVENT_PORTS 1 */
+#cmakedefine HAVE_INET_NTOP 1
+#cmakedefine HAVE_KQUEUE 1
+#cmakedefine HAVE_WORKING_KQUEUE 1
+#cmakedefine HAVE_SIGNAL 1
+#cmakedefine HAVE_TIMERADD 1
+#cmakedefine HAVE_TIMERCLEAR 1
+#cmakedefine HAVE_TIMERCMP 1
+#cmakedefine HAVE_TIMERISSET 1
+
+#cmakedefine HAVE_DEVPOLL 1
+#cmakedefine HAVE_SIGNAL_H 1
+#cmakedefine HAVE_SYS_DEVPOLL_H 1
+#cmakedefine HAVE_SYS_EPOLL_H 1
+#cmakedefine HAVE_SYS_EVENT_H 1
+#cmakedefine HAVE_SYS_QUEUE_H 1
+#cmakedefine HAVE_TAILQFOREACH 1
 #define USE_MB 1
 #define USE_MB_IDENT 1
 
@@ -468,7 +492,7 @@
 #cmakedefine STACK_DIRECTION @STACK_DIRECTION@
 
 #define SYSTEM_TYPE "@SYSTEM_TYPE@"
-#define MACHINE_TYPE "@CMAKE_SYSTEM_PROCESSOR@"
+#define MACHINE_TYPE "@MYSQL_MACHINE_TYPE@"
 #cmakedefine HAVE_DTRACE 1
 
 #cmakedefine SIGNAL_WITH_VIO_CLOSE 1
@@ -503,6 +527,14 @@
 #define NOMINMAX
 #endif
 
+/*
+   Memcached config options
+*/
+#cmakedefine WITH_INNODB_MEMCACHED 1
+#cmakedefine ENABLE_MEMCACHED_SASL 1
+#cmakedefine ENABLE_MEMCACHED_SASL_PWDB 1
+#cmakedefine HAVE_SASL_SASL_H 1
+#cmakedefine HAVE_HTONLL 1
 
 /*
   MySQL features
@@ -626,5 +658,9 @@
 
 #cmakedefine SIZEOF_TIME_T @SIZEOF_TIME_T@
 #cmakedefine TIME_T_UNSIGNED @TIME_T_UNSIGNED@
+
+/* CPU information */
+
+#cmakedefine CPU_LEVEL1_DCACHE_LINESIZE @CPU_LEVEL1_DCACHE_LINESIZE@
 
 #endif

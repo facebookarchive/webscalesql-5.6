@@ -10,8 +10,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA */
+   along with this program; if not, write to the Free Software Foundation,
+   Inc., 51 Franklin Street, Suite 500, Boston, MA 02110-1335 USA */
+
 
 /* This file includes constants used with all databases */
 
@@ -47,6 +48,11 @@
 #define HA_OPEN_COPY			256     /* Open copy (for repair) */
 /* Internal temp table, used for temporary results */
 #define HA_OPEN_INTERNAL_TABLE          512
+/**
+  Don't connect any share_psi to the handler, since it is a partition.
+  It would not be used, since partitions don't call unbind_psi()/rebind_psi().
+*/
+#define HA_OPEN_NO_PSI_CALL             1024    /* Don't call/connect PSI */
 
 /* The following is parameter to ha_rkey() how to use key */
 
@@ -193,7 +199,12 @@ enum ha_extra_function {
   HA_EXTRA_ADD_CHILDREN_LIST,
   HA_EXTRA_ATTACH_CHILDREN,
   HA_EXTRA_IS_ATTACHED_CHILDREN,
-  HA_EXTRA_DETACH_CHILDREN
+  HA_EXTRA_DETACH_CHILDREN,
+  /*
+    Prepare table for export
+    (e.g. quiesce the table and write table metadata).
+  */
+  HA_EXTRA_EXPORT
 };
 
 /* Compatible option, to be deleted in 6.0 */
@@ -305,6 +316,18 @@ enum ha_base_keytype {
 #define HA_OPTION_RELIES_ON_SQL_LAYER   512
 #define HA_OPTION_NULL_FIELDS		1024
 #define HA_OPTION_PAGE_CHECKSUM		2048
+/** STATS_PERSISTENT=1 has been specified in the SQL command (either CREATE
+or ALTER TABLE). Table and index statistics that are collected by the
+storage engine and used by the optimizer for query optimization will be
+stored on disk and will not change after a server restart. */
+#define HA_OPTION_STATS_PERSISTENT	4096
+/** STATS_PERSISTENT=0 has been specified in CREATE/ALTER TABLE. Statistics
+for the table will be wiped away on server shutdown and new ones recalculated
+after the server is started again. If none of HA_OPTION_STATS_PERSISTENT or
+HA_OPTION_NO_STATS_PERSISTENT is set, this means that the setting is not
+explicitly set at table level and the corresponding table will use whatever
+is the global server default. */
+#define HA_OPTION_NO_STATS_PERSISTENT	8192
 #define HA_OPTION_TEMP_COMPRESS_RECORD	((uint) 16384)	/* set by isamchk */
 #define HA_OPTION_READ_ONLY_DATA	((uint) 32768)	/* Set by isamchk */
 
@@ -374,11 +397,11 @@ enum ha_base_keytype {
   Do not add error numbers before HA_ERR_FIRST.
   If necessary to add lower numbers, change HA_ERR_FIRST accordingly.
 */
-#define HA_ERR_FIRST            120     /* Copy of first error nr.*/
+#define HA_ERR_FIRST            120	/* Copy of first error nr.*/
 
 #define HA_ERR_KEY_NOT_FOUND	120	/* Didn't find key on read or update */
 #define HA_ERR_FOUND_DUPP_KEY	121	/* Dupplicate key on write */
-#define HA_ERR_INTERNAL_ERROR   122     /* Internal error */
+#define HA_ERR_INTERNAL_ERROR   122	/* Internal error */
 #define HA_ERR_RECORD_CHANGED	123	/* Uppdate with is recoverable */
 #define HA_ERR_WRONG_INDEX	124	/* Wrong index given to function */
 #define HA_ERR_CRASHED		126	/* Indexfile is crashed */
@@ -397,7 +420,7 @@ enum ha_base_keytype {
 #define HA_WRONG_CREATE_OPTION	140	/* Wrong create option */
 #define HA_ERR_FOUND_DUPP_UNIQUE 141	/* Dupplicate unique on write */
 #define HA_ERR_UNKNOWN_CHARSET	 142	/* Can't open charset */
-#define HA_ERR_WRONG_MRG_TABLE_DEF 143  /* conflicting tables in MERGE */
+#define HA_ERR_WRONG_MRG_TABLE_DEF 143	/* conflicting tables in MERGE */
 #define HA_ERR_CRASHED_ON_REPAIR 144	/* Last (automatic?) repair failed */
 #define HA_ERR_CRASHED_ON_USAGE  145	/* Table must be repaired */
 #define HA_ERR_LOCK_WAIT_TIMEOUT 146
@@ -409,16 +432,16 @@ enum ha_base_keytype {
 #define HA_ERR_ROW_IS_REFERENCED 152     /* Cannot delete a parent row */
 #define HA_ERR_NO_SAVEPOINT	 153     /* No savepoint with that name */
 #define HA_ERR_NON_UNIQUE_BLOCK_SIZE 154 /* Non unique key block size */
-#define HA_ERR_NO_SUCH_TABLE     155  /* The table does not exist in engine */
-#define HA_ERR_TABLE_EXIST       156  /* The table existed in storage engine */
-#define HA_ERR_NO_CONNECTION     157  /* Could not connect to storage engine */
+#define HA_ERR_NO_SUCH_TABLE     155     /* The table does not exist in engine */
+#define HA_ERR_TABLE_EXIST       156     /* The table existed in storage engine */
+#define HA_ERR_NO_CONNECTION     157     /* Could not connect to storage engine */
 /* NULLs are not supported in spatial index */
 #define HA_ERR_NULL_IN_SPATIAL   158
-#define HA_ERR_TABLE_DEF_CHANGED 159  /* The table changed in storage engine */
+#define HA_ERR_TABLE_DEF_CHANGED 159     /* The table changed in storage engine */
 /* There's no partition in table for given value */
 #define HA_ERR_NO_PARTITION_FOUND 160
-#define HA_ERR_RBR_LOGGING_FAILED 161  /* Row-based binlogging of row failed */
-#define HA_ERR_DROP_INDEX_FK      162  /* Index needed in foreign key constr */
+#define HA_ERR_RBR_LOGGING_FAILED 161    /* Row-based binlogging of row failed */
+#define HA_ERR_DROP_INDEX_FK      162    /* Index needed in foreign key constr */
 /*
   Upholding foreign key constraints would lead to a duplicate key error
   in some other table.
@@ -438,20 +461,22 @@ enum ha_base_keytype {
                                             statement */
 #define HA_ERR_CORRUPT_EVENT      171    /* The event was corrupt, leading to
                                             illegal data being read */
-#define HA_ERR_NEW_FILE	          172	 /* New file format */
+#define HA_ERR_NEW_FILE	          172    /* New file format */
 #define HA_ERR_ROWS_EVENT_APPLY   173    /* The event could not be processed
                                             no other hanlder error happened */
 #define HA_ERR_INITIALIZATION     174    /* Error during initialization */
-#define HA_ERR_FILE_TOO_SHORT	  175	 /* File too short */
-#define HA_ERR_WRONG_CRC	  176	 /* Wrong CRC on page */
+#define HA_ERR_FILE_TOO_SHORT	  175    /* File too short */
+#define HA_ERR_WRONG_CRC	  176    /* Wrong CRC on page */
 #define HA_ERR_TOO_MANY_CONCURRENT_TRXS 177 /*Too many active concurrent transactions */
 /* There's no explicitly listed partition in table for the given value */
 #define HA_ERR_NOT_IN_LOCK_PARTITIONS 178
-#define HA_ERR_INDEX_COL_TOO_LONG 179	 /* Index column length exceeds limit */
-#define HA_ERR_INDEX_CORRUPT      180	 /* InnoDB index corrupted */
+#define HA_ERR_INDEX_COL_TOO_LONG 179    /* Index column length exceeds limit */
+#define HA_ERR_INDEX_CORRUPT      180    /* InnoDB index corrupted */
 #define HA_ERR_UNDO_REC_TOO_BIG   181    /* Undo log record too big */
-#define HA_FTS_INVALID_DOCID      182	/* Invalid InnoDB Doc ID */
-#define HA_ERR_LAST               182    /* Copy of last error nr */
+#define HA_FTS_INVALID_DOCID      182    /* Invalid InnoDB Doc ID */
+#define HA_ERR_TABLE_IN_FK_CHECK  183    /* Table being used in foreign key check */
+#define HA_ERR_TABLESPACE_EXISTS  184    /* The tablespace existed in storage engine */
+#define HA_ERR_LAST               184    /* Copy of last error nr */
 
 /* Number of different errors */
 #define HA_ERR_ERRORS            (HA_ERR_LAST - HA_ERR_FIRST + 1)

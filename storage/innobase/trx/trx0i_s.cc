@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-Copyright (c) 2007, 2011, Oracle and/or its affiliates. All Rights Reserved.
+Copyright (c) 2007, 2012, Oracle and/or its affiliates. All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -155,7 +155,7 @@ struct trx_i_s_cache_struct {
 	ullint		last_read;	/*!< last time the cache was read;
 					measured in microseconds since
 					epoch */
-	mutex_t		last_read_mutex;/*!< mutex protecting the
+	ib_mutex_t		last_read_mutex;/*!< mutex protecting the
 					last_read member - it is updated
 					inside a shared lock of the
 					rw_lock member */
@@ -505,8 +505,7 @@ fill_trx_row(
 		goto thd_done;
 	}
 
-	row->trx_mysql_thread_id = thd_get_thread_id(
-		static_cast<const THD*>(trx->mysql_thd));
+	row->trx_mysql_thread_id = thd_get_thread_id(trx->mysql_thd);
 
 	stmt = innobase_get_stmt(trx->mysql_thd, &stmt_len);
 
@@ -1301,7 +1300,10 @@ fetch_data_into_cache_low(
 
 	for (trx = UT_LIST_GET_FIRST(*trx_list);
 	     trx != NULL;
-	     trx = UT_LIST_GET_NEXT(trx_list, trx)) {
+	     trx =
+	     (trx_list == &trx_sys->mysql_trx_list
+	      ? UT_LIST_GET_NEXT(mysql_trx_list, trx)
+	      : UT_LIST_GET_NEXT(trx_list, trx))) {
 
 		i_s_trx_row_t*		trx_row;
 		i_s_locks_row_t*	requested_lock_row;

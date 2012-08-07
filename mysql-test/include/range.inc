@@ -1041,7 +1041,7 @@ alter table t2 add index (a,b);
 
 # 500 rows, 1 row
 
-select 'In following EXPLAIN the access method should be ref, #rows~=500 (and not 2)' Z;
+select 'In following EXPLAIN the access method should be ref or range, #rows~=500 (and not 2)' Z;
 explain select * from t2 where a=1000 and b<11;
 
 drop table t1, t2;
@@ -1493,6 +1493,11 @@ drop table t1, t2;
 --echo # Bug #26106: Wrong plan may be chosen when there are several possible
 --echo # range and ref accesses
 --echo #
+--echo # Note: The fix for this bug has been reverted. The code will no longer
+--echo # select the optimal plan for the two following test queries. This is
+--echo # not due to a bug but due to minor differences in range estimates
+--echo # produced by the storage engine.
+
 CREATE TABLE t1( 
   a INT,
   b INT,
@@ -1515,6 +1520,8 @@ INSERT INTO t1 SELECT a, b FROM t1 WHERE a=1 AND b=2; # 32
 INSERT INTO t1 SELECT a, b FROM t1 WHERE a=1 AND b=2; # 64
 INSERT INTO t1 SELECT a, b FROM t1 WHERE a=1 AND b=2; # 128
 --echo # This must use range over index l, not k.
+--echo # Update: Due to patch being reverted and minor differences in 
+--echo #         range estimates k is selected.
 EXPLAIN SELECT * FROM t1 WHERE a = 1 AND b >= 2;
 
 CREATE TABLE t2( 
@@ -1544,6 +1551,8 @@ INSERT INTO t2 SELECT a, b, c FROM t2 WHERE a=1 AND b=2; # 64
 INSERT INTO t2 VALUES (1, 1, 2);
 
 --echo # This must use range over index l, not n.
+--echo # Update: Due to patch being reverted and minor differences in 
+--echo #         range estimates k is selected.
 EXPLAIN SELECT * FROM t2 WHERE a = 1 AND b >= 2 AND c >= 2;
 
 DROP TABLE t1, t2;
@@ -1584,7 +1593,7 @@ DROP TABLE t10,t100;
 --echo # BUG#12698916 - JOIN QUERY GIVES WRONG RESULT AT 2ND EXEC. OR
 --echo # AFTER FLUSH TABLES [-INT VS NULL]
 --echo #
-CREATE TABLE t1 (col_int INT, pk INT) ENGINE=InnoDB;
+CREATE TABLE t1 (col_int INT, pk INT) ENGINE=InnoDB STATS_PERSISTENT=0;
 
 INSERT INTO t1 VALUES (-100,1),(1,6);
 
@@ -1594,7 +1603,7 @@ CREATE TABLE t2 (
   pk INT NOT NULL,
   PRIMARY KEY (pk),
   KEY (col_int_key)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB STATS_PERSISTENT=0;
 
 INSERT INTO t2 VALUES
 (1,"GOOD",1),(100,"",2),(200,"",3),(300,"",4),(400,"",5),(500,"",8);
@@ -1740,3 +1749,50 @@ UPDATE v3 SET f3=0, f4=4 WHERE f2=68 ORDER BY f1;
 SELECT * FROM v3;
 DROP TABLE t1;
 DROP VIEW v3;
+
+--echo #
+--echo # BUG#13731380: RANGE OPTIMIZER CALLS RECORDS_IN_RANGE() FOR OPEN RANGE
+--echo #
+
+CREATE TABLE t1 (pk INT PRIMARY KEY);
+INSERT INTO t1 VALUES (1),(3),(5);
+SELECT * FROM t1 WHERE pk <> 3 OR pk < 4;
+DROP TABLE t1;
+
+--echo #
+--echo # BUG#13803810: TOO FEW ROWS RETURNED FOR RANGE ACCESS IN 
+--echo #               VARCHAR INDEX USING DATETIME VALUE
+--echo
+CREATE TABLE t1 (a DATETIME);
+INSERT INTO t1 VALUES ('2001-01-01 00:00:00');
+INSERT INTO t1 VALUES ('2001-01-01 11:22:33');
+
+CREATE TABLE t2 (b VARCHAR(64), KEY (b));
+INSERT INTO t2 VALUES ('2001-01-01');
+INSERT INTO t2 VALUES ('2001.01.01');
+INSERT INTO t2 VALUES ('2001#01#01');
+INSERT INTO t2 VALUES ('2001-01-01 00:00:00');
+INSERT INTO t2 VALUES ('2001-01-01 11:22:33');
+
+--echo
+--echo # range/ref access cannot be used for this query
+--echo
+EXPLAIN SELECT * FROM t2 WHERE b=CAST('2001-01-01' AS DATE);
+SELECT * FROM t2 WHERE b=CAST('2001-01-01' AS DATE);
+
+let $query_ab=SELECT * FROM t1, t2 WHERE a=b ORDER BY BINARY a, BINARY b;
+let $query_ba=SELECT * FROM t1, t2 WHERE b=a ORDER BY BINARY a, BINARY b;
+
+--echo
+--echo # range/ref access cannot be used for any of the queries below.
+--echo # See BUG#13814468 about 'Range checked for each record'
+--echo
+eval EXPLAIN $query_ab;
+eval $query_ab;
+--echo
+eval EXPLAIN $query_ba;
+eval $query_ba;
+
+--echo
+DROP TABLE t1,t2;
+

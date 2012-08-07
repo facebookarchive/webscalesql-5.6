@@ -1,7 +1,7 @@
 #ifndef UNIREG_INCLUDED
 #define UNIREG_INCLUDED
 
-/* Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ typedef struct st_ha_create_information HA_CREATE_INFO;
 #define SPECIAL_BIG_SELECTS	256		/* Don't use heap tables */
 #define SPECIAL_NO_HOST_CACHE	512		/* Don't cache hosts */
 #define SPECIAL_SHORT_LOG_FORMAT 1024
-#define SPECIAL_SAFE_MODE	2048
+/* 2048 is no longer used */
 #define SPECIAL_LOG_QUERIES_NOT_USING_INDEXES 4096 /* Obsolete */
 
 	/* Extern defines */
@@ -181,5 +181,6 @@ int rea_create_table(THD *thd, const char *path,
                      HA_CREATE_INFO *create_info,
   		     List<Create_field> &create_field,
                      uint key_count,KEY *key_info,
-                     handler *file);
+                     handler *file,
+                     bool no_ha_table);
 #endif

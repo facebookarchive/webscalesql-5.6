@@ -1,4 +1,4 @@
-/* Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -43,9 +43,6 @@ setup_without_group(THD *thd, Ref_ptr_array ref_pointer_array,
                     ORDER *order,
                     ORDER *group, bool *hidden_group_fields);
 static bool resolve_subquery(THD *thd, JOIN *join);
-static bool
-setup_new_fields(THD *thd, List<Item> &fields,
-		 List<Item> &all_fields, ORDER *new_field);
 static int
 setup_group(THD *thd, Ref_ptr_array ref_pointer_array, TABLE_LIST *tables,
             List<Item> &fields, List<Item> &all_fields, ORDER *order);
@@ -74,7 +71,7 @@ JOIN::prepare(TABLE_LIST *tables_init,
 	      uint wild_num, Item *conds_init, uint og_num,
 	      ORDER *order_init, ORDER *group_init,
 	      Item *having_init,
-	      ORDER *proc_param_init, SELECT_LEX *select_lex_arg,
+	      SELECT_LEX *select_lex_arg,
 	      SELECT_LEX_UNIT *unit_arg)
 {
   DBUG_ENTER("JOIN::prepare");
@@ -93,8 +90,7 @@ JOIN::prepare(TABLE_LIST *tables_init,
   conds= conds_init;
   order= ORDER_with_src(order_init, ESC_ORDER_BY);
   group_list= ORDER_with_src(group_init, ESC_GROUP_BY);
-  having= having_init;
-  proc_param= proc_param_init;
+  having= having_for_explain= having_init;
   tables_list= tables_init;
   select_lex= select_lex_arg;
   select_lex->join= this;
@@ -183,6 +179,7 @@ JOIN::prepare(TABLE_LIST *tables_init,
 			 (having->fix_fields(thd, &having) ||
 			  having->check_cols(1)));
     select_lex->having_fix_field= 0;
+    select_lex->having= having;
     if (arena)
       thd->restore_active_arena(arena, &backup);
 
@@ -315,45 +312,9 @@ JOIN::prepare(TABLE_LIST *tables_init,
     for (ORDER *group_tmp= group_list ; group_tmp ; group_tmp= group_tmp->next)
       send_group_parts++;
   }
-  
-  procedure= setup_procedure(thd, proc_param, result, fields_list, &error);
-  if (error)
-    goto err;					/* purecov: inspected */
-  if (procedure)
-  {
-    if (setup_new_fields(thd, fields_list, all_fields,
-			 procedure->param_fields))
-	goto err;				/* purecov: inspected */
-    if (procedure->group)
-    {
-      if (!test_if_subpart(procedure->group,group_list))
-      {						/* purecov: inspected */
-	my_message(ER_DIFF_GROUPS_PROC, ER(ER_DIFF_GROUPS_PROC),
-                   MYF(0));                     /* purecov: inspected */
-	goto err;				/* purecov: inspected */
-      }
-    }
-    if (order && (procedure->flags & PROC_NO_SORT))
-    {						/* purecov: inspected */
-      my_message(ER_ORDER_WITH_PROC, ER(ER_ORDER_WITH_PROC),
-                 MYF(0));                       /* purecov: inspected */
-      goto err;					/* purecov: inspected */
-    }
-    if (thd->lex->derived_tables)
-    {
-      my_error(ER_WRONG_USAGE, MYF(0), "PROCEDURE", 
-               thd->lex->derived_tables & DERIVED_VIEW ?
-               "view" : "subquery"); 
-      goto err;
-    }
-    if (thd->lex->sql_command != SQLCOM_SELECT)
-    {
-      my_error(ER_WRONG_USAGE, MYF(0), "PROCEDURE", "non-SELECT");
-      goto err;
-    }
-  }
 
-  if (!procedure && result && result->prepare(fields_list, unit_arg))
+
+  if (result && result->prepare(fields_list, unit_arg))
     goto err;					/* purecov: inspected */
 
   /* Init join struct */
@@ -380,11 +341,25 @@ JOIN::prepare(TABLE_LIST *tables_init,
   if (alloc_func_list())
     goto err;
 
+#ifdef WITH_PARTITION_STORAGE_ENGINE
+  {
+    TABLE_LIST *tbl;
+    for (tbl= select_lex->leaf_tables; tbl; tbl= tbl->next_leaf)
+    {
+      /* 
+        This will only prune constant conditions, which will be used for
+        lock pruning.
+      */
+      Item *prune_cond= tbl->join_cond() ? tbl->join_cond() : conds;
+      if (prune_partitions(thd, tbl->table, prune_cond))
+        goto err;
+    }
+  }
+#endif
+
   DBUG_RETURN(0); // All OK
 
 err:
-  delete procedure;				/* purecov: inspected */
-  procedure= 0;
   DBUG_RETURN(-1);				/* purecov: inspected */
 }
 
@@ -614,13 +589,11 @@ static bool resolve_subquery(THD *thd, JOIN *join)
     Check if we're in subquery that is a candidate for flattening into a
     semi-join (which is done in flatten_subqueries()). The requirements are:
       1. Subquery predicate is an IN/=ANY subquery predicate
-      2. Subquery is a single SELECT (not a UNION)
+      2. Subquery is a single query block (not a UNION)
       3. Subquery does not have GROUP BY
       4. Subquery does not use aggregate functions or HAVING
       5. Subquery predicate is at the AND-top-level of ON/WHERE clause
-      6. We are not in a subquery of a single table UPDATE/DELETE that 
-           doesn't have a JOIN (TODO: We should handle this at some
-           point by switching to multi-table UPDATE/DELETE)
+      6. The outer context is a SELECT (not e.g. UPDATE or DELETE)
       7. We're not in a confluent table-less subquery, like "SELECT 1".
       8. No execution method was already chosen (by a prepared statement)
       9. Parent select is not a confluent table-less select
@@ -638,7 +611,9 @@ static bool resolve_subquery(THD *thd, JOIN *join)
       !join->having && !select_lex->with_sum_func &&                    // 4
       (outer->resolve_place == st_select_lex::RESOLVE_CONDITION ||      // 5
        outer->resolve_place == st_select_lex::RESOLVE_JOIN_NEST) &&     // 5
-      outer->join &&                                                    // 6
+      (thd->lex->sql_command == SQLCOM_SELECT ||                        // 6
+       thd->lex->sql_command == SQLCOM_INSERT_SELECT ||                 // 6
+       thd->lex->sql_command == SQLCOM_CREATE_TABLE) &&                 // 6
       select_lex->master_unit()->first_select()->leaf_tables &&         // 7
       in_exists_predicate->exec_method == 
                            Item_exists_subselect::EXEC_UNSPECIFIED &&   // 8
@@ -1405,41 +1380,6 @@ setup_group(THD *thd, Ref_ptr_array ref_pointer_array, TABLE_LIST *tables,
 }
 
 
-/**
-  Add fields with aren't used at start of field list.
-
-  @return
-    FALSE if ok
-*/
-
-static bool
-setup_new_fields(THD *thd, List<Item> &fields,
-		 List<Item> &all_fields, ORDER *new_field)
-{
-  Item	  **item;
-  uint counter;
-  enum_resolution_type not_used;
-  DBUG_ENTER("setup_new_fields");
-
-  thd->mark_used_columns= MARK_COLUMNS_READ;       // Not really needed, but...
-  for (; new_field ; new_field= new_field->next)
-  {
-    if ((item= find_item_in_list(*new_field->item, fields, &counter,
-				 IGNORE_ERRORS, &not_used)))
-      new_field->item=item;			/* Change to shared Item */
-    else
-    {
-      thd->where="procedure list";
-      if ((*new_field->item)->fix_fields(thd, new_field->item))
-	DBUG_RETURN(1); /* purecov: inspected */
-      all_fields.push_front(*new_field->item);
-      new_field->item=all_fields.head_ref();
-    }
-  }
-  DBUG_RETURN(0);
-}
-
-
 /****************************************************************************
   ROLLUP handling
 ****************************************************************************/
@@ -1506,7 +1446,7 @@ static bool change_group_ref(THD *thd, Item_func *expr, ORDER *group_list,
           {
             Item *new_item;
             if (!(new_item= new Item_ref(context, group_tmp->item, 0,
-                                        item->name)))
+                                        item->item_name.ptr())))
               return 1;                                 // fatal_error is set
             thd->change_item_tree(arg, new_item);
             arg_changed= TRUE;

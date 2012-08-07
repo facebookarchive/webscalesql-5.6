@@ -49,7 +49,7 @@ EXPLAIN SELECT * FROM t1 WHERE key2 < 5 OR key2 > 1020	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t1`.`key1` AS `key1`,`test`.`t1`.`key2` AS `key2`,`test`.`t1`.`key3` AS `key3`,`test`.`t1`.`key4` AS `key4`,`test`.`t1`.`key5` AS `key5`,`test`.`t1`.`key6` AS `key6`,`test`.`t1`.`key7` AS `key7`,`test`.`t1`.`key8` AS `key8` from `test`.`t1` where ((`test`.`t1`.`key2` < 5) or (`test`.`t1`.`key2` > 1020))"
+            "expanded_query": "/* select#1 */ select `t1`.`key1` AS `key1`,`t1`.`key2` AS `key2`,`t1`.`key3` AS `key3`,`t1`.`key4` AS `key4`,`t1`.`key5` AS `key5`,`t1`.`key6` AS `key6`,`t1`.`key7` AS `key7`,`t1`.`key8` AS `key8` from `t1` where ((`t1`.`key2` < 5) or (`t1`.`key2` > 1020))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -61,19 +61,19 @@ EXPLAIN SELECT * FROM t1 WHERE key2 < 5 OR key2 > 1020	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t1`.`key2` < 5) or (`test`.`t1`.`key2` > 1020))",
+              "original_condition": "((`t1`.`key2` < 5) or (`t1`.`key2` > 1020))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "((`test`.`t1`.`key2` < 5) or (`test`.`t1`.`key2` > 1020))"
+                  "resulting_condition": "((`t1`.`key2` < 5) or (`t1`.`key2` > 1020))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "((`test`.`t1`.`key2` < 5) or (`test`.`t1`.`key2` > 1020))"
+                  "resulting_condition": "((`t1`.`key2` < 5) or (`t1`.`key2` > 1020))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "((`test`.`t1`.`key2` < 5) or (`test`.`t1`.`key2` > 1020))"
+                  "resulting_condition": "((`t1`.`key2` < 5) or (`t1`.`key2` > 1020))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -81,8 +81,7 @@ EXPLAIN SELECT * FROM t1 WHERE key2 < 5 OR key2 > 1020	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -97,8 +96,7 @@ EXPLAIN SELECT * FROM t1 WHERE key2 < 5 OR key2 > 1020	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 1024,
@@ -158,15 +156,16 @@ EXPLAIN SELECT * FROM t1 WHERE key2 < 5 OR key2 > 1020	{
                     "range_scan_alternatives": [
                       {
                         "index": "i2",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "key2 < 5",
                           "1020 < key2"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 47,
                         "cost": 58.41,
-                        "rowid_ordered": false,
                         "chosen": true
                       }
                     ] /* range_scan_alternatives */,
@@ -196,14 +195,15 @@ EXPLAIN SELECT * FROM t1 WHERE key2 < 5 OR key2 > 1020	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
                       "access_type": "range",
                       "rows": 47,
-                      "cost": 58.41,
+                      "cost": 67.81,
                       "chosen": true
                     }
                   ] /* considered_access_paths */
@@ -216,14 +216,13 @@ EXPLAIN SELECT * FROM t1 WHERE key2 < 5 OR key2 > 1020	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t1`.`key2` < 5) or (`test`.`t1`.`key2` > 1020))",
+              "original_condition": "((`t1`.`key2` < 5) or (`t1`.`key2` > 1020))",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "((`test`.`t1`.`key2` < 5) or (`test`.`t1`.`key2` > 1020))"
+                  "table": "`t1`",
+                  "attached": "((`t1`.`key2` < 5) or (`t1`.`key2` > 1020))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -231,9 +230,8 @@ EXPLAIN SELECT * FROM t1 WHERE key2 < 5 OR key2 > 1020	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
-                "pushed_index_condition": "((`test`.`t1`.`key2` < 5) or (`test`.`t1`.`key2` > 1020))",
+                "table": "`t1`",
+                "pushed_index_condition": "((`t1`.`key2` < 5) or (`t1`.`key2` > 1020))",
                 "table_condition_attached": null,
                 "access_type": "range"
               }
@@ -266,7 +264,7 @@ EXPLAIN SELECT * FROM t1 WHERE key2 < 5 OR key2 > 1020	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t1`.`key1` AS `key1`,`test`.`t1`.`key2` AS `key2`,`test`.`t1`.`key3` AS `key3`,`test`.`t1`.`key4` AS `key4`,`test`.`t1`.`key5` AS `key5`,`test`.`t1`.`key6` AS `key6`,`test`.`t1`.`key7` AS `key7`,`test`.`t1`.`key8` AS `key8` from `test`.`t1` where ((`test`.`t1`.`key2` < 5) or (`test`.`t1`.`key2` > 1020))"
+            "expanded_query": "/* select#1 */ select `t1`.`key1` AS `key1`,`t1`.`key2` AS `key2`,`t1`.`key3` AS `key3`,`t1`.`key4` AS `key4`,`t1`.`key5` AS `key5`,`t1`.`key6` AS `key6`,`t1`.`key7` AS `key7`,`t1`.`key8` AS `key8` from `t1` where ((`t1`.`key2` < 5) or (`t1`.`key2` > 1020))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -278,19 +276,19 @@ EXPLAIN SELECT * FROM t1 WHERE key2 < 5 OR key2 > 1020	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t1`.`key2` < 5) or (`test`.`t1`.`key2` > 1020))",
+              "original_condition": "((`t1`.`key2` < 5) or (`t1`.`key2` > 1020))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "((`test`.`t1`.`key2` < 5) or (`test`.`t1`.`key2` > 1020))"
+                  "resulting_condition": "((`t1`.`key2` < 5) or (`t1`.`key2` > 1020))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "((`test`.`t1`.`key2` < 5) or (`test`.`t1`.`key2` > 1020))"
+                  "resulting_condition": "((`t1`.`key2` < 5) or (`t1`.`key2` > 1020))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "((`test`.`t1`.`key2` < 5) or (`test`.`t1`.`key2` > 1020))"
+                  "resulting_condition": "((`t1`.`key2` < 5) or (`t1`.`key2` > 1020))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -298,8 +296,7 @@ EXPLAIN SELECT * FROM t1 WHERE key2 < 5 OR key2 > 1020	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -314,8 +311,7 @@ EXPLAIN SELECT * FROM t1 WHERE key2 < 5 OR key2 > 1020	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 1024,
@@ -347,14 +343,15 @@ EXPLAIN SELECT * FROM t1 WHERE key2 < 5 OR key2 > 1020	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
                       "access_type": "range",
                       "rows": 47,
-                      "cost": 58.41,
+                      "cost": 67.81,
                       "chosen": true
                     }
                   ] /* considered_access_paths */
@@ -367,14 +364,13 @@ EXPLAIN SELECT * FROM t1 WHERE key2 < 5 OR key2 > 1020	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t1`.`key2` < 5) or (`test`.`t1`.`key2` > 1020))",
+              "original_condition": "((`t1`.`key2` < 5) or (`t1`.`key2` > 1020))",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "((`test`.`t1`.`key2` < 5) or (`test`.`t1`.`key2` > 1020))"
+                  "table": "`t1`",
+                  "attached": "((`t1`.`key2` < 5) or (`t1`.`key2` > 1020))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -382,9 +378,8 @@ EXPLAIN SELECT * FROM t1 WHERE key2 < 5 OR key2 > 1020	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
-                "pushed_index_condition": "((`test`.`t1`.`key2` < 5) or (`test`.`t1`.`key2` > 1020))",
+                "table": "`t1`",
+                "pushed_index_condition": "((`t1`.`key2` < 5) or (`t1`.`key2` > 1020))",
                 "table_condition_attached": null,
                 "access_type": "range"
               }
@@ -417,7 +412,7 @@ EXPLAIN SELECT * FROM t1 WHERE key1 < 3 OR key2 > 1020	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t1`.`key1` AS `key1`,`test`.`t1`.`key2` AS `key2`,`test`.`t1`.`key3` AS `key3`,`test`.`t1`.`key4` AS `key4`,`test`.`t1`.`key5` AS `key5`,`test`.`t1`.`key6` AS `key6`,`test`.`t1`.`key7` AS `key7`,`test`.`t1`.`key8` AS `key8` from `test`.`t1` where ((`test`.`t1`.`key1` < 3) or (`test`.`t1`.`key2` > 1020))"
+            "expanded_query": "/* select#1 */ select `t1`.`key1` AS `key1`,`t1`.`key2` AS `key2`,`t1`.`key3` AS `key3`,`t1`.`key4` AS `key4`,`t1`.`key5` AS `key5`,`t1`.`key6` AS `key6`,`t1`.`key7` AS `key7`,`t1`.`key8` AS `key8` from `t1` where ((`t1`.`key1` < 3) or (`t1`.`key2` > 1020))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -429,19 +424,19 @@ EXPLAIN SELECT * FROM t1 WHERE key1 < 3 OR key2 > 1020	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t1`.`key1` < 3) or (`test`.`t1`.`key2` > 1020))",
+              "original_condition": "((`t1`.`key1` < 3) or (`t1`.`key2` > 1020))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "((`test`.`t1`.`key1` < 3) or (`test`.`t1`.`key2` > 1020))"
+                  "resulting_condition": "((`t1`.`key1` < 3) or (`t1`.`key2` > 1020))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "((`test`.`t1`.`key1` < 3) or (`test`.`t1`.`key2` > 1020))"
+                  "resulting_condition": "((`t1`.`key1` < 3) or (`t1`.`key2` > 1020))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "((`test`.`t1`.`key1` < 3) or (`test`.`t1`.`key2` > 1020))"
+                  "resulting_condition": "((`t1`.`key1` < 3) or (`t1`.`key2` > 1020))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -449,8 +444,7 @@ EXPLAIN SELECT * FROM t1 WHERE key1 < 3 OR key2 > 1020	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -465,8 +459,7 @@ EXPLAIN SELECT * FROM t1 WHERE key1 < 3 OR key2 > 1020	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 1024,
@@ -524,6 +517,14 @@ EXPLAIN SELECT * FROM t1 WHERE key1 < 3 OR key2 > 1020	{
                     "chosen": false,
                     "cause": "not_group_by_or_distinct"
                   } /* group_index_range */,
+                  "analyzing_range_alternatives": {
+                    "range_scan_alternatives": [
+                    ] /* range_scan_alternatives */,
+                    "analyzing_roworder_intersect": {
+                      "usable": false,
+                      "cause": "too_few_roworder_scans"
+                    } /* analyzing_roworder_intersect */
+                  } /* analyzing_range_alternatives */,
                   "analyzing_index_merge": [
                     {
                       "indices_to_merge": [
@@ -531,14 +532,15 @@ EXPLAIN SELECT * FROM t1 WHERE key1 < 3 OR key2 > 1020	{
                           "range_scan_alternatives": [
                             {
                               "index": "i1",
-                              "index_dives_for_eq_ranges": true,
                               "ranges": [
                                 "key1 < 3"
                               ] /* ranges */,
+                              "index_dives_for_eq_ranges": true,
+                              "rowid_ordered": false,
+                              "using_mrr": false,
                               "index_only": true,
                               "rows": 3,
                               "cost": 1.6526,
-                              "rowid_ordered": false,
                               "chosen": true
                             }
                           ] /* range_scan_alternatives */,
@@ -549,14 +551,15 @@ EXPLAIN SELECT * FROM t1 WHERE key1 < 3 OR key2 > 1020	{
                           "range_scan_alternatives": [
                             {
                               "index": "i2",
-                              "index_dives_for_eq_ranges": true,
                               "ranges": [
                                 "1020 < key2"
                               ] /* ranges */,
+                              "index_dives_for_eq_ranges": true,
+                              "rowid_ordered": false,
+                              "using_mrr": false,
                               "index_only": true,
                               "rows": 42,
                               "cost": 10.282,
-                              "rowid_ordered": false,
                               "chosen": true
                             }
                           ] /* range_scan_alternatives */,
@@ -603,14 +606,15 @@ EXPLAIN SELECT * FROM t1 WHERE key1 < 3 OR key2 > 1020	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
                       "access_type": "range",
                       "rows": 45,
-                      "cost": 58.363,
+                      "cost": 67.363,
                       "chosen": true
                     }
                   ] /* considered_access_paths */
@@ -623,14 +627,13 @@ EXPLAIN SELECT * FROM t1 WHERE key1 < 3 OR key2 > 1020	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t1`.`key1` < 3) or (`test`.`t1`.`key2` > 1020))",
+              "original_condition": "((`t1`.`key1` < 3) or (`t1`.`key2` > 1020))",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "((`test`.`t1`.`key1` < 3) or (`test`.`t1`.`key2` > 1020))"
+                  "table": "`t1`",
+                  "attached": "((`t1`.`key1` < 3) or (`t1`.`key2` > 1020))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -638,8 +641,7 @@ EXPLAIN SELECT * FROM t1 WHERE key1 < 3 OR key2 > 1020	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "access_type": "range"
               }
             ] /* refine_plan */
@@ -670,7 +672,7 @@ EXPLAIN SELECT key2, MIN(key2_1) FROM t2 GROUP BY key2	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t2`.`key2` AS `key2`,min(`test`.`t2`.`key2_1`) AS `MIN(key2_1)` from `test`.`t2` group by `test`.`t2`.`key2`"
+            "expanded_query": "/* select#1 */ select `t2`.`key2` AS `key2`,min(`t2`.`key2_1`) AS `MIN(key2_1)` from `t2` group by `t2`.`key2`"
           }
         ] /* steps */
       } /* join_preparation */
@@ -682,8 +684,7 @@ EXPLAIN SELECT key2, MIN(key2_1) FROM t2 GROUP BY key2	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -694,8 +695,7 @@ EXPLAIN SELECT key2, MIN(key2_1) FROM t2 GROUP BY key2	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "const_keys_added": {
                   "keys": [
                     "i2_1",
@@ -811,14 +811,15 @@ EXPLAIN SELECT key2, MIN(key2_1) FROM t2 GROUP BY key2	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t2",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t2`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
                       "access_type": "range",
                       "rows": 103,
-                      "cost": 50.6,
+                      "cost": 71.2,
                       "chosen": true,
                       "use_tmp_table": true
                     }
@@ -839,8 +840,7 @@ EXPLAIN SELECT key2, MIN(key2_1) FROM t2 GROUP BY key2	{
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t2",
+                  "table": "`t2`",
                   "attached": null
                 }
               ] /* attached_conditions_summary */
@@ -849,21 +849,20 @@ EXPLAIN SELECT key2, MIN(key2_1) FROM t2 GROUP BY key2	{
           {
             "clause_processing": {
               "clause": "GROUP BY",
-              "original_clause": "`test`.`t2`.`key2`",
+              "original_clause": "`t2`.`key2`",
               "items": [
                 {
-                  "item": "`test`.`t2`.`key2`"
+                  "item": "`t2`.`key2`"
                 }
               ] /* items */,
               "resulting_clause_is_simple": true,
-              "resulting_clause": "`test`.`t2`.`key2`"
+              "resulting_clause": "`t2`.`key2`"
             } /* clause_processing */
           },
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "access_type": "range"
               }
             ] /* refine_plan */
@@ -897,7 +896,7 @@ EXPLAIN SELECT DISTINCT key2 FROM t2	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select distinct `test`.`t2`.`key2` AS `key2` from `test`.`t2`"
+            "expanded_query": "/* select#1 */ select distinct `t2`.`key2` AS `key2` from `t2`"
           }
         ] /* steps */
       } /* join_preparation */
@@ -909,8 +908,7 @@ EXPLAIN SELECT DISTINCT key2 FROM t2	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -921,8 +919,7 @@ EXPLAIN SELECT DISTINCT key2 FROM t2	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "const_keys_added": {
                   "keys": [
                     "i2_1",
@@ -1039,14 +1036,15 @@ EXPLAIN SELECT DISTINCT key2 FROM t2	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t2",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t2`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
                       "access_type": "range",
                       "rows": 103,
-                      "cost": 50.6,
+                      "cost": 71.2,
                       "chosen": true
                     }
                   ] /* considered_access_paths */
@@ -1064,8 +1062,7 @@ EXPLAIN SELECT DISTINCT key2 FROM t2	{
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t2",
+                  "table": "`t2`",
                   "attached": null
                 }
               ] /* attached_conditions_summary */
@@ -1074,21 +1071,20 @@ EXPLAIN SELECT DISTINCT key2 FROM t2	{
           {
             "clause_processing": {
               "clause": "GROUP BY",
-              "original_clause": "`test`.`t2`.`key2`",
+              "original_clause": "`t2`.`key2`",
               "items": [
                 {
-                  "item": "`test`.`t2`.`key2`"
+                  "item": "`t2`.`key2`"
                 }
               ] /* items */,
               "resulting_clause_is_simple": true,
-              "resulting_clause": "`test`.`t2`.`key2`"
+              "resulting_clause": "`t2`.`key2`"
             } /* clause_processing */
           },
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "access_type": "range"
               }
             ] /* refine_plan */
@@ -1127,7 +1123,7 @@ GROUP BY key2	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t2`.`key2` AS `key2`,min(`test`.`t2`.`key2_1`) AS `MIN(key2_1)` from `test`.`t2` where ((`test`.`t2`.`key2` = 5) or (`test`.`t2`.`key2` = 4) or (`test`.`t2`.`key2` = 3) or (`test`.`t2`.`key2` = 2) or (`test`.`t2`.`key2` = 1)) group by `test`.`t2`.`key2`"
+            "expanded_query": "/* select#1 */ select `t2`.`key2` AS `key2`,min(`t2`.`key2_1`) AS `MIN(key2_1)` from `t2` where ((`t2`.`key2` = 5) or (`t2`.`key2` = 4) or (`t2`.`key2` = 3) or (`t2`.`key2` = 2) or (`t2`.`key2` = 1)) group by `t2`.`key2`"
           }
         ] /* steps */
       } /* join_preparation */
@@ -1139,19 +1135,19 @@ GROUP BY key2	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t2`.`key2` = 5) or (`test`.`t2`.`key2` = 4) or (`test`.`t2`.`key2` = 3) or (`test`.`t2`.`key2` = 2) or (`test`.`t2`.`key2` = 1))",
+              "original_condition": "((`t2`.`key2` = 5) or (`t2`.`key2` = 4) or (`t2`.`key2` = 3) or (`t2`.`key2` = 2) or (`t2`.`key2` = 1))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "(multiple equal(5, `test`.`t2`.`key2`) or multiple equal(4, `test`.`t2`.`key2`) or multiple equal(3, `test`.`t2`.`key2`) or multiple equal(2, `test`.`t2`.`key2`) or multiple equal(1, `test`.`t2`.`key2`))"
+                  "resulting_condition": "(multiple equal(5, `t2`.`key2`) or multiple equal(4, `t2`.`key2`) or multiple equal(3, `t2`.`key2`) or multiple equal(2, `t2`.`key2`) or multiple equal(1, `t2`.`key2`))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "(multiple equal(5, `test`.`t2`.`key2`) or multiple equal(4, `test`.`t2`.`key2`) or multiple equal(3, `test`.`t2`.`key2`) or multiple equal(2, `test`.`t2`.`key2`) or multiple equal(1, `test`.`t2`.`key2`))"
+                  "resulting_condition": "(multiple equal(5, `t2`.`key2`) or multiple equal(4, `t2`.`key2`) or multiple equal(3, `t2`.`key2`) or multiple equal(2, `t2`.`key2`) or multiple equal(1, `t2`.`key2`))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "(multiple equal(5, `test`.`t2`.`key2`) or multiple equal(4, `test`.`t2`.`key2`) or multiple equal(3, `test`.`t2`.`key2`) or multiple equal(2, `test`.`t2`.`key2`) or multiple equal(1, `test`.`t2`.`key2`))"
+                  "resulting_condition": "(multiple equal(5, `t2`.`key2`) or multiple equal(4, `t2`.`key2`) or multiple equal(3, `t2`.`key2`) or multiple equal(2, `t2`.`key2`) or multiple equal(1, `t2`.`key2`))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -1159,8 +1155,7 @@ GROUP BY key2	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -1175,8 +1170,7 @@ GROUP BY key2	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 1024,
@@ -1285,7 +1279,6 @@ GROUP BY key2	{
                     "range_scan_alternatives": [
                       {
                         "index": "i2_1",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "1 <= key2 <= 1",
                           "2 <= key2 <= 2",
@@ -1293,15 +1286,16 @@ GROUP BY key2	{
                           "4 <= key2 <= 4",
                           "5 <= key2 <= 5"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": true,
                         "rows": 47,
                         "cost": 11.724,
-                        "rowid_ordered": false,
                         "chosen": true
                       },
                       {
                         "index": "i2_2",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "1 <= key2 <= 1",
                           "2 <= key2 <= 2",
@@ -1309,10 +1303,12 @@ GROUP BY key2	{
                           "4 <= key2 <= 4",
                           "5 <= key2 <= 5"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": true,
                         "rows": 47,
                         "cost": 11.724,
-                        "rowid_ordered": false,
                         "chosen": false,
                         "cause": "cost"
                       }
@@ -1346,14 +1342,15 @@ GROUP BY key2	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t2",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t2`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
                       "access_type": "range",
                       "rows": 5,
-                      "cost": 20.124,
+                      "cost": 21.124,
                       "chosen": true,
                       "use_tmp_table": true
                     }
@@ -1369,14 +1366,13 @@ GROUP BY key2	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t2`.`key2` = 5) or (`test`.`t2`.`key2` = 4) or (`test`.`t2`.`key2` = 3) or (`test`.`t2`.`key2` = 2) or (`test`.`t2`.`key2` = 1))",
+              "original_condition": "((`t2`.`key2` = 5) or (`t2`.`key2` = 4) or (`t2`.`key2` = 3) or (`t2`.`key2` = 2) or (`t2`.`key2` = 1))",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t2",
-                  "attached": "((`test`.`t2`.`key2` = 5) or (`test`.`t2`.`key2` = 4) or (`test`.`t2`.`key2` = 3) or (`test`.`t2`.`key2` = 2) or (`test`.`t2`.`key2` = 1))"
+                  "table": "`t2`",
+                  "attached": "((`t2`.`key2` = 5) or (`t2`.`key2` = 4) or (`t2`.`key2` = 3) or (`t2`.`key2` = 2) or (`t2`.`key2` = 1))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -1384,21 +1380,20 @@ GROUP BY key2	{
           {
             "clause_processing": {
               "clause": "GROUP BY",
-              "original_clause": "`test`.`t2`.`key2`",
+              "original_clause": "`t2`.`key2`",
               "items": [
                 {
-                  "item": "`test`.`t2`.`key2`"
+                  "item": "`t2`.`key2`"
                 }
               ] /* items */,
               "resulting_clause_is_simple": true,
-              "resulting_clause": "`test`.`t2`.`key2`"
+              "resulting_clause": "`t2`.`key2`"
             } /* clause_processing */
           },
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "access_type": "range"
               }
             ] /* refine_plan */
@@ -1433,7 +1428,7 @@ EXPLAIN SELECT * FROM t2 WHERE key2 = 1 AND (key2_1 = 1 OR key3 = 5)	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t2`.`key1a` AS `key1a`,`test`.`t2`.`key1b` AS `key1b`,`test`.`t2`.`key2` AS `key2`,`test`.`t2`.`key2_1` AS `key2_1`,`test`.`t2`.`key2_2` AS `key2_2`,`test`.`t2`.`key3` AS `key3` from `test`.`t2` where ((`test`.`t2`.`key2` = 1) and ((`test`.`t2`.`key2_1` = 1) or (`test`.`t2`.`key3` = 5)))"
+            "expanded_query": "/* select#1 */ select `t2`.`key1a` AS `key1a`,`t2`.`key1b` AS `key1b`,`t2`.`key2` AS `key2`,`t2`.`key2_1` AS `key2_1`,`t2`.`key2_2` AS `key2_2`,`t2`.`key3` AS `key3` from `t2` where ((`t2`.`key2` = 1) and ((`t2`.`key2_1` = 1) or (`t2`.`key3` = 5)))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -1445,19 +1440,19 @@ EXPLAIN SELECT * FROM t2 WHERE key2 = 1 AND (key2_1 = 1 OR key3 = 5)	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t2`.`key2` = 1) and ((`test`.`t2`.`key2_1` = 1) or (`test`.`t2`.`key3` = 5)))",
+              "original_condition": "((`t2`.`key2` = 1) and ((`t2`.`key2_1` = 1) or (`t2`.`key3` = 5)))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "((multiple equal(1, `test`.`t2`.`key2_1`) or multiple equal(5, `test`.`t2`.`key3`)) and multiple equal(1, `test`.`t2`.`key2`))"
+                  "resulting_condition": "((multiple equal(1, `t2`.`key2_1`) or multiple equal(5, `t2`.`key3`)) and multiple equal(1, `t2`.`key2`))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "((multiple equal(1, `test`.`t2`.`key2_1`) or multiple equal(5, `test`.`t2`.`key3`)) and multiple equal(1, `test`.`t2`.`key2`))"
+                  "resulting_condition": "((multiple equal(1, `t2`.`key2_1`) or multiple equal(5, `t2`.`key3`)) and multiple equal(1, `t2`.`key2`))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "((multiple equal(1, `test`.`t2`.`key2_1`) or multiple equal(5, `test`.`t2`.`key3`)) and multiple equal(1, `test`.`t2`.`key2`))"
+                  "resulting_condition": "((multiple equal(1, `t2`.`key2_1`) or multiple equal(5, `t2`.`key3`)) and multiple equal(1, `t2`.`key2`))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -1465,8 +1460,7 @@ EXPLAIN SELECT * FROM t2 WHERE key2 = 1 AND (key2_1 = 1 OR key3 = 5)	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -1477,15 +1471,13 @@ EXPLAIN SELECT * FROM t2 WHERE key2 = 1 AND (key2_1 = 1 OR key3 = 5)	{
           {
             "ref_optimizer_key_uses": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "field": "key2",
                 "equals": "1",
                 "null_rejecting": false
               },
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "field": "key2",
                 "equals": "1",
                 "null_rejecting": false
@@ -1495,8 +1487,7 @@ EXPLAIN SELECT * FROM t2 WHERE key2 = 1 AND (key2_1 = 1 OR key3 = 5)	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 1024,
@@ -1540,26 +1531,28 @@ EXPLAIN SELECT * FROM t2 WHERE key2 = 1 AND (key2_1 = 1 OR key3 = 5)	{
                     "range_scan_alternatives": [
                       {
                         "index": "i2_1",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "1 <= key2 <= 1"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 10,
                         "cost": 13.01,
-                        "rowid_ordered": false,
                         "chosen": true
                       },
                       {
                         "index": "i2_2",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "1 <= key2 <= 1"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 10,
                         "cost": 13.01,
-                        "rowid_ordered": false,
                         "chosen": false,
                         "cause": "cost"
                       }
@@ -1589,8 +1582,9 @@ EXPLAIN SELECT * FROM t2 WHERE key2 = 1 AND (key2_1 = 1 OR key3 = 5)	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t2",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t2`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
@@ -1622,14 +1616,13 @@ EXPLAIN SELECT * FROM t2 WHERE key2 = 1 AND (key2_1 = 1 OR key3 = 5)	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t2`.`key2` = 1) and ((`test`.`t2`.`key2_1` = 1) or (`test`.`t2`.`key3` = 5)))",
+              "original_condition": "((`t2`.`key2` = 1) and ((`t2`.`key2_1` = 1) or (`t2`.`key3` = 5)))",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t2",
-                  "attached": "((`test`.`t2`.`key2_1` = 1) or (`test`.`t2`.`key3` = 5))"
+                  "table": "`t2`",
+                  "attached": "((`t2`.`key2_1` = 1) or (`t2`.`key3` = 5))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -1637,8 +1630,7 @@ EXPLAIN SELECT * FROM t2 WHERE key2 = 1 AND (key2_1 = 1 OR key3 = 5)	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t2"
+                "table": "`t2`"
               }
             ] /* refine_plan */
           }
@@ -1668,7 +1660,7 @@ EXPLAIN SELECT * FROM t1 WHERE key2=10 OR key3=3 OR key4 <=> null	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t1`.`key1` AS `key1`,`test`.`t1`.`key2` AS `key2`,`test`.`t1`.`key3` AS `key3`,`test`.`t1`.`key4` AS `key4`,`test`.`t1`.`key5` AS `key5`,`test`.`t1`.`key6` AS `key6`,`test`.`t1`.`key7` AS `key7`,`test`.`t1`.`key8` AS `key8` from `test`.`t1` where ((`test`.`t1`.`key2` = 10) or (`test`.`t1`.`key3` = 3) or (`test`.`t1`.`key4` <=> NULL))"
+            "expanded_query": "/* select#1 */ select `t1`.`key1` AS `key1`,`t1`.`key2` AS `key2`,`t1`.`key3` AS `key3`,`t1`.`key4` AS `key4`,`t1`.`key5` AS `key5`,`t1`.`key6` AS `key6`,`t1`.`key7` AS `key7`,`t1`.`key8` AS `key8` from `t1` where ((`t1`.`key2` = 10) or (`t1`.`key3` = 3) or (`t1`.`key4` <=> NULL))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -1680,19 +1672,19 @@ EXPLAIN SELECT * FROM t1 WHERE key2=10 OR key3=3 OR key4 <=> null	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t1`.`key2` = 10) or (`test`.`t1`.`key3` = 3) or (`test`.`t1`.`key4` <=> NULL))",
+              "original_condition": "((`t1`.`key2` = 10) or (`t1`.`key3` = 3) or (`t1`.`key4` <=> NULL))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "(multiple equal(10, `test`.`t1`.`key2`) or multiple equal(3, `test`.`t1`.`key3`) or (`test`.`t1`.`key4` <=> NULL))"
+                  "resulting_condition": "(multiple equal(10, `t1`.`key2`) or multiple equal(3, `t1`.`key3`) or (`t1`.`key4` <=> NULL))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "(multiple equal(10, `test`.`t1`.`key2`) or multiple equal(3, `test`.`t1`.`key3`) or (`test`.`t1`.`key4` <=> NULL))"
+                  "resulting_condition": "(multiple equal(10, `t1`.`key2`) or multiple equal(3, `t1`.`key3`) or (`t1`.`key4` <=> NULL))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "(multiple equal(10, `test`.`t1`.`key2`) or multiple equal(3, `test`.`t1`.`key3`) or (`test`.`t1`.`key4` <=> NULL))"
+                  "resulting_condition": "(multiple equal(10, `t1`.`key2`) or multiple equal(3, `t1`.`key3`) or (`t1`.`key4` <=> NULL))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -1700,8 +1692,7 @@ EXPLAIN SELECT * FROM t1 WHERE key2=10 OR key3=3 OR key4 <=> null	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -1716,8 +1707,7 @@ EXPLAIN SELECT * FROM t1 WHERE key2=10 OR key3=3 OR key4 <=> null	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 1024,
@@ -1782,6 +1772,14 @@ EXPLAIN SELECT * FROM t1 WHERE key2=10 OR key3=3 OR key4 <=> null	{
                     "chosen": false,
                     "cause": "not_group_by_or_distinct"
                   } /* group_index_range */,
+                  "analyzing_range_alternatives": {
+                    "range_scan_alternatives": [
+                    ] /* range_scan_alternatives */,
+                    "analyzing_roworder_intersect": {
+                      "usable": false,
+                      "cause": "too_few_roworder_scans"
+                    } /* analyzing_roworder_intersect */
+                  } /* analyzing_range_alternatives */,
                   "analyzing_index_merge": [
                     {
                       "indices_to_merge": [
@@ -1789,14 +1787,15 @@ EXPLAIN SELECT * FROM t1 WHERE key2=10 OR key3=3 OR key4 <=> null	{
                           "range_scan_alternatives": [
                             {
                               "index": "i2",
-                              "index_dives_for_eq_ranges": true,
                               "ranges": [
                                 "10 <= key2 <= 10"
                               ] /* ranges */,
+                              "index_dives_for_eq_ranges": true,
+                              "rowid_ordered": true,
+                              "using_mrr": false,
                               "index_only": true,
                               "rows": 1,
                               "cost": 2.21,
-                              "rowid_ordered": true,
                               "chosen": true
                             }
                           ] /* range_scan_alternatives */,
@@ -1807,14 +1806,15 @@ EXPLAIN SELECT * FROM t1 WHERE key2=10 OR key3=3 OR key4 <=> null	{
                           "range_scan_alternatives": [
                             {
                               "index": "i3",
-                              "index_dives_for_eq_ranges": true,
                               "ranges": [
                                 "3 <= key3 <= 3"
                               ] /* ranges */,
+                              "index_dives_for_eq_ranges": true,
+                              "rowid_ordered": true,
+                              "using_mrr": false,
                               "index_only": true,
                               "rows": 1,
                               "cost": 2.21,
-                              "rowid_ordered": true,
                               "chosen": true
                             }
                           ] /* range_scan_alternatives */,
@@ -1889,14 +1889,15 @@ EXPLAIN SELECT * FROM t1 WHERE key2=10 OR key3=3 OR key4 <=> null	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
                       "access_type": "range",
                       "rows": 2,
-                      "cost": 6.327,
+                      "cost": 6.727,
                       "chosen": true
                     }
                   ] /* considered_access_paths */
@@ -1909,14 +1910,13 @@ EXPLAIN SELECT * FROM t1 WHERE key2=10 OR key3=3 OR key4 <=> null	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t1`.`key2` = 10) or (`test`.`t1`.`key3` = 3) or (`test`.`t1`.`key4` <=> NULL))",
+              "original_condition": "((`t1`.`key2` = 10) or (`t1`.`key3` = 3) or (`t1`.`key4` <=> NULL))",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "((`test`.`t1`.`key2` = 10) or (`test`.`t1`.`key3` = 3) or (`test`.`t1`.`key4` <=> NULL))"
+                  "table": "`t1`",
+                  "attached": "((`t1`.`key2` = 10) or (`t1`.`key3` = 3) or (`t1`.`key4` <=> NULL))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -1924,8 +1924,7 @@ EXPLAIN SELECT * FROM t1 WHERE key2=10 OR key3=3 OR key4 <=> null	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "access_type": "range"
               }
             ] /* refine_plan */
@@ -1956,7 +1955,7 @@ EXPLAIN SELECT * FROM t2 WHERE key2_1 < 79 OR key2 = 2	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t2`.`key1a` AS `key1a`,`test`.`t2`.`key1b` AS `key1b`,`test`.`t2`.`key2` AS `key2`,`test`.`t2`.`key2_1` AS `key2_1`,`test`.`t2`.`key2_2` AS `key2_2`,`test`.`t2`.`key3` AS `key3` from `test`.`t2` where ((`test`.`t2`.`key2_1` < 79) or (`test`.`t2`.`key2` = 2))"
+            "expanded_query": "/* select#1 */ select `t2`.`key1a` AS `key1a`,`t2`.`key1b` AS `key1b`,`t2`.`key2` AS `key2`,`t2`.`key2_1` AS `key2_1`,`t2`.`key2_2` AS `key2_2`,`t2`.`key3` AS `key3` from `t2` where ((`t2`.`key2_1` < 79) or (`t2`.`key2` = 2))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -1968,19 +1967,19 @@ EXPLAIN SELECT * FROM t2 WHERE key2_1 < 79 OR key2 = 2	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t2`.`key2_1` < 79) or (`test`.`t2`.`key2` = 2))",
+              "original_condition": "((`t2`.`key2_1` < 79) or (`t2`.`key2` = 2))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "((`test`.`t2`.`key2_1` < 79) or multiple equal(2, `test`.`t2`.`key2`))"
+                  "resulting_condition": "((`t2`.`key2_1` < 79) or multiple equal(2, `t2`.`key2`))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "((`test`.`t2`.`key2_1` < 79) or multiple equal(2, `test`.`t2`.`key2`))"
+                  "resulting_condition": "((`t2`.`key2_1` < 79) or multiple equal(2, `t2`.`key2`))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "((`test`.`t2`.`key2_1` < 79) or multiple equal(2, `test`.`t2`.`key2`))"
+                  "resulting_condition": "((`t2`.`key2_1` < 79) or multiple equal(2, `t2`.`key2`))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -1988,8 +1987,7 @@ EXPLAIN SELECT * FROM t2 WHERE key2_1 < 79 OR key2 = 2	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -2004,8 +2002,7 @@ EXPLAIN SELECT * FROM t2 WHERE key2_1 < 79 OR key2 = 2	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 1024,
@@ -2054,14 +2051,15 @@ EXPLAIN SELECT * FROM t2 WHERE key2_1 < 79 OR key2 = 2	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t2",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t2`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
                       "access_type": "scan",
                       "rows": 1024,
-                      "cost": 8.25,
+                      "cost": 213.05,
                       "chosen": true
                     }
                   ] /* considered_access_paths */
@@ -2074,14 +2072,13 @@ EXPLAIN SELECT * FROM t2 WHERE key2_1 < 79 OR key2 = 2	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t2`.`key2_1` < 79) or (`test`.`t2`.`key2` = 2))",
+              "original_condition": "((`t2`.`key2_1` < 79) or (`t2`.`key2` = 2))",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t2",
-                  "attached": "((`test`.`t2`.`key2_1` < 79) or (`test`.`t2`.`key2` = 2))"
+                  "table": "`t2`",
+                  "attached": "((`t2`.`key2_1` < 79) or (`t2`.`key2` = 2))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -2089,8 +2086,7 @@ EXPLAIN SELECT * FROM t2 WHERE key2_1 < 79 OR key2 = 2	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "access_type": "table_scan"
               }
             ] /* refine_plan */
@@ -2121,7 +2117,7 @@ EXPLAIN SELECT * FROM t2 WHERE key1a = 5 and key1b < 10	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t2`.`key1a` AS `key1a`,`test`.`t2`.`key1b` AS `key1b`,`test`.`t2`.`key2` AS `key2`,`test`.`t2`.`key2_1` AS `key2_1`,`test`.`t2`.`key2_2` AS `key2_2`,`test`.`t2`.`key3` AS `key3` from `test`.`t2` where ((`test`.`t2`.`key1a` = 5) and (`test`.`t2`.`key1b` < 10))"
+            "expanded_query": "/* select#1 */ select `t2`.`key1a` AS `key1a`,`t2`.`key1b` AS `key1b`,`t2`.`key2` AS `key2`,`t2`.`key2_1` AS `key2_1`,`t2`.`key2_2` AS `key2_2`,`t2`.`key3` AS `key3` from `t2` where ((`t2`.`key1a` = 5) and (`t2`.`key1b` < 10))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -2133,19 +2129,19 @@ EXPLAIN SELECT * FROM t2 WHERE key1a = 5 and key1b < 10	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t2`.`key1a` = 5) and (`test`.`t2`.`key1b` < 10))",
+              "original_condition": "((`t2`.`key1a` = 5) and (`t2`.`key1b` < 10))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "((`test`.`t2`.`key1b` < 10) and multiple equal(5, `test`.`t2`.`key1a`))"
+                  "resulting_condition": "((`t2`.`key1b` < 10) and multiple equal(5, `t2`.`key1a`))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "((`test`.`t2`.`key1b` < 10) and multiple equal(5, `test`.`t2`.`key1a`))"
+                  "resulting_condition": "((`t2`.`key1b` < 10) and multiple equal(5, `t2`.`key1a`))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "((`test`.`t2`.`key1b` < 10) and multiple equal(5, `test`.`t2`.`key1a`))"
+                  "resulting_condition": "((`t2`.`key1b` < 10) and multiple equal(5, `t2`.`key1a`))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -2153,8 +2149,7 @@ EXPLAIN SELECT * FROM t2 WHERE key1a = 5 and key1b < 10	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -2165,8 +2160,7 @@ EXPLAIN SELECT * FROM t2 WHERE key1a = 5 and key1b < 10	{
           {
             "ref_optimizer_key_uses": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "field": "key1a",
                 "equals": "5",
                 "null_rejecting": false
@@ -2176,8 +2170,7 @@ EXPLAIN SELECT * FROM t2 WHERE key1a = 5 and key1b < 10	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 1024,
@@ -2221,26 +2214,28 @@ EXPLAIN SELECT * FROM t2 WHERE key1a = 5 and key1b < 10	{
                     "range_scan_alternatives": [
                       {
                         "index": "PRIMARY",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "5 <= key1a <= 5 AND key1b < 10"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 1,
                         "cost": 2.21,
-                        "rowid_ordered": false,
                         "chosen": true
                       },
                       {
                         "index": "i1b",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "key1b < 10 AND 5 <= key1a <= 5"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 9,
                         "cost": 11.81,
-                        "rowid_ordered": false,
                         "chosen": false,
                         "cause": "cost"
                       }
@@ -2270,8 +2265,9 @@ EXPLAIN SELECT * FROM t2 WHERE key1a = 5 and key1b < 10	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t2",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t2`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
@@ -2284,7 +2280,7 @@ EXPLAIN SELECT * FROM t2 WHERE key1a = 5 and key1b < 10	{
                     {
                       "access_type": "range",
                       "rows": 1,
-                      "cost": 2.21,
+                      "cost": 2.41,
                       "chosen": true
                     }
                   ] /* considered_access_paths */
@@ -2297,14 +2293,13 @@ EXPLAIN SELECT * FROM t2 WHERE key1a = 5 and key1b < 10	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t2`.`key1a` = 5) and (`test`.`t2`.`key1b` < 10))",
+              "original_condition": "((`t2`.`key1a` = 5) and (`t2`.`key1b` < 10))",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t2",
-                  "attached": "((`test`.`t2`.`key1a` = 5) and (`test`.`t2`.`key1b` < 10))"
+                  "table": "`t2`",
+                  "attached": "((`t2`.`key1a` = 5) and (`t2`.`key1b` < 10))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -2312,9 +2307,8 @@ EXPLAIN SELECT * FROM t2 WHERE key1a = 5 and key1b < 10	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t2",
-                "pushed_index_condition": "((`test`.`t2`.`key1a` = 5) and (`test`.`t2`.`key1b` < 10))",
+                "table": "`t2`",
+                "pushed_index_condition": "((`t2`.`key1a` = 5) and (`t2`.`key1b` < 10))",
                 "table_condition_attached": null,
                 "access_type": "range"
               }
@@ -2348,7 +2342,7 @@ EXPLAIN SELECT * FROM t2 WHERE (key1a = 5 and key1b < 10 and key1b > 2) or
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t2`.`key1a` AS `key1a`,`test`.`t2`.`key1b` AS `key1b`,`test`.`t2`.`key2` AS `key2`,`test`.`t2`.`key2_1` AS `key2_1`,`test`.`t2`.`key2_2` AS `key2_2`,`test`.`t2`.`key3` AS `key3` from `test`.`t2` where (((`test`.`t2`.`key1a` = 5) and (`test`.`t2`.`key1b` < 10) and (`test`.`t2`.`key1b` > 2)) or ((`test`.`t2`.`key1a` = 4) and (`test`.`t2`.`key1b` < 7) and (`test`.`t2`.`key1b` > 3)))"
+            "expanded_query": "/* select#1 */ select `t2`.`key1a` AS `key1a`,`t2`.`key1b` AS `key1b`,`t2`.`key2` AS `key2`,`t2`.`key2_1` AS `key2_1`,`t2`.`key2_2` AS `key2_2`,`t2`.`key3` AS `key3` from `t2` where (((`t2`.`key1a` = 5) and (`t2`.`key1b` < 10) and (`t2`.`key1b` > 2)) or ((`t2`.`key1a` = 4) and (`t2`.`key1b` < 7) and (`t2`.`key1b` > 3)))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -2360,19 +2354,19 @@ EXPLAIN SELECT * FROM t2 WHERE (key1a = 5 and key1b < 10 and key1b > 2) or
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "(((`test`.`t2`.`key1a` = 5) and (`test`.`t2`.`key1b` < 10) and (`test`.`t2`.`key1b` > 2)) or ((`test`.`t2`.`key1a` = 4) and (`test`.`t2`.`key1b` < 7) and (`test`.`t2`.`key1b` > 3)))",
+              "original_condition": "(((`t2`.`key1a` = 5) and (`t2`.`key1b` < 10) and (`t2`.`key1b` > 2)) or ((`t2`.`key1a` = 4) and (`t2`.`key1b` < 7) and (`t2`.`key1b` > 3)))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "(((`test`.`t2`.`key1b` < 10) and (`test`.`t2`.`key1b` > 2) and multiple equal(5, `test`.`t2`.`key1a`)) or ((`test`.`t2`.`key1b` < 7) and (`test`.`t2`.`key1b` > 3) and multiple equal(4, `test`.`t2`.`key1a`)))"
+                  "resulting_condition": "(((`t2`.`key1b` < 10) and (`t2`.`key1b` > 2) and multiple equal(5, `t2`.`key1a`)) or ((`t2`.`key1b` < 7) and (`t2`.`key1b` > 3) and multiple equal(4, `t2`.`key1a`)))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "(((`test`.`t2`.`key1b` < 10) and (`test`.`t2`.`key1b` > 2) and multiple equal(5, `test`.`t2`.`key1a`)) or ((`test`.`t2`.`key1b` < 7) and (`test`.`t2`.`key1b` > 3) and multiple equal(4, `test`.`t2`.`key1a`)))"
+                  "resulting_condition": "(((`t2`.`key1b` < 10) and (`t2`.`key1b` > 2) and multiple equal(5, `t2`.`key1a`)) or ((`t2`.`key1b` < 7) and (`t2`.`key1b` > 3) and multiple equal(4, `t2`.`key1a`)))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "(((`test`.`t2`.`key1b` < 10) and (`test`.`t2`.`key1b` > 2) and multiple equal(5, `test`.`t2`.`key1a`)) or ((`test`.`t2`.`key1b` < 7) and (`test`.`t2`.`key1b` > 3) and multiple equal(4, `test`.`t2`.`key1a`)))"
+                  "resulting_condition": "(((`t2`.`key1b` < 10) and (`t2`.`key1b` > 2) and multiple equal(5, `t2`.`key1a`)) or ((`t2`.`key1b` < 7) and (`t2`.`key1b` > 3) and multiple equal(4, `t2`.`key1a`)))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -2380,8 +2374,7 @@ EXPLAIN SELECT * FROM t2 WHERE (key1a = 5 and key1b < 10 and key1b > 2) or
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -2396,8 +2389,7 @@ EXPLAIN SELECT * FROM t2 WHERE (key1a = 5 and key1b < 10 and key1b > 2) or
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 1024,
@@ -2441,29 +2433,31 @@ EXPLAIN SELECT * FROM t2 WHERE (key1a = 5 and key1b < 10 and key1b > 2) or
                     "range_scan_alternatives": [
                       {
                         "index": "PRIMARY",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "4 <= key1a <= 4 AND 3 < key1b < 7",
                           "5 <= key1a <= 5 AND 2 < key1b < 10"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 2,
                         "cost": 4.41,
-                        "rowid_ordered": false,
                         "chosen": true
                       },
                       {
                         "index": "i1b",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "2 < key1b <= 3 AND 5 <= key1a <= 5",
                           "3 < key1b < 7",
                           "7 <= key1b < 10 AND 5 <= key1a <= 5"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 6,
                         "cost": 10.21,
-                        "rowid_ordered": false,
                         "chosen": false,
                         "cause": "cost"
                       }
@@ -2494,14 +2488,15 @@ EXPLAIN SELECT * FROM t2 WHERE (key1a = 5 and key1b < 10 and key1b > 2) or
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t2",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t2`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
                       "access_type": "range",
                       "rows": 2,
-                      "cost": 4.41,
+                      "cost": 4.81,
                       "chosen": true
                     }
                   ] /* considered_access_paths */
@@ -2514,14 +2509,13 @@ EXPLAIN SELECT * FROM t2 WHERE (key1a = 5 and key1b < 10 and key1b > 2) or
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "(((`test`.`t2`.`key1a` = 5) and (`test`.`t2`.`key1b` < 10) and (`test`.`t2`.`key1b` > 2)) or ((`test`.`t2`.`key1a` = 4) and (`test`.`t2`.`key1b` < 7) and (`test`.`t2`.`key1b` > 3)))",
+              "original_condition": "(((`t2`.`key1a` = 5) and (`t2`.`key1b` < 10) and (`t2`.`key1b` > 2)) or ((`t2`.`key1a` = 4) and (`t2`.`key1b` < 7) and (`t2`.`key1b` > 3)))",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t2",
-                  "attached": "(((`test`.`t2`.`key1a` = 5) and (`test`.`t2`.`key1b` < 10) and (`test`.`t2`.`key1b` > 2)) or ((`test`.`t2`.`key1a` = 4) and (`test`.`t2`.`key1b` < 7) and (`test`.`t2`.`key1b` > 3)))"
+                  "table": "`t2`",
+                  "attached": "(((`t2`.`key1a` = 5) and (`t2`.`key1b` < 10) and (`t2`.`key1b` > 2)) or ((`t2`.`key1a` = 4) and (`t2`.`key1b` < 7) and (`t2`.`key1b` > 3)))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -2529,9 +2523,8 @@ EXPLAIN SELECT * FROM t2 WHERE (key1a = 5 and key1b < 10 and key1b > 2) or
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t2",
-                "pushed_index_condition": "(((`test`.`t2`.`key1a` = 5) and (`test`.`t2`.`key1b` < 10) and (`test`.`t2`.`key1b` > 2)) or ((`test`.`t2`.`key1a` = 4) and (`test`.`t2`.`key1b` < 7) and (`test`.`t2`.`key1b` > 3)))",
+                "table": "`t2`",
+                "pushed_index_condition": "(((`t2`.`key1a` = 5) and (`t2`.`key1b` < 10) and (`t2`.`key1b` > 2)) or ((`t2`.`key1a` = 4) and (`t2`.`key1b` < 7) and (`t2`.`key1b` > 3)))",
                 "table_condition_attached": null,
                 "access_type": "range"
               }
@@ -2565,7 +2558,7 @@ EXPLAIN SELECT * FROM t2 WHERE (key1b < 10 and key1b > 7) and
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t2`.`key1a` AS `key1a`,`test`.`t2`.`key1b` AS `key1b`,`test`.`t2`.`key2` AS `key2`,`test`.`t2`.`key2_1` AS `key2_1`,`test`.`t2`.`key2_2` AS `key2_2`,`test`.`t2`.`key3` AS `key3` from `test`.`t2` where ((`test`.`t2`.`key1b` < 10) and (`test`.`t2`.`key1b` > 7) and ((`test`.`t2`.`key1a` = 4) or (`test`.`t2`.`key1a` = 5)))"
+            "expanded_query": "/* select#1 */ select `t2`.`key1a` AS `key1a`,`t2`.`key1b` AS `key1b`,`t2`.`key2` AS `key2`,`t2`.`key2_1` AS `key2_1`,`t2`.`key2_2` AS `key2_2`,`t2`.`key3` AS `key3` from `t2` where ((`t2`.`key1b` < 10) and (`t2`.`key1b` > 7) and ((`t2`.`key1a` = 4) or (`t2`.`key1a` = 5)))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -2577,19 +2570,19 @@ EXPLAIN SELECT * FROM t2 WHERE (key1b < 10 and key1b > 7) and
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t2`.`key1b` < 10) and (`test`.`t2`.`key1b` > 7) and ((`test`.`t2`.`key1a` = 4) or (`test`.`t2`.`key1a` = 5)))",
+              "original_condition": "((`t2`.`key1b` < 10) and (`t2`.`key1b` > 7) and ((`t2`.`key1a` = 4) or (`t2`.`key1a` = 5)))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "((`test`.`t2`.`key1b` < 10) and (`test`.`t2`.`key1b` > 7) and (multiple equal(4, `test`.`t2`.`key1a`) or multiple equal(5, `test`.`t2`.`key1a`)))"
+                  "resulting_condition": "((`t2`.`key1b` < 10) and (`t2`.`key1b` > 7) and (multiple equal(4, `t2`.`key1a`) or multiple equal(5, `t2`.`key1a`)))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "((`test`.`t2`.`key1b` < 10) and (`test`.`t2`.`key1b` > 7) and (multiple equal(4, `test`.`t2`.`key1a`) or multiple equal(5, `test`.`t2`.`key1a`)))"
+                  "resulting_condition": "((`t2`.`key1b` < 10) and (`t2`.`key1b` > 7) and (multiple equal(4, `t2`.`key1a`) or multiple equal(5, `t2`.`key1a`)))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "((`test`.`t2`.`key1b` < 10) and (`test`.`t2`.`key1b` > 7) and (multiple equal(4, `test`.`t2`.`key1a`) or multiple equal(5, `test`.`t2`.`key1a`)))"
+                  "resulting_condition": "((`t2`.`key1b` < 10) and (`t2`.`key1b` > 7) and (multiple equal(4, `t2`.`key1a`) or multiple equal(5, `t2`.`key1a`)))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -2597,8 +2590,7 @@ EXPLAIN SELECT * FROM t2 WHERE (key1b < 10 and key1b > 7) and
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -2613,8 +2605,7 @@ EXPLAIN SELECT * FROM t2 WHERE (key1b < 10 and key1b > 7) and
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 1024,
@@ -2658,28 +2649,30 @@ EXPLAIN SELECT * FROM t2 WHERE (key1b < 10 and key1b > 7) and
                     "range_scan_alternatives": [
                       {
                         "index": "PRIMARY",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "4 <= key1a <= 4 AND 7 < key1b < 10",
                           "5 <= key1a <= 5 AND 7 < key1b < 10"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 2,
                         "cost": 4.41,
-                        "rowid_ordered": false,
                         "chosen": true
                       },
                       {
                         "index": "i1b",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "7 < key1b < 10 AND 4 <= key1a <= 4",
                           "7 < key1b < 10 AND 5 <= key1a <= 5"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 2,
                         "cost": 3.41,
-                        "rowid_ordered": false,
                         "chosen": true
                       }
                     ] /* range_scan_alternatives */,
@@ -2709,14 +2702,15 @@ EXPLAIN SELECT * FROM t2 WHERE (key1b < 10 and key1b > 7) and
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t2",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t2`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
                       "access_type": "range",
                       "rows": 2,
-                      "cost": 3.41,
+                      "cost": 3.81,
                       "chosen": true
                     }
                   ] /* considered_access_paths */
@@ -2729,14 +2723,13 @@ EXPLAIN SELECT * FROM t2 WHERE (key1b < 10 and key1b > 7) and
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t2`.`key1b` < 10) and (`test`.`t2`.`key1b` > 7) and ((`test`.`t2`.`key1a` = 4) or (`test`.`t2`.`key1a` = 5)))",
+              "original_condition": "((`t2`.`key1b` < 10) and (`t2`.`key1b` > 7) and ((`t2`.`key1a` = 4) or (`t2`.`key1a` = 5)))",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t2",
-                  "attached": "((`test`.`t2`.`key1b` < 10) and (`test`.`t2`.`key1b` > 7) and ((`test`.`t2`.`key1a` = 4) or (`test`.`t2`.`key1a` = 5)))"
+                  "table": "`t2`",
+                  "attached": "((`t2`.`key1b` < 10) and (`t2`.`key1b` > 7) and ((`t2`.`key1a` = 4) or (`t2`.`key1a` = 5)))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -2744,9 +2737,8 @@ EXPLAIN SELECT * FROM t2 WHERE (key1b < 10 and key1b > 7) and
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t2",
-                "pushed_index_condition": "((`test`.`t2`.`key1b` < 10) and (`test`.`t2`.`key1b` > 7) and ((`test`.`t2`.`key1a` = 4) or (`test`.`t2`.`key1a` = 5)))",
+                "table": "`t2`",
+                "pushed_index_condition": "((`t2`.`key1b` < 10) and (`t2`.`key1b` > 7) and ((`t2`.`key1a` = 4) or (`t2`.`key1a` = 5)))",
                 "table_condition_attached": null,
                 "access_type": "range"
               }
@@ -2778,7 +2770,7 @@ EXPLAIN SELECT * FROM t1 WHERE (key1 > 1 OR key2  > 2)	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t1`.`key1` AS `key1`,`test`.`t1`.`key2` AS `key2`,`test`.`t1`.`key3` AS `key3`,`test`.`t1`.`key4` AS `key4`,`test`.`t1`.`key5` AS `key5`,`test`.`t1`.`key6` AS `key6`,`test`.`t1`.`key7` AS `key7`,`test`.`t1`.`key8` AS `key8` from `test`.`t1` where ((`test`.`t1`.`key1` > 1) or (`test`.`t1`.`key2` > 2))"
+            "expanded_query": "/* select#1 */ select `t1`.`key1` AS `key1`,`t1`.`key2` AS `key2`,`t1`.`key3` AS `key3`,`t1`.`key4` AS `key4`,`t1`.`key5` AS `key5`,`t1`.`key6` AS `key6`,`t1`.`key7` AS `key7`,`t1`.`key8` AS `key8` from `t1` where ((`t1`.`key1` > 1) or (`t1`.`key2` > 2))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -2790,19 +2782,19 @@ EXPLAIN SELECT * FROM t1 WHERE (key1 > 1 OR key2  > 2)	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t1`.`key1` > 1) or (`test`.`t1`.`key2` > 2))",
+              "original_condition": "((`t1`.`key1` > 1) or (`t1`.`key2` > 2))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "((`test`.`t1`.`key1` > 1) or (`test`.`t1`.`key2` > 2))"
+                  "resulting_condition": "((`t1`.`key1` > 1) or (`t1`.`key2` > 2))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "((`test`.`t1`.`key1` > 1) or (`test`.`t1`.`key2` > 2))"
+                  "resulting_condition": "((`t1`.`key1` > 1) or (`t1`.`key2` > 2))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "((`test`.`t1`.`key1` > 1) or (`test`.`t1`.`key2` > 2))"
+                  "resulting_condition": "((`t1`.`key1` > 1) or (`t1`.`key2` > 2))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -2810,8 +2802,7 @@ EXPLAIN SELECT * FROM t1 WHERE (key1 > 1 OR key2  > 2)	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -2826,8 +2817,7 @@ EXPLAIN SELECT * FROM t1 WHERE (key1 > 1 OR key2  > 2)	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 1024,
@@ -2885,6 +2875,14 @@ EXPLAIN SELECT * FROM t1 WHERE (key1 > 1 OR key2  > 2)	{
                     "chosen": false,
                     "cause": "not_group_by_or_distinct"
                   } /* group_index_range */,
+                  "analyzing_range_alternatives": {
+                    "range_scan_alternatives": [
+                    ] /* range_scan_alternatives */,
+                    "analyzing_roworder_intersect": {
+                      "usable": false,
+                      "cause": "too_few_roworder_scans"
+                    } /* analyzing_roworder_intersect */
+                  } /* analyzing_range_alternatives */,
                   "analyzing_index_merge": [
                     {
                       "indices_to_merge": [
@@ -2892,14 +2890,15 @@ EXPLAIN SELECT * FROM t1 WHERE (key1 > 1 OR key2  > 2)	{
                           "range_scan_alternatives": [
                             {
                               "index": "i1",
-                              "index_dives_for_eq_ranges": true,
                               "ranges": [
                                 "1 < key1"
                               ] /* ranges */,
+                              "index_dives_for_eq_ranges": true,
+                              "rowid_ordered": false,
+                              "using_mrr": false,
                               "index_only": true,
                               "rows": 1023,
                               "cost": 227.35,
-                              "rowid_ordered": false,
                               "chosen": false,
                               "cause": "cost"
                             }
@@ -2911,14 +2910,15 @@ EXPLAIN SELECT * FROM t1 WHERE (key1 > 1 OR key2  > 2)	{
                           "range_scan_alternatives": [
                             {
                               "index": "i2",
-                              "index_dives_for_eq_ranges": true,
                               "ranges": [
                                 "2 < key2"
                               ] /* ranges */,
+                              "index_dives_for_eq_ranges": true,
+                              "rowid_ordered": false,
+                              "using_mrr": false,
                               "index_only": true,
                               "rows": 1022,
                               "cost": 227.13,
-                              "rowid_ordered": false,
                               "chosen": false,
                               "cause": "cost"
                             }
@@ -2939,14 +2939,15 @@ EXPLAIN SELECT * FROM t1 WHERE (key1 > 1 OR key2  > 2)	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
                       "access_type": "scan",
                       "rows": 1024,
-                      "cost": 10.25,
+                      "cost": 215.05,
                       "chosen": true
                     }
                   ] /* considered_access_paths */
@@ -2959,14 +2960,13 @@ EXPLAIN SELECT * FROM t1 WHERE (key1 > 1 OR key2  > 2)	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t1`.`key1` > 1) or (`test`.`t1`.`key2` > 2))",
+              "original_condition": "((`t1`.`key1` > 1) or (`t1`.`key2` > 2))",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "((`test`.`t1`.`key1` > 1) or (`test`.`t1`.`key2` > 2))"
+                  "table": "`t1`",
+                  "attached": "((`t1`.`key1` > 1) or (`t1`.`key2` > 2))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -2974,8 +2974,7 @@ EXPLAIN SELECT * FROM t1 WHERE (key1 > 1 OR key2  > 2)	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "access_type": "table_scan"
               }
             ] /* refine_plan */
@@ -3009,7 +3008,7 @@ WHERE t1.key1=t2.key1a AND t1.key2 > 1020	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select straight_join `test`.`t1`.`key1` AS `key1`,`test`.`t1`.`key2` AS `key2`,`test`.`t1`.`key3` AS `key3`,`test`.`t1`.`key4` AS `key4`,`test`.`t1`.`key5` AS `key5`,`test`.`t1`.`key6` AS `key6`,`test`.`t1`.`key7` AS `key7`,`test`.`t1`.`key8` AS `key8`,`test`.`t2`.`key1a` AS `key1a`,`test`.`t2`.`key1b` AS `key1b`,`test`.`t2`.`key2` AS `key2`,`test`.`t2`.`key2_1` AS `key2_1`,`test`.`t2`.`key2_2` AS `key2_2`,`test`.`t2`.`key3` AS `key3` from `test`.`t1` join `test`.`t2` where ((`test`.`t1`.`key1` = `test`.`t2`.`key1a`) and (`test`.`t1`.`key2` > 1020))"
+            "expanded_query": "/* select#1 */ select straight_join `t1`.`key1` AS `key1`,`t1`.`key2` AS `key2`,`t1`.`key3` AS `key3`,`t1`.`key4` AS `key4`,`t1`.`key5` AS `key5`,`t1`.`key6` AS `key6`,`t1`.`key7` AS `key7`,`t1`.`key8` AS `key8`,`t2`.`key1a` AS `key1a`,`t2`.`key1b` AS `key1b`,`t2`.`key2` AS `key2`,`t2`.`key2_1` AS `key2_1`,`t2`.`key2_2` AS `key2_2`,`t2`.`key3` AS `key3` from `t1` join `t2` where ((`t1`.`key1` = `t2`.`key1a`) and (`t1`.`key2` > 1020))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -3021,19 +3020,19 @@ WHERE t1.key1=t2.key1a AND t1.key2 > 1020	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t1`.`key1` = `test`.`t2`.`key1a`) and (`test`.`t1`.`key2` > 1020))",
+              "original_condition": "((`t1`.`key1` = `t2`.`key1a`) and (`t1`.`key2` > 1020))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "((`test`.`t1`.`key2` > 1020) and multiple equal(`test`.`t1`.`key1`, `test`.`t2`.`key1a`))"
+                  "resulting_condition": "((`t1`.`key2` > 1020) and multiple equal(`t1`.`key1`, `t2`.`key1a`))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "((`test`.`t1`.`key2` > 1020) and multiple equal(`test`.`t1`.`key1`, `test`.`t2`.`key1a`))"
+                  "resulting_condition": "((`t1`.`key2` > 1020) and multiple equal(`t1`.`key1`, `t2`.`key1a`))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "((`test`.`t1`.`key2` > 1020) and multiple equal(`test`.`t1`.`key1`, `test`.`t2`.`key1a`))"
+                  "resulting_condition": "((`t1`.`key2` > 1020) and multiple equal(`t1`.`key1`, `t2`.`key1a`))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -3041,16 +3040,14 @@ WHERE t1.key1=t2.key1a AND t1.key2 > 1020	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
                 ] /* depends_on_map_bits */
               },
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "row_may_be_null": false,
                 "map_bit": 1,
                 "depends_on_map_bits": [
@@ -3062,17 +3059,15 @@ WHERE t1.key1=t2.key1a AND t1.key2 > 1020	{
           {
             "ref_optimizer_key_uses": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "field": "key1",
-                "equals": "`test`.`t2`.`key1a`",
+                "equals": "`t2`.`key1a`",
                 "null_rejecting": false
               },
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "field": "key1a",
-                "equals": "`test`.`t1`.`key1`",
+                "equals": "`t1`.`key1`",
                 "null_rejecting": false
               }
             ] /* ref_optimizer_key_uses */
@@ -3080,8 +3075,7 @@ WHERE t1.key1=t2.key1a AND t1.key2 > 1020	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 1024,
@@ -3141,14 +3135,15 @@ WHERE t1.key1=t2.key1a AND t1.key2 > 1020	{
                     "range_scan_alternatives": [
                       {
                         "index": "i2",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "1020 < key2"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 42,
                         "cost": 51.41,
-                        "rowid_ordered": false,
                         "chosen": true
                       }
                     ] /* range_scan_alternatives */,
@@ -3173,8 +3168,7 @@ WHERE t1.key1=t2.key1a AND t1.key2 > 1020	{
                 } /* range_analysis */
               },
               {
-                "database": "test",
-                "table": "t2",
+                "table": "`t2`",
                 "table_scan": {
                   "rows": 1024,
                   "cost": 8
@@ -3185,8 +3179,9 @@ WHERE t1.key1=t2.key1a AND t1.key2 > 1020	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
@@ -3198,7 +3193,7 @@ WHERE t1.key1=t2.key1a AND t1.key2 > 1020	{
                     {
                       "access_type": "range",
                       "rows": 42,
-                      "cost": 51.41,
+                      "cost": 59.81,
                       "chosen": true
                     }
                   ] /* considered_access_paths */
@@ -3207,8 +3202,10 @@ WHERE t1.key1=t2.key1a AND t1.key2 > 1020	{
                 "rows_for_plan": 42
               },
               {
-                "database": "test",
-                "table": "t2",
+                "plan_prefix": [
+                  "`t1`"
+                ] /* plan_prefix */,
+                "table": "`t2`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
@@ -3222,7 +3219,7 @@ WHERE t1.key1=t2.key1a AND t1.key2 > 1020	{
                       "access_type": "scan",
                       "using_join_cache": true,
                       "rows": 768,
-                      "cost": 59.535,
+                      "cost": 6510.7,
                       "chosen": false
                     }
                   ] /* considered_access_paths */
@@ -3234,18 +3231,16 @@ WHERE t1.key1=t2.key1a AND t1.key2 > 1020	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t2`.`key1a` = `test`.`t1`.`key1`) and (`test`.`t1`.`key2` > 1020))",
+              "original_condition": "((`t2`.`key1a` = `t1`.`key1`) and (`t1`.`key2` > 1020))",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "(`test`.`t1`.`key2` > 1020)"
+                  "table": "`t1`",
+                  "attached": "(`t1`.`key2` > 1020)"
                 },
                 {
-                  "database": "test",
-                  "table": "t2",
+                  "table": "`t2`",
                   "attached": null
                 }
               ] /* attached_conditions_summary */
@@ -3254,15 +3249,13 @@ WHERE t1.key1=t2.key1a AND t1.key2 > 1020	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
-                "pushed_index_condition": "(`test`.`t1`.`key2` > 1020)",
+                "table": "`t1`",
+                "pushed_index_condition": "(`t1`.`key2` > 1020)",
                 "table_condition_attached": null,
                 "access_type": "range"
               },
               {
-                "database": "test",
-                "table": "t2"
+                "table": "`t2`"
               }
             ] /* refine_plan */
           }
@@ -3302,7 +3295,7 @@ EXPLAIN SELECT * FROM t1 WHERE cola = 'foo' AND colb = 'bar'	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t1`.`cola` AS `cola`,`test`.`t1`.`colb` AS `colb`,`test`.`t1`.`filler` AS `filler` from `test`.`t1` where ((`test`.`t1`.`cola` = 'foo') and (`test`.`t1`.`colb` = 'bar'))"
+            "expanded_query": "/* select#1 */ select `t1`.`cola` AS `cola`,`t1`.`colb` AS `colb`,`t1`.`filler` AS `filler` from `t1` where ((`t1`.`cola` = 'foo') and (`t1`.`colb` = 'bar'))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -3314,19 +3307,19 @@ EXPLAIN SELECT * FROM t1 WHERE cola = 'foo' AND colb = 'bar'	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t1`.`cola` = 'foo') and (`test`.`t1`.`colb` = 'bar'))",
+              "original_condition": "((`t1`.`cola` = 'foo') and (`t1`.`colb` = 'bar'))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "(multiple equal('foo', `test`.`t1`.`cola`) and multiple equal('bar', `test`.`t1`.`colb`))"
+                  "resulting_condition": "(multiple equal('foo', `t1`.`cola`) and multiple equal('bar', `t1`.`colb`))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "(multiple equal('foo', `test`.`t1`.`cola`) and multiple equal('bar', `test`.`t1`.`colb`))"
+                  "resulting_condition": "(multiple equal('foo', `t1`.`cola`) and multiple equal('bar', `t1`.`colb`))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "(multiple equal('foo', `test`.`t1`.`cola`) and multiple equal('bar', `test`.`t1`.`colb`))"
+                  "resulting_condition": "(multiple equal('foo', `t1`.`cola`) and multiple equal('bar', `t1`.`colb`))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -3334,8 +3327,7 @@ EXPLAIN SELECT * FROM t1 WHERE cola = 'foo' AND colb = 'bar'	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -3346,15 +3338,13 @@ EXPLAIN SELECT * FROM t1 WHERE cola = 'foo' AND colb = 'bar'	{
           {
             "ref_optimizer_key_uses": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "field": "cola",
                 "equals": "'foo'",
                 "null_rejecting": false
               },
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "field": "colb",
                 "equals": "'bar'",
                 "null_rejecting": false
@@ -3364,8 +3354,7 @@ EXPLAIN SELECT * FROM t1 WHERE cola = 'foo' AND colb = 'bar'	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 8704,
@@ -3397,26 +3386,28 @@ EXPLAIN SELECT * FROM t1 WHERE cola = 'foo' AND colb = 'bar'	{
                     "range_scan_alternatives": [
                       {
                         "index": "cola",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "foo <= cola <= foo"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": true,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 533,
                         "cost": 640.61,
-                        "rowid_ordered": true,
                         "chosen": true
                       },
                       {
                         "index": "colb",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "bar <= colb <= bar"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": true,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 533,
                         "cost": 640.61,
-                        "rowid_ordered": true,
                         "chosen": false,
                         "cause": "cost"
                       }
@@ -3485,8 +3476,9 @@ EXPLAIN SELECT * FROM t1 WHERE cola = 'foo' AND colb = 'bar'	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
@@ -3506,7 +3498,7 @@ EXPLAIN SELECT * FROM t1 WHERE cola = 'foo' AND colb = 'bar'	{
                     {
                       "access_type": "range",
                       "rows": 24,
-                      "cost": 54.959,
+                      "cost": 59.759,
                       "chosen": true
                     }
                   ] /* considered_access_paths */
@@ -3519,14 +3511,13 @@ EXPLAIN SELECT * FROM t1 WHERE cola = 'foo' AND colb = 'bar'	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t1`.`colb` = 'bar') and (`test`.`t1`.`cola` = 'foo'))",
+              "original_condition": "((`t1`.`colb` = 'bar') and (`t1`.`cola` = 'foo'))",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "((`test`.`t1`.`colb` = 'bar') and (`test`.`t1`.`cola` = 'foo'))"
+                  "table": "`t1`",
+                  "attached": "((`t1`.`colb` = 'bar') and (`t1`.`cola` = 'foo'))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -3534,8 +3525,7 @@ EXPLAIN SELECT * FROM t1 WHERE cola = 'foo' AND colb = 'bar'	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "access_type": "range"
               }
             ] /* refine_plan */
@@ -3566,7 +3556,7 @@ EXPLAIN SELECT * FROM t1 WHERE cola = 'f\no'	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t1`.`cola` AS `cola`,`test`.`t1`.`colb` AS `colb`,`test`.`t1`.`filler` AS `filler` from `test`.`t1` where (`test`.`t1`.`cola` = 'f\\no')"
+            "expanded_query": "/* select#1 */ select `t1`.`cola` AS `cola`,`t1`.`colb` AS `colb`,`t1`.`filler` AS `filler` from `t1` where (`t1`.`cola` = 'f\\no')"
           }
         ] /* steps */
       } /* join_preparation */
@@ -3578,19 +3568,19 @@ EXPLAIN SELECT * FROM t1 WHERE cola = 'f\no'	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "(`test`.`t1`.`cola` = 'f\\no')",
+              "original_condition": "(`t1`.`cola` = 'f\\no')",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "multiple equal('f\\no', `test`.`t1`.`cola`)"
+                  "resulting_condition": "multiple equal('f\\no', `t1`.`cola`)"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "multiple equal('f\\no', `test`.`t1`.`cola`)"
+                  "resulting_condition": "multiple equal('f\\no', `t1`.`cola`)"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "multiple equal('f\\no', `test`.`t1`.`cola`)"
+                  "resulting_condition": "multiple equal('f\\no', `t1`.`cola`)"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -3598,8 +3588,7 @@ EXPLAIN SELECT * FROM t1 WHERE cola = 'f\no'	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -3610,8 +3599,7 @@ EXPLAIN SELECT * FROM t1 WHERE cola = 'f\no'	{
           {
             "ref_optimizer_key_uses": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "field": "cola",
                 "equals": "'f\\no'",
                 "null_rejecting": false
@@ -3621,8 +3609,7 @@ EXPLAIN SELECT * FROM t1 WHERE cola = 'f\no'	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 8704,
@@ -3652,14 +3639,15 @@ EXPLAIN SELECT * FROM t1 WHERE cola = 'f\no'	{
                     "range_scan_alternatives": [
                       {
                         "index": "cola",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "f\no <= cola <= f\no"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": true,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 1,
                         "cost": 2.21,
-                        "rowid_ordered": true,
                         "chosen": true
                       }
                     ] /* range_scan_alternatives */,
@@ -3688,8 +3676,9 @@ EXPLAIN SELECT * FROM t1 WHERE cola = 'f\no'	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
@@ -3714,14 +3703,13 @@ EXPLAIN SELECT * FROM t1 WHERE cola = 'f\no'	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "(`test`.`t1`.`cola` = 'f\\no')",
+              "original_condition": "(`t1`.`cola` = 'f\\no')",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "(`test`.`t1`.`cola` = 'f\\no')"
+                  "table": "`t1`",
+                  "attached": "(`t1`.`cola` = 'f\\no')"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -3729,9 +3717,8 @@ EXPLAIN SELECT * FROM t1 WHERE cola = 'f\no'	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
-                "pushed_index_condition": "(`test`.`t1`.`cola` = 'f\\no')",
+                "table": "`t1`",
+                "pushed_index_condition": "(`t1`.`cola` = 'f\\no')",
                 "table_condition_attached": null
               }
             ] /* refine_plan */
@@ -3771,7 +3758,7 @@ EXPLAIN SELECT 1 FROM
         "select#": 2,
         "steps": [
           {
-            "expanded_query": "/* select#2 */ select 1 AS `1` from `test`.`t2` join `test`.`t1` where (`test`.`t2`.`b` < `test`.`t1`.`c`) group by 1 limit 1"
+            "expanded_query": "/* select#2 */ select 1 AS `1` from `t2` join `t1` where (`t2`.`b` < `t1`.`c`) group by 1 limit 1"
           }
         ] /* steps */
       } /* join_preparation */
@@ -3781,7 +3768,7 @@ EXPLAIN SELECT 1 FROM
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select 1 AS `1` from (/* select#2 */ select 1 AS `1` from `test`.`t2` join `test`.`t1` where (`test`.`t2`.`b` < `test`.`t1`.`c`) group by 1 limit 1) `d2`"
+            "expanded_query": "/* select#1 */ select 1 AS `1` from (/* select#2 */ select 1 AS `1` from `t2` join `t1` where (`t2`.`b` < `t1`.`c`) group by 1 limit 1) `d2`"
           }
         ] /* steps */
       } /* join_preparation */
@@ -3797,19 +3784,19 @@ EXPLAIN SELECT 1 FROM
                 {
                   "condition_processing": {
                     "condition": "WHERE",
-                    "original_condition": "(`test`.`t2`.`b` < `test`.`t1`.`c`)",
+                    "original_condition": "(`t2`.`b` < `t1`.`c`)",
                     "steps": [
                       {
                         "transformation": "equality_propagation",
-                        "resulting_condition": "(`test`.`t2`.`b` < `test`.`t1`.`c`)"
+                        "resulting_condition": "(`t2`.`b` < `t1`.`c`)"
                       },
                       {
                         "transformation": "constant_propagation",
-                        "resulting_condition": "(`test`.`t2`.`b` < `test`.`t1`.`c`)"
+                        "resulting_condition": "(`t2`.`b` < `t1`.`c`)"
                       },
                       {
                         "transformation": "trivial_condition_removal",
-                        "resulting_condition": "(`test`.`t2`.`b` < `test`.`t1`.`c`)"
+                        "resulting_condition": "(`t2`.`b` < `t1`.`c`)"
                       }
                     ] /* steps */
                   } /* condition_processing */
@@ -3817,16 +3804,14 @@ EXPLAIN SELECT 1 FROM
                 {
                   "table_dependencies": [
                     {
-                      "database": "test",
-                      "table": "t2",
+                      "table": "`t2`",
                       "row_may_be_null": false,
                       "map_bit": 0,
                       "depends_on_map_bits": [
                       ] /* depends_on_map_bits */
                     },
                     {
-                      "database": "test",
-                      "table": "t1",
+                      "table": "`t1`",
                       "row_may_be_null": false,
                       "map_bit": 1,
                       "depends_on_map_bits": [
@@ -3841,16 +3826,14 @@ EXPLAIN SELECT 1 FROM
                 {
                   "rows_estimation": [
                     {
-                      "database": "test",
-                      "table": "t2",
+                      "table": "`t2`",
                       "table_scan": {
                         "rows": 3,
                         "cost": 2
                       } /* table_scan */
                     },
                     {
-                      "database": "test",
-                      "table": "t1",
+                      "table": "`t1`",
                       "table_scan": {
                         "rows": 2,
                         "cost": 2
@@ -3863,11 +3846,10 @@ EXPLAIN SELECT 1 FROM
                 },
                 {
                   "attaching_conditions_to_tables": {
-                    "original_condition": "(`test`.`t2`.`b` < `test`.`t1`.`c`)",
+                    "original_condition": "(`t2`.`b` < `t1`.`c`)",
                     "attached_conditions_computation": [
                       {
-                        "database": "test",
-                        "table": "t2",
+                        "table": "`t2`",
                         "rechecking_index_usage": {
                           "range_analysis": {
                             "table_scan": {
@@ -3898,12 +3880,8 @@ EXPLAIN SELECT 1 FROM
                               "range_scan_alternatives": [
                                 {
                                   "index": "b",
-                                  "index_only": true,
-                                  "rows": 18446744073709551615,
-                                  "cost": 0,
-                                  "rowid_ordered": false,
                                   "chosen": false,
-                                  "cause": "cost"
+                                  "cause": "unknown"
                                 }
                               ] /* range_scan_alternatives */,
                               "analyzing_roworder_intersect": {
@@ -3917,14 +3895,12 @@ EXPLAIN SELECT 1 FROM
                     ] /* attached_conditions_computation */,
                     "attached_conditions_summary": [
                       {
-                        "database": "test",
-                        "table": "t1",
+                        "table": "`t1`",
                         "attached": null
                       },
                       {
-                        "database": "test",
-                        "table": "t2",
-                        "attached": "(`test`.`t2`.`b` < `test`.`t1`.`c`)"
+                        "table": "`t2`",
+                        "attached": "(`t2`.`b` < `t1`.`c`)"
                       }
                     ] /* attached_conditions_summary */
                   } /* attaching_conditions_to_tables */
@@ -3946,13 +3922,11 @@ EXPLAIN SELECT 1 FROM
                 {
                   "refine_plan": [
                     {
-                      "database": "test",
-                      "table": "t1",
+                      "table": "`t1`",
                       "access_type": "table_scan"
                     },
                     {
-                      "database": "test",
-                      "table": "t2",
+                      "table": "`t2`",
                       "access_type": "dynamic_range"
                     }
                   ] /* refine_plan */
@@ -3963,8 +3937,7 @@ EXPLAIN SELECT 1 FROM
           {
             "creating_tmp_table": {
               "tmp_table_info": {
-                "database": "",
-                "table": "d2",
+                "table": " `d2`",
                 "row_length": 5,
                 "key_length": 0,
                 "unique_constraint": false,
@@ -3979,8 +3952,7 @@ EXPLAIN SELECT 1 FROM
               "steps": [
                 {
                   "rows_estimation_per_outer_row": {
-                    "database": "test",
-                    "table": "t2",
+                    "table": "`t2`",
                     "range_analysis": {
                       "table_scan": {
                         "rows": 3,
@@ -4013,8 +3985,7 @@ EXPLAIN SELECT 1 FROM
                 },
                 {
                   "rows_estimation_per_outer_row": {
-                    "database": "test",
-                    "table": "t2",
+                    "table": "`t2`",
                     "range_analysis": {
                       "table_scan": {
                         "rows": 3,
@@ -4051,8 +4022,7 @@ EXPLAIN SELECT 1 FROM
           {
             "table_dependencies": [
               {
-                "database": "",
-                "table": "d2",
+                "table": " `d2`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -4063,8 +4033,7 @@ EXPLAIN SELECT 1 FROM
           {
             "rows_estimation": [
               {
-                "database": "",
-                "table": "d2",
+                "table": " `d2`",
                 "rows": 1,
                 "cost": 1,
                 "table_type": "system",
@@ -4123,7 +4092,7 @@ EXPLAIN SELECT 1 FROM
         "select#": 2,
         "steps": [
           {
-            "expanded_query": "/* select#2 */ select 1 AS `1` from `test`.`t2` join `test`.`t1` where (`test`.`t2`.`b` < `test`.`t1`.`c`) group by 1 limit 1"
+            "expanded_query": "/* select#2 */ select 1 AS `1` from `t2` join `t1` where (`t2`.`b` < `t1`.`c`) group by 1 limit 1"
           }
         ] /* steps */
       } /* join_preparation */
@@ -4133,7 +4102,7 @@ EXPLAIN SELECT 1 FROM
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select 1 AS `1` from (/* select#2 */ select 1 AS `1` from `test`.`t2` join `test`.`t1` where (`test`.`t2`.`b` < `test`.`t1`.`c`) group by 1 limit 1) `d2`"
+            "expanded_query": "/* select#1 */ select 1 AS `1` from (/* select#2 */ select 1 AS `1` from `t2` join `t1` where (`t2`.`b` < `t1`.`c`) group by 1 limit 1) `d2`"
           }
         ] /* steps */
       } /* join_preparation */
@@ -4149,19 +4118,19 @@ EXPLAIN SELECT 1 FROM
                 {
                   "condition_processing": {
                     "condition": "WHERE",
-                    "original_condition": "(`test`.`t2`.`b` < `test`.`t1`.`c`)",
+                    "original_condition": "(`t2`.`b` < `t1`.`c`)",
                     "steps": [
                       {
                         "transformation": "equality_propagation",
-                        "resulting_condition": "(`test`.`t2`.`b` < `test`.`t1`.`c`)"
+                        "resulting_condition": "(`t2`.`b` < `t1`.`c`)"
                       },
                       {
                         "transformation": "constant_propagation",
-                        "resulting_condition": "(`test`.`t2`.`b` < `test`.`t1`.`c`)"
+                        "resulting_condition": "(`t2`.`b` < `t1`.`c`)"
                       },
                       {
                         "transformation": "trivial_condition_removal",
-                        "resulting_condition": "(`test`.`t2`.`b` < `test`.`t1`.`c`)"
+                        "resulting_condition": "(`t2`.`b` < `t1`.`c`)"
                       }
                     ] /* steps */
                   } /* condition_processing */
@@ -4169,16 +4138,14 @@ EXPLAIN SELECT 1 FROM
                 {
                   "table_dependencies": [
                     {
-                      "database": "test",
-                      "table": "t2",
+                      "table": "`t2`",
                       "row_may_be_null": false,
                       "map_bit": 0,
                       "depends_on_map_bits": [
                       ] /* depends_on_map_bits */
                     },
                     {
-                      "database": "test",
-                      "table": "t1",
+                      "table": "`t1`",
                       "row_may_be_null": false,
                       "map_bit": 1,
                       "depends_on_map_bits": [
@@ -4193,16 +4160,14 @@ EXPLAIN SELECT 1 FROM
                 {
                   "rows_estimation": [
                     {
-                      "database": "test",
-                      "table": "t2",
+                      "table": "`t2`",
                       "table_scan": {
                         "rows": 3,
                         "cost": 2
                       } /* table_scan */
                     },
                     {
-                      "database": "test",
-                      "table": "t1",
+                      "table": "`t1`",
                       "table_scan": {
                         "rows": 2,
                         "cost": 2
@@ -4215,11 +4180,10 @@ EXPLAIN SELECT 1 FROM
                 },
                 {
                   "attaching_conditions_to_tables": {
-                    "original_condition": "(`test`.`t2`.`b` < `test`.`t1`.`c`)",
+                    "original_condition": "(`t2`.`b` < `t1`.`c`)",
                     "attached_conditions_computation": [
                       {
-                        "database": "test",
-                        "table": "t2",
+                        "table": "`t2`",
                         "rechecking_index_usage": {
                           "range_analysis": {
                             "table_scan": {
@@ -4250,12 +4214,8 @@ EXPLAIN SELECT 1 FROM
                               "range_scan_alternatives": [
                                 {
                                   "index": "b",
-                                  "index_only": true,
-                                  "rows": 18446744073709551615,
-                                  "cost": 0,
-                                  "rowid_ordered": false,
                                   "chosen": false,
-                                  "cause": "cost"
+                                  "cause": "unknown"
                                 }
                               ] /* range_scan_alternatives */,
                               "analyzing_roworder_intersect": {
@@ -4269,14 +4229,12 @@ EXPLAIN SELECT 1 FROM
                     ] /* attached_conditions_computation */,
                     "attached_conditions_summary": [
                       {
-                        "database": "test",
-                        "table": "t1",
+                        "table": "`t1`",
                         "attached": null
                       },
                       {
-                        "database": "test",
-                        "table": "t2",
-                        "attached": "(`test`.`t2`.`b` < `test`.`t1`.`c`)"
+                        "table": "`t2`",
+                        "attached": "(`t2`.`b` < `t1`.`c`)"
                       }
                     ] /* attached_conditions_summary */
                   } /* attaching_conditions_to_tables */
@@ -4298,13 +4256,11 @@ EXPLAIN SELECT 1 FROM
                 {
                   "refine_plan": [
                     {
-                      "database": "test",
-                      "table": "t1",
+                      "table": "`t1`",
                       "access_type": "table_scan"
                     },
                     {
-                      "database": "test",
-                      "table": "t2",
+                      "table": "`t2`",
                       "access_type": "dynamic_range"
                     }
                   ] /* refine_plan */
@@ -4315,8 +4271,7 @@ EXPLAIN SELECT 1 FROM
           {
             "creating_tmp_table": {
               "tmp_table_info": {
-                "database": "",
-                "table": "d2",
+                "table": " `d2`",
                 "row_length": 5,
                 "key_length": 0,
                 "unique_constraint": false,
@@ -4331,8 +4286,7 @@ EXPLAIN SELECT 1 FROM
               "steps": [
                 {
                   "rows_estimation_per_outer_row": {
-                    "database": "test",
-                    "table": "t2",
+                    "table": "`t2`",
                     "range_analysis": {
                       "table_scan": {
                         "rows": 3,
@@ -4369,8 +4323,7 @@ EXPLAIN SELECT 1 FROM
           {
             "table_dependencies": [
               {
-                "database": "",
-                "table": "d2",
+                "table": " `d2`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -4381,8 +4334,7 @@ EXPLAIN SELECT 1 FROM
           {
             "rows_estimation": [
               {
-                "database": "",
-                "table": "d2",
+                "table": " `d2`",
                 "rows": 1,
                 "cost": 1,
                 "table_type": "system",
@@ -4446,7 +4398,7 @@ EXPLAIN SELECT * FROM t1 WHERE i1 > '2' ORDER BY i1, i2	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t1`.`i1` AS `i1`,`test`.`t1`.`i2` AS `i2`,`test`.`t1`.`c` AS `c` from `test`.`t1` where (`test`.`t1`.`i1` > '2') order by `test`.`t1`.`i1`,`test`.`t1`.`i2`"
+            "expanded_query": "/* select#1 */ select `t1`.`i1` AS `i1`,`t1`.`i2` AS `i2`,`t1`.`c` AS `c` from `t1` where (`t1`.`i1` > '2') order by `t1`.`i1`,`t1`.`i2`"
           }
         ] /* steps */
       } /* join_preparation */
@@ -4458,19 +4410,19 @@ EXPLAIN SELECT * FROM t1 WHERE i1 > '2' ORDER BY i1, i2	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "(`test`.`t1`.`i1` > '2')",
+              "original_condition": "(`t1`.`i1` > '2')",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "(`test`.`t1`.`i1` > '2')"
+                  "resulting_condition": "(`t1`.`i1` > '2')"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "(`test`.`t1`.`i1` > '2')"
+                  "resulting_condition": "(`t1`.`i1` > '2')"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "(`test`.`t1`.`i1` > '2')"
+                  "resulting_condition": "(`t1`.`i1` > '2')"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -4478,8 +4430,7 @@ EXPLAIN SELECT * FROM t1 WHERE i1 > '2' ORDER BY i1, i2	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -4494,8 +4445,7 @@ EXPLAIN SELECT * FROM t1 WHERE i1 > '2' ORDER BY i1, i2	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 2,
@@ -4528,26 +4478,28 @@ EXPLAIN SELECT * FROM t1 WHERE i1 > '2' ORDER BY i1, i2	{
                     "range_scan_alternatives": [
                       {
                         "index": "k1",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "2 < i1"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 2,
                         "cost": 3.41,
-                        "rowid_ordered": false,
                         "chosen": true
                       },
                       {
                         "index": "k2",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "2 < i1"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 2,
                         "cost": 3.41,
-                        "rowid_ordered": false,
                         "chosen": false,
                         "cause": "cost"
                       }
@@ -4577,14 +4529,15 @@ EXPLAIN SELECT * FROM t1 WHERE i1 > '2' ORDER BY i1, i2	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
                       "access_type": "range",
                       "rows": 2,
-                      "cost": 3.41,
+                      "cost": 3.81,
                       "chosen": true,
                       "use_tmp_table": true
                     }
@@ -4600,14 +4553,13 @@ EXPLAIN SELECT * FROM t1 WHERE i1 > '2' ORDER BY i1, i2	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "(`test`.`t1`.`i1` > '2')",
+              "original_condition": "(`t1`.`i1` > '2')",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "(`test`.`t1`.`i1` > '2')"
+                  "table": "`t1`",
+                  "attached": "(`t1`.`i1` > '2')"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -4615,25 +4567,24 @@ EXPLAIN SELECT * FROM t1 WHERE i1 > '2' ORDER BY i1, i2	{
           {
             "clause_processing": {
               "clause": "ORDER BY",
-              "original_clause": "`test`.`t1`.`i1`,`test`.`t1`.`i2`",
+              "original_clause": "`t1`.`i1`,`t1`.`i2`",
               "items": [
                 {
-                  "item": "`test`.`t1`.`i1`"
+                  "item": "`t1`.`i1`"
                 },
                 {
-                  "item": "`test`.`t1`.`i2`"
+                  "item": "`t1`.`i2`"
                 }
               ] /* items */,
               "resulting_clause_is_simple": true,
-              "resulting_clause": "`test`.`t1`.`i1`,`test`.`t1`.`i2`"
+              "resulting_clause": "`t1`.`i1`,`t1`.`i2`"
             } /* clause_processing */
           },
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
-                "pushed_index_condition": "(`test`.`t1`.`i1` > '2')",
+                "table": "`t1`",
+                "pushed_index_condition": "(`t1`.`i1` > '2')",
                 "table_condition_attached": null,
                 "access_type": "range"
               }
@@ -4642,8 +4593,7 @@ EXPLAIN SELECT * FROM t1 WHERE i1 > '2' ORDER BY i1, i2	{
           {
             "reconsidering_access_paths_for_index_ordering": {
               "rows_estimation": {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "index": "k2",
                 "range_analysis": {
                   "table_scan": {
@@ -4675,14 +4625,15 @@ EXPLAIN SELECT * FROM t1 WHERE i1 > '2' ORDER BY i1, i2	{
                     "range_scan_alternatives": [
                       {
                         "index": "k2",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "2 < i1"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 2,
                         "cost": 3.41,
-                        "rowid_ordered": false,
                         "chosen": true
                       }
                     ] /* range_scan_alternatives */,
@@ -4707,8 +4658,7 @@ EXPLAIN SELECT * FROM t1 WHERE i1 > '2' ORDER BY i1, i2	{
                 } /* range_analysis */
               } /* rows_estimation */,
               "index_order_summary": {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "disabled_pushed_condition_on_old_index": true,
                 "index": "k2",
                 "order_direction": "asc",
@@ -4743,7 +4693,7 @@ EXPLAIN SELECT DISTINCT i1 FROM t1 WHERE i1 >= '1' ORDER BY i1 DESC	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select distinct `test`.`t1`.`i1` AS `i1` from `test`.`t1` where (`test`.`t1`.`i1` >= '1') order by `test`.`t1`.`i1` desc"
+            "expanded_query": "/* select#1 */ select distinct `t1`.`i1` AS `i1` from `t1` where (`t1`.`i1` >= '1') order by `t1`.`i1` desc"
           }
         ] /* steps */
       } /* join_preparation */
@@ -4755,19 +4705,19 @@ EXPLAIN SELECT DISTINCT i1 FROM t1 WHERE i1 >= '1' ORDER BY i1 DESC	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "(`test`.`t1`.`i1` >= '1')",
+              "original_condition": "(`t1`.`i1` >= '1')",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "(`test`.`t1`.`i1` >= '1')"
+                  "resulting_condition": "(`t1`.`i1` >= '1')"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "(`test`.`t1`.`i1` >= '1')"
+                  "resulting_condition": "(`t1`.`i1` >= '1')"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "(`test`.`t1`.`i1` >= '1')"
+                  "resulting_condition": "(`t1`.`i1` >= '1')"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -4775,8 +4725,7 @@ EXPLAIN SELECT DISTINCT i1 FROM t1 WHERE i1 >= '1' ORDER BY i1 DESC	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -4791,8 +4740,7 @@ EXPLAIN SELECT DISTINCT i1 FROM t1 WHERE i1 >= '1' ORDER BY i1 DESC	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 2,
@@ -4869,27 +4817,29 @@ EXPLAIN SELECT DISTINCT i1 FROM t1 WHERE i1 >= '1' ORDER BY i1 DESC	{
                     "range_scan_alternatives": [
                       {
                         "index": "k1",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "1 <= i1"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": true,
                         "rows": 2,
                         "cost": 3.41,
-                        "rowid_ordered": false,
                         "chosen": false,
                         "cause": "cost"
                       },
                       {
                         "index": "k2",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "1 <= i1"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": true,
                         "rows": 2,
                         "cost": 3.41,
-                        "rowid_ordered": false,
                         "chosen": false,
                         "cause": "cost"
                       }
@@ -4906,14 +4856,15 @@ EXPLAIN SELECT DISTINCT i1 FROM t1 WHERE i1 >= '1' ORDER BY i1 DESC	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
                       "access_type": "scan",
                       "rows": 2,
-                      "cost": 2.0049,
+                      "cost": 2.4049,
                       "chosen": true,
                       "use_tmp_table": true
                     }
@@ -4929,14 +4880,13 @@ EXPLAIN SELECT DISTINCT i1 FROM t1 WHERE i1 >= '1' ORDER BY i1 DESC	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "(`test`.`t1`.`i1` >= '1')",
+              "original_condition": "(`t1`.`i1` >= '1')",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "(`test`.`t1`.`i1` >= '1')"
+                  "table": "`t1`",
+                  "attached": "(`t1`.`i1` >= '1')"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -4944,21 +4894,20 @@ EXPLAIN SELECT DISTINCT i1 FROM t1 WHERE i1 >= '1' ORDER BY i1 DESC	{
           {
             "clause_processing": {
               "clause": "ORDER BY",
-              "original_clause": "`test`.`t1`.`i1` desc",
+              "original_clause": "`t1`.`i1` desc",
               "items": [
                 {
-                  "item": "`test`.`t1`.`i1`"
+                  "item": "`t1`.`i1`"
                 }
               ] /* items */,
               "resulting_clause_is_simple": true,
-              "resulting_clause": "`test`.`t1`.`i1` desc"
+              "resulting_clause": "`t1`.`i1` desc"
             } /* clause_processing */
           },
           {
             "reconsidering_access_paths_for_index_ordering": {
               "rows_estimation": {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "index": "k1",
                 "range_analysis": {
                   "table_scan": {
@@ -4994,14 +4943,15 @@ EXPLAIN SELECT DISTINCT i1 FROM t1 WHERE i1 >= '1' ORDER BY i1 DESC	{
                     "range_scan_alternatives": [
                       {
                         "index": "k1",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "1 <= i1"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": true,
                         "rows": 2,
                         "cost": 3.41,
-                        "rowid_ordered": false,
                         "chosen": false,
                         "cause": "cost"
                       }
@@ -5010,8 +4960,7 @@ EXPLAIN SELECT DISTINCT i1 FROM t1 WHERE i1 >= '1' ORDER BY i1 DESC	{
                 } /* range_analysis */
               } /* rows_estimation */,
               "index_order_summary": {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "index": "k1",
                 "order_direction": "desc",
                 "plan_changed": false
@@ -5021,8 +4970,7 @@ EXPLAIN SELECT DISTINCT i1 FROM t1 WHERE i1 >= '1' ORDER BY i1 DESC	{
           {
             "reconsidering_access_paths_for_index_ordering": {
               "index_order_summary": {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "index": "k1",
                 "order_direction": "desc",
                 "plan_changed": false
@@ -5032,21 +4980,20 @@ EXPLAIN SELECT DISTINCT i1 FROM t1 WHERE i1 >= '1' ORDER BY i1 DESC	{
           {
             "clause_processing": {
               "clause": "GROUP BY",
-              "original_clause": "`test`.`t1`.`i1` desc",
+              "original_clause": "`t1`.`i1` desc",
               "items": [
                 {
-                  "item": "`test`.`t1`.`i1`"
+                  "item": "`t1`.`i1`"
                 }
               ] /* items */,
               "resulting_clause_is_simple": true,
-              "resulting_clause": "`test`.`t1`.`i1` desc"
+              "resulting_clause": "`t1`.`i1` desc"
             } /* clause_processing */
           },
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "access_type": "index_scan"
               }
             ] /* refine_plan */
@@ -5054,8 +5001,7 @@ EXPLAIN SELECT DISTINCT i1 FROM t1 WHERE i1 >= '1' ORDER BY i1 DESC	{
           {
             "reconsidering_access_paths_for_index_ordering": {
               "index_order_summary": {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "index": "k1",
                 "order_direction": "desc",
                 "plan_changed": true,
@@ -5102,7 +5048,7 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND v = 'a' AND pk < 3	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t1`.`v` AS `v` from `test`.`t1` where ((`test`.`t1`.`i1` = 1) and (`test`.`t1`.`v` = 'a') and (`test`.`t1`.`pk` < 3))"
+            "expanded_query": "/* select#1 */ select `t1`.`v` AS `v` from `t1` where ((`t1`.`i1` = 1) and (`t1`.`v` = 'a') and (`t1`.`pk` < 3))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -5114,19 +5060,19 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND v = 'a' AND pk < 3	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t1`.`i1` = 1) and (`test`.`t1`.`v` = 'a') and (`test`.`t1`.`pk` < 3))",
+              "original_condition": "((`t1`.`i1` = 1) and (`t1`.`v` = 'a') and (`t1`.`pk` < 3))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "((`test`.`t1`.`pk` < 3) and multiple equal(1, `test`.`t1`.`i1`) and multiple equal('a', `test`.`t1`.`v`))"
+                  "resulting_condition": "((`t1`.`pk` < 3) and multiple equal(1, `t1`.`i1`) and multiple equal('a', `t1`.`v`))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "((`test`.`t1`.`pk` < 3) and multiple equal(1, `test`.`t1`.`i1`) and multiple equal('a', `test`.`t1`.`v`))"
+                  "resulting_condition": "((`t1`.`pk` < 3) and multiple equal(1, `t1`.`i1`) and multiple equal('a', `t1`.`v`))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "((`test`.`t1`.`pk` < 3) and multiple equal(1, `test`.`t1`.`i1`) and multiple equal('a', `test`.`t1`.`v`))"
+                  "resulting_condition": "((`t1`.`pk` < 3) and multiple equal(1, `t1`.`i1`) and multiple equal('a', `t1`.`v`))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -5134,8 +5080,7 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND v = 'a' AND pk < 3	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -5146,22 +5091,19 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND v = 'a' AND pk < 3	{
           {
             "ref_optimizer_key_uses": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "field": "i1",
                 "equals": "1",
                 "null_rejecting": false
               },
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "field": "v",
                 "equals": "'a'",
                 "null_rejecting": false
               },
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "field": "i1",
                 "equals": "1",
                 "null_rejecting": false
@@ -5171,8 +5113,7 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND v = 'a' AND pk < 3	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 5,
@@ -5217,40 +5158,43 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND v = 'a' AND pk < 3	{
                     "range_scan_alternatives": [
                       {
                         "index": "PRIMARY",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "pk < 3"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": true,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 2,
                         "cost": 2.41,
-                        "rowid_ordered": true,
                         "chosen": false,
                         "cause": "cost"
                       },
                       {
                         "index": "i1_idx",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "1 <= i1 <= 1"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": true,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 1,
                         "cost": 2.21,
-                        "rowid_ordered": true,
                         "chosen": false,
                         "cause": "cost"
                       },
                       {
                         "index": "v_idx",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "a <= v <= a AND 1 <= i1 <= 1"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": true,
+                        "using_mrr": false,
                         "index_only": true,
                         "rows": 1,
                         "cost": 2.21,
-                        "rowid_ordered": true,
                         "chosen": false,
                         "cause": "cost"
                       }
@@ -5322,8 +5266,9 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND v = 'a' AND pk < 3	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
@@ -5355,14 +5300,13 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND v = 'a' AND pk < 3	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t1`.`v` = 'a') and (`test`.`t1`.`i1` = 1) and (`test`.`t1`.`pk` < 3))",
+              "original_condition": "((`t1`.`v` = 'a') and (`t1`.`i1` = 1) and (`t1`.`pk` < 3))",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "((`test`.`t1`.`v` = 'a') and (`test`.`t1`.`pk` < 3))"
+                  "table": "`t1`",
+                  "attached": "((`t1`.`v` = 'a') and (`t1`.`pk` < 3))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -5370,10 +5314,9 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND v = 'a' AND pk < 3	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
-                "pushed_index_condition": "(`test`.`t1`.`pk` < 3)",
-                "table_condition_attached": "(`test`.`t1`.`v` = 'a')"
+                "table": "`t1`",
+                "pushed_index_condition": "(`t1`.`pk` < 3)",
+                "table_condition_attached": "(`t1`.`v` = 'a')"
               }
             ] /* refine_plan */
           }
@@ -5391,6 +5334,9 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND v = 'a' AND pk < 3	{
 }	0	0
 DROP INDEX i1_idx ON t1;
 CREATE INDEX i1_i2_idx ON t1 (i2,i1);
+ANALYZE TABLE t1;
+Table	Op	Msg_type	Msg_text
+test.t1	analyze	status	OK
 
 # Covering ROR intersect not chosen: cost
 EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND i2 = 1  AND v = 'a' AND pk < 3;
@@ -5406,7 +5352,7 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND i2 = 1  AND v = 'a' AND pk < 3	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t1`.`v` AS `v` from `test`.`t1` where ((`test`.`t1`.`i1` = 1) and (`test`.`t1`.`i2` = 1) and (`test`.`t1`.`v` = 'a') and (`test`.`t1`.`pk` < 3))"
+            "expanded_query": "/* select#1 */ select `t1`.`v` AS `v` from `t1` where ((`t1`.`i1` = 1) and (`t1`.`i2` = 1) and (`t1`.`v` = 'a') and (`t1`.`pk` < 3))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -5418,19 +5364,19 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND i2 = 1  AND v = 'a' AND pk < 3	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t1`.`i1` = 1) and (`test`.`t1`.`i2` = 1) and (`test`.`t1`.`v` = 'a') and (`test`.`t1`.`pk` < 3))",
+              "original_condition": "((`t1`.`i1` = 1) and (`t1`.`i2` = 1) and (`t1`.`v` = 'a') and (`t1`.`pk` < 3))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "((`test`.`t1`.`pk` < 3) and multiple equal(1, `test`.`t1`.`i1`) and multiple equal(1, `test`.`t1`.`i2`) and multiple equal('a', `test`.`t1`.`v`))"
+                  "resulting_condition": "((`t1`.`pk` < 3) and multiple equal(1, `t1`.`i1`) and multiple equal(1, `t1`.`i2`) and multiple equal('a', `t1`.`v`))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "((`test`.`t1`.`pk` < 3) and multiple equal(1, `test`.`t1`.`i1`) and multiple equal(1, `test`.`t1`.`i2`) and multiple equal('a', `test`.`t1`.`v`))"
+                  "resulting_condition": "((`t1`.`pk` < 3) and multiple equal(1, `t1`.`i1`) and multiple equal(1, `t1`.`i2`) and multiple equal('a', `t1`.`v`))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "((`test`.`t1`.`pk` < 3) and multiple equal(1, `test`.`t1`.`i1`) and multiple equal(1, `test`.`t1`.`i2`) and multiple equal('a', `test`.`t1`.`v`))"
+                  "resulting_condition": "((`t1`.`pk` < 3) and multiple equal(1, `t1`.`i1`) and multiple equal(1, `t1`.`i2`) and multiple equal('a', `t1`.`v`))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -5438,8 +5384,7 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND i2 = 1  AND v = 'a' AND pk < 3	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -5450,29 +5395,25 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND i2 = 1  AND v = 'a' AND pk < 3	{
           {
             "ref_optimizer_key_uses": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "field": "v",
                 "equals": "'a'",
                 "null_rejecting": false
               },
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "field": "i1",
                 "equals": "1",
                 "null_rejecting": false
               },
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "field": "i2",
                 "equals": "1",
                 "null_rejecting": false
               },
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "field": "i1",
                 "equals": "1",
                 "null_rejecting": false
@@ -5482,8 +5423,7 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND i2 = 1  AND v = 'a' AND pk < 3	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 5,
@@ -5524,38 +5464,41 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND i2 = 1  AND v = 'a' AND pk < 3	{
                     "range_scan_alternatives": [
                       {
                         "index": "PRIMARY",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "pk < 3"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": true,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 2,
                         "cost": 2.41,
-                        "rowid_ordered": true,
                         "chosen": true
                       },
                       {
                         "index": "v_idx",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "a <= v <= a AND 1 <= i1 <= 1"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": true,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 1,
                         "cost": 2.21,
-                        "rowid_ordered": true,
                         "chosen": true
                       },
                       {
                         "index": "i1_i2_idx",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "1 <= i2 <= 1 AND 1 <= i1 <= 1"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": true,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 1,
                         "cost": 2.21,
-                        "rowid_ordered": true,
                         "chosen": false,
                         "cause": "cost"
                       }
@@ -5624,8 +5567,9 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND i2 = 1  AND v = 'a' AND pk < 3	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
@@ -5645,7 +5589,7 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND i2 = 1  AND v = 'a' AND pk < 3	{
                     {
                       "access_type": "range",
                       "rows": 1,
-                      "cost": 1.1,
+                      "cost": 1.3,
                       "chosen": false
                     }
                   ] /* considered_access_paths */
@@ -5658,14 +5602,13 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND i2 = 1  AND v = 'a' AND pk < 3	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t1`.`v` = 'a') and (`test`.`t1`.`i2` = 1) and (`test`.`t1`.`i1` = 1) and (`test`.`t1`.`pk` < 3))",
+              "original_condition": "((`t1`.`v` = 'a') and (`t1`.`i2` = 1) and (`t1`.`i1` = 1) and (`t1`.`pk` < 3))",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "((`test`.`t1`.`v` = 'a') and (`test`.`t1`.`i2` = 1) and (`test`.`t1`.`pk` < 3))"
+                  "table": "`t1`",
+                  "attached": "((`t1`.`v` = 'a') and (`t1`.`i2` = 1) and (`t1`.`pk` < 3))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -5673,10 +5616,9 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND i2 = 1  AND v = 'a' AND pk < 3	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
-                "pushed_index_condition": "((`test`.`t1`.`v` = 'a') and (`test`.`t1`.`pk` < 3))",
-                "table_condition_attached": "(`test`.`t1`.`i2` = 1)"
+                "table": "`t1`",
+                "pushed_index_condition": "((`t1`.`v` = 'a') and (`t1`.`pk` < 3))",
+                "table_condition_attached": "(`t1`.`i2` = 1)"
               }
             ] /* refine_plan */
           }
@@ -5694,7 +5636,7 @@ EXPLAIN SELECT v FROM t1 WHERE i1 = 1 AND i2 = 1  AND v = 'a' AND pk < 3	{
 }	0	0
 
 DROP TABLE t1;
-CREATE TABLE t1 (a int, b int, PRIMARY KEY (a,b), KEY b (b)) ENGINE=InnoDB;
+CREATE TABLE t1 (a int, b int, PRIMARY KEY (a,b), KEY b (b)) ENGINE=InnoDB STATS_PERSISTENT=0;
 INSERT INTO t1 VALUES (1,1),(1,2),(1,0),(1,3);
 
 # Test trace for "access_type_changed 'ref' to 'range'"
@@ -5711,7 +5653,7 @@ EXPLAIN SELECT MAX(b), a FROM t1 WHERE b < 2 AND a = 1 GROUP BY a	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select max(`test`.`t1`.`b`) AS `MAX(b)`,`test`.`t1`.`a` AS `a` from `test`.`t1` where ((`test`.`t1`.`b` < 2) and (`test`.`t1`.`a` = 1)) group by `test`.`t1`.`a`"
+            "expanded_query": "/* select#1 */ select max(`t1`.`b`) AS `MAX(b)`,`t1`.`a` AS `a` from `t1` where ((`t1`.`b` < 2) and (`t1`.`a` = 1)) group by `t1`.`a`"
           }
         ] /* steps */
       } /* join_preparation */
@@ -5723,19 +5665,19 @@ EXPLAIN SELECT MAX(b), a FROM t1 WHERE b < 2 AND a = 1 GROUP BY a	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t1`.`b` < 2) and (`test`.`t1`.`a` = 1))",
+              "original_condition": "((`t1`.`b` < 2) and (`t1`.`a` = 1))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "((`test`.`t1`.`b` < 2) and multiple equal(1, `test`.`t1`.`a`))"
+                  "resulting_condition": "((`t1`.`b` < 2) and multiple equal(1, `t1`.`a`))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "((`test`.`t1`.`b` < 2) and multiple equal(1, `test`.`t1`.`a`))"
+                  "resulting_condition": "((`t1`.`b` < 2) and multiple equal(1, `t1`.`a`))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "((`test`.`t1`.`b` < 2) and multiple equal(1, `test`.`t1`.`a`))"
+                  "resulting_condition": "((`t1`.`b` < 2) and multiple equal(1, `t1`.`a`))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -5743,8 +5685,7 @@ EXPLAIN SELECT MAX(b), a FROM t1 WHERE b < 2 AND a = 1 GROUP BY a	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -5755,8 +5696,7 @@ EXPLAIN SELECT MAX(b), a FROM t1 WHERE b < 2 AND a = 1 GROUP BY a	{
           {
             "ref_optimizer_key_uses": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "field": "a",
                 "equals": "1",
                 "null_rejecting": false
@@ -5766,8 +5706,7 @@ EXPLAIN SELECT MAX(b), a FROM t1 WHERE b < 2 AND a = 1 GROUP BY a	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 4,
@@ -5837,27 +5776,29 @@ EXPLAIN SELECT MAX(b), a FROM t1 WHERE b < 2 AND a = 1 GROUP BY a	{
                     "range_scan_alternatives": [
                       {
                         "index": "PRIMARY",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "1 <= a <= 1 AND b < 2"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": true,
+                        "using_mrr": false,
                         "index_only": true,
                         "rows": 1,
                         "cost": 1.21,
-                        "rowid_ordered": true,
                         "chosen": false,
                         "cause": "cost"
                       },
                       {
                         "index": "b",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "b < 2"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": true,
                         "rows": 2,
                         "cost": 3.41,
-                        "rowid_ordered": false,
                         "chosen": false,
                         "cause": "cost"
                       }
@@ -5895,8 +5836,9 @@ EXPLAIN SELECT MAX(b), a FROM t1 WHERE b < 2 AND a = 1 GROUP BY a	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
@@ -5909,7 +5851,7 @@ EXPLAIN SELECT MAX(b), a FROM t1 WHERE b < 2 AND a = 1 GROUP BY a	{
                     {
                       "access_type": "range",
                       "rows": 1,
-                      "cost": 1.2,
+                      "cost": 1.4,
                       "chosen": false
                     }
                   ] /* considered_access_paths */
@@ -5922,12 +5864,11 @@ EXPLAIN SELECT MAX(b), a FROM t1 WHERE b < 2 AND a = 1 GROUP BY a	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t1`.`a` = 1) and (`test`.`t1`.`b` < 2))",
+              "original_condition": "((`t1`.`a` = 1) and (`t1`.`b` < 2))",
               "attached_conditions_computation": [
                 {
                   "access_type_changed": {
-                    "database": "test",
-                    "table": "t1",
+                    "table": "`t1`",
                     "index": "PRIMARY",
                     "old_type": "ref",
                     "new_type": "range",
@@ -5937,9 +5878,8 @@ EXPLAIN SELECT MAX(b), a FROM t1 WHERE b < 2 AND a = 1 GROUP BY a	{
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "((`test`.`t1`.`a` = 1) and (`test`.`t1`.`b` < 2))"
+                  "table": "`t1`",
+                  "attached": "((`t1`.`a` = 1) and (`t1`.`b` < 2))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -5947,10 +5887,10 @@ EXPLAIN SELECT MAX(b), a FROM t1 WHERE b < 2 AND a = 1 GROUP BY a	{
           {
             "clause_processing": {
               "clause": "GROUP BY",
-              "original_clause": "`test`.`t1`.`a`",
+              "original_clause": "`t1`.`a`",
               "items": [
                 {
-                  "item": "`test`.`t1`.`a`",
+                  "item": "`t1`.`a`",
                   "equals_constant_in_where": true
                 }
               ] /* items */,
@@ -5961,8 +5901,7 @@ EXPLAIN SELECT MAX(b), a FROM t1 WHERE b < 2 AND a = 1 GROUP BY a	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "access_type": "range"
               }
             ] /* refine_plan */
@@ -6006,7 +5945,7 @@ EXPLAIN SELECT * FROM t1 WHERE c1 = '1' ORDER BY i1	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t1`.`c1` AS `c1`,`test`.`t1`.`i1` AS `i1`,`test`.`t1`.`c2` AS `c2` from `test`.`t1` where (`test`.`t1`.`c1` = '1') order by `test`.`t1`.`i1`"
+            "expanded_query": "/* select#1 */ select `t1`.`c1` AS `c1`,`t1`.`i1` AS `i1`,`t1`.`c2` AS `c2` from `t1` where (`t1`.`c1` = '1') order by `t1`.`i1`"
           }
         ] /* steps */
       } /* join_preparation */
@@ -6018,19 +5957,19 @@ EXPLAIN SELECT * FROM t1 WHERE c1 = '1' ORDER BY i1	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "(`test`.`t1`.`c1` = '1')",
+              "original_condition": "(`t1`.`c1` = '1')",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "multiple equal('1', `test`.`t1`.`c1`)"
+                  "resulting_condition": "multiple equal('1', `t1`.`c1`)"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "multiple equal('1', `test`.`t1`.`c1`)"
+                  "resulting_condition": "multiple equal('1', `t1`.`c1`)"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "multiple equal('1', `test`.`t1`.`c1`)"
+                  "resulting_condition": "multiple equal('1', `t1`.`c1`)"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -6038,8 +5977,7 @@ EXPLAIN SELECT * FROM t1 WHERE c1 = '1' ORDER BY i1	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -6050,15 +5988,13 @@ EXPLAIN SELECT * FROM t1 WHERE c1 = '1' ORDER BY i1	{
           {
             "ref_optimizer_key_uses": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "field": "c1",
                 "equals": "'1'",
                 "null_rejecting": false
               },
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "field": "c1",
                 "equals": "'1'",
                 "null_rejecting": false
@@ -6068,8 +6004,7 @@ EXPLAIN SELECT * FROM t1 WHERE c1 = '1' ORDER BY i1	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 2,
@@ -6102,26 +6037,28 @@ EXPLAIN SELECT * FROM t1 WHERE c1 = '1' ORDER BY i1	{
                     "range_scan_alternatives": [
                       {
                         "index": "k1",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "1 <= c1 <= 1"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": true,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 1,
                         "cost": 2.21,
-                        "rowid_ordered": true,
                         "chosen": true
                       },
                       {
                         "index": "k2",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "1 <= c1 <= 1"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": false,
                         "rows": 1,
                         "cost": 2.21,
-                        "rowid_ordered": false,
                         "chosen": false,
                         "cause": "cost"
                       }
@@ -6151,8 +6088,9 @@ EXPLAIN SELECT * FROM t1 WHERE c1 = '1' ORDER BY i1	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
@@ -6184,14 +6122,13 @@ EXPLAIN SELECT * FROM t1 WHERE c1 = '1' ORDER BY i1	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "(`test`.`t1`.`c1` = '1')",
+              "original_condition": "(`t1`.`c1` = '1')",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "(`test`.`t1`.`c1` = '1')"
+                  "table": "`t1`",
+                  "attached": "(`t1`.`c1` = '1')"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -6199,31 +6136,32 @@ EXPLAIN SELECT * FROM t1 WHERE c1 = '1' ORDER BY i1	{
           {
             "clause_processing": {
               "clause": "ORDER BY",
-              "original_clause": "`test`.`t1`.`i1`",
+              "original_clause": "`t1`.`i1`",
               "items": [
                 {
-                  "item": "`test`.`t1`.`i1`"
+                  "item": "`t1`.`i1`"
                 }
               ] /* items */,
               "resulting_clause_is_simple": true,
-              "resulting_clause": "`test`.`t1`.`i1`"
+              "resulting_clause": "`t1`.`i1`"
             } /* clause_processing */
           },
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
-                "pushed_index_condition": "(`test`.`t1`.`c1` = '1')",
+                "table": "`t1`",
+                "pushed_index_condition": "(`t1`.`c1` = '1')",
                 "table_condition_attached": null
               }
             ] /* refine_plan */
           },
           {
+            "added_back_ref_condition": "((`t1`.`c1` <=> '1'))"
+          },
+          {
             "reconsidering_access_paths_for_index_ordering": {
               "index_order_summary": {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "disabled_pushed_condition_on_old_index": true,
                 "index": "k2",
                 "order_direction": "asc",

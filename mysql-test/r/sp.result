@@ -791,7 +791,7 @@ comment 'Characteristics procedure test'
   insert into t1 values ("chistics", 1)|
 show create procedure chistics|
 Procedure	sql_mode	Create Procedure	character_set_client	collation_connection	Database Collation
-chistics		CREATE DEFINER=`root`@`localhost` PROCEDURE `chistics`()
+chistics	NO_ENGINE_SUBSTITUTION	CREATE DEFINER=`root`@`localhost` PROCEDURE `chistics`()
     MODIFIES SQL DATA
     COMMENT 'Characteristics procedure test'
 insert into t1 values ("chistics", 1)	latin1	latin1_swedish_ci	latin1_swedish_ci
@@ -803,7 +803,7 @@ delete from t1|
 alter procedure chistics sql security invoker|
 show create procedure chistics|
 Procedure	sql_mode	Create Procedure	character_set_client	collation_connection	Database Collation
-chistics		CREATE DEFINER=`root`@`localhost` PROCEDURE `chistics`()
+chistics	NO_ENGINE_SUBSTITUTION	CREATE DEFINER=`root`@`localhost` PROCEDURE `chistics`()
     MODIFIES SQL DATA
     SQL SECURITY INVOKER
     COMMENT 'Characteristics procedure test'
@@ -818,7 +818,7 @@ comment 'Characteristics procedure test'
   return 42|
 show create function chistics|
 Function	sql_mode	Create Function	character_set_client	collation_connection	Database Collation
-chistics		CREATE DEFINER=`root`@`localhost` FUNCTION `chistics`() RETURNS int(11)
+chistics	NO_ENGINE_SUBSTITUTION	CREATE DEFINER=`root`@`localhost` FUNCTION `chistics`() RETURNS int(11)
     DETERMINISTIC
     SQL SECURITY INVOKER
     COMMENT 'Characteristics procedure test'
@@ -831,7 +831,7 @@ no sql
 comment 'Characteristics function test'|
 show create function chistics|
 Function	sql_mode	Create Function	character_set_client	collation_connection	Database Collation
-chistics		CREATE DEFINER=`root`@`localhost` FUNCTION `chistics`() RETURNS int(11)
+chistics	NO_ENGINE_SUBSTITUTION	CREATE DEFINER=`root`@`localhost` FUNCTION `chistics`() RETURNS int(11)
     NO SQL
     DETERMINISTIC
     SQL SECURITY INVOKER
@@ -1989,31 +1989,6 @@ select bug2772()|
 bug2772()
 a
 drop function bug2772|
-drop procedure if exists bug2776_1|
-create procedure bug2776_1(out x int)
-begin
-declare v int;
-set v = default;
-set x = v;
-end|
-drop procedure if exists bug2776_2|
-create procedure bug2776_2(out x int)
-begin
-declare v int default 42;
-set v = default;
-set x = v;
-end|
-set @x = 1|
-call bug2776_1(@x)|
-select @x|
-@x
-NULL
-call bug2776_2(@x)|
-select @x|
-@x
-42
-drop procedure bug2776_1|
-drop procedure bug2776_2|
 create table t3 (s1 smallint)|
 insert into t3 values (123456789012)|
 Warnings:
@@ -6790,7 +6765,7 @@ call p1$
 a
 alter table t1 add b integer;
 call p1$
-a
+a	b
 drop table t1;
 drop procedure p1;
 # ------------------------------------------------------------------
@@ -7256,23 +7231,7 @@ create table t1 (a int);
 insert into t1 (a) values (1), (2), (3), (4), (5);
 #
 # Do we correctly resolve identifiers in LIMIT?
-# Since DROP and CREATE did not invalidate
-# the SP cache, we can't test until
-# we drop and re-create the procedure.
 #
-call p1();
-ERROR 42S22: Unknown column 'test.t1.c1' in 'field list'
-# 
-# Drop and recreate the procedure, then repeat
-#
-drop procedure p1;
-create procedure p1()
-begin
-declare a integer;
-declare b integer;
-select * from t1 limit a, b;
-end|
-# Stored procedure variables are resolved correctly in the LIMIT
 call p1();
 a
 drop table t1;
@@ -7595,7 +7554,45 @@ CALL p2();
 DROP PROCEDURE p1;
 DROP PROCEDURE p2;
 DROP TABLE t1;
-# End of 5.5 tests
+
+# Bug#13805127: Stored program cache produces wrong result in same THD
+
+CREATE PROCEDURE p1(x INT UNSIGNED)
+BEGIN
+SELECT c1, t2.c2, count(c3)
+FROM
+(
+SELECT 3 as c2 FROM dual WHERE x = 1
+UNION
+SELECT 2       FROM dual WHERE x = 1 OR x = 2
+) AS t1,
+(
+SELECT '2012-03-01 01:00:00' AS c1, 3 as c2, 1 as c3 FROM dual
+UNION
+SELECT '2012-03-01 02:00:00',       3,       2       FROM dual
+UNION
+SELECT '2012-03-01 01:00:00',       2,       1       FROM dual
+) AS t2
+WHERE t2.c2 = t1.c2
+GROUP BY c1, c2
+;
+END|
+
+CALL p1(1);
+c1	c2	count(c3)
+2012-03-01 01:00:00	2	1
+2012-03-01 01:00:00	3	1
+2012-03-01 02:00:00	3	1
+CALL p1(2);
+c1	c2	count(c3)
+2012-03-01 01:00:00	2	1
+CALL p1(1);
+c1	c2	count(c3)
+2012-03-01 01:00:00	2	1
+2012-03-01 01:00:00	3	1
+2012-03-01 02:00:00	3	1
+DROP PROCEDURE p1;
+# End of 5.5 test
 #
 # Bug#12663165 SP DEAD CODE REMOVAL DOESN'T UNDERSTAND CONTINUE HANDLERS
 #
@@ -7698,4 +7695,58 @@ DROP FUNCTION f2;
 DROP FUNCTION f3;
 DROP FUNCTION f4;
 #
+#
+# WL#6230: Remove 'SET = DEFAULT'
+#
+CREATE TABLE t1(a INT);
+CREATE PROCEDURE p(p INT)
+SET p = DEFAULT|
+ERROR 42000: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 2
+CREATE PROCEDURE p()
+BEGIN
+DECLARE v INT;
+SET v = DEFAULT;
+END|
+ERROR 42000: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ';
+END' at line 4
+CREATE PROCEDURE p()
+BEGIN
+DECLARE v INT DEFAULT 1;
+SET v = DEFAULT;
+END|
+ERROR 42000: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ';
+END' at line 4
+CREATE PROCEDURE p()
+BEGIN
+DECLARE v INT DEFAULT (SELECT * FROM t1);
+SET v = DEFAULT;
+END|
+ERROR 42000: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ';
+END' at line 4
+CREATE TRIGGER t1_bu BEFORE UPDATE ON t1 FOR EACH ROW
+BEGIN
+SET NEW.a = DEFAULT;
+END|
+ERROR 42000: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ';
+END' at line 3
+
+# Check that setting system variables to DEFAULT still works in SP.
+
+CREATE PROCEDURE p1()
+SET @@default_storage_engine = DEFAULT;
+SET @default_storage_engine_saved = @@default_storage_engine;
+SELECT @@default_storage_engine;
+@@default_storage_engine
+MyISAM
+SET @@default_storage_engine = InnoDB;
+SELECT @@default_storage_engine;
+@@default_storage_engine
+InnoDB
+CALL p1();
+SELECT @@default_storage_engine;
+@@default_storage_engine
+MyISAM
+SET @@default_storage_engine = @default_storage_engine_saved;
+DROP PROCEDURE p1;
+DROP TABLE t1;
 # End of 5.6 tests

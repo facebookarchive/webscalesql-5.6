@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-Copyright (c) 1996, 2010, Oracle and/or its affiliates. All Rights Reserved.
+Copyright (c) 1996, 2012, Oracle and/or its affiliates. All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -52,6 +52,23 @@ typedef	struct undo_node_struct undo_node_t;
 typedef	struct purge_node_struct purge_node_t;
 
 typedef struct row_ext_struct row_ext_t;
+
+/** Index record modification operations during online index creation */
+enum row_op {
+	/** Insert a record */
+	ROW_OP_INSERT,
+	/** Delete-mark a record */
+	ROW_OP_DELETE_MARK,
+	/** Unmark a delete-marked record */
+	ROW_OP_DELETE_UNMARK,
+	/** Purge a delete-marked record */
+	ROW_OP_PURGE,
+	/** Purge a record that may not be delete-marked */
+	ROW_OP_DELETE_PURGE
+};
+
+/** Buffer for logging modifications during online index creation */
+struct row_log_t;
 
 /* MySQL data types */
 struct TABLE;

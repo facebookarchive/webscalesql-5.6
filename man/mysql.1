@@ -2,12 +2,12 @@
 .\"     Title: \fBmysql\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 03/29/2012
+.\"      Date: 07/17/2012
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQL\FR" "1" "03/29/2012" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQL\FR" "1" "07/17/2012" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -267,7 +267,7 @@ This option is supported beginning with MySQL 5\&.6\&.1\&.
 \fB\-\-character\-sets\-dir=\fR\fB\fIpath\fR\fR
 .sp
 The directory where character sets are installed\&. See
-Section\ \&9.5, \(lqCharacter Set Configuration\(rq\&.
+Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&.
 .RE
 .sp
 .RS 4
@@ -413,7 +413,7 @@ Print debugging information and memory and CPU usage statistics when the program
 \fB\-\-default\-auth=\fR\fB\fIplugin\fR\fR
 .sp
 The client\-side authentication plugin to use\&. See
-Section\ \&5.5.6, \(lqPluggable Authentication\(rq\&.
+Section\ \&6.3.6, \(lqPluggable Authentication\(rq\&.
 .RE
 .sp
 .RS 4
@@ -441,7 +441,7 @@ latin1
 character set by default\&. You can usually fix such issues by using this option to force the client to use the system character set instead\&.
 .sp
 See
-Section\ \&9.5, \(lqCharacter Set Configuration\(rq, for more information\&.
+Section\ \&10.5, \(lqCharacter Set Configuration\(rq, for more information\&.
 .RE
 .sp
 .RS 4
@@ -836,7 +836,7 @@ option on the command line,
 prompts for one\&.
 .sp
 Specifying a password on the command line should be considered insecure\&. See
-Section\ \&5.3.2.2, \(lqEnd-User Guidelines for Password Security\(rq\&. You can use an option file to avoid giving the password on the command line\&.
+Section\ \&6.1.2.2, \(lqEnd-User Guidelines for Password Security\(rq\&. You can use an option file to avoid giving the password on the command line\&.
 .RE
 .sp
 .RS 4
@@ -872,7 +872,7 @@ The directory in which to look for plugins\&. It may be necessary to specify thi
 option is used to specify an authentication plugin but
 \fBmysql\fR
 does not find it\&. See
-Section\ \&5.5.6, \(lqPluggable Authentication\(rq\&.
+Section\ \&6.3.6, \(lqPluggable Authentication\(rq\&.
 .RE
 .sp
 .RS 4
@@ -1171,7 +1171,7 @@ localhost, the Unix socket file to use, or, on Windows, the name of the named pi
 Options that begin with
 \fB\-\-ssl\fR
 specify whether to connect to the server using SSL and indicate where to find SSL keys and certificates\&. See
-Section\ \&5.5.8.3, \(lqSSL Command Options\(rq\&.
+Section\ \&6.3.8.3, \(lqSSL Command Options\(rq\&.
 .RE
 .sp
 .RS 4
@@ -1643,8 +1643,8 @@ is set to something other than the default of
 \(lq;\(rq, instances of that character are sent to the server without interpretation\&. However, the server itself still interprets
 \(lq;\(rq
 as a statement delimiter and processes statements accordingly\&. This behavior on the server side comes into play for multiple\-statement execution (see
-Section\ \&20.9.13, \(lqC API Support for Multiple Statement Execution\(rq), and for parsing the body of stored procedures and functions, triggers, and events (see
-Section\ \&17.1, \(lqDefining Stored Programs\(rq)\&.
+Section\ \&21.8.13, \(lqC API Support for Multiple Statement Execution\(rq), and for parsing the body of stored procedures and functions, triggers, and events (see
+Section\ \&18.1, \(lqDefining Stored Programs\(rq)\&.
 .RE
 .sp
 .RS 4
@@ -2523,7 +2523,7 @@ environment variable\&.
 The
 \&.mysql_history
 should be protected with a restrictive access mode because sensitive information might be written to it, such as the text of SQL statements that contain passwords\&. See
-Section\ \&5.3.2.2, \(lqEnd-User Guidelines for Password Security\(rq\&.
+Section\ \&6.1.2.2, \(lqEnd-User Guidelines for Password Security\(rq\&.
 .PP
 It is possible to suppress logging of statements to the history file by using the
 \fB\-\-batch\fR
@@ -2593,7 +2593,7 @@ command,
 uses it as a search string to access server\-side help from the contents of the MySQL Reference Manual\&. The proper operation of this command requires that the help tables in the
 mysql
 database be initialized with help topic information (see
-Section\ \&5.1.8, \(lqServer-Side Help\(rq)\&.
+Section\ \&5.1.9, \(lqServer-Side Help\(rq)\&.
 .PP
 If there is no match for the search string, the search fails:
 .sp
@@ -3063,7 +3063,7 @@ client with the
 option\&.
 .PP
 For more information about auto\-reconnect and its effect on state information when a reconnection occurs, see
-Section\ \&20.9.12, \(lqControlling Automatic Reconnection Behavior\(rq\&.
+Section\ \&21.8.12, \(lqControlling Automatic Reconnection Behavior\(rq\&.
 .SH "COPYRIGHT"
 .br
 .PP

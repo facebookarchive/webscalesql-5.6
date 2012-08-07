@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2006, 2011, Oracle and/or its affiliates. All rights reserved.
+   Copyright (c) 2006, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
 */
 
 #include "client_priv.h"
+#include "my_default.h"
 #include <sslopt-vars.h>
 #include "../scripts/mysql_fix_privilege_tables_sql.c"
 
@@ -344,6 +345,9 @@ static int run_command(char* cmd,
       fprintf(stdout, "%s", buf);
     }
   }
+
+  if (! ds_res)
+    fflush(stdout);
 
   error= pclose(res_file);
   return WEXITSTATUS(error);
@@ -823,7 +827,8 @@ static int run_sql_fix_privilege_tables(void)
         found_real_errors++;
         print_line(line);
       }
-      else if (strncmp(line, "WARNING", 7) == 0)
+      else if ((strncmp(line, "WARNING", 7) == 0) ||
+               (strncmp(line, "Warning", 7) == 0))
       {
         print_line(line);
       }

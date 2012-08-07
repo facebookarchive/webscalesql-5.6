@@ -89,8 +89,6 @@ extern ibool		buf_debug_prints;/*!< If this is set TRUE, the program
 					prints info whenever read or flush
 					occurs */
 #endif /* UNIV_DEBUG */
-extern ulint srv_buf_pool_write_requests; /*!< variable to count write request
-					  issued */
 extern ulint srv_buf_pool_instances;
 extern ulint srv_buf_pool_curr_size;
 #else /* !UNIV_HOTBACKUP */
@@ -222,9 +220,9 @@ buf_pool_mutex_exit_all(void);
 
 /********************************************************************//**
 Creates the buffer pool.
-@return	own: buf_pool object, NULL if not enough memory or error */
+@return	DB_SUCCESS if success, DB_ERROR if not enough memory or error */
 UNIV_INTERN
-ulint
+dberr_t
 buf_pool_init(
 /*=========*/
 	ulint	size,		/*!< in: Size of the total pool in bytes */
@@ -594,34 +592,34 @@ ib_uint64_t
 buf_block_get_modify_clock(
 /*=======================*/
 	buf_block_t*	block);	/*!< in: block */
-#else /* !UNIV_HOTBACKUP */
-# define buf_block_modify_clock_inc(block) ((void) 0)
-#endif /* !UNIV_HOTBACKUP */
 /*******************************************************************//**
 Increments the bufferfix count. */
 UNIV_INLINE
 void
 buf_block_buf_fix_inc_func(
 /*=======================*/
-#ifdef UNIV_SYNC_DEBUG
+# ifdef UNIV_SYNC_DEBUG
 	const char*	file,	/*!< in: file name */
 	ulint		line,	/*!< in: line */
-#endif /* UNIV_SYNC_DEBUG */
+# endif /* UNIV_SYNC_DEBUG */
 	buf_block_t*	block)	/*!< in/out: block to bufferfix */
 	__attribute__((nonnull));
-#ifdef UNIV_SYNC_DEBUG
+# ifdef UNIV_SYNC_DEBUG
 /** Increments the bufferfix count.
 @param b	in/out: block to bufferfix
 @param f	in: file name where requested
 @param l	in: line number where requested */
 # define buf_block_buf_fix_inc(b,f,l) buf_block_buf_fix_inc_func(f,l,b)
-#else /* UNIV_SYNC_DEBUG */
+# else /* UNIV_SYNC_DEBUG */
 /** Increments the bufferfix count.
 @param b	in/out: block to bufferfix
 @param f	in: file name where requested
 @param l	in: line number where requested */
 # define buf_block_buf_fix_inc(b,f,l) buf_block_buf_fix_inc_func(b)
-#endif /* UNIV_SYNC_DEBUG */
+# endif /* UNIV_SYNC_DEBUG */
+#else /* !UNIV_HOTBACKUP */
+# define buf_block_modify_clock_inc(block) ((void) 0)
+#endif /* !UNIV_HOTBACKUP */
 /********************************************************************//**
 Checks if a page is corrupt.
 @return	TRUE if corrupted */
@@ -629,9 +627,12 @@ UNIV_INTERN
 ibool
 buf_page_is_corrupted(
 /*==================*/
+	bool		check_lsn,	/*!< in: true if we need to check the
+					and complain about the LSN */
 	const byte*	read_buf,	/*!< in: a database page */
-	ulint		zip_size);	/*!< in: size of compressed page;
+	ulint		zip_size)	/*!< in: size of compressed page;
 					0 for uncompressed pages */
+	__attribute__((nonnull, warn_unused_result));
 #ifndef UNIV_HOTBACKUP
 /**********************************************************************//**
 Gets the space id, page offset, and byte offset within page of a
@@ -881,7 +882,7 @@ buf_page_belongs_to_unzip_LRU(
 Gets the mutex of a block.
 @return	pointer to mutex protecting bpage */
 UNIV_INLINE
-mutex_t*
+ib_mutex_t*
 buf_page_get_mutex(
 /*===============*/
 	const buf_page_t*	bpage)	/*!< in: pointer to control block */
@@ -1152,7 +1153,7 @@ UNIV_INTERN
 buf_page_t*
 buf_page_init_for_read(
 /*===================*/
-	ulint*		err,	/*!< out: DB_SUCCESS or DB_TABLESPACE_DELETED */
+	dberr_t*	err,	/*!< out: DB_SUCCESS or DB_TABLESPACE_DELETED */
 	ulint		mode,	/*!< in: BUF_READ_IBUF_PAGES_ONLY, ... */
 	ulint		space,	/*!< in: space id */
 	ulint		zip_size,/*!< in: compressed page size, or 0 */
@@ -1384,6 +1385,16 @@ buf_get_nth_chunk_block(
 	ulint		n,		/*!< in: nth chunk in the buffer pool */
 	ulint*		chunk_size);	/*!< in: chunk size */
 
+/********************************************************************//**
+Calculate the checksum of a page from compressed table and update the page. */
+UNIV_INTERN
+void
+buf_flush_update_zip_checksum(
+/*==========================*/
+	buf_frame_t*	page,		/*!< in/out: Page to update */
+	ulint		zip_size,	/*!< in: Compressed page size */
+	lsn_t		lsn);		/*!< in: Lsn to stamp on the page */
+
 #endif /* !UNIV_HOTBACKUP */
 
 /** The common buffer control block structure
@@ -1586,7 +1597,7 @@ struct buf_block_struct{
 					decompressed LRU list;
 					used in debugging */
 #endif /* UNIV_DEBUG */
-	mutex_t		mutex;		/*!< mutex protecting this block:
+	ib_mutex_t		mutex;		/*!< mutex protecting this block:
 					state (also protected by the buffer
 					pool mutex), io_fix, buf_fix_count,
 					and accessed; we introduce this new
@@ -1750,9 +1761,9 @@ struct buf_pool_struct{
 
 	/** @name General fields */
 	/* @{ */
-	mutex_t		mutex;		/*!< Buffer pool mutex of this
+	ib_mutex_t		mutex;		/*!< Buffer pool mutex of this
 					instance */
-	mutex_t		zip_mutex;	/*!< Zip mutex of this buffer
+	ib_mutex_t		zip_mutex;	/*!< Zip mutex of this buffer
 					pool instance, protects compressed
 					only pages (of type buf_page_t, not
 					buf_block_t */
@@ -1806,7 +1817,7 @@ struct buf_pool_struct{
 
 	/* @{ */
 
-	mutex_t		flush_list_mutex;/*!< mutex protecting the
+	ib_mutex_t		flush_list_mutex;/*!< mutex protecting the
 					flush list access. This mutex
 					protects flush_list, flush_rbt
 					and bpage::list pointers when

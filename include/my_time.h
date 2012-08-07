@@ -84,6 +84,7 @@ typedef long my_time_t;
 #define MYSQL_TIME_WARN_INVALID_TIMESTAMP 4
 #define MYSQL_TIME_WARN_ZERO_DATE         8
 #define MYSQL_TIME_NOTE_TRUNCATED        16
+#define MYSQL_TIME_WARN_ZERO_IN_DATE     32
 
 /* Usefull constants */
 #define SECONDS_IN_24H 86400L
@@ -179,8 +180,8 @@ void my_init_time(void);
     estimate.
 
   RETURN VALUES
-    FALSE   The value seems sane
-    TRUE    The MYSQL_TIME value is definitely out of range
+    TRUE    The value seems sane
+    FALSE   The MYSQL_TIME value is definitely out of range
 */
 
 static inline my_bool validate_timestamp_range(const MYSQL_TIME *t)

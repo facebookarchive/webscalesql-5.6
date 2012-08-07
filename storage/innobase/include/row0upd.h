@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-Copyright (c) 1996, 2011, Oracle and/or its affiliates. All Rights Reserved.
+Copyright (c) 1996, 2012, Oracle and/or its affiliates. All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -101,7 +101,7 @@ byte*
 row_upd_write_sys_vals_to_log(
 /*==========================*/
 	dict_index_t*	index,	/*!< in: clustered index */
-	trx_t*		trx,	/*!< in: transaction */
+	trx_id_t	trx_id,	/*!< in: transaction id */
 	roll_ptr_t	roll_ptr,/*!< in: roll ptr of the undo log record */
 	byte*		log_ptr,/*!< pointer to a buffer of size > 20 opened
 				in mlog */
@@ -118,7 +118,7 @@ row_upd_rec_sys_fields(
 				uncompressed part will be updated, or NULL */
 	dict_index_t*	index,	/*!< in: clustered index */
 	const ulint*	offsets,/*!< in: rec_get_offsets(rec, index) */
-	trx_t*		trx,	/*!< in: transaction */
+	const trx_t*	trx,	/*!< in: transaction */
 	roll_ptr_t	roll_ptr);/*!< in: roll ptr of the undo log record */
 /*********************************************************************//**
 Sets the trx id or roll ptr field of a clustered index entry. */
@@ -192,11 +192,12 @@ UNIV_INTERN
 upd_t*
 row_upd_build_sec_rec_difference_binary(
 /*====================================*/
-	dict_index_t*	index,	/*!< in: index */
-	const dtuple_t*	entry,	/*!< in: entry to insert */
 	const rec_t*	rec,	/*!< in: secondary index record */
-	trx_t*		trx,	/*!< in: transaction */
-	mem_heap_t*	heap);	/*!< in: memory heap from which allocated */
+	dict_index_t*	index,	/*!< in: index */
+	const ulint*	offsets,/*!< in: rec_get_offsets(rec, index) */
+	const dtuple_t*	entry,	/*!< in: entry to insert */
+	mem_heap_t*	heap)	/*!< in: memory heap from which allocated */
+	__attribute__((warn_unused_result, nonnull));
 /***************************************************************//**
 Builds an update vector from those fields, excluding the roll ptr and
 trx id fields, which in an index entry differ from a record that has
@@ -204,14 +205,19 @@ the equal ordering fields. NOTE: we compare the fields as binary strings!
 @return own: update vector of differing fields, excluding roll ptr and
 trx id */
 UNIV_INTERN
-upd_t*
+const upd_t*
 row_upd_build_difference_binary(
 /*============================*/
 	dict_index_t*	index,	/*!< in: clustered index */
 	const dtuple_t*	entry,	/*!< in: entry to insert */
 	const rec_t*	rec,	/*!< in: clustered index record */
-	trx_t*		trx,	/*!< in: transaction */
-	mem_heap_t*	heap);	/*!< in: memory heap from which allocated */
+	const ulint*	offsets,/*!< in: rec_get_offsets(rec,index), or NULL */
+	bool		no_sys,	/*!< in: skip the system columns
+				DB_TRX_ID and DB_ROLL_PTR */
+	trx_t*		trx,	/*!< in: transaction (for diagnostics),
+				or NULL */
+	mem_heap_t*	heap)	/*!< in: memory heap from which allocated */
+	__attribute__((nonnull(1,2,3,7), warn_unused_result));
 /***********************************************************//**
 Replaces the new column values stored in the update vector to the index entry
 given. */
@@ -315,25 +321,14 @@ row_upd_changes_fts_column(
 	upd_field_t*	upd_field);	/*!< in: field to check */
 /***********************************************************//**
 Checks if an FTS Doc ID column is affected by an UPDATE.
-@return TRUE if Doc ID column is affected */
+@return whether Doc ID column is affected */
 UNIV_INTERN
-ulint
+bool
 row_upd_changes_doc_id(
 /*===================*/
 	dict_table_t*	table,		/*!< in: table */
-	upd_field_t*	upd_field);	/*!< in: field to check */
-/***********************************************************//**
-Checks if an update vector changes the table's FTS-indexed columns.
-NOTE: must not be called for tables which do not have an FTS-index.
-Also, the vector returned must be explicitly freed as it's allocated
-using the ut_malloc() allocator.
-@return vector of FTS indexes that were affected by the update else NULL */
-UNIV_INTERN
-ib_vector_t*
-row_upd_changes_fts_columns(
-/*========================*/
-	dict_table_t*	table,		/*!< in: table */
-	upd_t*		update);	/*!< in: update vector for the row */
+	upd_field_t*	upd_field)	/*!< in: field to check */
+	__attribute__((nonnull, warn_unused_result));
 /***********************************************************//**
 Checks if an update vector changes an ordering field of an index record.
 This function is fast if the update vector is short or the number of ordering

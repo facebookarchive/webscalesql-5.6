@@ -62,6 +62,7 @@ struct fts_get_doc_struct {
 
 					/*!< Parsed sql statement */
 	que_t*		get_document_graph;
+	fts_cache_t*	cache;		/*!< The parent cache */
 };
 
 /** Since we can have multiple FTS indexes on a table, we keep a
@@ -145,11 +146,11 @@ struct fts_cache_struct {
 					intialization, it has different
 					SYNC level as above cache lock */
 
-	mutex_t		optimize_lock;	/*!< Lock for OPTIMIZE */
+	ib_mutex_t		optimize_lock;	/*!< Lock for OPTIMIZE */
 
-	mutex_t		deleted_lock;	/*!< Lock covering deleted_doc_ids */
+	ib_mutex_t		deleted_lock;	/*!< Lock covering deleted_doc_ids */
 
-	mutex_t		doc_id_lock;	/*!< Lock covering Doc ID */
+	ib_mutex_t		doc_id_lock;	/*!< Lock covering Doc ID */
 
 	ib_vector_t*	deleted_doc_ids;/*!< Array of deleted doc ids, each
 					element is of type fts_update_t */

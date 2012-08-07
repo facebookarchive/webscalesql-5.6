@@ -1,4 +1,4 @@
-/* Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -71,7 +71,9 @@ Query_tables_list::binlog_stmt_unsafe_errcode[BINLOG_STMT_UNSAFE_COUNT] =
   ER_BINLOG_UNSAFE_CREATE_IGNORE_SELECT,
   ER_BINLOG_UNSAFE_CREATE_REPLACE_SELECT,
   ER_BINLOG_UNSAFE_CREATE_SELECT_AUTOINC,
-  ER_BINLOG_UNSAFE_UPDATE_IGNORE
+  ER_BINLOG_UNSAFE_UPDATE_IGNORE,
+  ER_BINLOG_UNSAFE_INSERT_TWO_KEYS,
+  ER_BINLOG_UNSAFE_AUTOINC_NOT_FIRST
 };
 
 
@@ -171,6 +173,16 @@ st_parsing_options::reset()
   allows_derived= TRUE;
 }
 
+/**
+ Cleans slave connection info.
+*/
+void struct_slave_connection::reset()
+{
+  user= 0;
+  password= 0;
+  plugin_auth= 0;
+  plugin_dir= 0;
+}
 
 /**
   Perform initialization of Lex_input_stream instance.
@@ -431,9 +443,9 @@ void lex_start(THD *thd)
   lex->ignore= 0;
   lex->spname= NULL;
   lex->sphead= NULL;
-  lex->spcont= NULL;
+  lex->set_sp_current_parsing_ctx(NULL);
   lex->m_sql_cmd= NULL;
-  lex->proc_list.first= 0;
+  lex->proc_analyse= NULL;
   lex->escape_used= FALSE;
   lex->query_tables= 0;
   lex->reset_query_tables_list(FALSE);
@@ -1669,50 +1681,6 @@ int lex_one_token(void *arg, void *yythd)
 }
 
 
-/**
-  Construct a copy of this object to be used for mysql_alter_table
-  and mysql_create_table.
-
-  Historically, these two functions modify their Alter_info
-  arguments. This behaviour breaks re-execution of prepared
-  statements and stored procedures and is compensated by always
-  supplying a copy of Alter_info to these functions.
-
-  @return You need to use check the error in THD for out
-  of memory condition after calling this function.
-*/
-
-Alter_info::Alter_info(const Alter_info &rhs, MEM_ROOT *mem_root)
-  :drop_list(rhs.drop_list, mem_root),
-  alter_list(rhs.alter_list, mem_root),
-  key_list(rhs.key_list, mem_root),
-  create_list(rhs.create_list, mem_root),
-  flags(rhs.flags),
-  keys_onoff(rhs.keys_onoff),
-  tablespace_op(rhs.tablespace_op),
-  partition_names(rhs.partition_names, mem_root),
-  num_parts(rhs.num_parts),
-  change_level(rhs.change_level),
-  datetime_field(rhs.datetime_field),
-  error_if_not_empty(rhs.error_if_not_empty)
-{
-  /*
-    Make deep copies of used objects.
-    This is not a fully deep copy - clone() implementations
-    of Alter_drop, Alter_column, Key, foreign_key, Key_part_spec
-    do not copy string constants. At the same length the only
-    reason we make a copy currently is that ALTER/CREATE TABLE
-    code changes input Alter_info definitions, but string
-    constants never change.
-  */
-  list_copy_and_replace_each_value(drop_list, mem_root);
-  list_copy_and_replace_each_value(alter_list, mem_root);
-  list_copy_and_replace_each_value(key_list, mem_root);
-  list_copy_and_replace_each_value(create_list, mem_root);
-  /* partition_names are not deeply copied currently */
-}
-
-
 void trim_whitespace(const CHARSET_INFO *cs, LEX_STRING *str)
 {
   /*
@@ -1819,6 +1787,7 @@ void st_select_lex::init_query()
   select_list_tables= 0;
   m_non_agg_field_used= false;
   m_agg_func_used= false;
+  with_sum_func= false;
 }
 
 void st_select_lex::init_select()
@@ -2463,6 +2432,16 @@ static void print_join(THD *thd,
 
 
 /**
+  @returns whether a database is equal to the connection's default database
+*/
+bool db_is_default_db(const char *db, size_t db_len, const THD *thd)
+{
+  return thd != NULL && thd->db != NULL &&
+    thd->db_length == db_len && !memcmp(db, thd->db, db_len);
+}
+
+
+/**
   Print table as it should be in join list.
 
   @param str   string where table should be printed
@@ -2483,7 +2462,9 @@ void TABLE_LIST::print(THD *thd, String *str, enum_query_type query_type)
     {
       // A view
       if (!(belong_to_view &&
-            belong_to_view->compact_view_format))
+            belong_to_view->compact_view_format) &&
+          !((query_type & QT_NO_DEFAULT_DB) &&
+            db_is_default_db(view_db.str, view_db.length, thd)))
       {
         append_identifier(thd, str, view_db.str, view_db.length);
         str->append('.');
@@ -2494,9 +2475,12 @@ void TABLE_LIST::print(THD *thd, String *str, enum_query_type query_type)
     else if (derived)
     {
       // A derived table
-      str->append('(');
-      derived->print(str, query_type);
-      str->append(')');
+      if (!(query_type & QT_DERIVED_TABLE_ONLY_ALIAS))
+      {
+        str->append('(');
+        derived->print(str, query_type);
+        str->append(')');
+      }
       cmp_name= "";                               // Force printing of alias
     }
     else
@@ -2504,7 +2488,9 @@ void TABLE_LIST::print(THD *thd, String *str, enum_query_type query_type)
       // A normal table
 
       if (!(belong_to_view &&
-            belong_to_view->compact_view_format))
+            belong_to_view->compact_view_format) &&
+          !((query_type & QT_NO_DEFAULT_DB) &&
+            db_is_default_db(db, db_length, thd)))
       {
         append_identifier(thd, str, db, db_length);
         str->append('.');
@@ -2630,7 +2616,7 @@ void st_select_lex::print(THD *thd, String *str, enum_query_type query_type)
     else
       str->append(',');
 
-    if (master_unit()->item && item->is_autogenerated_name)
+    if (master_unit()->item && item->item_name.is_autogenerated())
     {
       /*
         Do not print auto-generated aliases in subqueries. It has no purpose
@@ -2696,7 +2682,7 @@ void st_select_lex::print(THD *thd, String *str, enum_query_type query_type)
   // having
   Item *cur_having= having;
   if (join)
-    cur_having= join->having;
+    cur_having= join->having_for_explain;
 
   if (cur_having || having_value != Item::COND_UNDEF)
   {
@@ -2744,10 +2730,13 @@ void LEX::cleanup_lex_after_parse_error(THD *thd)
     Sic: we must nullify the member of the main lex, not the
     current one that will be thrown away
   */
-  if (thd->lex->sphead)
+  sp_head *sp= thd->lex->sphead;
+
+  if (sp)
   {
-    thd->lex->sphead->restore_thd_mem_root(thd);
-    delete thd->lex->sphead;
+    sp->m_parser_data.finish_parsing_sp_body(thd);
+    delete sp;
+
     thd->lex->sphead= NULL;
   }
 }
@@ -2805,6 +2794,8 @@ void Query_tables_list::reset_query_tables_list(bool init)
   sroutines_list_own_elements= 0;
   binlog_stmt_flags= 0;
   stmt_accessed_table_flag= 0;
+  lock_tables_state= LTS_NOT_LOCKED;
+  table_count= 0;
 }
 
 
@@ -2836,7 +2827,8 @@ void Query_tables_list::destroy_query_tables_list()
 */
 
 LEX::LEX()
-  :result(0), option_type(OPT_DEFAULT), is_lex_started(0)
+  :result(0), option_type(OPT_DEFAULT), is_change_password(false),
+  is_lex_started(0)
 {
 
   my_init_dynamic_array2(&plugins, sizeof(plugin_ref),
@@ -3357,6 +3349,9 @@ TABLE_LIST *LEX::unlink_first_table(bool *link_to_local)
       query_tables_last= &query_tables;
     first->next_global= 0;
 
+    if (query_tables_own_last == &first->next_global)
+      query_tables_own_last= &query_tables;
+
     /*
       and from local list if it is not empty
     */
@@ -3439,6 +3434,10 @@ void LEX::link_first_table_back(TABLE_LIST *first,
       query_tables->prev_global= &first->next_global;
     else
       query_tables_last= &first->next_global;
+
+    if (query_tables_own_last == &query_tables)
+      query_tables_own_last= &first->next_global;
+
     query_tables= first;
 
     if (link_to_local)
@@ -3774,8 +3773,8 @@ st_select_lex::type_enum st_select_lex::type(const THD *thd)
 bool LEX::is_partition_management() const
 {
   return (sql_command == SQLCOM_ALTER_TABLE &&
-          (alter_info.flags == ALTER_ADD_PARTITION ||
-           alter_info.flags == ALTER_REORGANIZE_PARTITION));
+          (alter_info.flags == Alter_info::ALTER_ADD_PARTITION ||
+           alter_info.flags == Alter_info::ALTER_REORGANIZE_PARTITION));
 }
 
 

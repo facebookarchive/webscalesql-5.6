@@ -243,6 +243,7 @@ struct PSI_digest_storage
 {
   my_bool m_full;
   int m_byte_count;
+  const void *m_charset;
   unsigned char m_token_array[1024];
 };
 typedef struct PSI_digest_storage PSI_digest_storage;
@@ -435,7 +436,7 @@ typedef void (*start_stage_v1_t)
 typedef void (*end_stage_v1_t) (void);
 typedef struct PSI_statement_locker* (*get_thread_statement_locker_v1_t)
   (struct PSI_statement_locker_state_v1 *state,
-   PSI_statement_key key);
+   PSI_statement_key key, const void *charset);
 typedef struct PSI_statement_locker* (*refine_statement_v1_t)
   (struct PSI_statement_locker *locker,
    PSI_statement_key key);
@@ -499,6 +500,8 @@ typedef struct PSI_digest_locker * (*digest_start_v1_t)
   (struct PSI_statement_locker *locker);
 typedef struct PSI_digest_locker* (*digest_add_token_v1_t)
   (struct PSI_digest_locker *locker, uint token, struct OPAQUE_LEX_YYSTYPE *yylval);
+typedef int (*set_thread_connect_attrs_v1_t)(const char *buffer, uint length,
+                                             const void *from_cs);
 struct PSI_v1
 {
   register_mutex_v1_t register_mutex;
@@ -596,6 +599,7 @@ struct PSI_v1
   set_socket_thread_owner_v1_t set_socket_thread_owner;
   digest_start_v1_t digest_start;
   digest_add_token_v1_t digest_add_token;
+  set_thread_connect_attrs_v1_t set_thread_connect_attrs;
 };
 typedef struct PSI_v1 PSI;
 typedef struct PSI_mutex_info_v1 PSI_mutex_info;

@@ -1,4 +1,4 @@
-/* Copyright (c) 2001, 2011, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2001, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -134,7 +134,7 @@ static void mysql_ha_close_table(THD *thd, TABLE_LIST *tables)
     /* Non temporary table. */
     tables->table->file->ha_index_or_rnd_end();
     tables->table->open_by_handler= 0;
-    (void) close_thread_table(thd, &tables->table);
+    close_thread_table(thd, &tables->table);
     thd->mdl_context.release_lock(tables->mdl_request.ticket);
   }
   else if (tables->table)
@@ -668,32 +668,38 @@ retry:
   {
     switch (mode) {
     case RNEXT:
-      if (table->file->inited != handler::NONE)
+      if (m_key_name)
       {
-        if (m_key_name)
+        if (table->file->inited == handler::INDEX)
         {
           /* Check if we read from the same index. */
           DBUG_ASSERT((uint) keyno == table->file->get_index());
           error= table->file->ha_index_next(table->record[0]);
+          break;
         }
-        else
-        {
-          error= table->file->ha_rnd_next(table->record[0]);
-        }
+      }
+      else if (table->file->inited == handler::RND)
+      {
+        error= table->file->ha_rnd_next(table->record[0]);
         break;
       }
-      /* else fall through */
+      /*
+        Fall through to HANDLER ... READ ... FIRST case if we are trying
+        to read next row in index order after starting reading rows in
+        natural order, or, vice versa, trying to read next row in natural
+        order after reading previous rows in index order.
+      */
     case RFIRST:
       if (m_key_name)
       {
-        table->file->ha_index_or_rnd_end();
-        table->file->ha_index_init(keyno, 1);
-        error= table->file->ha_index_first(table->record[0]);
+        if (!(error= table->file->ha_index_or_rnd_end()) &&
+            !(error= table->file->ha_index_init(keyno, 1)))
+          error= table->file->ha_index_first(table->record[0]);
       }
       else
       {
-        table->file->ha_index_or_rnd_end();
-	if (!(error= table->file->ha_rnd_init(1)))
+        if (!(error= table->file->ha_index_or_rnd_end()) &&
+            !(error= table->file->ha_rnd_init(1)))
           error= table->file->ha_rnd_next(table->record[0]);
       }
       mode=RNEXT;
@@ -702,22 +708,22 @@ retry:
       DBUG_ASSERT(m_key_name != 0);
       /* Check if we read from the same index. */
       DBUG_ASSERT((uint) keyno == table->file->get_index());
-      if (table->file->inited != handler::NONE)
+      if (table->file->inited == handler::INDEX)
       {
         error= table->file->ha_index_prev(table->record[0]);
         break;
       }
-      /* else fall through */
+      /* else fall through, for more info, see comment before 'case RFIRST'. */
     case RLAST:
       DBUG_ASSERT(m_key_name != 0);
-      table->file->ha_index_or_rnd_end();
-      table->file->ha_index_init(keyno, 1);
-      error= table->file->ha_index_last(table->record[0]);
+      if (!(error= table->file->ha_index_or_rnd_end()) &&
+          !(error= table->file->ha_index_init(keyno, 1)))
+        error= table->file->ha_index_last(table->record[0]);
       mode=RPREV;
       break;
     case RNEXT_SAME:
       /* Continue scan on "(keypart1,keypart2,...)=(c1, c2, ...)  */
-      DBUG_ASSERT(m_key_name != 0);
+      DBUG_ASSERT(table->file->inited == handler::INDEX);
       error= table->file->ha_index_next_same(table->record[0], key, key_len);
       break;
     case RKEY:
@@ -755,11 +761,12 @@ retry:
 
       if (!(key= (uchar*) thd->calloc(ALIGN_SIZE(key_len))))
 	goto err;
-      table->file->ha_index_or_rnd_end();
-      table->file->ha_index_init(keyno, 1);
+      if ((error= table->file->ha_index_or_rnd_end()))
+        break;
       key_copy(key, table->record[0], table->key_info + keyno, key_len);
-      error= table->file->ha_index_read_map(table->record[0],
-                                            key, keypart_map, m_rkey_mode);
+      if (!(error= table->file->ha_index_init(keyno, 1)))
+        error= table->file->ha_index_read_map(table->record[0],
+                                              key, keypart_map, m_rkey_mode);
       mode=rkey_to_rnext[(int)m_rkey_mode];
       break;
     }

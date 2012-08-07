@@ -52,6 +52,11 @@ WHERE col_1_varchar = REPEAT("c", 4000) AND col_2_varchar = REPEAT("o", 4000);
 INSERT INTO worklog5743 VALUES(REPEAT("a", 4000),REPEAT("o", 4000));
 DELETE FROM worklog5743 WHERE col_1_varchar = REPEAT("b", 4000);
 SELECT col_1_varchar = REPEAT("c", 4000) FROM worklog5743;
+--error ER_INDEX_COLUMN_TOO_LONG
+ALTER TABLE worklog5743 ROW_FORMAT=REDUNDANT;
+--error ER_INDEX_COLUMN_TOO_LONG
+ALTER TABLE worklog5743 ROW_FORMAT=COMPACT;
+ALTER TABLE worklog5743 ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=16;
 DROP TABLE worklog5743;
 
 
@@ -765,7 +770,7 @@ COMMIT;
 # Wait for commit
 let $wait_condition=SELECT COUNT(*)=0 FROM information_schema.processlist
 WHERE info='COMMIT';
---source include/wait_condition.inc 
+--source include/wait_condition.inc
 
 --echo "In connection 1"
 --connection con1
@@ -874,8 +879,12 @@ worklog5743;
 SELECT COUNT(*) FROM worklog5743;
 COMMIT;
 
+--echo "Disconnect the connections 1 and 2"
 --disconnect con1
+--source include/wait_until_disconnected.inc
+--connection con2
 --disconnect con2
+--source include/wait_until_disconnected.inc
 
 --connection default
 DROP TABLE worklog5743;
@@ -1020,7 +1029,7 @@ AND col_2_varchar = REPEAT("o", 4000);
 ALTER TABLE worklog5743 ADD PRIMARY KEY (col_1_varchar(3072));
 
 INSERT INTO worklog5743 VALUES(REPEAT("a", 4000),REPEAT("o", 4000));
---error 1062
+--error ER_DUP_ENTRY
 INSERT INTO worklog5743 VALUES(REPEAT("a", 4000),REPEAT("o", 4000));
 DELETE FROM worklog5743 WHERE col_1_varchar = REPEAT("b", 4000);
 SELECT col_1_varchar = REPEAT("c", 4000) FROM worklog5743;
@@ -1054,7 +1063,7 @@ ALTER TABLE worklog5743 ADD PRIMARY KEY (col_1_varchar(3072));
 CREATE INDEX prefix_idx ON worklog5743(col_1_varchar (3072));
 
 INSERT INTO worklog5743 VALUES(REPEAT("a", 4000),REPEAT("o", 4000));
---error 1062
+--error ER_DUP_ENTRY
 INSERT INTO worklog5743 VALUES(REPEAT("a", 4000),REPEAT("o", 4000));
 DELETE FROM worklog5743 WHERE col_1_varchar = REPEAT("b", 4000);
 SELECT col_1_varchar = REPEAT("c", 4000) FROM worklog5743;
@@ -1274,8 +1283,8 @@ AND col_2_text = REPEAT("o", 4000);
 ALTER TABLE worklog5743 DROP PRIMARY KEY;
 
 # Again add index length > 948. Expect error 'to big row ' due to exceed
-# in key length.  
--- error 139
+# in key length.
+-- error ER_TOO_BIG_ROWSIZE
 ALTER TABLE worklog5743 ADD PRIMARY KEY (col_1_text (950));
 INSERT INTO worklog5743 VALUES(REPEAT("a", 4000),REPEAT("o", 4000));
 SELECT col_1_text = REPEAT("a", 4000) FROM worklog5743;
@@ -1337,7 +1346,7 @@ VALUES(concat(REPEAT("a", 2000),REPEAT("b", 1000),REPEAT("c", 1000)),
 REPEAT("o", 4000));
 INSERT INTO worklog5743
 VALUES(concat(REPEAT("a", 2000),REPEAT("b", 2000)), REPEAT("o", 4000));
---error 1062
+--error ER_DUP_ENTRY
 ALTER TABLE worklog5743 ADD PRIMARY KEY `pk_idx` (col_1_varchar(3000));
 DROP TABLE worklog5743;
 
@@ -1359,8 +1368,13 @@ CREATE TABLE worklog5743 (
 col_1_varchar VARCHAR (4000) , col_2_varchar VARCHAR (4000) ,
 PRIMARY KEY (col_1_varchar(767))
 ) engine = innodb;
-# Prefix index > 767 is truncated with REDUNDANT and COMPACT 
+INSERT INTO worklog5743 VALUES(REPEAT('a',4000),REPEAT('b',4000));
+# Prefix index > 767 is truncated with REDUNDANT and COMPACT
+--enable_info
 CREATE INDEX prefix_idx ON worklog5743(col_1_varchar (1000));
+ALTER TABLE worklog5743 ROW_FORMAT=REDUNDANT;
+--disable_info
+SHOW CREATE TABLE worklog5743;
 DROP TABLE worklog5743;
 #------------------------------------------------------------------------------
 
@@ -1368,4 +1382,10 @@ DROP TABLE worklog5743;
 eval set global innodb_file_format = $innodb_file_format_orig;
 eval set global innodb_file_per_table = $innodb_file_per_table_orig;
 eval set global innodb_large_prefix = $innodb_large_prefix_orig;
+--echo "Disconnect the connection 1"
+--connection con1
+--disconnect con1
+--source include/wait_until_disconnected.inc
 --enable_query_log
+--connection default
+

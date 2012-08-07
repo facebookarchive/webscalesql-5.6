@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-Copyright (c) 1996, 2011, Oracle and/or its affiliates. All Rights Reserved.
+Copyright (c) 1996, 2012, Oracle and/or its affiliates. All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -132,9 +132,44 @@ trx_start_if_not_started_xa(
 Starts the transaction if it is not yet started. */
 UNIV_INTERN
 void
-trx_start_if_not_started(
-/*=====================*/
+trx_start_if_not_started_low(
+/*=========================*/
 	trx_t*	trx);	/*!< in: transaction */
+
+#ifdef UNIV_DEBUG
+#define trx_start_if_not_started(t)				\
+	{							\
+	(t)->start_line = __LINE__;				\
+	(t)->start_file = __FILE__;				\
+	trx_start_if_not_started_low((t));			\
+	}
+#else
+#define trx_start_if_not_started(t)				\
+	trx_start_if_not_started_low((t))
+#endif /* UNIV_DEBUG */
+
+/*************************************************************//**
+Starts the transaction for a DDL operation. */
+UNIV_INTERN
+void
+trx_start_for_ddl_low(
+/*==================*/
+	trx_t*		trx,	/*!< in/out: transaction */
+	trx_dict_op_t	op)	/*!< in: dictionary operation type */
+	__attribute__((nonnull));
+
+#ifdef UNIV_DEBUG
+#define trx_start_for_ddl(t, o)					\
+	{							\
+	(t)->start_line = __LINE__;				\
+	(t)->start_file = __FILE__;				\
+	trx_start_for_ddl_low((t), (o));			\
+	}
+#else
+#define trx_start_for_ddl(t, o)					\
+	trx_start_for_ddl_low((t), (o))
+#endif /* UNIV_DEBUG */
+
 /****************************************************************//**
 Commits a transaction. */
 UNIV_INTERN
@@ -155,7 +190,7 @@ trx_cleanup_at_db_startup(
 Does the transaction commit for MySQL.
 @return	DB_SUCCESS or error number */
 UNIV_INTERN
-ulint
+dberr_t
 trx_commit_for_mysql(
 /*=================*/
 	trx_t*	trx);	/*!< in/out: transaction */
@@ -189,13 +224,13 @@ trx_get_trx_by_xid(
 	const XID*	xid);	/*!< in: X/Open XA transaction identifier */
 /**********************************************************************//**
 If required, flushes the log to disk if we called trx_commit_for_mysql()
-with trx->flush_log_later == TRUE.
-@return	0 or error number */
+with trx->flush_log_later == TRUE. */
 UNIV_INTERN
-ulint
+void
 trx_commit_complete_for_mysql(
 /*==========================*/
-	trx_t*	trx);	/*!< in: trx handle */
+	trx_t*	trx)	/*!< in/out: transaction */
+	__attribute__((nonnull));
 /**********************************************************************//**
 Marks the latest SQL statement ended. */
 UNIV_INTERN
@@ -286,21 +321,6 @@ trx_print(
 					or 0 to use the default max length */
 	__attribute__((nonnull));
 
-/** Type of data dictionary operation */
-typedef enum trx_dict_op {
-	/** The transaction is not modifying the data dictionary. */
-	TRX_DICT_OP_NONE = 0,
-	/** The transaction is creating a table or an index, or
-	dropping a table.  The table must be dropped in crash
-	recovery.  This and TRX_DICT_OP_NONE are the only possible
-	operation modes in crash recovery. */
-	TRX_DICT_OP_TABLE = 1,
-	/** The transaction is creating or dropping an index in an
-	existing table.  In crash recovery, the data dictionary
-	must be locked, but the table must not be dropped. */
-	TRX_DICT_OP_INDEX = 2
-} trx_dict_op_t;
-
 /**********************************************************************//**
 Determine if a transaction is a dictionary operation.
 @return	dictionary operation mode */
@@ -359,7 +379,7 @@ UNIV_INTERN
 ibool
 trx_is_interrupted(
 /*===============*/
-	trx_t*	trx);	/*!< in: transaction */
+	const trx_t*	trx);	/*!< in: transaction */
 /**********************************************************************//**
 Determines if the currently running transaction is in strict mode.
 @return	TRUE if strict */
@@ -405,6 +425,15 @@ trx_get_que_state_str(
 /*==================*/
 	const trx_t*	trx);	/*!< in: transaction */
 
+/****************************************************************//**
+Assign a read-only transaction a rollback-segment, if it is attempting
+to write to a TEMPORARY table. */
+UNIV_INTERN
+void
+trx_assign_rseg(
+/*============*/
+	trx_t*		trx);		/*!< A read-only transaction that
+					needs to be assigned a RBS. */
 /*******************************************************************//**
 Transactions that aren't started by the MySQL server don't set
 the trx_t::mysql_thd field. For such transactions we set the lock
@@ -450,7 +479,6 @@ non-locking select */
 	ut_ad(!trx_is_autocommit_non_locking((t)));			\
 	switch ((t)->state) {						\
 	case TRX_STATE_PREPARED:					\
-		ut_a(!(t)->read_only);					\
 		/* fall through */					\
 	case TRX_STATE_ACTIVE:						\
 	case TRX_STATE_COMMITTED_IN_MEMORY:				\
@@ -463,7 +491,7 @@ non-locking select */
 
 #ifdef UNIV_DEBUG
 /*******************************************************************//**
-Assert that an autocommit non-locking slect cannot be in the
+Assert that an autocommit non-locking select cannot be in the
 ro_trx_list nor the rw_trx_list and that it is a read-only transaction.
 The tranasction must be in the mysql_trx_list. */
 # define assert_trx_nonlocking_or_in_list(t)				\
@@ -623,7 +651,7 @@ lock_sys->mutex and sometimes by trx->mutex. */
 struct trx_struct{
 	ulint		magic_n;
 
-	mutex_t		mutex;		/*!< Mutex protecting the fields
+	ib_mutex_t		mutex;		/*!< Mutex protecting the fields
 					state and lock
 					(except some fields of lock, which
 					are protected by lock_sys->mutex) */
@@ -657,8 +685,7 @@ struct trx_struct{
 
 	Latching and various transaction lists membership rules:
 
-	XA (2PC) transactions are always treated as read-write and
-	non-autocommit.
+	XA (2PC) transactions are always treated as non-autocommit.
 
 	Transitions to ACTIVE or NOT_STARTED occur when
 	!in_rw_trx_list and !in_ro_trx_list (no trx_sys->mutex needed).
@@ -793,9 +820,9 @@ struct trx_struct{
 					transaction branch */
 	lsn_t		commit_lsn;	/*!< lsn at the time of the commit */
 	table_id_t	table_id;	/*!< Table to drop iff dict_operation
-					is TRUE, or 0. */
+					== TRX_DICT_OP_TABLE, or 0. */
 	/*------------------------------*/
-	void*		mysql_thd;	/*!< MySQL thread handle corresponding
+	THD*		mysql_thd;	/*!< MySQL thread handle corresponding
 					to this trx, or NULL */
 	const char*	mysql_log_file_name;
 					/*!< if MySQL binlog is used, this field
@@ -838,7 +865,7 @@ struct trx_struct{
 					trx_sys->mysql_trx_list */
 #endif /* UNIV_DEBUG */
 	/*------------------------------*/
-	enum db_err	error_state;	/*!< 0 if no error, otherwise error
+	dberr_t		error_state;	/*!< 0 if no error, otherwise error
 					number; NOTE That ONLY the thread
 					doing the transaction is allowed to
 					set this field: this is NOT protected
@@ -873,7 +900,7 @@ struct trx_struct{
 			trx_savepoints;	/*!< savepoints set with SAVEPOINT ...,
 					oldest first */
 	/*------------------------------*/
-	mutex_t		undo_mutex;	/*!< mutex protecting the fields in this
+	ib_mutex_t		undo_mutex;	/*!< mutex protecting the fields in this
 					section (down to undo_no_arr), EXCEPT
 					last_sql_stat_start, which can be
 					accessed only when we know that there
@@ -930,10 +957,20 @@ struct trx_struct{
 					each time we determine that a lock will
 					be acquired by the MySQL layer. */
 	/*------------------------------*/
-	fts_trx_t*	fts_trx;	/* FTS information, or NULL if
+	fts_trx_t*	fts_trx;	/*!< FTS information, or NULL if
 					transaction hasn't modified tables
 					with FTS indexes (yet). */
 	doc_id_t	fts_next_doc_id;/* The document id used for updates */
+	/*------------------------------*/
+	ulint		flush_tables;	/*!< if "covering" the FLUSH TABLES",
+					count of tables being flushed. */
+
+	/*------------------------------*/
+#ifdef UNIV_DEBUG
+	ulint		start_line;	/*!< Track where it was started from */
+	const char*	start_file;	/*!< Filename where it was started */
+#endif /* UNIV_DEBUG */
+
 	/*------------------------------*/
 	char detailed_error[256];	/*!< detailed error message for last
 					error, or empty. */

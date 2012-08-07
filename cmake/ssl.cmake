@@ -14,7 +14,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA 
 
 MACRO (CHANGE_SSL_SETTINGS string)
-  SET(WITH_SSL ${string} CACHE STRING "Options are : no, bundled, yes (prefer os library if present otherwise use bundled), system (use os library)" FORCE)
+  SET(WITH_SSL ${string} CACHE STRING "Options are : bundled, yes (prefer os library if present otherwise use bundled), system (use os library)" FORCE)
 ENDMACRO()
 
 MACRO (MYSQL_USE_BUNDLED_SSL)
@@ -25,7 +25,7 @@ MACRO (MYSQL_USE_BUNDLED_SSL)
   SET(SSL_LIBRARIES  yassl taocrypt)
   SET(SSL_INCLUDE_DIRS ${INC_DIRS})
   SET(SSL_INTERNAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/extra/yassl/taocrypt/mySTL)
-  SET(SSL_DEFINES "-DHAVE_YASSL -DYASSL_PURE_C -DYASSL_PREFIX -DHAVE_OPENSSL -DYASSL_THREAD_SAFE")
+  SET(SSL_DEFINES "-DHAVE_YASSL -DYASSL_PREFIX -DHAVE_OPENSSL -DYASSL_THREAD_SAFE")
   CHANGE_SSL_SETTINGS("bundled")
   ADD_SUBDIRECTORY(extra/yassl)
   ADD_SUBDIRECTORY(extra/yassl/taocrypt)
@@ -42,13 +42,11 @@ ENDMACRO()
 # MYSQL_CHECK_SSL
 #
 # Provides the following configure options:
-# WITH_SSL=[yes|no|bundled]
+# WITH_SSL=[yes|bundled|system]
 MACRO (MYSQL_CHECK_SSL)
   IF(NOT WITH_SSL)
    IF(WIN32)
      CHANGE_SSL_SETTINGS("bundled")
-   ELSE()
-     CHANGE_SSL_SETTINGS("no")
    ENDIF()
   ENDIF()
 
@@ -76,7 +74,7 @@ MACRO (MYSQL_CHECK_SSL)
       ENDIF()
       MYSQL_USE_BUNDLED_SSL()
     ENDIF()
-  ELSEIF(NOT WITH_SSL STREQUAL "no")
-    MESSAGE(SEND_ERROR "Wrong option for WITH_SSL. Valid values are : yes, no, bundled")
+  ELSE()
+    MESSAGE(SEND_ERROR "Wrong option for WITH_SSL. Valid values are : yes, bundled, system")
   ENDIF()
 ENDMACRO()

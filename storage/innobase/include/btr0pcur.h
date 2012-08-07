@@ -209,8 +209,17 @@ btr_pcur_open_at_rnd_pos_func(
 #define btr_pcur_open_at_rnd_pos(i,l,c,m)				\
 	btr_pcur_open_at_rnd_pos_func(i,l,c,__FILE__,__LINE__,m)
 /**************************************************************//**
-Frees the possible old_rec_buf buffer of a persistent cursor and sets the
-latch mode of the persistent cursor to BTR_NO_LATCHES. */
+Frees the possible memory heap of a persistent cursor and sets the latch
+mode of the persistent cursor to BTR_NO_LATCHES.
+WARNING: this function does not release the latch on the page where the
+cursor is currently positioned. The latch is acquired by the
+"move to next/previous" family of functions. Since recursive shared locks
+are not allowed, you must take care (if using the cursor in S-mode) to
+manually release the latch by either calling
+btr_leaf_page_release(btr_pcur_get_block(&pcur), pcur.latch_mode, mtr)
+or by committing the mini-transaction right after btr_pcur_close().
+A subsequent attempt to crawl the same page in the same mtr would cause
+an assertion failure. */
 UNIV_INLINE
 void
 btr_pcur_close(
@@ -459,7 +468,7 @@ struct btr_pcur_struct{
 					BTR_MODIFY_TREE, or BTR_NO_LATCHES,
 					depending on the latching state of
 					the page and tree where the cursor is
-					positioned; the last value means that
+					positioned; BTR_NO_LATCHES means that
 					the cursor is not currently positioned:
 					we say then that the cursor is
 					detached; it can be restored to

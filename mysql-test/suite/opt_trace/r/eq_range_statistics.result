@@ -66,7 +66,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 OR a>10 OR a IN (1)	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t1`.`a` AS `a`,`test`.`t1`.`b` AS `b` from `test`.`t1` where ((`test`.`t1`.`a` = 5) or (`test`.`t1`.`a` > 10) or (`test`.`t1`.`a` = 1))"
+            "expanded_query": "/* select#1 */ select `t1`.`a` AS `a`,`t1`.`b` AS `b` from `t1` where ((`t1`.`a` = 5) or (`t1`.`a` > 10) or (`t1`.`a` = 1))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -78,19 +78,19 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 OR a>10 OR a IN (1)	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t1`.`a` = 5) or (`test`.`t1`.`a` > 10) or (`test`.`t1`.`a` = 1))",
+              "original_condition": "((`t1`.`a` = 5) or (`t1`.`a` > 10) or (`t1`.`a` = 1))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "(multiple equal(5, `test`.`t1`.`a`) or (`test`.`t1`.`a` > 10) or multiple equal(1, `test`.`t1`.`a`))"
+                  "resulting_condition": "(multiple equal(5, `t1`.`a`) or (`t1`.`a` > 10) or multiple equal(1, `t1`.`a`))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "(multiple equal(5, `test`.`t1`.`a`) or (`test`.`t1`.`a` > 10) or multiple equal(1, `test`.`t1`.`a`))"
+                  "resulting_condition": "(multiple equal(5, `t1`.`a`) or (`t1`.`a` > 10) or multiple equal(1, `t1`.`a`))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "(multiple equal(5, `test`.`t1`.`a`) or (`test`.`t1`.`a` > 10) or multiple equal(1, `test`.`t1`.`a`))"
+                  "resulting_condition": "(multiple equal(5, `t1`.`a`) or (`t1`.`a` > 10) or multiple equal(1, `t1`.`a`))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -98,8 +98,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 OR a>10 OR a IN (1)	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -114,8 +113,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 OR a>10 OR a IN (1)	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 9,
@@ -146,16 +144,17 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 OR a>10 OR a IN (1)	{
                     "range_scan_alternatives": [
                       {
                         "index": "a",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "1 <= a <= 1",
                           "5 <= a <= 5",
                           "10 < a"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": true,
                         "rows": 5,
                         "cost": 2.139,
-                        "rowid_ordered": false,
                         "chosen": true
                       }
                     ] /* range_scan_alternatives */,
@@ -186,14 +185,15 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 OR a>10 OR a IN (1)	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
                       "access_type": "range",
                       "rows": 5,
-                      "cost": 2.139,
+                      "cost": 3.139,
                       "chosen": true
                     }
                   ] /* considered_access_paths */
@@ -206,14 +206,13 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 OR a>10 OR a IN (1)	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t1`.`a` = 5) or (`test`.`t1`.`a` > 10) or (`test`.`t1`.`a` = 1))",
+              "original_condition": "((`t1`.`a` = 5) or (`t1`.`a` > 10) or (`t1`.`a` = 1))",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "((`test`.`t1`.`a` = 5) or (`test`.`t1`.`a` > 10) or (`test`.`t1`.`a` = 1))"
+                  "table": "`t1`",
+                  "attached": "((`t1`.`a` = 5) or (`t1`.`a` > 10) or (`t1`.`a` = 1))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -221,8 +220,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 OR a>10 OR a IN (1)	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "access_type": "range"
               }
             ] /* refine_plan */
@@ -253,7 +251,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 OR a>10 OR a IN (1,2)	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t1`.`a` AS `a`,`test`.`t1`.`b` AS `b` from `test`.`t1` where ((`test`.`t1`.`a` = 5) or (`test`.`t1`.`a` > 10) or (`test`.`t1`.`a` in (1,2)))"
+            "expanded_query": "/* select#1 */ select `t1`.`a` AS `a`,`t1`.`b` AS `b` from `t1` where ((`t1`.`a` = 5) or (`t1`.`a` > 10) or (`t1`.`a` in (1,2)))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -265,19 +263,19 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 OR a>10 OR a IN (1,2)	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t1`.`a` = 5) or (`test`.`t1`.`a` > 10) or (`test`.`t1`.`a` in (1,2)))",
+              "original_condition": "((`t1`.`a` = 5) or (`t1`.`a` > 10) or (`t1`.`a` in (1,2)))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "(multiple equal(5, `test`.`t1`.`a`) or (`test`.`t1`.`a` > 10) or (`test`.`t1`.`a` in (1,2)))"
+                  "resulting_condition": "(multiple equal(5, `t1`.`a`) or (`t1`.`a` > 10) or (`t1`.`a` in (1,2)))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "(multiple equal(5, `test`.`t1`.`a`) or (`test`.`t1`.`a` > 10) or (`test`.`t1`.`a` in (1,2)))"
+                  "resulting_condition": "(multiple equal(5, `t1`.`a`) or (`t1`.`a` > 10) or (`t1`.`a` in (1,2)))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "(multiple equal(5, `test`.`t1`.`a`) or (`test`.`t1`.`a` > 10) or (`test`.`t1`.`a` in (1,2)))"
+                  "resulting_condition": "(multiple equal(5, `t1`.`a`) or (`t1`.`a` > 10) or (`t1`.`a` in (1,2)))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -285,8 +283,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 OR a>10 OR a IN (1,2)	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -301,8 +298,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 OR a>10 OR a IN (1,2)	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 9,
@@ -333,17 +329,18 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 OR a>10 OR a IN (1,2)	{
                     "range_scan_alternatives": [
                       {
                         "index": "a",
-                        "index_dives_for_eq_ranges": false,
                         "ranges": [
                           "1 <= a <= 1",
                           "2 <= a <= 2",
                           "5 <= a <= 5",
                           "10 < a"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": false,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": true,
                         "rows": 7,
                         "cost": 2.6035,
-                        "rowid_ordered": false,
                         "chosen": true
                       }
                     ] /* range_scan_alternatives */,
@@ -375,14 +372,15 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 OR a>10 OR a IN (1,2)	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
                       "access_type": "range",
                       "rows": 7,
-                      "cost": 2.6035,
+                      "cost": 4.0035,
                       "chosen": true
                     }
                   ] /* considered_access_paths */
@@ -395,14 +393,13 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 OR a>10 OR a IN (1,2)	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t1`.`a` = 5) or (`test`.`t1`.`a` > 10) or (`test`.`t1`.`a` in (1,2)))",
+              "original_condition": "((`t1`.`a` = 5) or (`t1`.`a` > 10) or (`t1`.`a` in (1,2)))",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "((`test`.`t1`.`a` = 5) or (`test`.`t1`.`a` > 10) or (`test`.`t1`.`a` in (1,2)))"
+                  "table": "`t1`",
+                  "attached": "((`t1`.`a` = 5) or (`t1`.`a` > 10) or (`t1`.`a` in (1,2)))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -410,8 +407,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 OR a>10 OR a IN (1,2)	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "access_type": "range"
               }
             ] /* refine_plan */
@@ -443,7 +439,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b=4)	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t1`.`a` AS `a`,`test`.`t1`.`b` AS `b` from `test`.`t1` where ((`test`.`t1`.`a` = 5) and ((`test`.`t1`.`b` = 2) or (`test`.`t1`.`b` = 3) or (`test`.`t1`.`b` = 4)))"
+            "expanded_query": "/* select#1 */ select `t1`.`a` AS `a`,`t1`.`b` AS `b` from `t1` where ((`t1`.`a` = 5) and ((`t1`.`b` = 2) or (`t1`.`b` = 3) or (`t1`.`b` = 4)))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -455,19 +451,19 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b=4)	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t1`.`a` = 5) and ((`test`.`t1`.`b` = 2) or (`test`.`t1`.`b` = 3) or (`test`.`t1`.`b` = 4)))",
+              "original_condition": "((`t1`.`a` = 5) and ((`t1`.`b` = 2) or (`t1`.`b` = 3) or (`t1`.`b` = 4)))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "((multiple equal(2, `test`.`t1`.`b`) or multiple equal(3, `test`.`t1`.`b`) or multiple equal(4, `test`.`t1`.`b`)) and multiple equal(5, `test`.`t1`.`a`))"
+                  "resulting_condition": "((multiple equal(2, `t1`.`b`) or multiple equal(3, `t1`.`b`) or multiple equal(4, `t1`.`b`)) and multiple equal(5, `t1`.`a`))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "((multiple equal(2, `test`.`t1`.`b`) or multiple equal(3, `test`.`t1`.`b`) or multiple equal(4, `test`.`t1`.`b`)) and multiple equal(5, `test`.`t1`.`a`))"
+                  "resulting_condition": "((multiple equal(2, `t1`.`b`) or multiple equal(3, `t1`.`b`) or multiple equal(4, `t1`.`b`)) and multiple equal(5, `t1`.`a`))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "((multiple equal(2, `test`.`t1`.`b`) or multiple equal(3, `test`.`t1`.`b`) or multiple equal(4, `test`.`t1`.`b`)) and multiple equal(5, `test`.`t1`.`a`))"
+                  "resulting_condition": "((multiple equal(2, `t1`.`b`) or multiple equal(3, `t1`.`b`) or multiple equal(4, `t1`.`b`)) and multiple equal(5, `t1`.`a`))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -475,8 +471,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b=4)	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -487,8 +482,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b=4)	{
           {
             "ref_optimizer_key_uses": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "field": "a",
                 "equals": "5",
                 "null_rejecting": false
@@ -498,8 +492,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b=4)	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 9,
@@ -530,16 +523,17 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b=4)	{
                     "range_scan_alternatives": [
                       {
                         "index": "a",
-                        "index_dives_for_eq_ranges": false,
                         "ranges": [
                           "5 <= a <= 5 AND 2 <= b <= 2",
                           "5 <= a <= 5 AND 3 <= b <= 3",
                           "5 <= a <= 5 AND 4 <= b <= 4"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": false,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": true,
                         "rows": 3,
                         "cost": 1.6745,
-                        "rowid_ordered": false,
                         "chosen": true
                       }
                     ] /* range_scan_alternatives */,
@@ -570,8 +564,9 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b=4)	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
@@ -584,7 +579,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b=4)	{
                     {
                       "access_type": "range",
                       "rows": 3,
-                      "cost": 1.6745,
+                      "cost": 2.2745,
                       "chosen": false
                     }
                   ] /* considered_access_paths */
@@ -597,12 +592,11 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b=4)	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t1`.`a` = 5) and ((`test`.`t1`.`b` = 2) or (`test`.`t1`.`b` = 3) or (`test`.`t1`.`b` = 4)))",
+              "original_condition": "((`t1`.`a` = 5) and ((`t1`.`b` = 2) or (`t1`.`b` = 3) or (`t1`.`b` = 4)))",
               "attached_conditions_computation": [
                 {
                   "access_type_changed": {
-                    "database": "test",
-                    "table": "t1",
+                    "table": "`t1`",
                     "index": "a",
                     "old_type": "ref",
                     "new_type": "range",
@@ -612,9 +606,8 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b=4)	{
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "((`test`.`t1`.`a` = 5) and ((`test`.`t1`.`b` = 2) or (`test`.`t1`.`b` = 3) or (`test`.`t1`.`b` = 4)))"
+                  "table": "`t1`",
+                  "attached": "((`t1`.`a` = 5) and ((`t1`.`b` = 2) or (`t1`.`b` = 3) or (`t1`.`b` = 4)))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -622,8 +615,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b=4)	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "access_type": "range"
               }
             ] /* refine_plan */
@@ -655,7 +647,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b>4)	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t1`.`a` AS `a`,`test`.`t1`.`b` AS `b` from `test`.`t1` where ((`test`.`t1`.`a` = 5) and ((`test`.`t1`.`b` = 2) or (`test`.`t1`.`b` = 3) or (`test`.`t1`.`b` > 4)))"
+            "expanded_query": "/* select#1 */ select `t1`.`a` AS `a`,`t1`.`b` AS `b` from `t1` where ((`t1`.`a` = 5) and ((`t1`.`b` = 2) or (`t1`.`b` = 3) or (`t1`.`b` > 4)))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -667,19 +659,19 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b>4)	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t1`.`a` = 5) and ((`test`.`t1`.`b` = 2) or (`test`.`t1`.`b` = 3) or (`test`.`t1`.`b` > 4)))",
+              "original_condition": "((`t1`.`a` = 5) and ((`t1`.`b` = 2) or (`t1`.`b` = 3) or (`t1`.`b` > 4)))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "((multiple equal(2, `test`.`t1`.`b`) or multiple equal(3, `test`.`t1`.`b`) or (`test`.`t1`.`b` > 4)) and multiple equal(5, `test`.`t1`.`a`))"
+                  "resulting_condition": "((multiple equal(2, `t1`.`b`) or multiple equal(3, `t1`.`b`) or (`t1`.`b` > 4)) and multiple equal(5, `t1`.`a`))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "((multiple equal(2, `test`.`t1`.`b`) or multiple equal(3, `test`.`t1`.`b`) or (`test`.`t1`.`b` > 4)) and multiple equal(5, `test`.`t1`.`a`))"
+                  "resulting_condition": "((multiple equal(2, `t1`.`b`) or multiple equal(3, `t1`.`b`) or (`t1`.`b` > 4)) and multiple equal(5, `t1`.`a`))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "((multiple equal(2, `test`.`t1`.`b`) or multiple equal(3, `test`.`t1`.`b`) or (`test`.`t1`.`b` > 4)) and multiple equal(5, `test`.`t1`.`a`))"
+                  "resulting_condition": "((multiple equal(2, `t1`.`b`) or multiple equal(3, `t1`.`b`) or (`t1`.`b` > 4)) and multiple equal(5, `t1`.`a`))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -687,8 +679,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b>4)	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -699,8 +690,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b>4)	{
           {
             "ref_optimizer_key_uses": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "field": "a",
                 "equals": "5",
                 "null_rejecting": false
@@ -710,8 +700,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b>4)	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 9,
@@ -742,16 +731,17 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b>4)	{
                     "range_scan_alternatives": [
                       {
                         "index": "a",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "5 <= a <= 5 AND 2 <= b <= 2",
                           "5 <= a <= 5 AND 3 <= b <= 3",
                           "5 <= a <= 5 AND 4 < b"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": true,
                         "rows": 3,
                         "cost": 1.6745,
-                        "rowid_ordered": false,
                         "chosen": true
                       }
                     ] /* range_scan_alternatives */,
@@ -782,8 +772,9 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b>4)	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
@@ -796,7 +787,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b>4)	{
                     {
                       "access_type": "range",
                       "rows": 3,
-                      "cost": 1.6745,
+                      "cost": 2.2745,
                       "chosen": false
                     }
                   ] /* considered_access_paths */
@@ -809,12 +800,11 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b>4)	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t1`.`a` = 5) and ((`test`.`t1`.`b` = 2) or (`test`.`t1`.`b` = 3) or (`test`.`t1`.`b` > 4)))",
+              "original_condition": "((`t1`.`a` = 5) and ((`t1`.`b` = 2) or (`t1`.`b` = 3) or (`t1`.`b` > 4)))",
               "attached_conditions_computation": [
                 {
                   "access_type_changed": {
-                    "database": "test",
-                    "table": "t1",
+                    "table": "`t1`",
                     "index": "a",
                     "old_type": "ref",
                     "new_type": "range",
@@ -824,9 +814,8 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b>4)	{
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "((`test`.`t1`.`a` = 5) and ((`test`.`t1`.`b` = 2) or (`test`.`t1`.`b` = 3) or (`test`.`t1`.`b` > 4)))"
+                  "table": "`t1`",
+                  "attached": "((`t1`.`a` = 5) and ((`t1`.`b` = 2) or (`t1`.`b` = 3) or (`t1`.`b` > 4)))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -834,8 +823,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b>4)	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "access_type": "range"
               }
             ] /* refine_plan */
@@ -866,7 +854,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b IS NULL)	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t1`.`a` AS `a`,`test`.`t1`.`b` AS `b` from `test`.`t1` where ((`test`.`t1`.`a` = 5) and ((`test`.`t1`.`b` = 2) or (`test`.`t1`.`b` = 3) or isnull(`test`.`t1`.`b`)))"
+            "expanded_query": "/* select#1 */ select `t1`.`a` AS `a`,`t1`.`b` AS `b` from `t1` where ((`t1`.`a` = 5) and ((`t1`.`b` = 2) or (`t1`.`b` = 3) or isnull(`t1`.`b`)))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -878,19 +866,19 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b IS NULL)	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t1`.`a` = 5) and ((`test`.`t1`.`b` = 2) or (`test`.`t1`.`b` = 3) or isnull(`test`.`t1`.`b`)))",
+              "original_condition": "((`t1`.`a` = 5) and ((`t1`.`b` = 2) or (`t1`.`b` = 3) or isnull(`t1`.`b`)))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "((multiple equal(2, `test`.`t1`.`b`) or multiple equal(3, `test`.`t1`.`b`) or isnull(`test`.`t1`.`b`)) and multiple equal(5, `test`.`t1`.`a`))"
+                  "resulting_condition": "((multiple equal(2, `t1`.`b`) or multiple equal(3, `t1`.`b`) or isnull(`t1`.`b`)) and multiple equal(5, `t1`.`a`))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "((multiple equal(2, `test`.`t1`.`b`) or multiple equal(3, `test`.`t1`.`b`) or isnull(`test`.`t1`.`b`)) and multiple equal(5, `test`.`t1`.`a`))"
+                  "resulting_condition": "((multiple equal(2, `t1`.`b`) or multiple equal(3, `t1`.`b`) or isnull(`t1`.`b`)) and multiple equal(5, `t1`.`a`))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "((multiple equal(2, `test`.`t1`.`b`) or multiple equal(3, `test`.`t1`.`b`) or isnull(`test`.`t1`.`b`)) and multiple equal(5, `test`.`t1`.`a`))"
+                  "resulting_condition": "((multiple equal(2, `t1`.`b`) or multiple equal(3, `t1`.`b`) or isnull(`t1`.`b`)) and multiple equal(5, `t1`.`a`))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -898,8 +886,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b IS NULL)	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -910,8 +897,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b IS NULL)	{
           {
             "ref_optimizer_key_uses": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "field": "a",
                 "equals": "5",
                 "null_rejecting": false
@@ -921,8 +907,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b IS NULL)	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 9,
@@ -953,16 +938,17 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b IS NULL)	{
                     "range_scan_alternatives": [
                       {
                         "index": "a",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "5 <= a <= 5 AND NULL <= b <= NULL",
                           "5 <= a <= 5 AND 2 <= b <= 2",
                           "5 <= a <= 5 AND 3 <= b <= 3"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": true,
                         "rows": 3,
                         "cost": 1.6745,
-                        "rowid_ordered": false,
                         "chosen": true
                       }
                     ] /* range_scan_alternatives */,
@@ -993,8 +979,9 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b IS NULL)	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
@@ -1007,7 +994,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b IS NULL)	{
                     {
                       "access_type": "range",
                       "rows": 3,
-                      "cost": 1.6745,
+                      "cost": 2.2745,
                       "chosen": false
                     }
                   ] /* considered_access_paths */
@@ -1020,12 +1007,11 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b IS NULL)	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t1`.`a` = 5) and ((`test`.`t1`.`b` = 2) or (`test`.`t1`.`b` = 3) or isnull(`test`.`t1`.`b`)))",
+              "original_condition": "((`t1`.`a` = 5) and ((`t1`.`b` = 2) or (`t1`.`b` = 3) or isnull(`t1`.`b`)))",
               "attached_conditions_computation": [
                 {
                   "access_type_changed": {
-                    "database": "test",
-                    "table": "t1",
+                    "table": "`t1`",
                     "index": "a",
                     "old_type": "ref",
                     "new_type": "range",
@@ -1035,9 +1021,8 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b IS NULL)	{
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "((`test`.`t1`.`a` = 5) and ((`test`.`t1`.`b` = 2) or (`test`.`t1`.`b` = 3) or isnull(`test`.`t1`.`b`)))"
+                  "table": "`t1`",
+                  "attached": "((`t1`.`a` = 5) and ((`t1`.`b` = 2) or (`t1`.`b` = 3) or isnull(`t1`.`b`)))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -1045,8 +1030,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5 AND (b=2 OR b=3 OR b IS NULL)	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "access_type": "range"
               }
             ] /* refine_plan */
@@ -1077,7 +1061,7 @@ EXPLAIN SELECT * FROM t1 WHERE a>5 AND (b=2 OR b=3 OR b=4)	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t1`.`a` AS `a`,`test`.`t1`.`b` AS `b` from `test`.`t1` where ((`test`.`t1`.`a` > 5) and ((`test`.`t1`.`b` = 2) or (`test`.`t1`.`b` = 3) or (`test`.`t1`.`b` = 4)))"
+            "expanded_query": "/* select#1 */ select `t1`.`a` AS `a`,`t1`.`b` AS `b` from `t1` where ((`t1`.`a` > 5) and ((`t1`.`b` = 2) or (`t1`.`b` = 3) or (`t1`.`b` = 4)))"
           }
         ] /* steps */
       } /* join_preparation */
@@ -1089,19 +1073,19 @@ EXPLAIN SELECT * FROM t1 WHERE a>5 AND (b=2 OR b=3 OR b=4)	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "((`test`.`t1`.`a` > 5) and ((`test`.`t1`.`b` = 2) or (`test`.`t1`.`b` = 3) or (`test`.`t1`.`b` = 4)))",
+              "original_condition": "((`t1`.`a` > 5) and ((`t1`.`b` = 2) or (`t1`.`b` = 3) or (`t1`.`b` = 4)))",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "((`test`.`t1`.`a` > 5) and (multiple equal(2, `test`.`t1`.`b`) or multiple equal(3, `test`.`t1`.`b`) or multiple equal(4, `test`.`t1`.`b`)))"
+                  "resulting_condition": "((`t1`.`a` > 5) and (multiple equal(2, `t1`.`b`) or multiple equal(3, `t1`.`b`) or multiple equal(4, `t1`.`b`)))"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "((`test`.`t1`.`a` > 5) and (multiple equal(2, `test`.`t1`.`b`) or multiple equal(3, `test`.`t1`.`b`) or multiple equal(4, `test`.`t1`.`b`)))"
+                  "resulting_condition": "((`t1`.`a` > 5) and (multiple equal(2, `t1`.`b`) or multiple equal(3, `t1`.`b`) or multiple equal(4, `t1`.`b`)))"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "((`test`.`t1`.`a` > 5) and (multiple equal(2, `test`.`t1`.`b`) or multiple equal(3, `test`.`t1`.`b`) or multiple equal(4, `test`.`t1`.`b`)))"
+                  "resulting_condition": "((`t1`.`a` > 5) and (multiple equal(2, `t1`.`b`) or multiple equal(3, `t1`.`b`) or multiple equal(4, `t1`.`b`)))"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -1109,8 +1093,7 @@ EXPLAIN SELECT * FROM t1 WHERE a>5 AND (b=2 OR b=3 OR b=4)	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -1125,8 +1108,7 @@ EXPLAIN SELECT * FROM t1 WHERE a>5 AND (b=2 OR b=3 OR b=4)	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 9,
@@ -1157,16 +1139,17 @@ EXPLAIN SELECT * FROM t1 WHERE a>5 AND (b=2 OR b=3 OR b=4)	{
                     "range_scan_alternatives": [
                       {
                         "index": "a",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "5 < a AND 2 <= b <= 2",
                           "5 < a AND 3 <= b <= 3",
                           "5 < a AND 4 <= b <= 4"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": true,
                         "rows": 1,
                         "cost": 2.21,
-                        "rowid_ordered": false,
                         "chosen": true
                       }
                     ] /* range_scan_alternatives */,
@@ -1197,14 +1180,15 @@ EXPLAIN SELECT * FROM t1 WHERE a>5 AND (b=2 OR b=3 OR b=4)	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
                       "access_type": "range",
                       "rows": 1,
-                      "cost": 2.21,
+                      "cost": 2.41,
                       "chosen": true
                     }
                   ] /* considered_access_paths */
@@ -1217,14 +1201,13 @@ EXPLAIN SELECT * FROM t1 WHERE a>5 AND (b=2 OR b=3 OR b=4)	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "((`test`.`t1`.`a` > 5) and ((`test`.`t1`.`b` = 2) or (`test`.`t1`.`b` = 3) or (`test`.`t1`.`b` = 4)))",
+              "original_condition": "((`t1`.`a` > 5) and ((`t1`.`b` = 2) or (`t1`.`b` = 3) or (`t1`.`b` = 4)))",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
-                  "attached": "((`test`.`t1`.`a` > 5) and ((`test`.`t1`.`b` = 2) or (`test`.`t1`.`b` = 3) or (`test`.`t1`.`b` = 4)))"
+                  "table": "`t1`",
+                  "attached": "((`t1`.`a` > 5) and ((`t1`.`b` = 2) or (`t1`.`b` = 3) or (`t1`.`b` = 4)))"
                 }
               ] /* attached_conditions_summary */
             } /* attaching_conditions_to_tables */
@@ -1232,8 +1215,7 @@ EXPLAIN SELECT * FROM t1 WHERE a>5 AND (b=2 OR b=3 OR b=4)	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "access_type": "range"
               }
             ] /* refine_plan */
@@ -1265,7 +1247,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5	{
         "select#": 1,
         "steps": [
           {
-            "expanded_query": "/* select#1 */ select `test`.`t1`.`a` AS `a`,`test`.`t1`.`b` AS `b` from `test`.`t1` where (`test`.`t1`.`a` = 5)"
+            "expanded_query": "/* select#1 */ select `t1`.`a` AS `a`,`t1`.`b` AS `b` from `t1` where (`t1`.`a` = 5)"
           }
         ] /* steps */
       } /* join_preparation */
@@ -1277,19 +1259,19 @@ EXPLAIN SELECT * FROM t1 WHERE a=5	{
           {
             "condition_processing": {
               "condition": "WHERE",
-              "original_condition": "(`test`.`t1`.`a` = 5)",
+              "original_condition": "(`t1`.`a` = 5)",
               "steps": [
                 {
                   "transformation": "equality_propagation",
-                  "resulting_condition": "multiple equal(5, `test`.`t1`.`a`)"
+                  "resulting_condition": "multiple equal(5, `t1`.`a`)"
                 },
                 {
                   "transformation": "constant_propagation",
-                  "resulting_condition": "multiple equal(5, `test`.`t1`.`a`)"
+                  "resulting_condition": "multiple equal(5, `t1`.`a`)"
                 },
                 {
                   "transformation": "trivial_condition_removal",
-                  "resulting_condition": "multiple equal(5, `test`.`t1`.`a`)"
+                  "resulting_condition": "multiple equal(5, `t1`.`a`)"
                 }
               ] /* steps */
             } /* condition_processing */
@@ -1297,8 +1279,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5	{
           {
             "table_dependencies": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "row_may_be_null": false,
                 "map_bit": 0,
                 "depends_on_map_bits": [
@@ -1309,8 +1290,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5	{
           {
             "ref_optimizer_key_uses": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "field": "a",
                 "equals": "5",
                 "null_rejecting": false
@@ -1320,8 +1300,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5	{
           {
             "rows_estimation": [
               {
-                "database": "test",
-                "table": "t1",
+                "table": "`t1`",
                 "range_analysis": {
                   "table_scan": {
                     "rows": 9,
@@ -1352,14 +1331,15 @@ EXPLAIN SELECT * FROM t1 WHERE a=5	{
                     "range_scan_alternatives": [
                       {
                         "index": "a",
-                        "index_dives_for_eq_ranges": true,
                         "ranges": [
                           "5 <= a <= 5"
                         ] /* ranges */,
+                        "index_dives_for_eq_ranges": true,
+                        "rowid_ordered": false,
+                        "using_mrr": false,
                         "index_only": true,
                         "rows": 3,
                         "cost": 1.6745,
-                        "rowid_ordered": false,
                         "chosen": true
                       }
                     ] /* range_scan_alternatives */,
@@ -1388,8 +1368,9 @@ EXPLAIN SELECT * FROM t1 WHERE a=5	{
           {
             "considered_execution_plans": [
               {
-                "database": "test",
-                "table": "t1",
+                "plan_prefix": [
+                ] /* plan_prefix */,
+                "table": "`t1`",
                 "best_access_path": {
                   "considered_access_paths": [
                     {
@@ -1414,13 +1395,12 @@ EXPLAIN SELECT * FROM t1 WHERE a=5	{
           },
           {
             "attaching_conditions_to_tables": {
-              "original_condition": "(`test`.`t1`.`a` = 5)",
+              "original_condition": "(`t1`.`a` = 5)",
               "attached_conditions_computation": [
               ] /* attached_conditions_computation */,
               "attached_conditions_summary": [
                 {
-                  "database": "test",
-                  "table": "t1",
+                  "table": "`t1`",
                   "attached": null
                 }
               ] /* attached_conditions_summary */
@@ -1429,8 +1409,7 @@ EXPLAIN SELECT * FROM t1 WHERE a=5	{
           {
             "refine_plan": [
               {
-                "database": "test",
-                "table": "t1"
+                "table": "`t1`"
               }
             ] /* refine_plan */
           }

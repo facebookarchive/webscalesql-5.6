@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2004, 2011, Oracle and/or its affiliates. All rights reserved.
+   Copyright (c) 2004, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -589,7 +589,7 @@ end:
     with the implicit commit.
   */
   if (thd->locked_tables_mode && tables && lock_upgrade_done)
-    mdl_ticket->downgrade_exclusive_lock(MDL_SHARED_NO_READ_WRITE);
+    mdl_ticket->downgrade_lock(MDL_SHARED_NO_READ_WRITE);
 
   /* Restore the query table list. Used only for drop trigger. */
   if (!create)
@@ -638,7 +638,6 @@ bool Table_triggers_list::create_trigger(THD *thd, TABLE_LIST *tables,
   sql_mode_t *trg_sql_mode;
   char trg_definer_holder[USER_HOST_BUFF_SIZE];
   LEX_STRING *trg_definer;
-  Item_trigger_field *trg_field;
   struct st_trigname trigname;
   LEX_STRING *trg_client_cs_name;
   LEX_STRING *trg_connection_cl_name;
@@ -655,8 +654,12 @@ bool Table_triggers_list::create_trigger(THD *thd, TABLE_LIST *tables,
     return 1;
   }
 
+  sp_head *trg= lex->sphead;
+  int trg_event= trg->m_trg_chistics.event;
+  int trg_action_time= trg->m_trg_chistics.action_time;
+
   /* We don't allow creation of several triggers of the same type yet */
-  if (bodies[lex->trg_chistics.event][lex->trg_chistics.action_time] != 0)
+  if (bodies[trg_event][trg_action_time] != NULL)
   {
     my_error(ER_NOT_SUPPORTED_YET, MYF(0),
              "multiple triggers with the same action time"
@@ -724,7 +727,7 @@ bool Table_triggers_list::create_trigger(THD *thd, TABLE_LIST *tables,
   */
   old_field= new_field= table->field;
 
-  for (trg_field= lex->trg_table_fields.first;
+  for (Item_trigger_field *trg_field= lex->sphead->m_trg_table_fields.first;
        trg_field; trg_field= trg_field->next_trg_field)
   {
     /*
@@ -1069,37 +1072,35 @@ Table_triggers_list::~Table_triggers_list()
   of record[0] (they will represent OLD.* row values in ON UPDATE trigger
   and in ON DELETE trigger which will be called during REPLACE execution).
 
-  @param table   pointer to TABLE object for which we are creating fields.
-
   @retval
     False   success
   @retval
     True    error
 */
-bool Table_triggers_list::prepare_record1_accessors(TABLE *table)
+bool Table_triggers_list::prepare_record1_accessors()
 {
   Field **fld, **old_fld;
 
-  if (!(record1_field= (Field **)alloc_root(&table->mem_root,
-                                            (table->s->fields + 1) *
+  if (!(record1_field= (Field **)alloc_root(&trigger_table->mem_root,
+                                            (trigger_table->s->fields + 1) *
                                             sizeof(Field*))))
-    return 1;
+    return true;
 
-  for (fld= table->field, old_fld= record1_field; *fld; fld++, old_fld++)
+  for (fld= trigger_table->field, old_fld= record1_field; *fld; fld++, old_fld++)
   {
     /*
       QQ: it is supposed that it is ok to use this function for field
       cloning...
     */
-    if (!(*old_fld= (*fld)->new_field(&table->mem_root, table,
-                                      table == (*fld)->table)))
-      return 1;
-    (*old_fld)->move_field_offset((my_ptrdiff_t)(table->record[1] -
-                                                 table->record[0]));
+    if (!(*old_fld= (*fld)->new_field(&trigger_table->mem_root, trigger_table,
+                                      trigger_table == (*fld)->table)))
+      return true;
+    (*old_fld)->move_field_offset((my_ptrdiff_t)(trigger_table->record[1] -
+                                                 trigger_table->record[0]));
   }
   *old_fld= 0;
 
-  return 0;
+  return false;
 }
 
 
@@ -1150,6 +1151,7 @@ bool Table_triggers_list::check_n_load(THD *thd, const char *db,
   LEX_STRING path;
   File_parser *parser;
   LEX_STRING save_db;
+  PSI_statement_locker *parent_locker= thd->m_statement_psi;
 
   DBUG_ENTER("Table_triggers_list::check_n_load");
 
@@ -1343,7 +1345,7 @@ bool Table_triggers_list::check_n_load(THD *thd, const char *db,
         TODO: This could be avoided if there is no triggers
               for UPDATE and DELETE.
       */
-      if (!names_only && triggers->prepare_record1_accessors(table))
+      if (!names_only && triggers->prepare_record1_accessors())
         DBUG_RETURN(1);
 
       List_iterator_fast<sql_mode_t> itm(triggers->definition_modes_list);
@@ -1352,7 +1354,7 @@ bool Table_triggers_list::check_n_load(THD *thd, const char *db,
       List_iterator_fast<LEX_STRING> it_connection_cl_name(triggers->connection_cl_names);
       List_iterator_fast<LEX_STRING> it_db_cl_name(triggers->db_cl_names);
       LEX *old_lex= thd->lex, lex;
-      sp_rcontext *save_spcont= thd->spcont;
+      sp_rcontext *sp_runtime_ctx_saved= thd->sp_runtime_ctx;
       sql_mode_t save_sql_mode= thd->variables.sql_mode;
       LEX_STRING *on_table_name;
 
@@ -1363,7 +1365,6 @@ bool Table_triggers_list::check_n_load(THD *thd, const char *db,
       thd->reset_db((char*) db, strlen(db));
       while ((trg_create_str= it++))
       {
-        sp_head *sp;
         trg_sql_mode= itm++;
         LEX_STRING *trg_definer= it_definer++;
 
@@ -1382,11 +1383,13 @@ bool Table_triggers_list::check_n_load(THD *thd, const char *db,
                                        it_db_cl_name++);
 
         lex_start(thd);
-        thd->spcont= NULL;
+        thd->sp_runtime_ctx= NULL;
 
         Deprecated_trigger_syntax_handler error_handler;
         thd->push_internal_handler(&error_handler);
+        thd->m_statement_psi= NULL;
         bool parse_error= parse_sql(thd, & parser_state, creation_ctx);
+        thd->m_statement_psi= parent_locker;
         thd->pop_internal_handler();
 
         /*
@@ -1404,7 +1407,7 @@ bool Table_triggers_list::check_n_load(THD *thd, const char *db,
           if (!triggers->m_has_unparseable_trigger)
             triggers->set_parse_error_message(error_handler.get_error_message());
           /* Currently sphead is always set to NULL in case of a parse error */
-          DBUG_ASSERT(lex.sphead == 0);
+          DBUG_ASSERT(lex.sphead == NULL);
           if (error_handler.get_trigger_name())
           {
             LEX_STRING *trigger_name;
@@ -1445,12 +1448,14 @@ bool Table_triggers_list::check_n_load(THD *thd, const char *db,
           continue;
         }
 
-        lex.sphead->set_info(0, 0, &lex.sp_chistics, (ulong) *trg_sql_mode);
+        sp_head *sp= lex.sphead;
+        sp->set_info(0, 0, &lex.sp_chistics, *trg_sql_mode);
+        sp->m_trg_list= triggers;
 
-        int event= lex.trg_chistics.event;
-        int action_time= lex.trg_chistics.action_time;
+        int trg_event= sp->m_trg_chistics.event;
+        int trg_action_time= sp->m_trg_chistics.action_time;
 
-        sp= triggers->bodies[event][action_time]= lex.sphead;
+        triggers->bodies[trg_event][trg_action_time]= sp;
         lex.sphead= NULL; /* Prevent double cleanup. */
 
         sp->set_info(0, 0, &lex.sp_chistics, *trg_sql_mode);
@@ -1525,14 +1530,6 @@ bool Table_triggers_list::check_n_load(THD *thd, const char *db,
         }
 
         /*
-          Gather all Item_trigger_field objects representing access to fields
-          in old/new versions of row in trigger into lists containing all such
-          objects for the triggers with same action and timing.
-        */
-        triggers->trigger_fields[lex.trg_chistics.event]
-                                [lex.trg_chistics.action_time]=
-          lex.trg_table_fields.first;
-        /*
           Also let us bind these objects to Field objects in table being
           opened.
 
@@ -1541,20 +1538,19 @@ bool Table_triggers_list::check_n_load(THD *thd, const char *db,
           SELECT)...
           Anyway some things can be checked only during trigger execution.
         */
-        for (Item_trigger_field *trg_field= lex.trg_table_fields.first;
+        for (Item_trigger_field *trg_field= sp->m_trg_table_fields.first;
              trg_field;
              trg_field= trg_field->next_trg_field)
         {
           trg_field->setup_field(thd, table,
-            &triggers->subject_table_grants[lex.trg_chistics.event]
-                                           [lex.trg_chistics.action_time]);
+            &triggers->subject_table_grants[trg_event][trg_action_time]);
         }
 
         lex_end(&lex);
       }
       thd->reset_db(save_db.str, save_db.length);
       thd->lex= old_lex;
-      thd->spcont= save_spcont;
+      thd->sp_runtime_ctx= sp_runtime_ctx_saved;
       thd->variables.sql_mode= save_sql_mode;
 
       DBUG_RETURN(0);
@@ -1563,7 +1559,7 @@ err_with_lex_cleanup:
       // QQ: anything else ?
       lex_end(&lex);
       thd->lex= old_lex;
-      thd->spcont= save_spcont;
+      thd->sp_runtime_ctx= sp_runtime_ctx_saved;
       thd->variables.sql_mode= save_sql_mode;
       thd->reset_db(save_db.str, save_db.length);
       DBUG_RETURN(1);
@@ -2215,6 +2211,37 @@ add_tables_and_routines_for_triggers(THD *thd,
 
 
 /**
+  Check if any of the marked fields are used in the trigger.
+
+  @param used_fields  Bitmap over fields to check
+  @param event_type   Type of event triggers for which we are going to inspect
+  @param action_time  Type of trigger action time we are going to inspect
+*/
+
+bool Table_triggers_list::is_fields_updated_in_trigger(MY_BITMAP *used_fields,
+                                                       trg_event_type event_type,
+                                                       trg_action_time_type action_time)
+{
+  Item_trigger_field *trg_field;
+  sp_head *sp= bodies[event_type][action_time];
+  DBUG_ASSERT(used_fields->n_bits == trigger_table->s->fields);
+
+  for (trg_field= sp->m_trg_table_fields.first; trg_field;
+       trg_field= trg_field->next_trg_field)
+  {
+    /* We cannot check fields which does not present in table. */
+    if (trg_field->field_idx != (uint)-1)
+    {
+      if (bitmap_is_set(used_fields, trg_field->field_idx) &&
+          trg_field->get_settable_routine_parameter())
+        return true;
+    }
+  }
+  return false;
+}
+
+
+/**
   Mark fields of subject table which we read/set in its triggers
   as such.
 
@@ -2223,7 +2250,6 @@ add_tables_and_routines_for_triggers(THD *thd,
   and thus informs handler that values for these fields should be
   retrieved/stored during execution of statement.
 
-  @param thd    Current thread context
   @param event  Type of event triggers for which we are going to inspect
 */
 
@@ -2234,7 +2260,12 @@ void Table_triggers_list::mark_fields_used(trg_event_type event)
 
   for (action_time= 0; action_time < (int)TRG_ACTION_MAX; action_time++)
   {
-    for (trg_field= trigger_fields[event][action_time]; trg_field;
+    sp_head *sp= bodies[event][action_time];
+
+    if (!sp)
+      continue;
+
+    for (trg_field= sp->m_trg_table_fields.first; trg_field;
          trg_field= trg_field->next_trg_field)
     {
       /* We cannot mark fields which does not present in table. */

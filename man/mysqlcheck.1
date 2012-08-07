@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqlcheck\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 03/29/2012
+.\"      Date: 07/17/2012
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLCHECK\FR" "1" "03/29/2012" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLCHECK\FR" "1" "07/17/2012" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -37,7 +37,7 @@ client performs table maintenance: It checks, repairs, optimizes, or analyzes ta
 Each table is locked and therefore unavailable to other sessions while it is being processed, although for check operations, the table is locked with a
 READ
 lock only (see
-Section\ \&12.3.5, \(lqLOCK TABLES and UNLOCK TABLES Syntax\(rq, for more information about
+Section\ \&13.3.5, \(lqLOCK TABLES and UNLOCK TABLES Syntax\(rq, for more information about
 READ
 and
 WRITE
@@ -72,7 +72,7 @@ REPAIR TABLE,
 ANALYZE TABLE, and
 OPTIMIZE TABLE
 in a convenient way for the user\&. It determines which statements to use for the operation you want to perform, and then sends the statements to the server to be executed\&. For details about which storage engines each statement works with, see the descriptions for those statements in
-Section\ \&12.7.2, \(lqTable Maintenance Statements\(rq\&.
+Section\ \&13.7.2, \(lqTable Maintenance Statements\(rq\&.
 .PP
 The
 MyISAM
@@ -311,7 +311,7 @@ This option is supported beginning with MySQL 5\&.6\&.1\&.
 \fB\-\-character\-sets\-dir=\fR\fB\fIpath\fR\fR
 .sp
 The directory where character sets are installed\&. See
-Section\ \&9.5, \(lqCharacter Set Configuration\(rq\&.
+Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&.
 .RE
 .sp
 .RS 4
@@ -468,7 +468,7 @@ Print debugging information and memory and CPU usage statistics when the program
 Use
 \fIcharset_name\fR
 as the default character set\&. See
-Section\ \&9.5, \(lqCharacter Set Configuration\(rq\&.
+Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&.
 .RE
 .sp
 .RS 4
@@ -502,7 +502,7 @@ If you are using this option to repair tables, it runs an extended repair that m
 \fB\-\-default\-auth=\fR\fB\fIplugin\fR\fR
 .sp
 The client\-side authentication plugin to use\&. See
-Section\ \&5.5.6, \(lqPluggable Authentication\(rq\&.
+Section\ \&6.3.6, \(lqPluggable Authentication\(rq\&.
 .sp
 This option was added in MySQL 5\&.6\&.2\&.
 .RE
@@ -645,7 +645,7 @@ option on the command line,
 prompts for one\&.
 .sp
 Specifying a password on the command line should be considered insecure\&. See
-Section\ \&5.3.2.2, \(lqEnd-User Guidelines for Password Security\(rq\&. You can use an option file to avoid giving the password on the command line\&.
+Section\ \&6.1.2.2, \(lqEnd-User Guidelines for Password Security\(rq\&. You can use an option file to avoid giving the password on the command line\&.
 .RE
 .sp
 .RS 4
@@ -681,7 +681,7 @@ The directory in which to look for plugins\&. It may be necessary to specify thi
 option is used to specify an authentication plugin but
 \fBmysqlcheck\fR
 does not find it\&. See
-Section\ \&5.5.6, \(lqPluggable Authentication\(rq\&.
+Section\ \&6.3.6, \(lqPluggable Authentication\(rq\&.
 .sp
 This option was added in MySQL 5\&.6\&.2\&.
 .RE
@@ -800,7 +800,7 @@ localhost, the Unix socket file to use, or, on Windows, the name of the named pi
 Options that begin with
 \fB\-\-ssl\fR
 specify whether to connect to the server using SSL and indicate where to find SSL keys and certificates\&. See
-Section\ \&5.5.8.3, \(lqSSL Command Options\(rq\&.
+Section\ \&6.3.8.3, \(lqSSL Command Options\(rq\&.
 .RE
 .sp
 .RS 4

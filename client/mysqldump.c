@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+   Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@
 #include <stdarg.h>
 
 #include "client_priv.h"
+#include "my_default.h"
 #include "mysql.h"
 #include "mysql_version.h"
 #include "mysqld_error.h"
@@ -84,6 +85,15 @@
 #define IGNORE_NONE 0x00 /* no ignore */
 #define IGNORE_DATA 0x01 /* don't dump data for this table */
 #define IGNORE_INSERT_DELAYED 0x02 /* table doesn't support INSERT DELAYED */
+
+/* general_log or slow_log tables under mysql database */
+static inline my_bool general_log_or_slow_log_tables(const char *db, 
+                                                     const char *table)
+{
+  return (strcmp(db, "mysql") == 0) &&
+         ((strcmp(table, "general_log") == 0) ||
+          (strcmp(table, "slow_log") == 0));
+}
 
 static void add_load_option(DYNAMIC_STRING *str, const char *option,
                              const char *option_value);
@@ -1502,6 +1512,9 @@ static int connect_to_db(char *host, char *user,char *passwd)
   if (opt_default_auth && *opt_default_auth)
     mysql_options(&mysql_connection, MYSQL_DEFAULT_AUTH, opt_default_auth);
 
+  mysql_options(&mysql_connection, MYSQL_OPT_CONNECT_ATTR_RESET, 0);
+  mysql_options4(&mysql_connection, MYSQL_OPT_CONNECT_ATTR_ADD,
+                 "program_name", "mysqldump");
   if (!(mysql= mysql_real_connect(&mysql_connection,host,user,passwd,
                                   NULL,opt_mysql_port,opt_mysql_unix_port,
                                   0)))
@@ -2467,6 +2480,7 @@ static uint get_table_structure(char *table, char *db, char *table_type,
                                 "TABLE_SCHEMA = '%s' AND TABLE_NAME = '%s'";
   FILE       *sql_file= md_result_file;
   int        len;
+  my_bool    is_log_table;
   MYSQL_RES  *result;
   MYSQL_ROW  row;
   DBUG_ENTER("get_table_structure");
@@ -2551,9 +2565,12 @@ static uint get_table_structure(char *table, char *db, char *table_type,
       /*
         Even if the "table" is a view, we do a DROP TABLE here.  The
         view-specific code below fills in the DROP VIEW.
+        We will skip the DROP TABLE for general_log and slow_log, since
+        those stmts will fail, in case we apply dump by enabling logging.
        */
-        fprintf(sql_file, "DROP TABLE IF EXISTS %s;\n",
-                opt_quoted_table);
+        if (!general_log_or_slow_log_tables(db, table))
+          fprintf(sql_file, "DROP TABLE IF EXISTS %s;\n",
+                  opt_quoted_table);
         check_io(sql_file);
       }
 
@@ -2665,12 +2682,25 @@ static uint get_table_structure(char *table, char *db, char *table_type,
 
       row= mysql_fetch_row(result);
 
-      fprintf(sql_file, (opt_compatible_mode & 3) ? "%s;\n" :
-              "/*!40101 SET @saved_cs_client     = @@character_set_client */;\n"
-              "/*!40101 SET character_set_client = utf8 */;\n"
-              "%s;\n"
-              "/*!40101 SET character_set_client = @saved_cs_client */;\n",
-              row[1]);
+      is_log_table= general_log_or_slow_log_tables(db, table);
+      if (is_log_table)
+        row[1]+= 13; /* strlen("CREATE TABLE ")= 13 */
+      if (opt_compatible_mode & 3)
+      {
+        fprintf(sql_file,
+                is_log_table ? "CREATE TABLE IF NOT EXISTS %s;\n" : "%s;\n",
+                row[1]);
+      }
+      else
+      {
+        fprintf(sql_file,
+                "/*!40101 SET @saved_cs_client     = @@character_set_client */;\n"
+                "/*!40101 SET character_set_client = utf8 */;\n"
+                "%s%s;\n"
+                "/*!40101 SET character_set_client = @saved_cs_client */;\n",
+                is_log_table ? "CREATE TABLE IF NOT EXISTS " : "",
+                row[1]);
+      }
 
       check_io(sql_file);
       mysql_free_result(result);
@@ -4082,6 +4112,48 @@ static int dump_tablespaces(char* ts_where)
   DBUG_RETURN(0);
 }
 
+
+static int
+is_ndbinfo(MYSQL* mysql, const char* dbname)
+{
+  static int checked_ndbinfo= 0;
+  static int have_ndbinfo= 0;
+
+  if (!checked_ndbinfo)
+  {
+    MYSQL_RES *res;
+    MYSQL_ROW row;
+    char buf[32], query[64];
+
+    my_snprintf(query, sizeof(query),
+                "SHOW VARIABLES LIKE %s",
+                quote_for_like("ndbinfo_version", buf));
+
+    checked_ndbinfo= 1;
+
+    if (mysql_query_with_error_report(mysql, &res, query))
+      return 0;
+
+    if (!(row= mysql_fetch_row(res)))
+    {
+      mysql_free_result(res);
+      return 0;
+    }
+
+    have_ndbinfo= 1;
+    mysql_free_result(res);
+  }
+
+  if (!have_ndbinfo)
+    return 0;
+
+  if (my_strcasecmp(&my_charset_latin1, dbname, "ndbinfo") == 0)
+    return 1;
+
+  return 0;
+}
+
+
 static int dump_all_databases()
 {
   MYSQL_ROW row;
@@ -4098,6 +4170,9 @@ static int dump_all_databases()
 
     if (mysql_get_server_version(mysql) >= FIRST_PERFORMANCE_SCHEMA_VERSION &&
         !my_strcasecmp(&my_charset_latin1, row[0], PERFORMANCE_SCHEMA_DB_NAME))
+      continue;
+
+    if (is_ndbinfo(mysql, row[0]))
       continue;
 
     if (dump_all_tables_in_db(row[0]))
@@ -4120,6 +4195,9 @@ static int dump_all_databases()
 
       if (mysql_get_server_version(mysql) >= FIRST_PERFORMANCE_SCHEMA_VERSION &&
           !my_strcasecmp(&my_charset_latin1, row[0], PERFORMANCE_SCHEMA_DB_NAME))
+        continue;
+
+      if (is_ndbinfo(mysql, row[0]))
         continue;
 
       if (dump_all_views_in_db(row[0]))
@@ -4228,6 +4306,12 @@ int init_dumping_tables(char *qdatabase)
 
 static int init_dumping(char *database, int init_func(char*))
 {
+  if (is_ndbinfo(mysql, database))
+  {
+    verbose_msg("-- Skipping dump of ndbinfo database\n");
+    return 0;
+  }
+
   if (mysql_select_db(mysql, database))
   {
     DB_error(mysql, "when selecting the database");
@@ -4285,6 +4369,22 @@ static int dump_all_tables_in_db(char *database)
   if (opt_xml)
     print_xml_tag(md_result_file, "", "\n", "database", "name=", database, NullS);
 
+  if (strcmp(database, "mysql") == 0)
+  {
+    char table_type[NAME_LEN];
+    char ignore_flag;
+    uint num_fields;
+    num_fields= get_table_structure((char *) "general_log", 
+                                    database, table_type, &ignore_flag);
+    if (num_fields == 0)
+      verbose_msg("-- Warning: get_table_structure() failed with some internal "
+                  "error for 'general_log' table\n");
+    num_fields= get_table_structure((char *) "slow_log", 
+                                    database, table_type, &ignore_flag);
+    if (num_fields == 0)
+      verbose_msg("-- Warning: get_table_structure() failed with some internal "
+                  "error for 'slow_log' table\n");
+  }
   if (lock_tables)
   {
     DYNAMIC_STRING query;

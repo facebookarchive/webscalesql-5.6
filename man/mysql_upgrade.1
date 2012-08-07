@@ -2,12 +2,12 @@
 .\"     Title: \fBmysql_upgrade\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 03/29/2012
+.\"      Date: 07/17/2012
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQL_UPGRADE\FR" "1" "03/29/2012" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQL_UPGRADE\FR" "1" "07/17/2012" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -77,7 +77,7 @@ with administrator privileges\&. You can do this by running a Command Prompt as 
 You should always back up your current MySQL installation
 \fIbefore\fR
 performing an upgrade\&. See
-Section\ \&6.2, \(lqDatabase Backup Methods\(rq\&.
+Section\ \&7.2, \(lqDatabase Backup Methods\(rq\&.
 .PP
 Some upgrade incompatibilities may require special handling before you upgrade your MySQL installation and run
 \fBmysql_upgrade\fR\&. See
@@ -150,7 +150,7 @@ FOR UPGRADE
 option of the
 CHECK TABLE
 statement (see
-Section\ \&12.7.2.2, \(lqCHECK TABLE Syntax\(rq)\&.
+Section\ \&13.7.2.2, \(lqCHECK TABLE Syntax\(rq)\&.
 .RE
 .sp
 .RS 4
@@ -190,7 +190,7 @@ Section\ \&2.5.1, \(lqInstalling MySQL from RPM Packages on Linux\(rq\&.)
 .PP
 \fBmysql_upgrade\fR
 does not upgrade the contents of the help tables\&. For upgrade instructions, see
-Section\ \&5.1.8, \(lqServer-Side Help\(rq\&.
+Section\ \&5.1.9, \(lqServer-Side Help\(rq\&.
 .PP
 \fBmysql_upgrade\fR
 supports the following options, which can be specified on the command line or in the
@@ -294,7 +294,7 @@ Print debugging information and memory and CPU usage statistics when the program
 \fB\-\-default\-auth=\fR\fB\fIplugin\fR\fR
 .sp
 The client\-side authentication plugin to use\&. See
-Section\ \&5.5.6, \(lqPluggable Authentication\(rq\&.
+Section\ \&6.3.6, \(lqPluggable Authentication\(rq\&.
 .sp
 This option was added in MySQL 5\&.6\&.2\&.
 .RE
@@ -337,7 +337,7 @@ The directory in which to look for plugins\&. It may be necessary to specify thi
 option is used to specify an authentication plugin but
 \fBmysql_upgrade\fR
 does not find it\&. See
-Section\ \&5.5.6, \(lqPluggable Authentication\(rq\&.
+Section\ \&6.3.6, \(lqPluggable Authentication\(rq\&.
 .sp
 This option was added in MySQL 5\&.6\&.2\&.
 .RE
@@ -420,8 +420,21 @@ Verbose mode\&. Print more information about what the program does\&.
 .sp
 Cause binary logging to be enabled while
 \fBmysql_upgrade\fR
-runs\&. This is the default behavior; to disable binary logging during the upgrade, use the inverse of this option (that is, start the program with
-\fB\-\-skip\-write\-binlog\fR)\&.
+runs\&. In MySQL 5\&.6\&.6 and earlier, this was the default behavior\&. (To disable binary logging during the upgrade, it was necessary to use the inverse of this option, by starting the program with
+\fB\-\-skip\-write\-binlog\fR\&.) Beginning with MySQL 5\&.6\&.7, binary logging by
+\fBmysql_upgrade\fR
+is disabled by default (Bug #14221043), and you must invoke the program explicitly with
+\fB\-\-write\-binlog\fR
+if you want its actions to be written to the binary log\&. (Also beginning with MySQL 5\&.6\&.7, the
+\fB\-\-skip\-write\-binlog\fR
+option effectively does nothing\&.)
+.sp
+Employing this option is not recommended when upgrading a MySQL Server that is running with global transaction identifiers enabled (Bug #13833710)\&. This is because enabling GTIDs means that any updates which
+\fBmysql_upgrade\fR
+might need to perform on system tables using a nontransactional storage engine such as
+MyISAM
+to fail\&. See
+Section\ \&16.1.3.3, \(lqRestrictions on Replication with GTIDs\(rq, for more information\&.
 .RE
 .SH "COPYRIGHT"
 .br

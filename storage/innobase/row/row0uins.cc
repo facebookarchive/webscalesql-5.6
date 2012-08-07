@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-Copyright (c) 1997, 2010, Oracle and/or its affiliates. All Rights Reserved.
+Copyright (c) 1997, 2012, Oracle and/or its affiliates. All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -38,6 +38,7 @@ Created 2/25/1997 Heikki Tuuri
 #include "mach0data.h"
 #include "row0undo.h"
 #include "row0vers.h"
+#include "row0log.h"
 #include "trx0trx.h"
 #include "trx0rec.h"
 #include "row0row.h"
@@ -60,25 +61,64 @@ introduced where a call to log_free_check() is bypassed. */
 Removes a clustered index record. The pcur in node was positioned on the
 record, now it is detached.
 @return	DB_SUCCESS or DB_OUT_OF_FILE_SPACE */
-static
-ulint
+static  __attribute__((nonnull, warn_unused_result))
+dberr_t
 row_undo_ins_remove_clust_rec(
 /*==========================*/
 	undo_node_t*	node)	/*!< in: undo node */
 {
 	btr_cur_t*	btr_cur;
 	ibool		success;
-	ulint		err;
-	ulint		n_tries		= 0;
+	dberr_t		err;
+	ulint		n_tries	= 0;
 	mtr_t		mtr;
+	dict_index_t*	index	= node->pcur.btr_cur.index;
+	bool		online;
+
+	ut_ad(dict_index_is_clust(index));
 
 	mtr_start(&mtr);
 
-	success = btr_pcur_restore_position(BTR_MODIFY_LEAF, &(node->pcur),
-					    &mtr);
+	/* This is similar to row_undo_mod_clust(). Even though we
+	call row_log_table_rollback() elsewhere, the DDL thread may
+	already have copied this row to the sort buffers or to the new
+	table. We must log the removal, so that the row will be
+	correctly purged. However, we can log the removal out of sync
+	with the B-tree modification. */
+
+	online = dict_index_is_online_ddl(index);
+	if (online) {
+		ut_ad(node->trx->dict_operation_lock_mode
+		      != RW_X_LATCH);
+		ut_ad(node->table->id != DICT_INDEXES_ID);
+		mtr_s_lock(dict_index_get_lock(index), &mtr);
+	}
+
+	success = btr_pcur_restore_position(
+		online
+		? BTR_MODIFY_LEAF | BTR_ALREADY_S_LATCHED
+		: BTR_MODIFY_LEAF, &node->pcur, &mtr);
 	ut_a(success);
 
+	btr_cur = btr_pcur_get_btr_cur(&node->pcur);
+
+	ut_ad(rec_get_trx_id(btr_cur_get_rec(btr_cur), btr_cur->index)
+	      == node->trx->id);
+
+	if (online && dict_index_is_online_ddl(index)) {
+		const rec_t*	rec	= btr_cur_get_rec(btr_cur);
+		mem_heap_t*	heap	= NULL;
+		const ulint*	offsets	= rec_get_offsets(
+			rec, index, NULL, ULINT_UNDEFINED, &heap);
+		row_log_table_delete(
+			rec, index, offsets,
+			trx_read_trx_id(row_get_trx_id_offset(index, offsets)
+					+ rec));
+		mem_heap_free(heap);
+	}
+
 	if (node->table->id == DICT_INDEXES_ID) {
+		ut_ad(!online);
 		ut_ad(node->trx->dict_operation_lock_mode == RW_X_LATCH);
 
 		/* Drop the index tree associated with the row in
@@ -90,14 +130,12 @@ row_undo_ins_remove_clust_rec(
 
 		mtr_start(&mtr);
 
-		success = btr_pcur_restore_position(BTR_MODIFY_LEAF,
-						    &(node->pcur), &mtr);
+		success = btr_pcur_restore_position(
+			BTR_MODIFY_LEAF, &node->pcur, &mtr);
 		ut_a(success);
 	}
 
-	btr_cur = btr_pcur_get_btr_cur(&(node->pcur));
-
-	if (btr_cur_optimistic_delete(btr_cur, &mtr)) {
+	if (btr_cur_optimistic_delete(btr_cur, 0, &mtr)) {
 		err = DB_SUCCESS;
 		goto func_exit;
 	}
@@ -111,7 +149,7 @@ retry:
 					    &(node->pcur), &mtr);
 	ut_a(success);
 
-	btr_cur_pessimistic_delete(&err, FALSE, btr_cur,
+	btr_cur_pessimistic_delete(&err, FALSE, btr_cur, 0,
 				   trx_is_recv(node->trx)
 				   ? RB_RECOVERY
 				   : RB_NORMAL, &mtr);
@@ -142,8 +180,8 @@ func_exit:
 /***************************************************************//**
 Removes a secondary index entry if found.
 @return	DB_SUCCESS, DB_FAIL, or DB_OUT_OF_FILE_SPACE */
-static
-ulint
+static __attribute__((nonnull, warn_unused_result))
+dberr_t
 row_undo_ins_remove_sec_low(
 /*========================*/
 	ulint		mode,	/*!< in: BTR_MODIFY_LEAF or BTR_MODIFY_TREE,
@@ -154,7 +192,7 @@ row_undo_ins_remove_sec_low(
 {
 	btr_pcur_t		pcur;
 	btr_cur_t*		btr_cur;
-	ulint			err;
+	dberr_t			err;
 	mtr_t			mtr;
 	enum row_search_result	search_result;
 
@@ -182,7 +220,7 @@ row_undo_ins_remove_sec_low(
 	}
 
 	if (mode == BTR_MODIFY_LEAF) {
-		err = btr_cur_optimistic_delete(btr_cur, &mtr)
+		err = btr_cur_optimistic_delete(btr_cur, 0, &mtr)
 			? DB_SUCCESS : DB_FAIL;
 	} else {
 		ut_ad(mode == BTR_MODIFY_TREE);
@@ -193,7 +231,7 @@ row_undo_ins_remove_sec_low(
 		deleting a record that contains externally stored
 		columns. */
 		ut_ad(!dict_index_is_clust(index));
-		btr_cur_pessimistic_delete(&err, FALSE, btr_cur,
+		btr_cur_pessimistic_delete(&err, FALSE, btr_cur, 0,
 					   RB_NORMAL, &mtr);
 	}
 func_exit:
@@ -207,14 +245,14 @@ func_exit:
 Removes a secondary index entry from the index if found. Tries first
 optimistic, then pessimistic descent down the tree.
 @return	DB_SUCCESS or DB_OUT_OF_FILE_SPACE */
-static
-ulint
+static __attribute__((nonnull, warn_unused_result))
+dberr_t
 row_undo_ins_remove_sec(
 /*====================*/
 	dict_index_t*	index,	/*!< in: index */
 	dtuple_t*	entry)	/*!< in: index entry to insert */
 {
-	ulint	err;
+	dberr_t	err;
 	ulint	n_tries	= 0;
 
 	/* Try first optimistic descent to the B-tree */
@@ -271,12 +309,12 @@ row_undo_ins_parse_undo_rec(
 	node->rec_type = type;
 
 	node->update = NULL;
-	node->table = dict_table_open_on_id(table_id, dict_locked);
+	node->table = dict_table_open_on_id(table_id, dict_locked, FALSE);
 
 	/* Skip the UNDO if we can't find the table or the .ibd file. */
 	if (UNIV_UNLIKELY(node->table == NULL)) {
 	} else if (UNIV_UNLIKELY(node->table->ibd_file_missing)) {
-		dict_table_close(node->table, dict_locked);
+		dict_table_close(node->table, dict_locked, FALSE);
 		node->table = NULL;
 	} else {
 		clust_index = dict_table_get_first_index(node->table);
@@ -287,7 +325,8 @@ row_undo_ins_parse_undo_rec(
 
 			if (!row_undo_search_clust_to_pcur(node)) {
 
-				dict_table_close(node->table, dict_locked);
+				dict_table_close(
+					node->table, dict_locked, FALSE);
 
 				node->table = NULL;
 			}
@@ -300,7 +339,7 @@ row_undo_ins_parse_undo_rec(
 			fprintf(stderr, " has no indexes, "
 				"ignoring the table\n");
 
-			dict_table_close(node->table, dict_locked);
+			dict_table_close(node->table, dict_locked, FALSE);
 
 			node->table = NULL;
 		}
@@ -310,27 +349,32 @@ row_undo_ins_parse_undo_rec(
 /***************************************************************//**
 Removes secondary index records.
 @return	DB_SUCCESS or DB_OUT_OF_FILE_SPACE */
-static
-ulint
+static __attribute__((nonnull, warn_unused_result))
+dberr_t
 row_undo_ins_remove_sec_rec(
 /*========================*/
 	undo_node_t*	node)	/*!< in/out: row undo node */
 {
-	ulint		err	= DB_SUCCESS;
+	dberr_t		err	= DB_SUCCESS;
+	dict_index_t*	index	= node->index;
 	mem_heap_t*	heap;
 
 	heap = mem_heap_create(1024);
 
-	while (node->index != NULL) {
+	while (index != NULL) {
 		dtuple_t*	entry;
 
-		if (node->index->type & DICT_FTS) {
-			dict_table_next_uncorrupted_index(node->index);
+		if (index->type & DICT_FTS) {
+			dict_table_next_uncorrupted_index(index);
 			continue;
 		}
 
-		entry = row_build_index_entry(node->row, node->ext,
-					      node->index, heap);
+		/* An insert undo record TRX_UNDO_INSERT_REC will
+		always contain all fields of the index. It does not
+		matter if any indexes were created afterwards; all
+		index entries can be reconstructed from the row. */
+		entry = row_build_index_entry(
+			node->row, node->ext, index, heap);
 		if (UNIV_UNLIKELY(!entry)) {
 			/* The database must have crashed after
 			inserting a clustered index record but before
@@ -342,10 +386,15 @@ row_undo_ins_remove_sec_rec(
 			only occur during the rollback of incomplete
 			transactions. */
 			ut_a(trx_is_recv(node->trx));
+		} else if (dict_index_online_trylog(
+				   index, entry, node->trx->id,
+				   ROW_OP_DELETE_PURGE)) {
+			/* The index is being created, and we
+			successfully buffered the purge operation. */
 		} else {
 			log_free_check();
 
-			err = row_undo_ins_remove_sec(node->index, entry);
+			err = row_undo_ins_remove_sec(index, entry);
 
 			if (UNIV_UNLIKELY(err != DB_SUCCESS)) {
 				goto func_exit;
@@ -353,10 +402,11 @@ row_undo_ins_remove_sec_rec(
 		}
 
 		mem_heap_empty(heap);
-		dict_table_next_uncorrupted_index(node->index);
+		dict_table_next_uncorrupted_index(index);
 	}
 
 func_exit:
+	node->index = index;
 	mem_heap_free(heap);
 	return(err);
 }
@@ -369,15 +419,14 @@ if it figures out that an index record will be removed in the purge
 anyway, it will remove it in the rollback.
 @return	DB_SUCCESS or DB_OUT_OF_FILE_SPACE */
 UNIV_INTERN
-ulint
+dberr_t
 row_undo_ins(
 /*=========*/
 	undo_node_t*	node)	/*!< in: row undo node */
 {
-	ulint		err;
-	ibool		dict_locked;
+	dberr_t	err;
+	ibool	dict_locked;
 
-	ut_ad(node);
 	ut_ad(node->state == UNDO_NODE_INSERT);
 
 	dict_locked = node->trx->dict_operation_lock_mode == RW_X_LATCH;
@@ -392,24 +441,46 @@ row_undo_ins(
 
 	/* Iterate over all the indexes and undo the insert.*/
 
+	node->index = dict_table_get_first_index(node->table);
+	ut_ad(dict_index_is_clust(node->index));
+
+	if (dict_index_is_online_ddl(node->index)) {
+		/* Note that we are rolling back this transaction, so
+		that all inserts and updates with this DB_TRX_ID can
+		be skipped. */
+		row_log_table_rollback(node->index, node->trx->id);
+	}
+
 	/* Skip the clustered index (the first index) */
-	node->index = dict_table_get_next_index(
-		dict_table_get_first_index(node->table));
+	node->index = dict_table_get_next_index(node->index);
 
 	dict_table_skip_corrupt_index(node->index);
 
 	err = row_undo_ins_remove_sec_rec(node);
 
-	if (UNIV_UNLIKELY(err != DB_SUCCESS)) {
-		goto func_exit;
+	if (err == DB_SUCCESS) {
+
+		log_free_check();
+
+		if (node->table->id == DICT_INDEXES_ID) {
+
+			if (!dict_locked) {
+				mutex_enter(&dict_sys->mutex);
+			}
+		}
+
+		// FIXME: We need to update the dict_index_t::space and
+		// page number fields too.
+		err = row_undo_ins_remove_clust_rec(node);
+
+		if (node->table->id == DICT_INDEXES_ID
+		    && !dict_locked) {
+
+			mutex_exit(&dict_sys->mutex);
+		}
 	}
 
-	log_free_check();
-
-	err = row_undo_ins_remove_clust_rec(node);
-
-func_exit:
-	dict_table_close(node->table, dict_locked);
+	dict_table_close(node->table, dict_locked, FALSE);
 
 	node->table = NULL;
 

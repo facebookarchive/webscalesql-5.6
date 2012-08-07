@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-Copyright (c) 1996, 2011, Oracle and/or its affiliates. All Rights Reserved.
+Copyright (c) 1996, 2012, Oracle and/or its affiliates. All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -49,7 +49,7 @@ struct file_format_struct {
 	ulint		id;		/*!< id of the file format */
 	const char*	name;		/*!< text representation of the
 					file format */
-	mutex_t		mutex;		/*!< covers changes to the above
+	ib_mutex_t		mutex;		/*!< covers changes to the above
 					fields */
 };
 
@@ -121,12 +121,12 @@ UNIV_INTERN mysql_pfs_key_t	file_format_max_mutex_key;
 UNIV_INTERN mysql_pfs_key_t	trx_sys_mutex_key;
 #endif /* UNIV_PFS_RWLOCK */
 
+#ifndef UNIV_HOTBACKUP
 #ifdef UNIV_DEBUG
 /* Flag to control TRX_RSEG_N_SLOTS behavior debugging. */
 uint		trx_rseg_n_slots_debug = 0;
 #endif
 
-#ifndef UNIV_HOTBACKUP
 /** This is used to track the maximum file format id known to InnoDB. It's
 updated via SET GLOBAL innodb_file_format_max = 'x' or when we open
 or create a table. */
@@ -700,7 +700,7 @@ Check for the max file format tag stored on disk. Note: If max_format_id
 is == UNIV_FORMAT_MAX + 1 then we only print a warning.
 @return	DB_SUCCESS or error code */
 UNIV_INTERN
-ulint
+dberr_t
 trx_sys_file_format_max_check(
 /*==========================*/
 	ulint	max_format_id)	/*!< in: max format id to check */
@@ -999,7 +999,7 @@ trx_sys_read_file_format_id(
 	);
 	if (!success) {
 		/* The following call prints an error message */
-		os_file_get_last_error(TRUE);
+		os_file_get_last_error(true);
 
 		ut_print_timestamp(stderr);
 
@@ -1018,7 +1018,7 @@ trx_sys_read_file_format_id(
 
 	if (!success) {
 		/* The following call prints an error message */
-		os_file_get_last_error(TRUE);
+		os_file_get_last_error(true);
 
 		ut_print_timestamp(stderr);
 
@@ -1079,7 +1079,7 @@ trx_sys_read_pertable_file_format_id(
 	);
 	if (!success) {
 		/* The following call prints an error message */
-		os_file_get_last_error(TRUE);
+		os_file_get_last_error(true);
 
 		ut_print_timestamp(stderr);
 
@@ -1098,7 +1098,7 @@ trx_sys_read_pertable_file_format_id(
 
 	if (!success) {
 		/* The following call prints an error message */
-		os_file_get_last_error(TRUE);
+		os_file_get_last_error(true);
 
 		ut_print_timestamp(stderr);
 
@@ -1251,7 +1251,7 @@ trx_sys_any_active_transactions(void)
 	mutex_enter(&trx_sys->mutex);
 
 	total_trx = UT_LIST_GET_LEN(trx_sys->rw_trx_list)
-		+ trx_sys->n_mysql_trx;
+		  + UT_LIST_GET_LEN(trx_sys->mysql_trx_list);
 
 	ut_a(total_trx >= trx_sys->n_prepared_trx);
 	total_trx -= trx_sys->n_prepared_trx;

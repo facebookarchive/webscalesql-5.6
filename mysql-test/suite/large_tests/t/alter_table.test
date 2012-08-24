@@ -2,6 +2,9 @@
 # fastest machine.  This test requires at least 60 GB of disk space.
 --source include/big_test.inc
 
+# Does not complete in reasonable time in debug mode.
+--source include/have_nodebug.inc
+
 #
 # Bug#27029 alter table ... enable keys crashes mysqld on large table
 #

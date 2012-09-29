@@ -49,7 +49,7 @@
        Mac OS X and Mac OS X Server depending on the installation
        type you chose. The following table shows the default
        locations by installation type.
-       Table 2.7. MySQL Unix Socket Locations on Mac OS X by
+       Table 2.4. MySQL Unix Socket Locations on Mac OS X by
        Installation Type
 
                Installation Type             Socket Location
@@ -60,7 +60,7 @@
        of the socket used within your application (for example,
        changing php.ini), or you should configure the socket location
        using a MySQL configuration file and the socket option. For
-       more information, see Section 5.1.2, "Server Command Options."
+       more information, see Section 5.1.3, "Server Command Options."
 
      * You may need (or want) to create a specific mysql user to own
        the MySQL directory and data. On Mac OS X 10.4 and lower you
@@ -140,7 +140,7 @@ alias mysqladmin /usr/local/mysql/bin/mysqladmin
    /usr/local/mysql-5.1.39-osx10.5-x86_64 . The following table shows
    the layout of the installation directory.
 
-   Table 2.8. MySQL Installation Layout on Mac OS X
+   Table 2.5. MySQL Installation Layout on Mac OS X
    Directory Contents of Directory
    bin Client programs and the mysqld server
    data Log files, databases
@@ -336,7 +336,7 @@ shell> sudo /Library/StartupItems/MySQLCOM/MySQLCOM stop
    already be installed. The following table shows the versions of
    MySQL that ship with Mac OS X Server versions.
 
-   Table 2.9. MySQL Versions Preinstalled with Mac OS X Server
+   Table 2.6. MySQL Versions Preinstalled with Mac OS X Server
    Mac OS X Server Version MySQL Version
    10.2-10.2.2             3.23.51
    10.2.3-10.2.6           3.23.53
@@ -349,7 +349,7 @@ shell> sudo /Library/StartupItems/MySQLCOM/MySQLCOM stop
    The following table shows the installation layout of MySQL on Mac
    OS X Server.
 
-   Table 2.10. MySQL Directory Layout for Preinstalled MySQL
+   Table 2.7. MySQL Directory Layout for Preinstalled MySQL
    Installations on Mac OS X Server
    Directory Contents of Directory
    /usr/bin Client programs

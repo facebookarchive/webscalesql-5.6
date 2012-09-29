@@ -25,7 +25,6 @@ buffer_pool_size	disabled
 buffer_pool_reads	disabled
 buffer_pool_read_requests	disabled
 buffer_pool_write_requests	disabled
-buffer_pool_pages_in_flush	disabled
 buffer_pool_wait_free	disabled
 buffer_pool_read_ahead	disabled
 buffer_pool_read_ahead_evicted	disabled
@@ -156,6 +155,8 @@ log_write_requests	disabled
 log_writes	disabled
 compress_pages_compressed	disabled
 compress_pages_decompressed	disabled
+compression_pad_increments	disabled
+compression_pad_decrements	disabled
 index_splits	disabled
 index_merges	disabled
 adaptive_hash_searches	disabled

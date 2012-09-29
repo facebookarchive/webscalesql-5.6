@@ -45,7 +45,7 @@ Created 9/17/2000 Heikki Tuuri
 #include "dict0load.h"
 #include "dict0boot.h"
 #include "dict0stats.h"
-#include "dict0stats_background.h"
+#include "dict0stats_bg.h"
 #include "trx0roll.h"
 #include "trx0purge.h"
 #include "trx0rec.h"
@@ -67,10 +67,7 @@ Created 9/17/2000 Heikki Tuuri
 UNIV_INTERN ibool	row_rollback_on_timeout	= FALSE;
 
 /** Chain node of the list of tables to drop in the background. */
-typedef struct row_mysql_drop_struct	row_mysql_drop_t;
-
-/** Chain node of the list of tables to drop in the background. */
-struct row_mysql_drop_struct{
+struct row_mysql_drop_t{
 	char*				table_name;	/*!< table name */
 	UT_LIST_NODE_T(row_mysql_drop_t)row_mysql_drop_list;
 							/*!< list chain node */
@@ -1012,9 +1009,14 @@ row_get_prebuilt_insert_row(
 
 	prebuilt->ins_graph->state = QUE_FORK_ACTIVE;
 
-	ut_ad(prebuilt->trx_id == 0 || prebuilt->trx_id <= last_index->trx_id);
+	/* The prebuilt->trx_id can be greater than the current last
+	index trx id for cases where the secondary index create failed
+	but the secondary index was visible briefly during the create
+	process. */
 
-	prebuilt->trx_id = last_index->trx_id;
+	if (last_index->trx_id > prebuilt->trx_id) {
+		prebuilt->trx_id = last_index->trx_id;
+	}
 
 	return(prebuilt->ins_node->row);
 }
@@ -1047,7 +1049,7 @@ row_update_statistics_if_needed(
 		if (counter > n_rows / 10 /* 10% */
 		    && dict_stats_auto_recalc_is_enabled(table)) {
 
-			dict_stats_enqueue_table_for_auto_recalc(table);
+			dict_stats_recalc_pool_add(table);
 			table->stat_modified_counter = 0;
 		}
 		return;
@@ -1941,6 +1943,8 @@ run_again:
 	thr->run_node = node;
 	thr->prev_node = node;
 
+	DEBUG_SYNC_C("foreign_constraint_update_cascade");
+
 	row_upd_step(thr);
 
 	/* The recursive call for cascading update/delete happens
@@ -2769,6 +2773,7 @@ row_discard_tablespace_begin(
 		name, TRUE, FALSE, DICT_ERR_IGNORE_NONE);
 
 	if (table) {
+		dict_stats_wait_bg_to_stop_using_tables(table, NULL, trx);
 		ut_a(table->space != TRX_SYS_SPACE);
 		ut_a(table->n_foreign_key_checks_running == 0);
 	}
@@ -3182,6 +3187,12 @@ row_truncate_table_for_mysql(
 		return(DB_ERROR);
 	}
 
+	if (dict_table_is_discarded(table)) {
+		return(DB_TABLESPACE_DELETED);
+	} else if (table->ibd_file_missing) {
+		return(DB_TABLESPACE_NOT_FOUND);
+	}
+
 	trx_start_if_not_started(trx);
 
 	trx->op_info = "truncating table";
@@ -3193,7 +3204,6 @@ row_truncate_table_for_mysql(
 	/* Prevent foreign key checks etc. while we are truncating the
 	table */
 
-wait_for_persistent_stats:
 	row_mysql_lock_data_dictionary(trx);
 
 	ut_ad(mutex_own(&(dict_sys->mutex)));
@@ -3201,15 +3211,7 @@ wait_for_persistent_stats:
 	ut_ad(rw_lock_own(&dict_operation_lock, RW_LOCK_EX));
 #endif /* UNIV_SYNC_DEBUG */
 
-	if (table->stats_bg_flag == BG_STAT_IN_PROGRESS) {
-
-		row_mysql_unlock_data_dictionary(trx);
-
-		os_thread_sleep(100000);
-
-    		goto wait_for_persistent_stats;
-	}
-
+	dict_stats_wait_bg_to_stop_using_tables(table, NULL, trx);
 
 	/* Check if the table is referenced by foreign key constraints from
 	some other table (not the table itself) */
@@ -3719,7 +3721,14 @@ row_drop_table_for_mysql(
 			fts_optimize_remove_table(table);
 			row_mysql_lock_data_dictionary(trx);
 		}
-		dict_stats_wait_bg_to_stop_using_tables(table, NULL, trx);
+
+		/* Do not bother to deal with persistent stats for temp
+		tables since we know temp tables do not use persistent
+		stats. */
+		if (!dict_table_is_temporary(table)) {
+			dict_stats_wait_bg_to_stop_using_tables(
+				table, NULL, trx);
+		}
 	}
 
 	/* Delete the link file if used. */
@@ -3727,19 +3736,20 @@ row_drop_table_for_mysql(
 		fil_delete_link_file(name);
 	}
 
-	dict_stats_wait_bg_to_stop_using_tables(table, NULL, trx);
+	if (!dict_table_is_temporary(table)) {
 
-	dict_stats_remove_table_from_auto_recalc(table);
+		dict_stats_recalc_pool_del(table);
 
-	/* Remove stats for this table and all of its indexes from the
-	persistent storage if it exists and if there are stats for this
-	table in there. This function creates its own trx and commits
-	it. */
-	char	errstr[1024];
-	err = dict_stats_drop_table(name, errstr, sizeof(errstr));
-	if (err != DB_SUCCESS) {
-		ut_print_timestamp(stderr);
-		fprintf(stderr, " InnoDB: %s\n", errstr);
+		/* Remove stats for this table and all of its indexes from the
+		persistent storage if it exists and if there are stats for this
+		table in there. This function creates its own trx and commits
+		it. */
+		char	errstr[1024];
+		err = dict_stats_drop_table(name, errstr, sizeof(errstr));
+		if (err != DB_SUCCESS) {
+			ut_print_timestamp(stderr);
+			fprintf(stderr, " InnoDB: %s\n", errstr);
+		}
 	}
 
 	ut_a(table->n_foreign_key_checks_running == 0);
@@ -4041,7 +4051,7 @@ check_next_foreign:
 		/* We do not allow temporary tables with a remote path. */
 		ut_a(!(is_temp && DICT_TF_HAS_DATA_DIR(table->flags)));
 
-		if (DICT_TF_HAS_DATA_DIR(table->flags)) {
+		if (space_id && DICT_TF_HAS_DATA_DIR(table->flags)) {
 			dict_get_and_save_data_dir_path(table, true);
 			ut_a(table->data_dir_path);
 
@@ -4098,7 +4108,7 @@ check_next_foreign:
 		a temp table or if the tablesace has been discarded. */
 		print_msg = !(is_temp || ibd_file_missing);
 
-		if (err == DB_SUCCESS && space_id > 0) {
+		if (err == DB_SUCCESS && space_id > TRX_SYS_SPACE) {
 			if (!is_temp
 			    && !fil_space_for_table_exists_in_mem(
 					space_id, tablename, FALSE, print_msg)) {
@@ -4605,7 +4615,9 @@ row_rename_table_for_mysql(
 		      "InnoDB: " REFMAN "innodb-troubleshooting.html\n",
 		      stderr);
 		goto funct_exit;
-	} else if (!dict_table_is_discarded(table) && table->ibd_file_missing) {
+
+	} else if (table->ibd_file_missing
+		   && !dict_table_is_discarded(table)) {
 
 		err = DB_TABLE_NOT_FOUND;
 
@@ -4615,6 +4627,7 @@ row_rename_table_for_mysql(
 			old_name);
 
 		goto funct_exit;
+
 	} else if (new_is_tmp) {
 		/* MySQL is doing an ALTER TABLE command and it renames the
 		original table to a temporary table name. We want to preserve
@@ -4671,7 +4684,9 @@ row_rename_table_for_mysql(
 
 	/* SYS_TABLESPACES and SYS_DATAFILES track non-system tablespaces
 	which have space IDs > 0. */
-	if (err == DB_SUCCESS && table->space) {
+	if (err == DB_SUCCESS
+	    && table->space != TRX_SYS_SPACE
+	    && !table->ibd_file_missing) {
 		/* Make a new pathname to update SYS_DATAFILES. */
 		char*	new_path = row_make_new_pathname(table, new_name);
 

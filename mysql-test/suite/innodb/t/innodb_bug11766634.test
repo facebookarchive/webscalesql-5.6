@@ -9,6 +9,8 @@
 
 #Want to skip this test from daily Valgrind execution.
 --source include/no_valgrind_without_big.inc
+# Adding big test option for this test.
+--source include/big_test.inc
 
 -- source include/not_embedded.inc
 -- source include/have_innodb.inc
@@ -18,7 +20,7 @@ let $MYSQLD_DATADIR=`select @@datadir`;
 let IBDATA1=$MYSQLD_DATADIR/ibdata1;
 let $MYSQLD_TMPDIR = `SELECT @@tmpdir`;
 let $rnd=`SELECT FLOOR(1 + (RAND() * 100000))`;
-let TMPFILE=$MYSQLD_TMPDIR/bug11766634-$rnd.txt
+let TMPFILE=$MYSQLD_TMPDIR/bug11766634-$rnd.txt;
 
 let $recs = 36262;
 

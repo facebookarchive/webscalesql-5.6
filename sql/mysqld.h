@@ -79,6 +79,8 @@ void dec_connection_count();
 void set_remaining_args(int argc, char **argv);
 int init_common_variables();
 void my_init_signals();
+bool gtid_server_init();
+void gtid_server_cleanup();
 
 extern "C" MYSQL_PLUGIN_IMPORT CHARSET_INFO *system_charset_info;
 extern MYSQL_PLUGIN_IMPORT CHARSET_INFO *files_charset_info ;
@@ -332,10 +334,12 @@ extern PSI_mutex_key key_RELAYLOG_LOCK_log;
 extern PSI_mutex_key key_RELAYLOG_LOCK_sync;
 extern PSI_mutex_key key_RELAYLOG_LOCK_sync_queue;
 extern PSI_mutex_key key_LOCK_sql_rand;
+extern PSI_mutex_key key_gtid_ensure_index_mutex;
 
 extern PSI_rwlock_key key_rwlock_LOCK_grant, key_rwlock_LOCK_logger,
   key_rwlock_LOCK_sys_init_connect, key_rwlock_LOCK_sys_init_slave,
-  key_rwlock_LOCK_system_variables_hash, key_rwlock_query_cache_query_lock;
+  key_rwlock_LOCK_system_variables_hash, key_rwlock_query_cache_query_lock,
+  key_rwlock_global_sid_lock;
 
 #ifdef HAVE_MMAP
 extern PSI_cond_key key_PAGE_cond, key_COND_active, key_COND_pool;
@@ -357,6 +361,7 @@ extern PSI_cond_key key_BINLOG_update_cond,
 extern PSI_cond_key key_BINLOG_COND_done;
 extern PSI_cond_key key_RELAYLOG_COND_done;
 extern PSI_cond_key key_RELAYLOG_update_cond;
+extern PSI_cond_key key_gtid_ensure_index_cond;
 
 extern PSI_thread_key key_thread_bootstrap, key_thread_delayed_insert,
   key_thread_handle_manager, key_thread_kill_server, key_thread_main,
@@ -623,7 +628,8 @@ enum options_mysqld
   OPT_SSL_CRL,
   OPT_SSL_CRLPATH,
   OPT_PFS_INSTRUMENT,
-  OPT_DEFAULT_AUTH
+  OPT_DEFAULT_AUTH,
+  OPT_SECURE_AUTH
 };
 
 
@@ -682,24 +688,25 @@ inline void table_case_convert(char * name, uint length)
 
 ulong sql_rnd_with_mutex();
 
+extern int32 num_thread_running;
 inline int32
 inc_thread_running()
 {
-  int32 num_thread_running;
+  int32 num_threads;
   my_atomic_rwlock_wrlock(&thread_running_lock);
-  num_thread_running= my_atomic_add32(&num_thread_running, 1);
+  num_threads= my_atomic_add32(&num_thread_running, 1);
   my_atomic_rwlock_wrunlock(&thread_running_lock);
-  return (num_thread_running+1);
+  return (num_threads+1);
 }
 
 inline int32
 dec_thread_running()
 {
-  int32 num_thread_running;
+  int32 num_threads;
   my_atomic_rwlock_wrlock(&thread_running_lock);
-  num_thread_running= my_atomic_add32(&num_thread_running, -1);
+  num_threads= my_atomic_add32(&num_thread_running, -1);
   my_atomic_rwlock_wrunlock(&thread_running_lock);
-  return (num_thread_running-1);
+  return (num_threads-1);
 }
 
 #if defined(MYSQL_DYNAMIC_PLUGIN) && defined(_WIN32)

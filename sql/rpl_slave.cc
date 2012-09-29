@@ -91,9 +91,15 @@ const char *relay_log_basename= 0;
 const ulong mts_slave_worker_queue_len_max= 16384;
 
 /*
+  Statistics go to the error log every # of seconds when --log-warnings > 1
+*/
+const long mts_online_stat_period= 60 * 2;
+
+
+/*
   MTS load-ballancing parameter.
-  Time in microsecs to sleep by MTS Coordinator to avoid the Worker queues
-  room overrun.
+  Time unit in microsecs to sleep by MTS Coordinator to avoid extra thread
+  signalling in the case of Worker queues are close to be filled up.
 */
 const ulong mts_coordinator_basic_nap= 5;
 
@@ -101,8 +107,18 @@ const ulong mts_coordinator_basic_nap= 5;
   MTS load-ballancing parameter.
   Percent of Worker queue size at which Worker is considered to become
   hungry.
+
+  C enqueues --+                   . underrun level
+               V                   "
+   +----------+-+------------------+--------------+
+   | empty    |.|::::::::::::::::::|xxxxxxxxxxxxxx| ---> Worker dequeues
+   +----------+-+------------------+--------------+
+
+   Like in the above diagram enqueuing to the x-d area would indicate
+   actual underrruning by Worker.
 */
 const ulong mts_worker_underrun_level= 10;
+
 Slave_job_item * de_queue(Slave_jobs_queue *jobs, Slave_job_item *ret);
 bool append_item_to_jobs(slave_job_item *job_item,
                          Slave_worker *w, Relay_log_info *rli);
@@ -314,6 +330,7 @@ int init_slave()
   if ((error= Rpl_info_factory::create_coordinators(opt_mi_repository_id, &active_mi,
                                                     opt_rli_repository_id, &rli)))
   {
+    sql_print_error("Failed to create or recover replication info repository.");
     error= 1;
     goto err;
   }
@@ -356,6 +373,10 @@ int init_slave()
 
 err:
   mysql_mutex_unlock(&LOCK_active_mi);
+  if (error)
+    sql_print_information("Check error log for additional messages. "
+                          "You will not be able to start replication until "
+                          "the issue is resolved and the server restarted.");
   DBUG_RETURN(error);
 }
 
@@ -2411,8 +2432,8 @@ bool show_slave_status(THD* thd, Master_info* mi)
  
   if (mi != NULL)
   { 
-    global_sid_lock.wrlock();
-    const Gtid_set* sql_gtid_set= gtid_state.get_logged_gtids();
+    global_sid_lock->wrlock();
+    const Gtid_set* sql_gtid_set= gtid_state->get_logged_gtids();
     const Gtid_set* io_gtid_set= mi->rli->get_gtid_set();
     if ((sql_gtid_set_size= sql_gtid_set->to_string(&sql_gtid_set_buffer)) < 0 ||
         (io_gtid_set_size= io_gtid_set->to_string(&io_gtid_set_buffer)) < 0)
@@ -2420,10 +2441,10 @@ bool show_slave_status(THD* thd, Master_info* mi)
       my_eof(thd);
       my_free(sql_gtid_set_buffer);
       my_free(io_gtid_set_buffer);
-      global_sid_lock.unlock();
+      global_sid_lock->unlock();
       DBUG_RETURN(true);
     }
-    global_sid_lock.unlock();
+    global_sid_lock->unlock();
   }
 
   field_list.push_back(new Item_empty_string("Slave_IO_State",
@@ -2905,16 +2926,16 @@ static int request_dump(THD *thd, MYSQL* mysql, Master_info* mi,
     // get set of GTIDs
     Sid_map sid_map(NULL/*no lock needed*/);
     Gtid_set gtid_done(&sid_map);
-    global_sid_lock.wrlock();
-    gtid_state.dbug_print();
+    global_sid_lock->wrlock();
+    gtid_state->dbug_print();
     if (gtid_done.add_gtid_set(mi->rli->get_gtid_set()) != RETURN_STATUS_OK ||
-        gtid_done.add_gtid_set(gtid_state.get_logged_gtids()) !=
+        gtid_done.add_gtid_set(gtid_state->get_logged_gtids()) !=
         RETURN_STATUS_OK)
     {
-      global_sid_lock.unlock();
+      global_sid_lock->unlock();
       goto err;
     }
-    global_sid_lock.unlock();
+    global_sid_lock->unlock();
      
     // allocate buffer
     size_t unused_size= 0;
@@ -3374,6 +3395,31 @@ apply_event_and_update_pos(Log_event** ptr_ev, THD* thd, Relay_log_info* rli)
 
       }
       *ptr_ev= NULL; // announcing the event is passed to w-worker
+
+      if (log_warnings > 1 &&
+          rli->is_parallel_exec() && rli->mts_events_assigned % 1024 == 1)
+      {
+        time_t my_now= my_time(0);
+
+        if ((my_now - rli->mts_last_online_stat) >=
+            mts_online_stat_period)
+        {
+          sql_print_information("Multi-threaded slave statistics: "
+                                "seconds elapsed = %lu; "
+                                "events assigned = %llu; "
+                                "worker queues filled over overrun level = %lu; "
+                                "waited due a Worker queue full = %lu; "
+                                "waited due the total size = %lu; "
+                                "slept when Workers occupied = %lu ",
+                                my_now - rli->mts_last_online_stat,
+                                rli->mts_events_assigned,
+                                rli->mts_wq_overrun_cnt,
+                                rli->mts_wq_overfill_cnt,
+                                rli->wq_size_waits_cnt,
+                                rli->mts_wq_no_underrun_cnt);
+          rli->mts_last_online_stat= my_now;
+        }
+      }
     }
   }
   else
@@ -4412,7 +4458,7 @@ pthread_handler_t handle_slave_worker(void *arg)
 
   mysql_mutex_unlock(&rli->pending_jobs_lock);
 
-  /* 
+  /*
      In MTS case cleanup_after_session() has be called explicitly.
      TODO: to make worker thd be deleted before Slave_worker instance.
   */
@@ -4424,7 +4470,6 @@ pthread_handler_t handle_slave_worker(void *arg)
   mysql_mutex_lock(&w->jobs_lock);
 
   w->running_status= Slave_worker::NOT_RUNNING;
-  w->info_thd= NULL; // required by ~Slave_worker; thd is deleted by this thread
   if (log_warnings > 1)
     sql_print_information("Worker %lu statistics: "
                           "events processed = %lu "
@@ -5040,6 +5085,7 @@ int slave_start_workers(Relay_log_info *rli, ulong n, bool *mts_inited)
   rli->curr_group_seen_begin= rli->curr_group_seen_gtid= false;
   rli->curr_group_isolated= FALSE;
   rli->checkpoint_seqno= 0;
+  rli->mts_last_online_stat= my_time(0);
   rli->mts_group_status= Relay_log_info::MTS_NOT_IN_GROUP;
   /*
     dyn memory to consume by Coordinator per event
@@ -5176,11 +5222,11 @@ void slave_stop_workers(Relay_log_info *rli, bool *mts_inited)
   }
 
   if (log_warnings > 1)
-    sql_print_information("Multi-threaded slave statistics: "
-                          "events processed = %lu ;"
-                          "worker queues filled over overrun level = %lu ;"
-                          "waited due a Worker queue full = %lu ;"
-                          "waited due the total size = %lu ;"
+    sql_print_information("Total MTS session statistics: "
+                          "events processed = %llu; "
+                          "worker queues filled over overrun level = %lu; "
+                          "waited due a Worker queue full = %lu; "
+                          "waited due the total size = %lu; "
                           "slept when Workers occupied = %lu ",
                           rli->mts_events_assigned, rli->mts_wq_overrun_cnt,
                           rli->mts_wq_overfill_cnt, rli->wq_size_waits_cnt,
@@ -5194,7 +5240,12 @@ end:
   destroy_hash_workers(rli);
   delete rli->gaq;
   delete_dynamic(&rli->least_occupied_workers);    // least occupied
+
+  // Destroy buffered events of the current group prior to exit.
+  for (uint i= 0; i < rli->curr_group_da.elements; i++)
+    delete *(Log_event**) dynamic_array_ptr(&rli->curr_group_da, i);
   delete_dynamic(&rli->curr_group_da);             // GCDA
+
   delete_dynamic(&rli->curr_group_assigned_parts); // GCAP
   rli->deinit_workers();
   rli->slave_parallel_workers= 0;
@@ -6307,12 +6358,12 @@ static int queue_event(Master_info* mi,const char* buf, ulong event_len)
       error= ER_FOUND_GTID_EVENT_WHEN_GTID_MODE_IS_OFF;
       goto err;
     }
-    global_sid_lock.rdlock();
+    global_sid_lock->rdlock();
     Gtid_log_event gtid_ev(buf, checksum_alg != BINLOG_CHECKSUM_ALG_OFF ?
                            event_len - BINLOG_CHECKSUM_LEN : event_len,
                            mi->get_mi_description_event());
     gtid.sidno= gtid_ev.get_sidno(false);
-    global_sid_lock.unlock();
+    global_sid_lock->unlock();
     if (gtid.sidno < 0)
       goto err;
     gtid.gno= gtid_ev.get_gno();
@@ -6406,9 +6457,9 @@ static int queue_event(Master_info* mi,const char* buf, ulong event_len)
 
       if (event_type == GTID_LOG_EVENT)
       {
-        global_sid_lock.rdlock();
+        global_sid_lock->rdlock();
         int ret= rli->add_logged_gtid(gtid.sidno, gtid.gno);
-        global_sid_lock.unlock();
+        global_sid_lock->unlock();
         if (ret != 0)
           goto err;
       }
@@ -7617,7 +7668,7 @@ int start_slave(THD* thd , Master_info* mi,  bool net_report)
         }
         else if (thd->lex->mi.gtid)
         {
-          global_sid_lock.wrlock();
+          global_sid_lock->wrlock();
           mi->rli->clear_until_condition();
           if (mi->rli->until_sql_gtids.add_gtid_text(thd->lex->mi.gtid)
               != RETURN_STATUS_OK)
@@ -7628,7 +7679,7 @@ int start_slave(THD* thd , Master_info* mi,  bool net_report)
               ? Relay_log_info::UNTIL_SQL_BEFORE_GTIDS
               : Relay_log_info::UNTIL_SQL_AFTER_GTIDS;
           }
-          global_sid_lock.unlock();
+          global_sid_lock->unlock();
         }
         else if (thd->lex->mi.until_after_gaps)
         {
@@ -7989,6 +8040,20 @@ bool change_master(THD* thd, Master_info* mi)
   if ((lex_mi->host && strcmp(lex_mi->host, mi->host)) ||
       (lex_mi->port && lex_mi->port != mi->port))
   {
+    /*
+      This is necessary because the primary key, i.e. host or port, has
+      changed.
+
+      The repository does not support direct changes on the primary key,
+      so the row is dropped and re-inserted with a new primary key. If we
+      don't do that, the master info repository we will end up with several
+      rows.
+    */
+    if (mi->clean_info())
+    {
+      ret= true;
+      goto err;
+    }
     mi->master_uuid[0]= 0;
     mi->master_id= 0;
   }
@@ -8178,7 +8243,7 @@ bool change_master(THD* thd, Master_info* mi)
     Relay log's IO_CACHE may not be inited, if rli->inited==0 (server was never
     a slave before).
   */
-  if (flush_master_info(mi, FALSE))
+  if (flush_master_info(mi, true))
   {
     my_error(ER_RELAY_LOG_INIT, MYF(0), "Failed to flush master info file");
     ret= TRUE;
@@ -8261,7 +8326,8 @@ bool change_master(THD* thd, Master_info* mi)
     running.
   */
   DBUG_ASSERT(!mi->rli->slave_running);
-  ret= mi->rli->flush_info(TRUE);
+  if ((ret= mi->rli->flush_info(true)))
+    my_error(ER_RELAY_LOG_INIT, MYF(0), "Failed to flush relay info file.");
   mysql_cond_broadcast(&mi->data_cond);
   mysql_mutex_unlock(&mi->rli->data_lock);
 

@@ -2,12 +2,12 @@
 .\"     Title: \fBmysql\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 07/17/2012
+.\"      Date: 08/01/2012
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQL\FR" "1" "07/17/2012" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQL\FR" "1" "08/01/2012" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -836,7 +836,7 @@ option on the command line,
 prompts for one\&.
 .sp
 Specifying a password on the command line should be considered insecure\&. See
-Section\ \&6.1.2.2, \(lqEnd-User Guidelines for Password Security\(rq\&. You can use an option file to avoid giving the password on the command line\&.
+Section\ \&6.1.2.1, \(lqEnd-User Guidelines for Password Security\(rq\&. You can use an option file to avoid giving the password on the command line\&.
 .RE
 .sp
 .RS 4
@@ -1053,6 +1053,65 @@ the section called \(lqMYSQL TIPS\(rq, for more information about this option\&.
 \fB\-\-secure\-auth\fR
 .sp
 Do not send passwords to the server in old (pre\-4\&.1\&.1) format\&. This prevents connections except for servers that use the newer password format\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysql: server-public-key option
+.\" server-public-key option: mysql
+\fB\-\-server\-public\-key=\fR\fBfile_name\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+l l s s
+l l s s
+^ l l s.
+T{
+\fBVersion Introduced\fR
+T}:T{
+5\&.6\&.6
+T}
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-server\-public\-key=file_name
+T}
+T{
+\fBOption\-File Format\fR
+T}:T{
+server\-public\-key=file_name
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+file name
+T}
+.TE
+.sp 1
+The path name to a file containing the server RSA public key\&. The file must be in PEM format\&. The public key is used for RSA encryption of the client password for connections to the server made using accounts that authenticate with the
+sha256_password
+plugin\&. This option is ignored for client accounts that do not authenticate with that plugin\&. It is also ignored if password encryption is not needed, as is the case when the client connects to the server using an SSL connection\&.
+.sp
+The server sends the public key to the client as needed, so it is not necessary to use this option for RSA password encryption to occur\&. It is more efficient to do so because then the server need not send the key\&.
+.sp
+For additional discussion regarding use of the
+sha256_password
+plugin, including how to get the RSA public key, see
+Section\ \&6.3.6.2, \(lqThe SHA-256 Authentication Plugin\(rq\&.
+.sp
+This option is available only if MySQL was built using OpenSSL\&. It was added in MySQL 5\&.6\&.6\&.
 .RE
 .sp
 .RS 4
@@ -2523,7 +2582,7 @@ environment variable\&.
 The
 \&.mysql_history
 should be protected with a restrictive access mode because sensitive information might be written to it, such as the text of SQL statements that contain passwords\&. See
-Section\ \&6.1.2.2, \(lqEnd-User Guidelines for Password Security\(rq\&.
+Section\ \&6.1.2.1, \(lqEnd-User Guidelines for Password Security\(rq\&.
 .PP
 It is possible to suppress logging of statements to the history file by using the
 \fB\-\-batch\fR

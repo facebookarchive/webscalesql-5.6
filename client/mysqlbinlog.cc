@@ -49,6 +49,7 @@ static void warning(const char *format, ...) ATTRIBUTE_FORMAT(printf, 1, 2);
 #include "log_event.h"
 #include "log_event_old.h"
 #include "sql_common.h"
+#include "my_dir.h"
 #include <welcome_copyright_notice.h> // ORACLE_WELCOME_COPYRIGHT_NOTICE
 #include "sql_string.h"
 #include "my_decimal.h"
@@ -153,6 +154,11 @@ static MYSQL* mysql = NULL;
 static char* dirname_for_local_load= 0;
 static uint opt_server_id_bits = 0;
 static ulong opt_server_id_mask = 0;
+Sid_map *global_sid_map= NULL;
+Checkable_rwlock *global_sid_lock= NULL;
+Gtid_set *gtid_set_included= NULL;
+Gtid_set *gtid_set_excluded= NULL;
+
 
 /**
   Pointer to the Format_description_log_event of the currently active binlog.
@@ -181,9 +187,6 @@ static char *opt_include_gtids_str= NULL,
             *opt_exclude_gtids_str= NULL;
 static my_bool opt_skip_gtids= 0;
 static bool filter_based_on_gtids= false;
-static Gtid_set gtid_set_included(&global_sid_map);
-static Gtid_set gtid_set_excluded(&global_sid_map);
-
 static Exit_status dump_local_log_entries(PRINT_EVENT_INFO *print_event_info,
                                           const char* logname);
 static Exit_status dump_remote_log_entries(PRINT_EVENT_INFO *print_event_info,
@@ -728,14 +731,14 @@ static bool shall_skip_gtids(Log_event* ev)
        if (opt_include_gtids_str != NULL)
        {
          filtered= filtered ||
-           !gtid_set_included.contains_gtid(gtid->get_sidno(true),
+           !gtid_set_included->contains_gtid(gtid->get_sidno(true),
                                             gtid->get_gno());
        }
 
        if (opt_exclude_gtids_str != NULL)
        {
          filtered= filtered ||
-           gtid_set_excluded.contains_gtid(gtid->get_sidno(true),
+           gtid_set_excluded->contains_gtid(gtid->get_sidno(true),
                                            gtid->get_gno());
        }
        filter_based_on_gtids= filtered;
@@ -910,8 +913,11 @@ Exit_status process_event(PRINT_EVENT_INFO *print_event_info, Log_event *ev,
 	filename and use LOCAL), prepared in the 'case EXEC_LOAD_EVENT' 
 	below.
       */
+      {
       ce->print(result_file, print_event_info, TRUE);
-
+        if (head->error == -1)
+          goto err;
+      }
       // If this binlog is not 3.23 ; why this test??
       if (glob_description_event->binlog_version >= 3)
       {
@@ -962,6 +968,8 @@ Exit_status process_event(PRINT_EVENT_INFO *print_event_info, Log_event *ev,
 	ce->print(result_file, print_event_info, TRUE);
 	my_free((void*)ce->fname);
 	delete ce;
+        if (head->error == -1)
+          goto err;
       }
       else
         warning("Ignoring Execute_load_log_event as there is no "
@@ -1022,6 +1030,12 @@ Exit_status process_event(PRINT_EVENT_INFO *print_event_info, Log_event *ev,
         {
           convert_path_to_forward_slashes(fname);
           exlq->print(result_file, print_event_info, fname);
+          if (head->error == -1)
+          {
+            if (fname)
+              my_free(fname);
+            goto err;
+          }
         }
         else
           warning("Ignoring Execute_load_query since there is no "
@@ -1348,7 +1362,7 @@ static struct my_option my_long_options[] =
    "Stop reading the binlog at position N. Applies to the last binlog "
    "passed on the command line.",
    &stop_position, &stop_position, 0, GET_ULL,
-   REQUIRED_ARG, (ulonglong)(~(my_off_t)0), BIN_LOG_HEADER_SIZE,
+   REQUIRED_ARG, (longlong)(~(my_off_t)0), BIN_LOG_HEADER_SIZE,
    (ulonglong)(~(my_off_t)0), 0, 0, 0},
   {"to-last-log", 't', "Requires -R. Will not stop at the end of the "
    "requested binlog but rather continue printing until the end of the last "
@@ -1495,7 +1509,7 @@ static void print_version()
 static void usage()
 {
   print_version();
-  puts(ORACLE_WELCOME_COPYRIGHT_NOTICE("2000, 2012"));
+  puts(ORACLE_WELCOME_COPYRIGHT_NOTICE("2000"));
   printf("\
 Dumps a MySQL binary log in a format usable for viewing or for piping to\n\
 the mysql command line client.\n\n");
@@ -1915,10 +1929,10 @@ static Exit_status dump_remote_log_entries(PRINT_EVENT_INFO *print_event_info,
   {
     command= COM_BINLOG_DUMP_GTID;
 
-    Gtid_set gtid_set(&global_sid_map);
-    global_sid_lock.rdlock();
+    Gtid_set gtid_set(global_sid_map);
+    global_sid_lock->rdlock();
 
-    gtid_set.add_gtid_set(&gtid_set_excluded);
+    gtid_set.add_gtid_set(gtid_set_excluded);
 
     // allocate buffer
     size_t unused_size= 0;
@@ -1931,7 +1945,7 @@ static Exit_status dump_remote_log_entries(PRINT_EVENT_INFO *print_event_info,
     if (!(command_buffer= (uchar *) my_malloc(allocation_size, MYF(MY_WME))))
     {
       error("Got fatal error allocating memory.");
-      global_sid_lock.unlock();
+      global_sid_lock->unlock();
       DBUG_RETURN(ERROR_STOP);
     }
     uchar* ptr_buffer= command_buffer;
@@ -1966,7 +1980,7 @@ static Exit_status dump_remote_log_entries(PRINT_EVENT_INFO *print_event_info,
       unused_size= ::BINLOG_DATA_SIZE_INFO_SIZE + encoded_data_size;
     }
 
-    global_sid_lock.unlock();
+    global_sid_lock->unlock();
 
     command_size= ptr_buffer - command_buffer;
     DBUG_ASSERT(command_size == (allocation_size - unused_size - 1));
@@ -2199,6 +2213,7 @@ static Exit_status check_header(IO_CACHE* file,
   uchar header[BIN_LOG_HEADER_SIZE];
   uchar buf[PROBE_HEADER_LEN];
   my_off_t tmp_pos, pos;
+  MY_STAT my_file_stat;
 
   delete glob_description_event;
   if (!(glob_description_event= new Format_description_log_event(3)))
@@ -2208,7 +2223,16 @@ static Exit_status check_header(IO_CACHE* file,
   }
 
   pos= my_b_tell(file);
-  my_b_seek(file, (my_off_t)0);
+
+  /* fstat the file to check if the file is a regular file. */
+  if (my_fstat(file->file, &my_file_stat, MYF(0)) == -1)
+  {
+    error("Unable to stat the file.");
+    DBUG_RETURN(ERROR_STOP);
+  }
+  if ((my_file_stat.st_mode & S_IFMT) == S_IFREG)
+    my_b_seek(file, (my_off_t)0);
+
   if (my_b_read(file, header, sizeof(header)))
   {
     error("Failed reading header; probably an empty file.");
@@ -2535,35 +2559,70 @@ static int args_post_process(void)
     }
   }
 
-  global_sid_lock.rdlock();
+  global_sid_lock->rdlock();
 
   if (opt_include_gtids_str != NULL)
   {
-    if (gtid_set_included.add_gtid_text(opt_include_gtids_str) !=
+    if (gtid_set_included->add_gtid_text(opt_include_gtids_str) !=
         RETURN_STATUS_OK)
     {
       error("Could not configure --include-gtids '%s'", opt_include_gtids_str);
-      global_sid_lock.unlock();
+      global_sid_lock->unlock();
       DBUG_RETURN(ERROR_STOP);
     }
   }
 
   if (opt_exclude_gtids_str != NULL)
   {
-    if (gtid_set_excluded.add_gtid_text(opt_exclude_gtids_str) !=
+    if (gtid_set_excluded->add_gtid_text(opt_exclude_gtids_str) !=
         RETURN_STATUS_OK)
     {
       error("Could not configure --exclude-gtids '%s'", opt_exclude_gtids_str);
-      global_sid_lock.unlock();
+      global_sid_lock->unlock();
       DBUG_RETURN(ERROR_STOP);
     }
   }
 
-  global_sid_lock.unlock();
+  global_sid_lock->unlock();
 
   DBUG_RETURN(OK_CONTINUE);
 }
 
+/**
+   GTID cleanup destroys objects and reset their pointer.
+   Function is reentrant.
+*/
+inline void gtid_client_cleanup()
+{
+  delete global_sid_lock;
+  delete global_sid_map;
+  delete gtid_set_excluded;
+  delete gtid_set_included;
+  global_sid_lock= NULL;
+  global_sid_map= NULL;
+  gtid_set_excluded= NULL;
+  gtid_set_included= NULL;
+}
+
+/**
+   GTID initialization.
+
+   @return true if allocation does not succeed
+           false if OK
+*/
+inline bool gtid_client_init()
+{
+  bool res=
+    (!(global_sid_lock= new Checkable_rwlock) ||
+     !(global_sid_map= new Sid_map(global_sid_lock)) ||
+     !(gtid_set_excluded= new Gtid_set(global_sid_map)) ||
+     !(gtid_set_included= new Gtid_set(global_sid_map)));
+  if (res)
+  {
+    gtid_client_cleanup();
+  }
+  return res;
+}
 
 int main(int argc, char** argv)
 {
@@ -2601,6 +2660,12 @@ int main(int argc, char** argv)
     usage();
     free_defaults(defaults_argv);
     my_end(my_end_arg);
+    exit(1);
+  }
+
+  if (gtid_client_init())
+  {
+    error("Could not initialize GTID structuress.");
     exit(1);
   }
 
@@ -2700,6 +2765,7 @@ int main(int argc, char** argv)
   load_processor.destroy();
   /* We cannot free DBUG, it is used in global destructors after exit(). */
   my_end(my_end_arg | MY_DONT_FREE_DBUG);
+  gtid_client_cleanup();
 
   exit(retval == ERROR_STOP ? 1 : 0);
   /* Keep compilers happy. */

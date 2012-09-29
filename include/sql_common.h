@@ -1,7 +1,7 @@
 #ifndef SQL_COMMON_INCLUDED
 #define SQL_COMMON_INCLUDED
 
-/* Copyright (c) 2003, 2011, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2003, 2012, Oracle and/or its affiliates. All rights reserved.
    
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ struct st_mysql_options_extention {
   HASH connection_attributes;
   char *server_public_key_path;
   size_t connection_attributes_length;
+  my_bool enable_cleartext_plugin;
 };
 
 typedef struct st_mysql_methods
@@ -78,8 +79,9 @@ typedef struct st_mysql_methods
                                         0, arg, length, 1, stmt)
 
 extern CHARSET_INFO *default_client_charset_info;
-MYSQL_FIELD *unpack_fields(MYSQL_DATA *data,MEM_ROOT *alloc,uint fields,
-			   my_bool default_value, uint server_capabilities);
+MYSQL_FIELD *unpack_fields(MYSQL *mysql, MYSQL_DATA *data,MEM_ROOT *alloc,
+                           uint fields, my_bool default_value, 
+                           uint server_capabilities);
 void free_rows(MYSQL_DATA *cur);
 void free_old_query(MYSQL *mysql);
 void end_server(MYSQL *mysql);
@@ -110,6 +112,7 @@ void mysql_client_plugin_deinit();
 struct st_mysql_client_plugin;
 extern struct st_mysql_client_plugin *mysql_client_builtins[];
 uchar * send_client_connect_attrs(MYSQL *mysql, uchar *buf);
+extern my_bool libmysql_cleartext_plugin_enabled;
 
 #ifdef	__cplusplus
 }

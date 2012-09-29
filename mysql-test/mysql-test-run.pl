@@ -2163,17 +2163,10 @@ sub mysqldump_arguments ($) {
 sub mysql_client_test_arguments(){
   my $exe;
   # mysql_client_test executable may _not_ exist
-  if ( $opt_embedded_server ) {
-    $exe= mtr_exe_maybe_exists(
-            vs_config_dirs('libmysqld/examples','mysql_client_test_embedded'),
-	      "$basedir/libmysqld/examples/mysql_client_test_embedded",
-		"$basedir/bin/mysql_client_test_embedded");
-  } else {
-    $exe= mtr_exe_maybe_exists(vs_config_dirs('tests', 'mysql_client_test'),
-			       "$basedir/tests/mysql_client_test",
-			       "$basedir/bin/mysql_client_test");
-  }
-
+  $exe= mtr_exe_maybe_exists(vs_config_dirs('tests', 'mysql_client_test'),
+			     "$basedir/tests/mysql_client_test",
+			     "$basedir/bin/mysql_client_test");
+  return "" unless $exe;
   my $args;
   mtr_init_args(\$args);
   if ( $opt_valgrind_mysqltest ) {
@@ -2792,9 +2785,13 @@ sub check_debug_support ($) {
     #mtr_report(" - binaries are not debug compiled");
     $debug_compiled_binaries= 0;
 
+    if ( $opt_debug )
+    {
+      mtr_error("Can't use --debug, binary does not support it");
+    }
     if ( $opt_debug_server )
     {
-      mtr_error("Can't use --debug[-server], binary does not support it");
+      mtr_warning("Ignoring --debug-server, binary does not support it");
     }
     return;
   }
@@ -4460,7 +4457,7 @@ sub extract_server_log ($$) {
       if ( $line =~ /^CURRENT_TEST:/)
       {
 	@lines= ();
-	$found_test= $line =~ /^CURRENT_TEST: $tname/;
+	$found_test= $line =~ /^CURRENT_TEST: $tname$/;
       }
       else
       {
@@ -4475,7 +4472,7 @@ sub extract_server_log ($$) {
     else
     {
       # Search for beginning of test, until found
-      $found_test= 1 if ($line =~ /^CURRENT_TEST: $tname/);
+      $found_test= 1 if ($line =~ /^CURRENT_TEST: $tname$/);
     }
   }
   $Ferr = undef; # Close error log file

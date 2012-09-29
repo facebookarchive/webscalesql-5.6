@@ -55,7 +55,6 @@ static ha_rows find_all_keys(Sort_param *param,SQL_SELECT *select,
                              ha_rows *found_rows);
 static int write_keys(Sort_param *param, Filesort_info *fs_info,
                       uint count, IO_CACHE *buffer_file, IO_CACHE *tempfile);
-static void make_sortkey(Sort_param *param,uchar *to, uchar *ref_pos);
 static void register_used_fields(Sort_param *param);
 static int merge_index(Sort_param *param,uchar *sort_buffer,
                        BUFFPEK *buffpek,
@@ -64,8 +63,6 @@ static int merge_index(Sort_param *param,uchar *sort_buffer,
 static bool save_index(Sort_param *param, uint count,
                        Filesort_info *table_sort);
 static uint suffix_length(ulong string_length);
-static uint sortlength(THD *thd, SORT_FIELD *sortorder, uint s_length,
-		       bool *multi_byte_charset);
 static SORT_ADDON_FIELD *get_addon_fields(ulong max_length_for_sort_data,
                                           Field **ptabfield,
                                           uint sortlength, uint *plength);
@@ -387,9 +384,7 @@ ha_rows filesort(THD *thd, TABLE *table, Filesort *filesort,
       Use also the space previously used by string pointers in sort_buffer
       for temporary key storage.
     */
-    param.max_keys_per_buffer=((param.max_keys_per_buffer *
-                                (param.rec_length + sizeof(char*))) /
-                               param.rec_length - 1);
+    param.max_keys_per_buffer= table_sort.sort_buffer_size() / param.rec_length;
     maxbuffer--;				// Offset from 0
     if (merge_many_buff(&param,
                         (uchar*) table_sort.get_sort_keys(),
@@ -715,8 +710,13 @@ static ha_rows find_all_keys(Sort_param *param, SQL_SELECT *select,
   if (!quick_select)
   {
     next_pos=(uchar*) 0;			/* Find records in sequence */
-    if (file->ha_rnd_init(1))
+    DBUG_EXECUTE_IF("bug14365043_1",
+                    DBUG_SET("+d,ha_rnd_init_fail"););
+    if ((error= file->ha_rnd_init(1)))
+    {
+      file->print_error(error, MYF(0));
       DBUG_RETURN(HA_POS_ERROR);
+    }
     file->extra_opt(HA_EXTRA_CACHE,
 		    current_thd->variables.read_buff_size);
   }
@@ -807,7 +807,11 @@ static ha_rows find_all_keys(Sort_param *param, SQL_SELECT *select,
         make_sortkey(param, fs_info->get_record_buffer(idx++), ref_pos);
       }
     }
-    else
+    /*
+      Don't try unlocking the row if skip_record reported an error since in
+      this case the transaction might have been rolled back already.
+    */
+    else if (!thd->is_error())
       file->unlock_row();
     /* It does not make sense to read more keys in case of a fatal error */
     if (thd->is_error())
@@ -925,22 +929,35 @@ static inline void store_length(uchar *to, uint length, uint pack_length)
 }
 
 
+#ifdef WORDS_BIGENDIAN
+const bool Is_big_endian= true;
+#else
+const bool Is_big_endian= false;
+#endif
+void copy_native_longlong(uchar *to, int to_length,
+                          longlong val, bool is_unsigned)
+{
+  copy_integer<Is_big_endian>(to, to_length,
+                              static_cast<uchar*>(static_cast<void*>(&val)),
+                              sizeof(longlong),
+                              is_unsigned);
+}
+
+
 /** Make a sort-key from record. */
 
-static void make_sortkey(register Sort_param *param,
-                         register uchar *to, uchar *ref_pos)
+void make_sortkey(Sort_param *param, uchar *to, uchar *ref_pos)
 {
-  reg3 Field *field;
-  reg1 SORT_FIELD *sort_field;
-  reg5 uint length;
+  SORT_FIELD *sort_field;
 
-  for (sort_field=param->local_sortorder ;
+  for (sort_field= param->local_sortorder ;
        sort_field != param->end ;
        sort_field++)
   {
-    bool maybe_null=0;
-    if ((field=sort_field->field))
-    {						// Field
+    bool maybe_null= false;
+    if (sort_field->field)
+    {
+      Field *field= sort_field->field;
       if (field->maybe_null())
       {
 	if (field->is_null())
@@ -994,7 +1011,7 @@ static void make_sortkey(register Sort_param *param,
           }
           break;
         }
-        length= res->length();
+        uint length= res->length();
         sort_field_length= sort_field->length - sort_field->suffix_length;
         diff=(int) (sort_field_length - length);
         if (diff < 0)
@@ -1055,27 +1072,8 @@ static void make_sortkey(register Sort_param *param,
               break;
             }
           }
-#if SIZEOF_LONG_LONG > 4
-	  to[7]= (uchar) value;
-	  to[6]= (uchar) (value >> 8);
-	  to[5]= (uchar) (value >> 16);
-	  to[4]= (uchar) (value >> 24);
-	  to[3]= (uchar) (value >> 32);
-	  to[2]= (uchar) (value >> 40);
-	  to[1]= (uchar) (value >> 48);
-          if (item->unsigned_flag)                    /* Fix sign */
-            to[0]= (uchar) (value >> 56);
-          else
-            to[0]= (uchar) (value >> 56) ^ 128;	/* Reverse signbit */
-#else
-	  to[3]= (uchar) value;
-	  to[2]= (uchar) (value >> 8);
-	  to[1]= (uchar) (value >> 16);
-          if (item->unsigned_flag)                    /* Fix sign */
-            to[0]= (uchar) (value >> 24);
-          else
-            to[0]= (uchar) (value >> 24) ^ 128;	/* Reverse signbit */
-#endif
+          copy_native_longlong(to, sort_field->length,
+                               value, item->unsigned_flag);
 	  break;
 	}
       case DECIMAL_RESULT:
@@ -1091,9 +1089,20 @@ static void make_sortkey(register Sort_param *param,
             }
             *to++=1;
           }
-          my_decimal2binary(E_DEC_FATAL_ERROR, dec_val, to,
-                            item->max_length - (item->decimals ? 1:0),
-                            item->decimals);
+          if (sort_field->length < DECIMAL_MAX_FIELD_SIZE)
+          {
+            uchar buf[DECIMAL_MAX_FIELD_SIZE];
+            my_decimal2binary(E_DEC_FATAL_ERROR, dec_val, buf,
+                              item->max_length - (item->decimals ? 1:0),
+                              item->decimals);
+            memcpy(to, buf, sort_field->length);
+          }
+          else
+          {
+            my_decimal2binary(E_DEC_FATAL_ERROR, dec_val, to,
+                              item->max_length - (item->decimals ? 1:0),
+                              item->decimals);
+          }
          break;
         }
       case REAL_RESULT:
@@ -1109,7 +1118,16 @@ static void make_sortkey(register Sort_param *param,
             }
 	    *to++=1;
           }
-	  change_double_for_sort(value,(uchar*) to);
+          if (sort_field->length < sizeof(double))
+          {
+            uchar buf[sizeof(double)];
+            change_double_for_sort(value, buf);
+            memcpy(to, buf, sort_field->length);
+          }
+          else
+          {
+            change_double_for_sort(value, (uchar*) to);
+          }
 	  break;
 	}
       case ROW_RESULT:
@@ -1123,7 +1141,7 @@ static void make_sortkey(register Sort_param *param,
     {							/* Revers key */
       if (maybe_null)
         to[-1]= ~to[-1];
-      length=sort_field->length;
+      uint length= sort_field->length;
       while (length--)
       {
 	*to = (uchar) (~ *to);
@@ -1147,7 +1165,7 @@ static void make_sortkey(register Sort_param *param,
     DBUG_ASSERT(addonf != 0);
     memset(nulls, 0, addonf->offset);
     to+= addonf->offset;
-    for ( ; (field= addonf->field) ; addonf++)
+    for (Field* field; (field= addonf->field) ; addonf++)
     {
       if (addonf->null_bit && field->is_null())
       {
@@ -1784,15 +1802,14 @@ static uint suffix_length(ulong string_length)
     Total length of sort buffer in bytes
 */
 
-static uint
+uint
 sortlength(THD *thd, SORT_FIELD *sortorder, uint s_length,
            bool *multi_byte_charset)
 {
-  reg2 uint length;
+  uint total_length= 0;
   const CHARSET_INFO *cs;
-  *multi_byte_charset= 0;
+  *multi_byte_charset= false;
 
-  length=0;
   for (; s_length-- ; sortorder++)
   {
     sortorder->need_strxnfrm= 0;
@@ -1809,7 +1826,7 @@ sortlength(THD *thd, SORT_FIELD *sortorder, uint s_length,
         sortorder->length= cs->coll->strnxfrmlen(cs, sortorder->length);
       }
       if (sortorder->field->maybe_null())
-	length++;				// Place for NULL marker
+        total_length++;                       // Place for NULL marker
     }
     else
     {
@@ -1818,7 +1835,7 @@ sortlength(THD *thd, SORT_FIELD *sortorder, uint s_length,
         sortorder->result_type= INT_RESULT;
       switch (sortorder->result_type) {
       case STRING_RESULT:
-	sortorder->length=sortorder->item->max_length;
+	sortorder->length= sortorder->item->max_length;
         set_if_smaller(sortorder->length, thd->variables.max_sort_length);
 	if (use_strnxfrm((cs=sortorder->item->collation.collation)))
 	{ 
@@ -1841,6 +1858,7 @@ sortlength(THD *thd, SORT_FIELD *sortorder, uint s_length,
 #endif
 	break;
       case DECIMAL_RESULT:
+        // NOTE: max length here is 65 bytes, we might need to truncate!
         sortorder->length=
           my_decimal_get_binary_size(sortorder->item->max_length - 
                                      (sortorder->item->decimals ? 1 : 0),
@@ -1856,14 +1874,14 @@ sortlength(THD *thd, SORT_FIELD *sortorder, uint s_length,
 	break;
       }
       if (sortorder->item->maybe_null)
-	length++;				// Place for NULL marker
+        total_length++;                       // Place for NULL marker
     }
     set_if_smaller(sortorder->length, thd->variables.max_sort_length);
-    length+=sortorder->length;
+    total_length+= sortorder->length;
   }
-  sortorder->field= (Field*) 0;			// end marker
-  DBUG_PRINT("info",("sort_length: %d",length));
-  return length;
+  sortorder->field= NULL;                       // end marker
+  DBUG_PRINT("info",("sort_length: %u", total_length));
+  return total_length;
 }
 
 

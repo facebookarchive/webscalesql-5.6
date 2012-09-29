@@ -144,10 +144,10 @@ static struct my_option my_long_options[]=
    &opt_verbose, &opt_verbose, 0,
    GET_BOOL, NO_ARG, 1, 0, 0, 0, 0, 0},
   {"write-binlog", OPT_WRITE_BINLOG,
-   "All commands including mysqlcheck are binlogged. Enabled by default;"
-   "use --skip-write-binlog when commands should not be sent to replication slaves.",
+   "All commands including mysqlcheck are binlogged. Disabled by default; "
+   "use when commands should be sent to replication slaves.",
    &opt_write_binlog, &opt_write_binlog, 0, GET_BOOL, NO_ARG,
-   1, 0, 0, 0, 0, 0},
+   0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0, GET_NO_ARG, NO_ARG, 0, 0, 0, 0, 0, 0}
 };
 
@@ -247,7 +247,7 @@ get_one_option(int optid, const struct my_option *opt,
   case '?':
     printf("%s  Ver %s Distrib %s, for %s (%s)\n",
            my_progname, VER, MYSQL_SERVER_VERSION, SYSTEM_TYPE, MACHINE_TYPE);
-    puts(ORACLE_WELCOME_COPYRIGHT_NOTICE("2000, 2012"));
+    puts(ORACLE_WELCOME_COPYRIGHT_NOTICE("2000"));
     puts("MySQL utility for upgrading databases to new MySQL versions.\n");
     my_print_help(my_long_options);
     exit(0);

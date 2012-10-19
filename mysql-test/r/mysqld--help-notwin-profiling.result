@@ -937,6 +937,8 @@ The following options may be given as the first argument:
  --stored-program-cache=# 
  The soft upper limit for number of cached stored routines
  for one connection.
+ --super-read-only   Enable read_only, and also block writes by users with the
+ SUPER privilege
  -s, --symbolic-links 
  Enable symbolic link support.
  --sync-binlog=#     Synchronously flush binary log to disk after every #th
@@ -1273,6 +1275,7 @@ sort-buffer-size 262144
 sporadic-binlog-dump-fail FALSE
 sql-mode NO_ENGINE_SUBSTITUTION
 stored-program-cache 256
+super-read-only FALSE
 symbolic-links FALSE
 sync-binlog 0
 sync-frm TRUE

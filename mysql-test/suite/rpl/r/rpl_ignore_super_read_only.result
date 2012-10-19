@@ -1,0 +1,27 @@
+# This unit test is only to test super_read_only=1 doesn't cause
+# errors when executing "CHANGE MASTER".
+#
+# It is not intended to test general super_read_only functionality.
+#
+# Comprehensive super_read_only testing is in the
+# sys_vars.super_read_only_basic test.
+include/master-slave.inc
+Warnings:
+Note	####	Sending passwords in plain text without SSL/TLS is extremely insecure.
+Note	####	Storing MySQL user name or password information in the master info repository is not secure and is therefore not recommended. Please consider using the USER and PASSWORD connection options for START SLAVE; see the 'START SLAVE Syntax' in the MySQL Manual for more information.
+[connection master]
+create table t1(a int);
+insert into t1 values(1);
+set @@global.super_read_only=1;
+include/stop_slave.inc
+change master to master_connect_retry=20;
+include/start_slave.inc
+insert into t1 values(2);
+select * from t1;
+a
+1
+2
+set @@global.super_read_only=0;
+set @@global.read_only=0;
+drop table t1;
+include/rpl_end.inc

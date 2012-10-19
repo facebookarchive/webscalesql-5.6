@@ -1,0 +1,265 @@
+#
+# Setup
+#
+# Save original value
+set @start_read_only= @@global.read_only;
+set @start_super_read_only= @@global.super_read_only;
+grant CREATE, SELECT, DROP on *.* to test@localhost;
+# connect (con1,localhost,test,,test);
+# connection default;
+#
+# Test combinations of settings and changes
+#
+# ro,sro: 0,0: set ro->0: 0,0
+set global read_only=0;
+set global super_read_only=0;
+select @@global.read_only;
+@@global.read_only
+0
+select @@global.super_read_only;
+@@global.super_read_only
+0
+set global read_only=0;
+select @@global.read_only;
+@@global.read_only
+0
+select @@global.super_read_only;
+@@global.super_read_only
+0
+# ro,sro: 0,0: set ro->1: 1,0
+set global read_only=0;
+set global super_read_only=0;
+select @@global.read_only;
+@@global.read_only
+0
+select @@global.super_read_only;
+@@global.super_read_only
+0
+set global read_only=1;
+select @@global.read_only;
+@@global.read_only
+1
+select @@global.super_read_only;
+@@global.super_read_only
+0
+# ro,sro: 0,0: set sro->0: 0,0
+set global read_only=0;
+set global super_read_only=0;
+select @@global.read_only;
+@@global.read_only
+0
+select @@global.super_read_only;
+@@global.super_read_only
+0
+set global super_read_only=0;
+select @@global.read_only;
+@@global.read_only
+0
+select @@global.super_read_only;
+@@global.super_read_only
+0
+# ro,sro: 0,0: set sro->1: 1,1
+set global read_only=0;
+set global super_read_only=0;
+select @@global.read_only;
+@@global.read_only
+0
+select @@global.super_read_only;
+@@global.super_read_only
+0
+set global super_read_only=1;
+select @@global.read_only;
+@@global.read_only
+1
+select @@global.super_read_only;
+@@global.super_read_only
+1
+# ro,sro: 1,0: set ro->0: 0,0
+set global read_only=1;
+set global super_read_only=0;
+select @@global.read_only;
+@@global.read_only
+1
+select @@global.super_read_only;
+@@global.super_read_only
+0
+set global read_only=0;
+select @@global.read_only;
+@@global.read_only
+0
+select @@global.super_read_only;
+@@global.super_read_only
+0
+# ro,sro: 1,0: set ro->1: 1,0
+set global read_only=1;
+set global super_read_only=0;
+select @@global.read_only;
+@@global.read_only
+1
+select @@global.super_read_only;
+@@global.super_read_only
+0
+set global read_only=1;
+select @@global.read_only;
+@@global.read_only
+1
+select @@global.super_read_only;
+@@global.super_read_only
+0
+# ro,sro: 1,0: set sro->0: 1,0
+set global read_only=1;
+set global super_read_only=0;
+select @@global.read_only;
+@@global.read_only
+1
+select @@global.super_read_only;
+@@global.super_read_only
+0
+set global super_read_only=0;
+select @@global.read_only;
+@@global.read_only
+1
+select @@global.super_read_only;
+@@global.super_read_only
+0
+# ro,sro: 1,0: set sro->1: 1,1
+set global read_only=1;
+set global super_read_only=0;
+select @@global.read_only;
+@@global.read_only
+1
+select @@global.super_read_only;
+@@global.super_read_only
+0
+set global super_read_only=1;
+select @@global.read_only;
+@@global.read_only
+1
+select @@global.super_read_only;
+@@global.super_read_only
+1
+# ro,sro: 1,1: set ro->0: 0,0
+set global read_only=1;
+set global super_read_only=1;
+select @@global.read_only;
+@@global.read_only
+1
+select @@global.super_read_only;
+@@global.super_read_only
+1
+set global read_only=0;
+select @@global.read_only;
+@@global.read_only
+0
+select @@global.super_read_only;
+@@global.super_read_only
+0
+# ro,sro: 1,1: set ro->1: 1,1
+set global read_only=1;
+set global super_read_only=1;
+select @@global.read_only;
+@@global.read_only
+1
+select @@global.super_read_only;
+@@global.super_read_only
+1
+set global read_only=1;
+select @@global.read_only;
+@@global.read_only
+1
+select @@global.super_read_only;
+@@global.super_read_only
+1
+# ro,sro: 1,1: set sro->0: 1,0
+set global read_only=1;
+set global super_read_only=1;
+select @@global.read_only;
+@@global.read_only
+1
+select @@global.super_read_only;
+@@global.super_read_only
+1
+set global super_read_only=0;
+select @@global.read_only;
+@@global.read_only
+1
+select @@global.super_read_only;
+@@global.super_read_only
+0
+# ro,sro: 1,1: set sro->1: 1,1
+set global read_only=1;
+set global super_read_only=1;
+select @@global.read_only;
+@@global.read_only
+1
+select @@global.super_read_only;
+@@global.super_read_only
+1
+set global super_read_only=1;
+select @@global.read_only;
+@@global.read_only
+1
+select @@global.super_read_only;
+@@global.super_read_only
+1
+set global read_only=0;
+set global super_read_only=0;
+DROP TABLE IF EXISTS t1,t2,t3;
+#
+# Create tables/Make sure normal writes work
+#
+set global super_read_only=0;
+connection con1;
+create table t1 (a int);
+insert into t1 values(1);
+create table t2 select * from t1;
+update t1, t2 set t1.a=2, t2.a=2;
+start transaction read write;
+commit;
+create trigger trig1 before insert on t1 for each row set new.a = new.a;
+connection default;
+#
+# Make sure it blocks SUPER
+#
+set global super_read_only=1;
+create trigger trig2 before insert on t2 for each row set new.a = new.a;
+ERROR HY000: The MySQL server is running with the --read-only (super) option so it cannot execute this statement
+create table t3 (a int);
+ERROR HY000: The MySQL server is running with the --read-only (super) option so it cannot execute this statement
+drop table t3;
+ERROR HY000: The MySQL server is running with the --read-only (super) option so it cannot execute this statement
+update t1, t2 set t1.a=3, t2.a=3;
+ERROR HY000: The MySQL server is running with the --read-only (super) option so it cannot execute this statement
+start transaction read write;
+ERROR HY000: The MySQL server is running with the --read-only (super) option so it cannot execute this statement
+drop trigger trig1;
+ERROR HY000: The MySQL server is running with the --read-only (super) option so it cannot execute this statement
+#
+# Make sure it still blocks for non-super
+#
+connection con1;
+select @@global.read_only;
+@@global.read_only
+1
+select @@global.super_read_only;
+@@global.super_read_only
+1
+create table t3 (a int);
+ERROR HY000: The MySQL server is running with the --read-only (super) option so it cannot execute this statement
+insert into t1 values(1);
+ERROR HY000: The MySQL server is running with the --read-only (super) option so it cannot execute this statement
+update t1, t2 set t1.a=3, t2.a=3;
+ERROR HY000: The MySQL server is running with the --read-only (super) option so it cannot execute this statement
+start transaction read write;
+ERROR HY000: The MySQL server is running with the --read-only (super) option so it cannot execute this statement
+drop trigger trig1;
+ERROR HY000: The MySQL server is running with the --read-only (super) option so it cannot execute this statement
+#
+# Cleanup
+#
+connection default;
+set global super_read_only=0;
+drop table t1,t2;
+drop user test@localhost;
+set global read_only= @start_read_only;
+set global super_read_only= @start_super_read_only;

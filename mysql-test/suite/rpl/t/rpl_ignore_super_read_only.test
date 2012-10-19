@@ -1,0 +1,32 @@
+--echo # This unit test is only to test super_read_only=1 doesn't cause
+--echo # errors when executing "CHANGE MASTER".
+--echo #
+--echo # It is not intended to test general super_read_only functionality.
+--echo #
+--echo # Comprehensive super_read_only testing is in the
+--echo # sys_vars.super_read_only_basic test.
+
+source include/master-slave.inc;
+
+connection master;
+create table t1(a int);
+insert into t1 values(1);
+sync_slave_with_master;
+
+set @@global.super_read_only=1;
+source include/stop_slave.inc;
+change master to master_connect_retry=20;
+source include/start_slave.inc;
+
+connection master;
+insert into t1 values(2);
+sync_slave_with_master;
+
+select * from t1;
+set @@global.super_read_only=0;
+set @@global.read_only=0;
+
+connection master;
+drop table t1;
+
+source include/rpl_end.inc;

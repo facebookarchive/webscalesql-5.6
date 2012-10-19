@@ -1,0 +1,235 @@
+# Test of the SUPER_READ_ONLY modification to the READ_ONLY global variable:
+# check that it blocks updates even with SUPER privs
+
+# should work with embedded server after mysqltest is fixed
+--source include/not_embedded.inc
+
+
+--echo #
+--echo # Setup
+--echo #
+
+--echo # Save original value
+set @start_read_only= @@global.read_only;
+set @start_super_read_only= @@global.super_read_only;
+
+grant CREATE, SELECT, DROP on *.* to test@localhost;
+
+--echo # connect (con1,localhost,test,,test);
+connect (con1,localhost,test,,test);
+
+--echo # connection default;
+connection default;
+
+
+--echo #
+--echo # Test combinations of settings and changes
+--echo #
+
+--echo # ro,sro: 0,0: set ro->0: 0,0
+set global read_only=0;
+set global super_read_only=0;
+select @@global.read_only;
+select @@global.super_read_only;
+set global read_only=0;
+select @@global.read_only;
+select @@global.super_read_only;
+
+--echo # ro,sro: 0,0: set ro->1: 1,0
+set global read_only=0;
+set global super_read_only=0;
+select @@global.read_only;
+select @@global.super_read_only;
+set global read_only=1;
+select @@global.read_only;
+select @@global.super_read_only;
+
+--echo # ro,sro: 0,0: set sro->0: 0,0
+set global read_only=0;
+set global super_read_only=0;
+select @@global.read_only;
+select @@global.super_read_only;
+set global super_read_only=0;
+select @@global.read_only;
+select @@global.super_read_only;
+
+--echo # ro,sro: 0,0: set sro->1: 1,1
+set global read_only=0;
+set global super_read_only=0;
+select @@global.read_only;
+select @@global.super_read_only;
+set global super_read_only=1;
+select @@global.read_only;
+select @@global.super_read_only;
+
+# We don't care about 0,1 - since all this ensures it can't happen.
+
+--echo # ro,sro: 1,0: set ro->0: 0,0
+set global read_only=1;
+set global super_read_only=0;
+select @@global.read_only;
+select @@global.super_read_only;
+set global read_only=0;
+select @@global.read_only;
+select @@global.super_read_only;
+
+--echo # ro,sro: 1,0: set ro->1: 1,0
+set global read_only=1;
+set global super_read_only=0;
+select @@global.read_only;
+select @@global.super_read_only;
+set global read_only=1;
+select @@global.read_only;
+select @@global.super_read_only;
+
+--echo # ro,sro: 1,0: set sro->0: 1,0
+set global read_only=1;
+set global super_read_only=0;
+select @@global.read_only;
+select @@global.super_read_only;
+set global super_read_only=0;
+select @@global.read_only;
+select @@global.super_read_only;
+
+--echo # ro,sro: 1,0: set sro->1: 1,1
+set global read_only=1;
+set global super_read_only=0;
+select @@global.read_only;
+select @@global.super_read_only;
+set global super_read_only=1;
+select @@global.read_only;
+select @@global.super_read_only;
+
+
+--echo # ro,sro: 1,1: set ro->0: 0,0
+set global read_only=1;
+set global super_read_only=1;
+select @@global.read_only;
+select @@global.super_read_only;
+set global read_only=0;
+select @@global.read_only;
+select @@global.super_read_only;
+
+--echo # ro,sro: 1,1: set ro->1: 1,1
+set global read_only=1;
+set global super_read_only=1;
+select @@global.read_only;
+select @@global.super_read_only;
+set global read_only=1;
+select @@global.read_only;
+select @@global.super_read_only;
+
+--echo # ro,sro: 1,1: set sro->0: 1,0
+set global read_only=1;
+set global super_read_only=1;
+select @@global.read_only;
+select @@global.super_read_only;
+set global super_read_only=0;
+select @@global.read_only;
+select @@global.super_read_only;
+
+--echo # ro,sro: 1,1: set sro->1: 1,1
+set global read_only=1;
+set global super_read_only=1;
+select @@global.read_only;
+select @@global.super_read_only;
+set global super_read_only=1;
+select @@global.read_only;
+select @@global.super_read_only;
+
+--disable_warnings
+set global read_only=0;
+set global super_read_only=0;
+DROP TABLE IF EXISTS t1,t2,t3;
+--enable_warnings
+
+
+--echo #
+--echo # Create tables/Make sure normal writes work
+--echo #
+
+set global super_read_only=0;
+
+--echo connection con1;
+connection con1;
+
+create table t1 (a int);
+
+insert into t1 values(1);
+
+create table t2 select * from t1;
+
+update t1, t2 set t1.a=2, t2.a=2;
+
+start transaction read write;
+commit;
+
+create trigger trig1 before insert on t1 for each row set new.a = new.a;
+
+--echo connection default;
+connection default;
+
+
+--echo #
+--echo # Make sure it blocks SUPER
+--echo #
+
+set global super_read_only=1;
+
+--error ER_OPTION_PREVENTS_STATEMENT
+create trigger trig2 before insert on t2 for each row set new.a = new.a;
+
+--error ER_OPTION_PREVENTS_STATEMENT
+create table t3 (a int);
+
+--error ER_OPTION_PREVENTS_STATEMENT
+drop table t3;
+
+--error ER_OPTION_PREVENTS_STATEMENT
+update t1, t2 set t1.a=3, t2.a=3;
+
+--error ER_OPTION_PREVENTS_STATEMENT
+start transaction read write;
+
+--error ER_OPTION_PREVENTS_STATEMENT
+drop trigger trig1;
+
+--echo #
+--echo # Make sure it still blocks for non-super
+--echo #
+
+--echo connection con1;
+connection con1;
+
+select @@global.read_only;
+select @@global.super_read_only;
+
+--error ER_OPTION_PREVENTS_STATEMENT
+create table t3 (a int);
+
+--error ER_OPTION_PREVENTS_STATEMENT
+insert into t1 values(1);
+
+--error ER_OPTION_PREVENTS_STATEMENT
+update t1, t2 set t1.a=3, t2.a=3;
+
+--error ER_OPTION_PREVENTS_STATEMENT
+start transaction read write;
+
+--error ER_OPTION_PREVENTS_STATEMENT
+drop trigger trig1;
+
+--echo #
+--echo # Cleanup
+--echo #
+
+--echo connection default;
+connection default;
+set global super_read_only=0;
+disconnect con1;
+drop table t1,t2;
+drop user test@localhost;
+
+# Restore original value
+set global read_only= @start_read_only;
+set global super_read_only= @start_super_read_only;

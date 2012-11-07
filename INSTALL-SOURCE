@@ -499,8 +499,8 @@ Development Release
 shell> md5sum package_name
 
    Example:
-shell> md5sum mysql-standard-5.6.8-linux-i686.tar.gz
-aaab65abbec64d5e907dcd41b8699945  mysql-standard-5.6.8-linux-i686.tar
+shell> md5sum mysql-standard-5.6.9-linux-i686.tar.gz
+aaab65abbec64d5e907dcd41b8699945  mysql-standard-5.6.9-linux-i686.tar
 .gz
 
    You should verify that the resulting checksum (the string of
@@ -627,8 +627,8 @@ pg-signature.html
 
    Table 2.1. MySQL Package and Signature Files
        File Type                     File Name
-   Distribution file mysql-standard-5.6.8-linux-i686.tar.gz
-   Signature file    mysql-standard-5.6.8-linux-i686.tar.gz.asc
+   Distribution file mysql-standard-5.6.9-linux-i686.tar.gz
+   Signature file    mysql-standard-5.6.9-linux-i686.tar.gz.asc
 
    Make sure that both files are stored in the same directory and
    then run the following command to verify the signature for the
@@ -636,7 +636,7 @@ pg-signature.html
 shell> gpg --verify package_name.asc
 
    Example:
-shell> gpg --verify mysql-standard-5.6.8-linux-i686.tar.gz.asc
+shell> gpg --verify mysql-standard-5.6.9-linux-i686.tar.gz.asc
 gpg: Signature made Tue 01 Feb 2011 02:38:30 AM CST using DSA key ID
 5072E1F5
 gpg: Good signature from "MySQL Release Engineering <mysql-build@oss.
@@ -656,8 +656,8 @@ oracle.com>"
 shell> rpm --checksig package_name.rpm
 
    Example:
-shell> rpm --checksig MySQL-server-5.6.8-0.glibc23.i386.rpm
-MySQL-server-5.6.8-0.glibc23.i386.rpm: md5 gpg OK
+shell> rpm --checksig MySQL-server-5.6.9-0.glibc23.i386.rpm
+MySQL-server-5.6.9-0.glibc23.i386.rpm: md5 gpg OK
 
    Note
 
@@ -732,7 +732,7 @@ shell> rpm --import mysql_pubkey.asc
 
    MySQL compressed tar file binary distributions have names of the
    form mysql-VERSION-OS.tar.gz, where VERSION is a number (for
-   example, 5.6.8), and OS indicates the type of operating system for
+   example, 5.6.9), and OS indicates the type of operating system for
    which the distribution is intended (for example, pc-linux-i686 or
    winx64).
 
@@ -1036,19 +1036,19 @@ Perform Postinstallation Setup
    from when installing MySQL on Windows:
 
      * MySQL Installer: This package has a file name similar to
-       mysql-installer-community-5.6.8-rc.0.msi and is recommended
+       mysql-installer-community-5.6.9-rc.0.msi and is recommended
        for most users. It is used to both install and upgrade the
        MySQL Server, along with other MySQL products such as the
        MySQL Notifier for Microsoft Windows.
 
      * The Noinstall Archive: This package has a file name similar to
-       mysql-5.6.8-win32.zip and contains all the files found in the
+       mysql-5.6.9-win32.zip and contains all the files found in the
        Complete install package, with the exception of the GUI. This
        package does not include an automated installer, and must be
        manually installed and configured.
 
      * The source code: This package has a file name similar to
-       mysql-5.6.8.zip and contains the source code for compiling the
+       mysql-5.6.9.zip and contains the source code for compiling the
        MySQL Server on Windows.
 
    Your choice of install package affects the installation process
@@ -1066,16 +1066,18 @@ Perform Postinstallation Setup
    MySQL Installer is an application designed to simplify the
    installation and updating process for a wide range of MySQL
    products including MySQL Notifier for Microsoft Windows, MySQL
-   Workbench, and MySQL for Excel
-   (http://dev.mysql.com/doc/refman/5.5/en/excel-addon.html). From
-   this central tool, you can see which components are already
-   installed, configure them, and remove them if necessary. The
-   installer can also install plugins, documentation, tutorials, and
-   examples. The MySQL Installer is only available for Microsoft
-   Windows.
+   Workbench, and MySQL for Excel. From this central tool, you can
+   see which components are already installed, configure them, and
+   remove them if necessary. The installer can also install plugins,
+   documentation, tutorials, and examples. The MySQL Installer is
+   only available for Microsoft Windows.
 
-   Download the installer at
+   Download MySQL Installer at
    http://dev.mysql.com/downloads/installer/
+
+   The MySQL Installer Change History (Changelog) is located with the
+   main Changelog for MySQL. See Section D.9, "MySQL Installer Change
+   History."
 
    MySQL Installer is compatible with pre-existing installations and
    will add them to its list of installed components. And while the
@@ -1576,7 +1578,7 @@ InnoDB: foreign key constraint system tables created
    something like this, which indicates that the server is ready to
    service client connections:
 mysqld: ready for connections
-Version: '5.6.8'  socket: ''  port: 3306
+Version: '5.6.9'  socket: ''  port: 3306
 
    The server continues to write to the console any further
    diagnostic output it produces. You can open a new console window
@@ -1656,6 +1658,17 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysqladmin" -u root
    Installer (as of MySQL Installer 5.5.26), and by default it's set
    up to automatically start when Microsoft Windows is started.
    Supported versions of Microsoft Windows includes XP and greater.
+   Note
+
+   To install, download and execute the MySQL Installer
+   (http://dev.mysql.com/downloads/installer/), be sure the MySQL
+   Notifier for Microsoft Windows product is selected, then proceed
+   with the installation. See the MySQL Installer manual for
+   additional details.
+
+   Visit the MySQL Notifier forum
+   (http://forums.mysql.com/list.php?173) for additional MySQL
+   Notifier for Microsoft Windows help and support.
 
    Features include:
 
@@ -2197,9 +2210,7 @@ C:\> C:\mysql\bin\mysqld --remove
      * MySQL Notifier: Starts, stops, or restarts the MySQL server,
        and monitors its status.
 
-     * MySQL for Excel
-       (http://dev.mysql.com/doc/refman/5.5/en/excel-addon.html):
-       Edits MySQL data with Microsoft Excel.
+     * MySQL for Excel: Edits MySQL data with Microsoft Excel.
 
    On Windows, you need not create the data directory and the grant
    tables. MySQL Windows distributions include the grant tables with
@@ -3305,15 +3316,15 @@ Error in accept: Protocol error
    To use this package, download the corresponding
    mysql-VERSION-solaris10-PLATFORM.pkg.gz file, then decompress it.
    For example:
-shell> gunzip mysql-5.6.8-solaris10-x86_64.pkg.gz
+shell> gunzip mysql-5.6.9-solaris10-x86_64.pkg.gz
 
    To install a new package, use pkgadd and follow the onscreen
    prompts. You must have root privileges to perform this operation:
-shell> pkgadd -d mysql-5.6.8-solaris10-x86_64.pkg
+shell> pkgadd -d mysql-5.6.9-solaris10-x86_64.pkg
 
 The following packages are available:
   1  mysql     MySQL Community Server (GPL)
-               (i86pc) 5.6.8
+               (i86pc) 5.6.9
 
 Select package(s) you wish to process (or 'all' to process
 all packages). (default: all) [?,??,q]:
@@ -3350,7 +3361,7 @@ shell> ln /etc/init.d/mysql /etc/rc0.d/K02mysql
    The typical upgrade sequence is therefore:
 shell> mysqladmin shutdown
 shell> pkgrm mysql
-shell> pkgadd -d mysql-5.6.8-solaris10-x86_64.pkg
+shell> pkgadd -d mysql-5.6.9-solaris10-x86_64.pkg
 shell> mysql_upgrade
 shell> mysqld_safe &
 
@@ -3588,7 +3599,7 @@ Source Installation Methods
        Standard distributions are available as compressed tar files,
        Zip archives, or RPM packages. Distribution files have names
        of the form mysql-VERSION.tar.gz, mysql-VERSION.zip, or
-       mysql-VERSION.rpm, where VERSION is a number like 5.6.8. File
+       mysql-VERSION.rpm, where VERSION is a number like 5.6.9. File
        names for source distributions can be distinguished from those
        for precompiled binary distributions in that source
        distribution names are generic and include no platform name,
@@ -4845,10 +4856,10 @@ shell> bin/mysqladmin variables
        on your platform and version of MySQL, but should be similar
        to that shown here:
 shell> bin/mysqladmin version
-mysqladmin  Ver 14.12 Distrib 5.6.8, for pc-linux-gnu on i686
+mysqladmin  Ver 14.12 Distrib 5.6.9, for pc-linux-gnu on i686
 ...
 
-Server version          5.6.8
+Server version          5.6.9
 Protocol version        10
 Connection              Localhost via UNIX socket
 UNIX socket             /var/lib/mysql/mysql.sock
@@ -5723,6 +5734,12 @@ mysql> DROP DATABASE test;
        mysql_upgrade does not upgrade the contents of the help
        tables. For upgrade instructions, see Section 5.1.10,
        "Server-Side Help."
+       mysql_upgrade should not be used when the server is running
+       with --gtid-mode=ON, since it may make changes in
+       nontransactional system tables in the mysql database, many of
+       which are MyISAM and cannot be changed to use a different
+       storage engine. See Section 16.1.3.3, "GTID mode and
+       mysql_upgrade."
 
      * If you run MySQL Server on Windows, see Section 2.3.6,
        "Upgrading MySQL on Windows."

@@ -1,13 +1,22 @@
 '\" t
 .\"     Title: \fBmysqld_multi\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 08/01/2012
+.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
+.\"      Date: 11/22/2012
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLD_MULTI\FR" "1" "08/01/2012" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLD_MULTI\FR" "1" "11/22/2012" "MySQL 5\&.6" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -60,16 +69,19 @@ To invoke
 .RS 4
 .\}
 .nf
-shell> \fBmysqld_multi [\fR\fB\fIoptions\fR\fR\fB] {start|stop|report} [\fR\fB\fIGNR\fR\fR\fB[,\fR\fB\fIGNR\fR\fR\fB] \&.\&.\&.]\fR
+shell> \fBmysqld_multi [\fR\fB\fIoptions\fR\fR\fB] {start|stop|reload|report} [\fR\fB\fIGNR\fR\fR\fB[,\fR\fB\fIGNR\fR\fR\fB] \&.\&.\&.]\fR
 .fi
 .if n \{\
 .RE
 .\}
 .PP
 start,
-stop, and
+stop,
+reload
+(stop and restart), and
 report
-indicate which operation to perform\&. You can perform the designated operation for a single server or multiple servers, depending on the
+indicate which operation to perform\&. (reload
+is available as of MySQL 5\&.6\&.3\&.) You can perform the designated operation for a single server or multiple servers, depending on the
 \fIGNR\fR
 list that follows the option name\&. If there is no list,
 \fBmysqld_multi\fR
@@ -518,7 +530,7 @@ account by executing the following commands for each server:
 shell> \fBmysql \-u root \-S /tmp/mysql\&.sock \-p\fR
 Enter password:
 mysql> \fBGRANT SHUTDOWN ON *\&.*\fR
-    \-> \fBTO \'multi_admin\'@\'localhost\' IDENTIFIED BY \'multipass\';\fR
+    \-> \fBTO \*(Aqmulti_admin\*(Aq@\*(Aqlocalhost\*(Aq IDENTIFIED BY \*(Aqmultipass\*(Aq;\fR
 .fi
 .if n \{\
 .RE
@@ -614,7 +626,7 @@ You might want to use the
 option for
 \fBmysqld\fR, but to do this you need to run the
 \fBmysqld_multi\fR
-script as the Unix superuser (root)\&. Having the option in the option file doesn\'t matter; you just get a warning if you are not the superuser and the
+script as the Unix superuser (root)\&. Having the option in the option file doesn\*(Aqt matter; you just get a warning if you are not the superuser and the
 \fBmysqld\fR
 processes are started under your own Unix account\&.
 .RE

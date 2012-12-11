@@ -1,13 +1,22 @@
 '\" t
 .\"     Title: \fBmysqlbinlog\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 08/01/2012
+.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
+.\"      Date: 11/22/2012
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLBINLOG\FR" "1" "08/01/2012" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLBINLOG\FR" "1" "11/22/2012" "MySQL 5\&.6" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -26,7 +35,7 @@ mysqlbinlog \- utility for processing binary log files
 \fBmysqlbinlog [\fR\fBoptions\fR\fB] \fR\fB\fIlog_file\fR\fR\fB \&.\&.\&.\fR
 .SH "DESCRIPTION"
 .PP
-The server\'s binary log consists of files containing
+The server\*(Aqs binary log consists of files containing
 \(lqevents\(rq
 that describe modifications to database contents\&. The server writes these files in binary format\&. To display their contents in text format, use the
 \fBmysqlbinlog\fR
@@ -127,7 +136,7 @@ and
 groups of an option file\&.
 \fBmysqlbinlog\fR
 also supports the options for processing option files described at
-Section\ \&4.2.3.3.1, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+Section\ \&4.2.3.4, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
 .sp
 .RS 4
 .ie n \{\
@@ -155,7 +164,7 @@ Display a help message and exit\&.
 .\}
 .\" mysqlbinlog: base64-output option
 .\" base64-output option: mysqlbinlog
-\fB\-\-base64\-output[=\fR\fB\fIvalue\fR\fR\fB]\fR
+\fB\-\-base64\-output=\fR\fB\fIvalue\fR\fR
 .sp
 This option determines when events should be displayed encoded as base\-64 strings using
 BINLOG
@@ -176,7 +185,7 @@ UNSPEC
 BINLOG
 statements automatically when necessary (that is, for format description events and row events)\&. If no
 \fB\-\-base64\-output\fR
-option is given or the option is given without a value, the effect is the same as
+option is given, the effect is the same as
 \fB\-\-base64\-output=AUTO\fR\&.
 .if n \{\
 .sp
@@ -237,7 +246,7 @@ BINLOG
 statements, but unlike
 NEVER, it does not exit with an error if a row event is found\&.
 .RE
-.RS 4
+.sp
 For examples that show the effect of
 \fB\-\-base64\-output\fR
 and
@@ -422,7 +431,7 @@ DROP DATABASE\&. The database being
 \fIcreated, altered, or dropped\fR
 is considered to be the default database when determining whether to output the statement\&.
 .RE
-.RS 4
+.sp
 Suppose that the binary log was created by executing these statements using statement\-based\-logging:
 .sp
 .if n \{\
@@ -504,8 +513,8 @@ USE\&. (In particular, no cross\-database updates should be used\&.)
 Write a debugging log\&. A typical
 \fIdebug_options\fR
 string is
-\'d:t:o,\fIfile_name\fR\'\&. The default is
-\'d:t:o,/tmp/mysqlbinlog\&.trace\'\&.
+\*(Aqd:t:o,\fIfile_name\fR\*(Aq\&. The default is
+\*(Aqd:t:o,/tmp/mysqlbinlog\&.trace\*(Aq\&.
 .RE
 .sp
 .RS 4
@@ -600,6 +609,22 @@ privilege\&.
 .sp
 Do not display any of the groups listed in the
 \fIgtid_set\fR\&. Added in MySQL 5\&.6\&.5\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysqlbinlog: force-if-open option
+.\" force-if-open option: mysqlbinlog
+\fB\-\-force\-if\-open\fR,
+\fB\-F\fR
+.sp
+Read binary log files even if they are open or were not closed properly\&.
 .RE
 .sp
 .RS 4
@@ -833,7 +858,7 @@ also be used because the files are requested from a server\&.
 \fBmysqlbinlog\fR
 writes one output file for each file read from the server\&. The
 \fB\-\-raw\fR
-option can be used to make a backup of a server\'s binary log\&. With the
+option can be used to make a backup of a server\*(Aqs binary log\&. With the
 \fB\-\-stop\-never\fR
 option, the backup is
 \(lqlive\(rq
@@ -845,6 +870,36 @@ option\&. For more information, see
 the section called \(lqUSING MYSQLBINLOG TO BACK UP BINARY LOG FILES\(rq\&.
 .sp
 This option was added in MySQL 5\&.6\&.0\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysqlbinlog: read-from-remote-master option
+.\" read-from-remote-master option: mysqlbinlog
+\fB\-\-read\-from\-remote\-master=\fR\fB\fItype\fR\fR
+.sp
+Read binary logs from a MySQL server with the
+COM_BINLOG_DUMP
+or
+COM_BINLOG_DUMP_GTID
+commands by setting the option value to either
+BINLOG\-DUMP\-NON\-GTIDS
+or
+BINLOG\-DUMP\-GTIDS, respectively\&. If
+\fB\-\-read\-from\-remote\-master=BINLOG\-DUMP\-GTIDS\fR
+is combined with
+\fB\-\-exclude\-gtids\fR, transactions can be filtered out on the master, avoiding unnecessary network traffic\&.
+.sp
+See also the description for
+\fB\-\-read\-from\-remote\-server\fR\&.
+.sp
+This option was added in MySQL 5\&.6\&.5\&.
 .RE
 .sp
 .RS 4
@@ -869,6 +924,9 @@ Read the binary log from a MySQL server rather than reading a local log file\&. 
 \fB\-\-user\fR\&.
 .sp
 This option requires that the remote server be running\&. It works only for binary log files on the remote server, not relay log files\&.
+.sp
+As of MySQL 5\&.6\&.5, this option is like
+\fB\-\-read\-from\-remote\-master=BINLOG\-DUMP\-NON\-GTIDS\fR\&.
 .RE
 .sp
 .RS 4
@@ -1104,7 +1162,7 @@ This option was added in MySQL 5\&.6\&.0\&.
 With
 \fB\-\-stop\-never\fR,
 \fBmysqlbinlog\fR
-reports a server ID of 65535 when it connect to the server\&.
+reports a server ID of 65535 when it connects to the server\&.
 \fB\-\-stop\-never\-slave\-server\-id\fR
 explicitly specifies the server ID to report\&. It can be used to avoid a conflict with the ID of a slave server or another
 \fBmysqlbinlog\fR
@@ -1187,6 +1245,22 @@ and
 \fB\-\-verbose\fR
 on row event output, see
 the section called \(lqMYSQLBINLOG ROW EVENT DISPLAY\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysqlbinlog: verify-binlog-checksum option
+.\" verify-binlog-checksum option: mysqlbinlog
+\fB\-\-verify\-binlog\-checksum\fR,
+\fB\-c\fR
+.sp
+Verify checksums in binary log files\&. This option was added in MySQL 5\&.6\&.1\&.
 .RE
 .sp
 .RS 4
@@ -1453,9 +1527,9 @@ Position: The byte position within the log file\&.
 .IP \(bu 2.3
 .\}
 Timestamp: The event timestamp\&. In the example shown,
-\'9d fc 5c 43\'
+\*(Aq9d fc 5c 43\*(Aq
 is the representation of
-\'051024 17:24:13\'
+\*(Aq051024 17:24:13\*(Aq
 in hexadecimal\&.
 .RE
 .sp
@@ -1468,7 +1542,7 @@ in hexadecimal\&.
 .IP \(bu 2.3
 .\}
 Type: The event type code\&. In the example shown,
-\'0f\'
+\*(Aq0f\*(Aq
 indicates a
 FORMAT_DESCRIPTION_EVENT\&. The following table lists the possible type codes\&.
 .TS
@@ -1793,7 +1867,7 @@ T}:T{
 Log file correctly closed\&. (Used only in
                     FORMAT_DESCRIPTION_EVENT\&.) If
                     this flag is set (if the flags are, for example,
-                    \'01 00\') in a
+                    \*(Aq01 00\*(Aq) in a
                     FORMAT_DESCRIPTION_EVENT, the log
                     file has not been properly closed\&. Most probably
                     this is because of a master crash (for example, due
@@ -1812,7 +1886,7 @@ T}:T{
 LOG_EVENT_THREAD_SPECIFIC_F
 T}:T{
 Set if the event is dependent on the connection it was executed in (for
-                    example, \'04 00\'), for example,
+                    example, \*(Aq04 00\*(Aq), for example,
                     if the event uses temporary tables\&.
 T}
 T{
@@ -1854,8 +1928,8 @@ CREATE TABLE t
   date DATE NULL
 ) ENGINE = InnoDB;
 START TRANSACTION;
-INSERT INTO t VALUES(1, \'apple\', NULL);
-UPDATE t SET name = \'pear\', date = \'2009\-01\-01\' WHERE id = 1;
+INSERT INTO t VALUES(1, \*(Aqapple\*(Aq, NULL);
+UPDATE t SET name = \*(Aqpear\*(Aq, date = \*(Aq2009\-01\-01\*(Aq WHERE id = 1;
 DELETE FROM t WHERE id = 1;
 COMMIT;
 .fi
@@ -1877,24 +1951,24 @@ shell> \fBmysqlbinlog \fR\fB\fIlog_file\fR\fR
 \&.\&.\&.
 # at 218
 #080828 15:03:08 server id 1  end_log_pos 258 	Write_rows: table id 17 flags: STMT_END_F
-BINLOG \'
+BINLOG \*(Aq
 fAS3SBMBAAAALAAAANoAAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
 fAS3SBcBAAAAKAAAAAIBAAAQABEAAAAAAAEAA//8AQAAAAVhcHBsZQ==
-\'/*!*/;
+\*(Aq/*!*/;
 \&.\&.\&.
 # at 302
 #080828 15:03:08 server id 1  end_log_pos 356 	Update_rows: table id 17 flags: STMT_END_F
-BINLOG \'
+BINLOG \*(Aq
 fAS3SBMBAAAALAAAAC4BAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
 fAS3SBgBAAAANgAAAGQBAAAQABEAAAAAAAEAA////AEAAAAFYXBwbGX4AQAAAARwZWFyIbIP
-\'/*!*/;
+\*(Aq/*!*/;
 \&.\&.\&.
 # at 400
 #080828 15:03:08 server id 1  end_log_pos 442 	Delete_rows: table id 17 flags: STMT_END_F
-BINLOG \'
+BINLOG \*(Aq
 fAS3SBMBAAAALAAAAJABAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
 fAS3SBkBAAAAKgAAALoBAAAQABEAAAAAAAEAA//4AQAAAARwZWFyIbIP
-\'/*!*/;
+\*(Aq/*!*/;
 .fi
 .if n \{\
 .RE
@@ -1919,43 +1993,43 @@ shell> \fBmysqlbinlog \-v \fR\fB\fIlog_file\fR\fR
 \&.\&.\&.
 # at 218
 #080828 15:03:08 server id 1  end_log_pos 258 	Write_rows: table id 17 flags: STMT_END_F
-BINLOG \'
+BINLOG \*(Aq
 fAS3SBMBAAAALAAAANoAAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
 fAS3SBcBAAAAKAAAAAIBAAAQABEAAAAAAAEAA//8AQAAAAVhcHBsZQ==
-\'/*!*/;
+\*(Aq/*!*/;
 ### INSERT INTO test\&.t
 ### SET
 ###   @1=1
-###   @2=\'apple\'
+###   @2=\*(Aqapple\*(Aq
 ###   @3=NULL
 \&.\&.\&.
 # at 302
 #080828 15:03:08 server id 1  end_log_pos 356 	Update_rows: table id 17 flags: STMT_END_F
-BINLOG \'
+BINLOG \*(Aq
 fAS3SBMBAAAALAAAAC4BAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
 fAS3SBgBAAAANgAAAGQBAAAQABEAAAAAAAEAA////AEAAAAFYXBwbGX4AQAAAARwZWFyIbIP
-\'/*!*/;
+\*(Aq/*!*/;
 ### UPDATE test\&.t
 ### WHERE
 ###   @1=1
-###   @2=\'apple\'
+###   @2=\*(Aqapple\*(Aq
 ###   @3=NULL
 ### SET
 ###   @1=1
-###   @2=\'pear\'
-###   @3=\'2009:01:01\'
+###   @2=\*(Aqpear\*(Aq
+###   @3=\*(Aq2009:01:01\*(Aq
 \&.\&.\&.
 # at 400
 #080828 15:03:08 server id 1  end_log_pos 442 	Delete_rows: table id 17 flags: STMT_END_F
-BINLOG \'
+BINLOG \*(Aq
 fAS3SBMBAAAALAAAAJABAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
 fAS3SBkBAAAAKgAAALoBAAAQABEAAAAAAAEAA//4AQAAAARwZWFyIbIP
-\'/*!*/;
+\*(Aq/*!*/;
 ### DELETE FROM test\&.t
 ### WHERE
 ###   @1=1
-###   @2=\'pear\'
-###   @3=\'2009:01:01\'
+###   @2=\*(Aqpear\*(Aq
+###   @3=\*(Aq2009:01:01\*(Aq
 .fi
 .if n \{\
 .RE
@@ -1975,43 +2049,43 @@ shell> \fBmysqlbinlog \-vv \fR\fB\fIlog_file\fR\fR
 \&.\&.\&.
 # at 218
 #080828 15:03:08 server id 1  end_log_pos 258 	Write_rows: table id 17 flags: STMT_END_F
-BINLOG \'
+BINLOG \*(Aq
 fAS3SBMBAAAALAAAANoAAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
 fAS3SBcBAAAAKAAAAAIBAAAQABEAAAAAAAEAA//8AQAAAAVhcHBsZQ==
-\'/*!*/;
+\*(Aq/*!*/;
 ### INSERT INTO test\&.t
 ### SET
 ###   @1=1 /* INT meta=0 nullable=0 is_null=0 */
-###   @2=\'apple\' /* VARSTRING(20) meta=20 nullable=0 is_null=0 */
+###   @2=\*(Aqapple\*(Aq /* VARSTRING(20) meta=20 nullable=0 is_null=0 */
 ###   @3=NULL /* VARSTRING(20) meta=0 nullable=1 is_null=1 */
 \&.\&.\&.
 # at 302
 #080828 15:03:08 server id 1  end_log_pos 356 	Update_rows: table id 17 flags: STMT_END_F
-BINLOG \'
+BINLOG \*(Aq
 fAS3SBMBAAAALAAAAC4BAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
 fAS3SBgBAAAANgAAAGQBAAAQABEAAAAAAAEAA////AEAAAAFYXBwbGX4AQAAAARwZWFyIbIP
-\'/*!*/;
+\*(Aq/*!*/;
 ### UPDATE test\&.t
 ### WHERE
 ###   @1=1 /* INT meta=0 nullable=0 is_null=0 */
-###   @2=\'apple\' /* VARSTRING(20) meta=20 nullable=0 is_null=0 */
+###   @2=\*(Aqapple\*(Aq /* VARSTRING(20) meta=20 nullable=0 is_null=0 */
 ###   @3=NULL /* VARSTRING(20) meta=0 nullable=1 is_null=1 */
 ### SET
 ###   @1=1 /* INT meta=0 nullable=0 is_null=0 */
-###   @2=\'pear\' /* VARSTRING(20) meta=20 nullable=0 is_null=0 */
-###   @3=\'2009:01:01\' /* DATE meta=0 nullable=1 is_null=0 */
+###   @2=\*(Aqpear\*(Aq /* VARSTRING(20) meta=20 nullable=0 is_null=0 */
+###   @3=\*(Aq2009:01:01\*(Aq /* DATE meta=0 nullable=1 is_null=0 */
 \&.\&.\&.
 # at 400
 #080828 15:03:08 server id 1  end_log_pos 442 	Delete_rows: table id 17 flags: STMT_END_F
-BINLOG \'
+BINLOG \*(Aq
 fAS3SBMBAAAALAAAAJABAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
 fAS3SBkBAAAAKgAAALoBAAAQABEAAAAAAAEAA//4AQAAAARwZWFyIbIP
-\'/*!*/;
+\*(Aq/*!*/;
 ### DELETE FROM test\&.t
 ### WHERE
 ###   @1=1 /* INT meta=0 nullable=0 is_null=0 */
-###   @2=\'pear\' /* VARSTRING(20) meta=20 nullable=0 is_null=0 */
-###   @3=\'2009:01:01\' /* DATE meta=0 nullable=1 is_null=0 */
+###   @2=\*(Aqpear\*(Aq /* VARSTRING(20) meta=20 nullable=0 is_null=0 */
+###   @3=\*(Aq2009:01:01\*(Aq /* DATE meta=0 nullable=1 is_null=0 */
 .fi
 .if n \{\
 .RE
@@ -2042,7 +2116,7 @@ shell> \fBmysqlbinlog \-v \-\-base64\-output=DECODE\-ROWS \fR\fB\fIlog_file\fR\f
 ### INSERT INTO test\&.t
 ### SET
 ###   @1=1
-###   @2=\'apple\'
+###   @2=\*(Aqapple\*(Aq
 ###   @3=NULL
 \&.\&.\&.
 # at 302
@@ -2050,20 +2124,20 @@ shell> \fBmysqlbinlog \-v \-\-base64\-output=DECODE\-ROWS \fR\fB\fIlog_file\fR\f
 ### UPDATE test\&.t
 ### WHERE
 ###   @1=1
-###   @2=\'apple\'
+###   @2=\*(Aqapple\*(Aq
 ###   @3=NULL
 ### SET
 ###   @1=1
-###   @2=\'pear\'
-###   @3=\'2009:01:01\'
+###   @2=\*(Aqpear\*(Aq
+###   @3=\*(Aq2009:01:01\*(Aq
 \&.\&.\&.
 # at 400
 #080828 15:03:08 server id 1  end_log_pos 442 	Delete_rows: table id 17 flags: STMT_END_F
 ### DELETE FROM test\&.t
 ### WHERE
 ###   @1=1
-###   @2=\'pear\'
-###   @3=\'2009:01:01\'
+###   @2=\*(Aqpear\*(Aq
+###   @3=\*(Aq2009:01:01\*(Aq
 .fi
 .if n \{\
 .RE
@@ -2311,7 +2385,7 @@ the section called \(lqSPECIFYING THE MYSQLBINLOG SERVER ID\(rq\&.
 \fB\-\-result\-file\fR: A prefix for output file names, as described later\&.
 .RE
 .PP
-To back up a server\'s binary log files with
+To back up a server\*(Aqs binary log files with
 \fBmysqlbinlog\fR, you must specify file names that actually exist on the server\&. If you do not know the names, connect to the server and use the
 SHOW BINARY LOGS
 statement to see the current names\&. Suppose that the statement produces this output:
@@ -2404,7 +2478,7 @@ With
 to read to the last log file because that option is implied\&.
 .RE
         Output File Naming
-      .PP
+.PP
 Without
 \fB\-\-raw\fR,
 \fBmysqlbinlog\fR
@@ -2463,12 +2537,12 @@ T}
 .TE
 .sp 1
         Example: \fBmysqldump\fR + \fBmysqlbinlog\fR for Backup and Restore
-      .PP
+.PP
 The following example describes a simple scenario that shows how to use
 \fBmysqldump\fR
 and
 \fBmysqlbinlog\fR
-together to back up a server\'s data and binary log, and how to use the backup to restore the server if data loss occurs\&. The example assumes that the server is running on host
+together to back up a server\*(Aqs data and binary log, and how to use the backup to restore the server if data loss occurs\&. The example assumes that the server is running on host
 \fIhost_name\fR
 and its first binary log file is named
 binlog\&.000999\&. Enter each command on a single line\&.
@@ -2490,7 +2564,7 @@ mysqlbinlog \-\-read\-from\-remote\-server \-\-host=\fIhost_name\fR \-\-raw
 .PP
 Use
 \fBmysqldump\fR
-to create a dump file as a snapshot of the server\'s data\&. Use
+to create a dump file as a snapshot of the server\*(Aqs data\&. Use
 \fB\-\-all\-databases\fR,
 \fB\-\-events\fR, and
 \fB\-\-routines\fR
@@ -2530,7 +2604,7 @@ Then use the binary log backup to re\-execute events that were written after the
 .RS 4
 .\}
 .nf
-\-\- CHANGE MASTER TO MASTER_LOG_FILE=\'binlog\&.001002\', MASTER_LOG_POS=27284;
+\-\- CHANGE MASTER TO MASTER_LOG_FILE=\*(Aqbinlog\&.001002\*(Aq, MASTER_LOG_POS=27284;
 .fi
 .if n \{\
 .RE

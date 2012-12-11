@@ -1,13 +1,22 @@
 '\" t
 .\"     Title: \fBmysqlcheck\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 08/01/2012
+.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
+.\"      Date: 11/22/2012
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLCHECK\FR" "1" "08/01/2012" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLCHECK\FR" "1" "11/22/2012" "MySQL 5\&.6" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -92,7 +101,7 @@ table, an attempt to check it produces this result:
 .nf
 shell> \fBmysqlcheck test t\fR
 test\&.t
-note     : The storage engine for the table doesn\'t support check
+note     : The storage engine for the table doesn\*(Aqt support check
 .fi
 .if n \{\
 .RE
@@ -198,7 +207,7 @@ and
 groups of an option file\&.
 \fBmysqlcheck\fR
 also supports the options for processing option files described at
-Section\ \&4.2.3.3.1, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+Section\ \&4.2.3.4, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
 .sp
 .RS 4
 .ie n \{\
@@ -419,8 +428,8 @@ treats the first name argument on the command line as a database name and follow
 Write a debugging log\&. A typical
 \fIdebug_options\fR
 string is
-\'d:t:o,\fIfile_name\fR\'\&. The default is
-\'d:t:o\'\&.
+\*(Aqd:t:o,\fIfile_name\fR\*(Aq\&. The default is
+\*(Aqd:t:o\*(Aq\&.
 .RE
 .sp
 .RS 4
@@ -800,7 +809,7 @@ localhost, the Unix socket file to use, or, on Windows, the name of the named pi
 Options that begin with
 \fB\-\-ssl\fR
 specify whether to connect to the server using SSL and indicate where to find SSL keys and certificates\&. See
-Section\ \&6.3.8.3, \(lqSSL Command Options\(rq\&.
+Section\ \&6.3.8.4, \(lqSSL Command Options\(rq\&.
 .RE
 .sp
 .RS 4

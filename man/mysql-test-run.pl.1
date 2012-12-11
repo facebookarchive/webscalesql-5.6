@@ -1,13 +1,22 @@
 '\" t
 .\"     Title: \fBmysql-test-run.pl\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 08/01/2012
+.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
+.\"      Date: 11/14/2012
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL
 .\"  Language: English
 .\"
-.TH "\FBMYSQL\-TEST\-RUN\" "1" "08/01/2012" "MySQL" "MySQL Database System"
+.TH "\FBMYSQL\-TEST\-RUN\" "1" "11/14/2012" "MySQL" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -187,7 +196,7 @@ is disabled\&. This is an expected failure in this case\&.
 .PP
 To run
 \fBmysql\-test\-run\&.pl\fR
-on Windows, you\'ll need either Cygwin or ActiveState Perl to run it\&. You may also need to install the modules required by the script\&. To run the test script, change location into the
+on Windows, you\*(Aqll need either Cygwin or ActiveState Perl to run it\&. You may also need to install the modules required by the script\&. To run the test script, change location into the
 mysql\-test
 directory, set the
 MTR_VS_CONFIG
@@ -838,7 +847,7 @@ mysqld
 as server\&. If it does find
 mysqld\&.debug, it will search for plugin libraries in a subdirectory
 debug
-under the directory where it\'s normally located\&. This option does not turn on trace output and is independt of the
+under the directory where it\*(Aqs normally located\&. This option does not turn on trace output and is independent of the
 \fBdebug\fR
 option\&.
 .sp
@@ -1014,7 +1023,7 @@ if they fail\&. This option was added in MySQL 5\&.1\&.33\&.
 For an example of a file that might be specified using this option, see
 mysql\-test/collections/default\&.experimental\&.
 .sp
-From MySQL 5\&.1\&.51, it\'s possible to supply more than one
+From MySQL 5\&.1\&.51, it\*(Aqs possible to supply more than one
 \fB\-\-experimental\fR, test cases listed in all the files will be treated as experimental\&.
 .RE
 .sp
@@ -1101,7 +1110,7 @@ causes execution to continue regardless of test case failure\&.
 .\" force-restart option: mysql-test-run.pl
 \fB\-\-force\-restart\fR
 .sp
-Always restart the server(s) between each tast case, whether it\'s needed or not\&. Will also restart between repeated runs of the same test case\&. This may be useful e\&.g\&. when looking for the source of a memory leak, as there will only have been one test run before the server exits\&.
+Always restart the server(s) between each tast case, whether it\*(Aqs needed or not\&. Will also restart between repeated runs of the same test case\&. This may be useful e\&.g\&. when looking for the source of a memory leak, as there will only have been one test run before the server exits\&.
 .sp
 The
 \fB\-\-force\-restart\fR
@@ -1956,7 +1965,7 @@ option, it sets up a secure connection for all test cases\&. In this case, if
 does not support SSL,
 \fBmysql\-test\-run\&.pl\fR
 exits with an error message:
-Couldn\'t find support for SSL
+Couldn\*(Aqt find support for SSL
 .RE
 .sp
 .RS 4
@@ -2072,7 +2081,7 @@ output for
 \fBmysqltest\fR\&. Will produce default
 \fBstrace\fR
 output as
-mysqltest\&.strace\&. Note that this will be overwritten for each new test case, so it\'s most useful for running only one test\&.
+mysqltest\&.strace\&. Note that this will be overwritten for each new test case, so it\*(Aqs most useful for running only one test\&.
 .sp
 The
 \fBstrace\-client\fR
@@ -2096,7 +2105,7 @@ Create
 output for the server\&. Will produce default
 \fBstrace\fR
 output as
-mysqld\&.1\&.strace\&. Note that this will be overwritten each time the server is restarted, so it\'s most useful for running a single test, or if you want trace from the first test that fails\&.
+mysqld\&.1\&.strace\&. Note that this will be overwritten each time the server is restarted, so it\*(Aqs most useful for running a single test, or if you want trace from the first test that fails\&.
 .sp
 The
 \fBstrace\-server\fR

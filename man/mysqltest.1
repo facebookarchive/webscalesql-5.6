@@ -1,13 +1,22 @@
 '\" t
 .\"     Title: \fBmysqltest\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 08/01/2012
+.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
+.\"      Date: 11/14/2012
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL
 .\"  Language: English
 .\"
-.TH "\FBMYSQLTEST\FR" "1" "08/01/2012" "MySQL" "MySQL Database System"
+.TH "\FBMYSQLTEST\FR" "1" "11/14/2012" "MySQL" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -245,7 +254,7 @@ The default database to use\&.
 Write a debugging log if MySQL is built with debugging support\&. The default
 \fIdebug_options\fR
 value is
-\'d:t:S:i:O,/tmp/mysqltest\&.trace\'\&.
+\*(Aqd:t:S:i:O,/tmp/mysqltest\&.trace\*(Aq\&.
 .RE
 .sp
 .RS 4
@@ -655,9 +664,9 @@ Read arguments for the embedded server from the given file\&. The file should co
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqltest: server-public-key option
-.\" server-public-key option: mysqltest
-\fB\-\-server\-public\-key=\fR\fBfile_name\fR
+.\" mysqltest: server-public-key-path option
+.\" server-public-key-path option: mysqltest
+\fB\-\-server\-public\-key\-path=\fR\fBfile_name\fR
 .sp
 The path name to a file containing the server RSA public key\&. The file must be in PEM format\&. The public key is used for RSA encryption of the client password for connections to the server made using accounts that authenticate with the
 sha256_password
@@ -670,7 +679,10 @@ sha256_password
 plugin, including how to get the RSA public key, see
 \m[blue]\fBThe SHA\-256 Authentication Plugin\fR\m[]\&\s-2\u[1]\d\s+2\&.
 .sp
-This option is available only if MySQL was built using OpenSSL\&. It was added in MySQL 5\&.6\&.6\&.
+This option is available only if MySQL was built using OpenSSL\&. It was added in MySQL 5\&.6\&.6 under the name
+\fB\-\-server\-public\-key\fR
+and renamed in 5\&.6\&.7 to
+\fB\-\-server\-public\-key\-path\fR\&.
 .RE
 .sp
 .RS 4

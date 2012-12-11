@@ -1,13 +1,22 @@
 '\" t
 .\"     Title: \fBmysql_upgrade\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 08/01/2012
+.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
+.\"      Date: 11/22/2012
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQL_UPGRADE\FR" "1" "08/01/2012" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQL_UPGRADE\FR" "1" "11/22/2012" "MySQL 5\&.6" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -22,7 +31,7 @@
 .\" upgrading MySQL
 .\" MySQL: upgrading
 .SH "NAME"
-mysql_upgrade \- check tables for MySQL upgrade
+mysql_upgrade \- check and upgrade MySQL tables
 .SH "SYNOPSIS"
 .HP \w'\fBmysql_upgrade\ [\fR\fB\fIoptions\fR\fR\fB]\fR\ 'u
 \fBmysql_upgrade [\fR\fB\fIoptions\fR\fR\fB]\fR
@@ -34,9 +43,7 @@ examines all tables in all databases for incompatibilities with the current vers
 also upgrades the system tables so that you can take advantage of new privileges or capabilities that might have been added\&.
 .PP
 \fBmysql_upgrade\fR
-should be executed each time you upgrade MySQL\&. It supersedes the older
-\fBmysql_fix_privilege_tables\fR
-script, which has been removed in MySQL 5\&.6\&.
+should be executed each time you upgrade MySQL\&.
 .PP
 If
 \fBmysql_upgrade\fR
@@ -190,7 +197,7 @@ Section\ \&2.5.1, \(lqInstalling MySQL from RPM Packages on Linux\(rq\&.)
 .PP
 \fBmysql_upgrade\fR
 does not upgrade the contents of the help tables\&. For upgrade instructions, see
-Section\ \&5.1.9, \(lqServer-Side Help\(rq\&.
+Section\ \&5.1.10, \(lqServer-Side Help\(rq\&.
 .PP
 \fBmysql_upgrade\fR
 supports the following options, which can be specified on the command line or in the
@@ -203,7 +210,7 @@ groups of an option file\&. Other options are passed to
 option\&.
 \fBmysql_upgrade\fR
 also supports the options for processing option files described at
-Section\ \&4.2.3.3.1, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+Section\ \&4.2.3.4, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
 .sp
 .RS 4
 .ie n \{\
@@ -429,7 +436,9 @@ if you want its actions to be written to the binary log\&. (Also beginning with 
 \fB\-\-skip\-write\-binlog\fR
 option effectively does nothing\&.)
 .sp
-Employing this option is not recommended when upgrading a MySQL Server that is running with global transaction identifiers enabled (Bug #13833710)\&. This is because enabling GTIDs means that any updates which
+Running
+\fBmysql_upgrade\fR
+is not recommended with a MySQL Server that is running with global transaction identifiers enabled (Bug #13833710)\&. This is because enabling GTIDs means that any updates which
 \fBmysql_upgrade\fR
 might need to perform on system tables using a nontransactional storage engine such as
 MyISAM

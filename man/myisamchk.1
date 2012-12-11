@@ -1,13 +1,22 @@
 '\" t
 .\"     Title: \fBmyisamchk\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 08/01/2012
+.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
+.\"      Date: 11/22/2012
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYISAMCHK\FR" "1" "08/01/2012" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYISAMCHK\FR" "1" "11/22/2012" "MySQL 5\&.6" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -210,7 +219,7 @@ Otherwise, when you run
 .RS 4
 .\}
 .nf
-warning: clients are using or haven\'t closed the table properly
+warning: clients are using or haven\*(Aqt closed the table properly
 .fi
 .if n \{\
 .RE
@@ -218,7 +227,7 @@ warning: clients are using or haven\'t closed the table properly
 .PP
 This means that you are trying to check a table that has been updated by another program (such as the
 \fBmysqld\fR
-server) that hasn\'t yet closed the file or that has died without closing the file properly, which can sometimes lead to the corruption of one or more
+server) that hasn\*(Aqt yet closed the file or that has died without closing the file properly, which can sometimes lead to the corruption of one or more
 MyISAM
 tables\&.
 .PP
@@ -243,7 +252,7 @@ supports the following options, which can be specified on the command line or in
 group of an option file\&.
 \fBmyisamchk\fR
 also supports the options for processing option files described at
-Section\ \&4.2.3.3.1, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+Section\ \&4.2.3.4, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
 .SH "MYISAMCHK GENERAL OPTIONS"
 .\" options: myisamchk
 .\" myisamchk: options
@@ -299,8 +308,8 @@ Display a help message and exit\&. Options are presented in a single list\&.
 Write a debugging log\&. A typical
 \fIdebug_options\fR
 string is
-\'d:t:o,\fIfile_name\fR\'\&. The default is
-\'d:t:o,/tmp/myisamchk\&.trace\'\&.
+\*(Aqd:t:o,\fIfile_name\fR\*(Aq\&. The default is
+\*(Aqd:t:o,/tmp/myisamchk\&.trace\*(Aq\&.
 .RE
 .sp
 .RS 4
@@ -539,7 +548,7 @@ myisam_stats_method
 system variable\&. For more information, see the description of
 myisam_stats_method
 in
-Section\ \&5.1.3, \(lqServer System Variables\(rq, and
+Section\ \&5.1.4, \(lqServer System Variables\(rq, and
 Section\ \&8.3.7, \(lqInnoDB and MyISAM Index Statistics Collection\(rq\&.
 .PP
 ft_min_word_len
@@ -693,7 +702,7 @@ the section called \(lqOBTAINING TABLE INFORMATION WITH MYISAMCHK\(rq\&.
 \fB\-\-fast\fR,
 \fB\-F\fR
 .sp
-Check only tables that haven\'t been closed properly\&.
+Check only tables that haven\*(Aqt been closed properly\&.
 .RE
 .sp
 .RS 4
@@ -789,7 +798,7 @@ Store information in the
 \&.MYI
 file to indicate when the table was checked and whether the table crashed\&. This should be used to get full benefit of the
 \fB\-\-check\-only\-changed\fR
-option, but you shouldn\'t use this option if the
+option, but you shouldn\*(Aqt use this option if the
 \fBmysqld\fR
 server is using the table and you are running it with external locking disabled\&.
 .RE
@@ -1261,8 +1270,8 @@ Sort records according to a particular index\&. This makes your data much more l
 SELECT
 and
 ORDER BY
-operations that use this index\&. (The first time you use this option to sort a table, it may be very slow\&.) To determine a table\'s index numbers, use
-SHOW INDEX, which displays a table\'s indexes in the same order that
+operations that use this index\&. (The first time you use this option to sort a table, it may be very slow\&.) To determine a table\*(Aqs index numbers, use
+SHOW INDEX, which displays a table\*(Aqs indexes in the same order that
 \fBmyisamchk\fR
 sees them\&. Indexes are numbered beginning with 1\&.
 .sp
@@ -1574,7 +1583,7 @@ sorted index pages\&.
 Auto increment key,
 Last value
 .sp
-The key number associated the table\'s
+The key number associated the table\*(Aqs
 AUTO_INCREMENT
 column, and the most recently generated value for this column\&. These fields do not appear if there is no such column\&.
 .RE
@@ -1715,7 +1724,7 @@ displays some low\-level information:
 .\}
 Key
 .sp
-This key\'s number\&. This value is shown only for the first column of the key\&. If this value is missing, the line corresponds to the second or later column of a multiple\-column key\&. For the table shown in the example, there are two
+This key\*(Aqs number\&. This value is shown only for the first column of the key\&. If this value is missing, the line corresponds to the second or later column of a multiple\-column key\&. For the table shown in the example, there are two
 table description
 lines for the second index\&. This indicates that it is a multiple\-part index with two parts\&.
 .RE

@@ -430,7 +430,7 @@ Development Release
 
    No one is required to download a new release. The News section
    helps you determine whether the new release has something you
-   really want. See Appendix D, "MySQL Change History."
+   really want. See Appendix D, "MySQL Release Notes."
 
    We use the following policy when updating MySQL:
 
@@ -499,9 +499,9 @@ Development Release
 shell> md5sum package_name
 
    Example:
-shell> md5sum mysql-standard-5.6.9-linux-i686.tar.gz
-aaab65abbec64d5e907dcd41b8699945  mysql-standard-5.6.9-linux-i686.tar
-.gz
+shell> md5sum mysql-standard-5.6.10-linux-i686.tar.gz
+aaab65abbec64d5e907dcd41b8699945  mysql-standard-5.6.10-linux-i686.ta
+r.gz
 
    You should verify that the resulting checksum (the string of
    hexadecimal digits) matches the one displayed on the download page
@@ -626,9 +626,9 @@ pg-signature.html
    .asc extension, as shown by the examples in the following table.
 
    Table 2.1. MySQL Package and Signature Files
-       File Type                     File Name
-   Distribution file mysql-standard-5.6.9-linux-i686.tar.gz
-   Signature file    mysql-standard-5.6.9-linux-i686.tar.gz.asc
+       File Type                      File Name
+   Distribution file mysql-standard-5.6.10-linux-i686.tar.gz
+   Signature file    mysql-standard-5.6.10-linux-i686.tar.gz.asc
 
    Make sure that both files are stored in the same directory and
    then run the following command to verify the signature for the
@@ -636,7 +636,7 @@ pg-signature.html
 shell> gpg --verify package_name.asc
 
    Example:
-shell> gpg --verify mysql-standard-5.6.9-linux-i686.tar.gz.asc
+shell> gpg --verify mysql-standard-5.6.10-linux-i686.tar.gz.asc
 gpg: Signature made Tue 01 Feb 2011 02:38:30 AM CST using DSA key ID
 5072E1F5
 gpg: Good signature from "MySQL Release Engineering <mysql-build@oss.
@@ -656,8 +656,8 @@ oracle.com>"
 shell> rpm --checksig package_name.rpm
 
    Example:
-shell> rpm --checksig MySQL-server-5.6.9-0.glibc23.i386.rpm
-MySQL-server-5.6.9-0.glibc23.i386.rpm: md5 gpg OK
+shell> rpm --checksig MySQL-server-5.6.10-0.glibc23.i386.rpm
+MySQL-server-5.6.10-0.glibc23.i386.rpm: md5 gpg OK
 
    Note
 
@@ -732,9 +732,9 @@ shell> rpm --import mysql_pubkey.asc
 
    MySQL compressed tar file binary distributions have names of the
    form mysql-VERSION-OS.tar.gz, where VERSION is a number (for
-   example, 5.6.9), and OS indicates the type of operating system for
-   which the distribution is intended (for example, pc-linux-i686 or
-   winx64).
+   example, 5.6.10), and OS indicates the type of operating system
+   for which the distribution is intended (for example, pc-linux-i686
+   or winx64).
 
    To install MySQL from a compressed tar file binary distribution,
    your system must have GNU gunzip to uncompress the distribution
@@ -1036,20 +1036,20 @@ Perform Postinstallation Setup
    from when installing MySQL on Windows:
 
      * MySQL Installer: This package has a file name similar to
-       mysql-installer-community-5.6.9-rc.0.msi and is recommended
+       mysql-installer-community-5.6.10-rc.0.msi and is recommended
        for most users. It is used to both install and upgrade the
        MySQL Server, along with other MySQL products such as the
        MySQL Notifier for Microsoft Windows.
 
      * The Noinstall Archive: This package has a file name similar to
-       mysql-5.6.9-win32.zip and contains all the files found in the
+       mysql-5.6.10-win32.zip and contains all the files found in the
        Complete install package, with the exception of the GUI. This
        package does not include an automated installer, and must be
        manually installed and configured.
 
      * The source code: This package has a file name similar to
-       mysql-5.6.9.zip and contains the source code for compiling the
-       MySQL Server on Windows.
+       mysql-5.6.10.zip and contains the source code for compiling
+       the MySQL Server on Windows.
 
    Your choice of install package affects the installation process
    you must follow. If you choose to use MySQL Installer, see Section
@@ -1060,63 +1060,63 @@ Perform Postinstallation Setup
 
 2.3.3. Installing MySQL on Microsoft Windows Using MySQL Installer
 
-   MySQL Installer includes both a GUI and a command-line interface,
-   and both options are included with MySQL Installer.
-
-   MySQL Installer is an application designed to simplify the
-   installation and updating process for a wide range of MySQL
-   products including MySQL Notifier for Microsoft Windows, MySQL
-   Workbench, and MySQL for Excel. From this central tool, you can
-   see which components are already installed, configure them, and
+   MySQL Installer is an application that simplifies the installation
+   and updating process for a wide range of MySQL products, including
+   MySQL Notifier for Microsoft Windows, MySQL Workbench, and MySQL
+   for Excel. From this central application, you can see which MySQL
+   products are already installed, configure them, and update or
    remove them if necessary. The installer can also install plugins,
-   documentation, tutorials, and examples. The MySQL Installer is
-   only available for Microsoft Windows.
+   documentation, tutorials, and example databases. The MySQL
+   Installer is only available for Microsoft Windows, and includes
+   both a GUI and command-line interface.
 
    Download MySQL Installer at
    http://dev.mysql.com/downloads/installer/
 
-   The MySQL Installer Change History (Changelog) is located with the
-   main Changelog for MySQL. See Section D.9, "MySQL Installer Change
-   History."
+   The MySQL Installer Change History (Changelog) is located along
+   with the main Changelog for MySQL. See Section D.9, "MySQL
+   Installer Change History."
 
-   MySQL Installer is compatible with pre-existing installations and
-   will add them to its list of installed components. And while the
-   MySQL Installer is bundled with a specific version of MySQL
-   Server, a single MySQL Installer instance can install and manage
-   multiple MySQL Community Server versions. For example, a single
-   MySQL Installer instance can install versions 5.1, 5.5, and 5.6.
+   MySQL Installer is compatible with pre-existing installations, and
+   adds them to its list of installed components. And while the MySQL
+   Installer is bundled with a specific version of MySQL Server, a
+   single MySQL Installer instance can install and manage multiple
+   MySQL Server versions. For example, a single MySQL Installer
+   instance can install versions 5.1, 5.5, and 5.6. It can also
+   manage both commercial and community versions of the MySQL Server.
 
-   MySQL Installer handles the initial configuration of applications.
-   For example:
+   MySQL Installer handles the initial configuration and setup of the
+   applications. For example:
 
-    1. It will create the initial MySQL Workbench connections that
-       allow immediate use of MySQL Workbench.
+    1. It will create MySQL Server connections in MySQL Workbench.
 
-    2. It creates the configuration file (my.ini) that is used to run
-       the server.
+    2. It creates the configuration file (my.ini) that is used to
+       configure the MySQL Server.
 
-    3. It creates example tables that are available from the local
-       server.
+    3. It imports example databases.
 
     4. It creates MySQL Server user accounts with configurable
        permissions based on general roles, such as DB Administrator,
        DB Designer, and Backup Admin. It optionally creates a Windows
-       user named MysqlSys, with limited privileges, which would then
+       user named MysqlSys with limited privileges, which would then
        run the MySQL Server.
+       This feature is only available during the initial installation
+       of the MySQL Server, and not during future updates. User
+       accounts may also be added with MySQL Workbench.
 
     5. If the "Advanced Configuration" option is checked, then the
-       configuration of Logging Options is available. It includes
-       defining file paths for the error log, general log, slow query
-       log (including the configuration of seconds it requires to
-       execute a query), and the binary log.
+       Logging Options are also configured. This includes defining
+       file paths for the error log, general log, slow query log
+       (including the configuration of seconds it requires to execute
+       a query), and the binary log.
 
-   MySQL Installer can also check for updated components and download
-   them automatically, should you choose to allow it to do so.
+   MySQL Installer can optionally check for updated components and
+   download them for you automatically.
 
 2.3.3.1. MySQL Installer GUI
 
-   After installation of the GUI version, the installer will have its
-   own Start Menu item so that you can access it more easily.
+   After installation of the GUI version, the installer will have add
+   its own Start Menu item under MySQL.
    Note
 
    Files that are generated by MySQL Installer grant full permissions
@@ -1124,9 +1124,6 @@ Perform Postinstallation Setup
    does not apply to files and directories for specific products such
    as the MySQL Server data directory in ProgramData, that is owned
    by SYSTEM.
-
-   To install MySQL Installer via the GUI, open the application, and
-   click Execute or Next when prompted.
 
    After the installer itself has been installed and started, the
    following screen is displayed:
@@ -1142,19 +1139,17 @@ Perform Postinstallation Setup
 
     3. Resources - Information to help install and configure MySQL.
 
-   When you click "Install MySQL Products," the Installer will find
-   and install MySQL. But first, you'll need to accept the license
-   agreement before proceeding. The license agreement is only
-   displayed the initial time that MySQL Installer is executed:
+   To Install MySQL Products after executing MySQL Installer for the
+   first time, you must accept the license agreement before
+   proceeding with the installation process.
 
    Figure 2.2. MySQL Installer - License Agreement
    MySQL Installer - License Agreement
 
-   If you are connected to the Internet, then the program will search
-   for the latest MySQL components, and add them to the installation
-   bundle, ensuring the best functionality. Click Connect to the
-   Internet to complete this step, or if you'd rather not, check the
-   Skip checkbox and continue.
+   If you are connected to the Internet, then the Installer will
+   search for the latest MySQL components and add them to the
+   installation bundle. Click Connect to the Internet to complete
+   this step, or otherwise check the Skip checkbox and then Continue.
 
    Figure 2.3. MySQL Installer - Find latest products
    MySQL Installer - Find latest products
@@ -1168,23 +1163,22 @@ Perform Postinstallation Setup
    MySQL Installer - Choose Setup Type
 
    Each type contains a description, so read the Setup Type
-   Description to determine which option will be most compatible with
-   your preferences.
+   Description to determine the option most compatible with your
+   preferences.
 
    The Installation and Data paths are also defined here, and a
-   caution flag will notify you if the data path you are trying to
-   establish already exists.
+   caution flag will notify you if the data path you define already
+   exists.
 
-   Once you select a setup type, the MySQL Installer will check your
-   system for the necessary external requirements, and download and
-   install any missing pieces onto your system.
+   After you select a setup type, the MySQL Installer will check your
+   system for the necessary external requirements and download then
+   install missing components onto your system.
 
    Figure 2.5. MySQL Installer - Check Requirements
    MySQL Installer - Check Requirements
 
-   In the next window, you will be able to view a list of the MySQL
-   components that are scheduled to be installed, and watch the
-   progress of the installation.
+   The next window lists the MySQL components that are scheduled to
+   be installed:
 
    Figure 2.6. MySQL Installer - Installation Progress
    MySQL Installer - Installation Progress
@@ -1195,9 +1189,10 @@ Perform Postinstallation Setup
    Figure 2.7. MySQL Installer - Installation Progress status
    MySQL Installer - Installation Progress status
 
-   Once all components are installed, the next step is configuration.
-   You can watch the progress of this step in the Configuration
-   Overview window:
+   After all components are installed, the next step involves
+   configuring the products. The Configuration Overview window
+   displays the progress and then loads a configuration window if it
+   is required.
 
    Figure 2.8. MySQL Installer - Configuration Overview
    MySQL Installer - Configuration Overview
@@ -1209,11 +1204,11 @@ Perform Postinstallation Setup
    You may enable TCP/IP Networking here as otherwise only localhost
    connections are allowed.
 
-   And if the "Advanced Configuration" option is checked, then you
-   will have the option to configure additional Logging Options. This
-   includes defining file paths for the error log, general log, slow
-   query log (including the configuration of seconds it requires to
-   execute a query), and the binary log.
+   Checking the "Advanced Configuration" option provides additional
+   Logging Options to configure. This includes defining file paths
+   for the error log, general log, slow query log (including the
+   configuration of seconds it requires to execute a query), and the
+   binary log.
 
    Figure 2.9. MySQL Installer - MySQL Server Configuration: Define
    platform, networking, and logging options
@@ -1221,10 +1216,10 @@ Perform Postinstallation Setup
    networking, and logging options
 
    Next, choose your account information. Defining a root password is
-   required, whereas creating additional users is optional. There are
-   several different predefined user roles each with different
-   permissions. For example, a "DB Admin" will have more privileges
-   than a "DB Designer" will.
+   required, whereas it's optional to create additional users. There
+   are several different predefined user roles that each have
+   different permission levels. For example, a "DB Admin" will have
+   more privileges than a "DB Designer.".
 
    Figure 2.10. MySQL Installer - MySQL Server Configuration: User
    accounts
@@ -1244,33 +1239,47 @@ Perform Postinstallation Setup
    service details
    MySQL Installer - MySQL Server Configuration: Windows service
    details
+   Note
 
-   The final configuration step will be available if the Advanced
-   Configuration option was checked initially. It defines log
-   filenames.
+   When configuring Run Windows Services as ... using a Custom User,
+   the custom user must have privileges to log on to Windows as a
+   service. And the Next button will be disabled until this user is
+   given these user rights.
+
+   On Microsoft Windows 7, this is configured by loading the Start
+   Menu, Control Panel, Administrative Tools, Local Security Policy,
+   Local Policies, User Rights Assignment, then Log On As A Service.
+   Choose Add User or Group here to add the custom user, and then OK,
+   OK to save.
+
+   The final configuration step is available if the Advanced
+   Configuration option was checked, and it includes configuration
+   options related to log file names:
 
    Figure 2.12. MySQL Installer - MySQL Server Configuration: Logging
    options
    MySQL Installer - MySQL Server Configuration: Logging options
 
-   When the MySQL Installer configuration is complete, you can save
-   the log and by default, the "Start MySQL Workbench after Setup"
-   option is checked:
+   After the MySQL Installer configuration process is completed, you
+   may save the installation log, and then load MySQL Workbench if
+   the Start MySQL Workbench after Setup option is checked:
 
    Figure 2.13. MySQL Installer - Installation Complete
    MySQL Installer - Installation Complete
 
    You can now open MySQL Installer from the Microsoft Windows Start
-   menu, which will pull up the MySQL Installer Maintenance Screen.
-   This will be used to add, update, and remove features.
+   menu under the MySQL group, which will load the MySQL Installer
+   Maintenance Screen. This is used to add, update, and remove
+   features.
 
    Figure 2.14. MySQL Installer - Maintenance Screen
    MySQL Installer - Maintenance Screen
    Note
 
-   If MySQL Installer is used on a machine with older products
-   installed, an Update Screen is shown instead of the Maintenance
-   Screen. However, the functionality remains the same.
+   An Update Screen screen is shown if MySQL Installer is used on a
+   machine with older products installed, as opposed to the
+   Maintenance Screen shown above. However, the functionality remains
+   the same.
 
    See also the MySQL Workbench documentation
    (http://dev.mysql.com/doc/workbench/en/).
@@ -1291,16 +1300,16 @@ Perform Postinstallation Setup
    located:
 C:\> cd "C:\Program Files (x86)\MySQL\MySQL Installer"
 
-   MySQLInstallerConsole supports the following options, which are be
-   specified on the command line.
+   MySQLInstallerConsole supports the following options, which are
+   specified on the command line:
 
      * --help, -h, or -?
-       Display a help message with usage examples, and exit.
+       Displays a help message with usage examples, and then exits.
 C:\> MySQLInstallerConsole --help
 
      * --updates (or -u)
-       Checks for new products before before any further action is
-       taken. Disabled by default.
+       Checks for new products before any further action is taken.
+       Disabled by default.
 
      * --nowait
        Skips the final pause when the program finishes. Otherwise, a
@@ -1308,7 +1317,7 @@ C:\> MySQLInstallerConsole --help
        in conjunction with other options.
 
      * --catalog=catalog_name (or -c)
-       Sets the default catalog. Use --list to see a list of
+       Sets the default catalog. Use --list to view a list of
        available catalogs.
 
      * --type=installation_type (or -t)
@@ -1333,12 +1342,12 @@ C:\> MySQLInstallerConsole --help
           + list: Lists the product manifest, both installed and
             available products.
 
-          + status: Used to show the status after another action is
+          + status: Shows the status after another action is
             performed.
 
      * --product=product_name[:feature1],[feature2], [...] (or -p)
        Set the feature list of a product. Use --list to view
-       available products, and pass in --product=* (an asterisk) to
+       available products, or pass in --product=* (an asterisk) to
        install all available products.
 
      * --config=product_name:passwd=root_password[;parameter1=value],
@@ -1352,7 +1361,7 @@ C:\> MySQLInstallerConsole --help
        tokens=tokens
        Creates a new user.
        Requires: name, host, role, and the password or tokens. Tokens
-       are separated with a pipe ("|") character.
+       are separated by pipe ("|") characters.
 
 2.3.4. Installing MySQL on Microsoft Windows Using a noinstall Zip
 Archive
@@ -1578,7 +1587,7 @@ InnoDB: foreign key constraint system tables created
    something like this, which indicates that the server is ready to
    service client connections:
 mysqld: ready for connections
-Version: '5.6.9'  socket: ''  port: 3306
+Version: '5.6.10'  socket: ''  port: 3306
 
    The server continues to write to the console any further
    diagnostic output it produces. You can open a new console window
@@ -1587,7 +1596,8 @@ Version: '5.6.9'  socket: ''  port: 3306
    If you omit the --console option, the server writes diagnostic
    output to the error log in the data directory (C:\Program
    Files\MySQL\MySQL Server 5.6\data by default). The error log is
-   the file with the .err extension.
+   the file with the .err extension, and may be set using the
+   --log-error option.
    Note
 
    The accounts that are listed in the MySQL grant tables initially
@@ -1630,9 +1640,10 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysqladmin" -u root
 
    If mysqld doesn't start, check the error log to see whether the
    server wrote any messages there to indicate the cause of the
-   problem. The error log is located in the C:\Program
+   problem. By default, the error log is located in the C:\Program
    Files\MySQL\MySQL Server 5.6\data directory. It is the file with a
-   suffix of .err. You can also try to start the server as mysqld
+   suffix of .err, or may be specified by passing in the --log-error
+   option. Alternatively, you can try to start the server as mysqld
    --console; in this case, you may get some useful information on
    the screen that may help solve the problem.
 
@@ -1655,9 +1666,8 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysqladmin" -u root
    context menu.
 
    The MySQL Notifier for Microsoft Windows is installed by MySQL
-   Installer (as of MySQL Installer 5.5.26), and by default it's set
-   up to automatically start when Microsoft Windows is started.
-   Supported versions of Microsoft Windows includes XP and greater.
+   Installer, and (by default) will start-up when Microsoft Windows
+   is started.
    Note
 
    To install, download and execute the MySQL Installer
@@ -1672,61 +1682,63 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysqladmin" -u root
 
    Features include:
 
-     * Start, Stop, and Restart instances of the MySQL Server
+     * Start, Stop, and Restart instances of the MySQL Server.
 
-     * Automatically detect (and add) new MySQL Server instances
+     * Automatically detects (and adds) new MySQL Server services.
+       These are listed under Manage Services, and may also be
+       configured.
 
-     * The Tray icon changes, depending on the status (green/red)
+     * The Tray icon changes, depending on the status. It's green if
+       all monitored MySQL Server instances are running, or red if at
+       least one service is stopped.
 
      * Links to other applications like MySQL Workbench, Windows
-       Installer, and the MySQL Utilities
+       Installer, and the MySQL Utilities. For example, choosing
+       Configure Instance will load the MySQL Workbench Server
+       Administration window for that particular instance.
 
      * If MySQL Workbench is also installed, then the Configure
-       Instance and SQL Editor options are available
+       Instance and SQL Editor options are available.
 
    The MySQL Notifier for Microsoft Windows resides in the system
    tray and provides visual status information for your MySQL Server
    instances. A green icon is displayed at the top left corner of the
-   tray icon if the current MySQL Server is running, and a red icon
-   is displayed if the service is stopped.
+   tray icon if the current MySQL Server is running, or a red icon if
+   the service is stopped.
 
-   The MySQL Notifier for Microsoft Windows will automatically add
-   all of the MySQL Services that it finds on the local machine. This
-   is then configurable which includes options to manage individual
-   services. If new services are added to the machine, then MySQL
-   Notifier for Microsoft Windows will recognize and install them if
-   the Automatically add new services that match this pattern option
-   is enabled. This option is enabled by default with the .*mysqld.*
-   pattern. Several Notifications Options exist and are enabled by
-   default, including an option to show when new services are found
-   and added. And uninstalling a service will also remove the service
-   from the MySQL Notifier for Microsoft Windows.
+   The MySQL Notifier for Microsoft Windows automatically adds
+   discovered MySQL Services on the local machine, and each service
+   is saved and configurable. By default, the Automatically add new
+   services that match this pattern option is enabled and set to
+   .*mysqld.*. Related Notifications Options include being notified
+   when new services are either discovered or experience status
+   changes, and are also enabled by default. And uninstalling a
+   service will also remove the service from the MySQL Notifier for
+   Microsoft Windows.
 
-   Clicking the system tray icon will reveal several options,
-   including several that are described above. The following
-   screenshots demonstrate the menu options.
+   Clicking the system tray icon will reveal several options, as seen
+   in the screenshots below:
 
-   The Service Instance menu is the main use of MySQL Notifier for
-   Microsoft Windows, as it allows the Stop, Start, and Restart
-   options for a server instance.
+   The Service Instance menu is the main MySQL Notifier for Microsoft
+   Windows window, and allows you to Stop, Start, and Restart the
+   MySQL Server.
 
    Figure 2.15. MySQL Notifier for Microsoft Windows Service Instance
    menu
    MySQL Notifier for Microsoft Windows Service Instance menu
 
-   The Actions menu offers additional actions, which includes several
-   links to external applications (if they are installed).
+   The Actions menu actions include several links to external
+   applications (if they are installed).
    Note
 
-   The main menu will only show the Actions menu when there are no
-   services being monitored by the MySQL Notifier for Microsoft
-   Windows.
+   The main menu will not show the Actions menu when there are no
+   services being monitored by MySQL Notifier for Microsoft Windows.
 
    Figure 2.16. MySQL Notifier for Microsoft Windows Actions menu
    MySQL Notifier for Microsoft Windows Actions menu
 
    The Actions, Options menu configures MySQL Notifier for Microsoft
-   Windows and are described as:
+   Windows and includes options to:
 
      * Use colorful status icons: Enables a colorful style of icons
        for the tray of the MySQL Notifier for Microsoft Windows.
@@ -1743,32 +1755,29 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysqladmin" -u root
        and also filters the list of the Microsoft Windows services
        for the Add New Service dialog.
 
-     * Notify me when a service is automatically added: Will enable a
-       balloon notification when a new service that matches the
-       criteria has been added to the monitored services list.
+     * Notify me when a service is automatically added: Will display
+       a notification from the taskbar when a newly discovered
+       service is added to the monitored services list.
 
-     * Notify me when a service changes status: Will enable a balloon
-       notification when one of the monitored services experiences a
-       status change.
+     * Notify me when a service changes status: Will display a
+       notification from the taskbar when a monitored service changes
+       its status.
 
    Figure 2.17. MySQL Notifier for Microsoft Windows Options menu
    MySQL Notifier for Microsoft Windows Options menu
 
-   The Actions, Manage Services menu allows manual editing
-   (Add/Delete) of the services (MySQL Server instances) that are
-   being monitored by MySQL Notifier for Microsoft Windows.
+   The Actions, Manage Services menu allows you to configure the
+   monitored services.
 
    Figure 2.18. MySQL Notifier for Microsoft Windows Service Instance
    menu
    MySQL Notifier for Microsoft Windows Manage Services menu
 
-   Adding a service (after clicking Add within the Manage Services
-   window) allows you to select from one of the existing services on
-   the Windows machine, and add it to the list of MySQL monitored
-   services for use within MySQL Notifier for Microsoft Windows. Add
-   a new service by clicking on a service name from the list, and
-   then click OK to accept. It is possible to select multiple
-   services before pressing OK.
+   Adding a service (after clicking Add in the Manage Services
+   window) allows you to select a running Microsoft Windows service,
+   and configure MySQL Notifier for Microsoft Windows to monitor it.
+   Add a new service by clicking service name from the list, then OK
+   to accept. Multiple services may be selected.
 
    Figure 2.19. MySQL Notifier for Microsoft Windows Adding a new
    services
@@ -2788,6 +2797,24 @@ Additional Resources
    MySQL-client packages to get a functional MySQL installation. The
    other packages are not required for a standard installation.
 
+   As of MySQL 5.6.8, new RPM install operations (not upgrades)
+   invoke mysql_install_db with the --random-passwords option that
+   provides for more secure MySQL installation. Invoking
+   mysql_install_db with --random-passwords causes it to assign a
+   random password to the MySQL root accounts, set the "password
+   expired" flag for those accounts, and remove the anonymous-user
+   MySQL accounts. It will be necessary after installation to start
+   the server, connect as root using the password written to the
+   $HOME/.mysql.secret file, and assign a new root password. Until
+   this is done, root cannot do anything else. This must be done for
+   each root account you intend to use. To change the password, you
+   can use the SET PASSWORD statement (for example, with the mysql
+   client). You can also use mysqladmin or mysql_secure_installation.
+   For additional details, see Section 4.4.3, "mysql_install_db ---
+   Initialize MySQL Data Directory." (Install operations using RPMs
+   for Unbreakable Linux Network are unaffected because they do not
+   use mysql_install_db.)
+
    RPMs for MySQL Cluster.  Standard MySQL server RPMs built by MySQL
    do not provide support for the NDBCLUSTER
    (http://dev.mysql.com/doc/refman/5.5/en/mysql-cluster.html)
@@ -3316,15 +3343,15 @@ Error in accept: Protocol error
    To use this package, download the corresponding
    mysql-VERSION-solaris10-PLATFORM.pkg.gz file, then decompress it.
    For example:
-shell> gunzip mysql-5.6.9-solaris10-x86_64.pkg.gz
+shell> gunzip mysql-5.6.10-solaris10-x86_64.pkg.gz
 
    To install a new package, use pkgadd and follow the onscreen
    prompts. You must have root privileges to perform this operation:
-shell> pkgadd -d mysql-5.6.9-solaris10-x86_64.pkg
+shell> pkgadd -d mysql-5.6.10-solaris10-x86_64.pkg
 
 The following packages are available:
   1  mysql     MySQL Community Server (GPL)
-               (i86pc) 5.6.9
+               (i86pc) 5.6.10
 
 Select package(s) you wish to process (or 'all' to process
 all packages). (default: all) [?,??,q]:
@@ -3361,9 +3388,9 @@ shell> ln /etc/init.d/mysql /etc/rc0.d/K02mysql
    The typical upgrade sequence is therefore:
 shell> mysqladmin shutdown
 shell> pkgrm mysql
-shell> pkgadd -d mysql-5.6.9-solaris10-x86_64.pkg
-shell> mysql_upgrade
+shell> pkgadd -d mysql-5.6.10-solaris10-x86_64.pkg
 shell> mysqld_safe &
+shell> mysql_upgrade
 
    You should check the notes in Section 2.11, "Upgrading or
    Downgrading MySQL" before performing any upgrade.
@@ -3599,7 +3626,7 @@ Source Installation Methods
        Standard distributions are available as compressed tar files,
        Zip archives, or RPM packages. Distribution files have names
        of the form mysql-VERSION.tar.gz, mysql-VERSION.zip, or
-       mysql-VERSION.rpm, where VERSION is a number like 5.6.9. File
+       mysql-VERSION.rpm, where VERSION is a number like 5.6.10. File
        names for source distributions can be distinguished from those
        for precompiled binary distributions in that source
        distribution names are generic and include no platform name,
@@ -4774,6 +4801,15 @@ shell> scripts/mysql_install_db --user=mysql \
        test or starting with test_. See Section 6.2, "The MySQL
        Access Privilege System," for a complete listing and
        description of the grant tables.
+       For a more secure installation, invoke mysql_install_db with
+       the --random-passwords option. This causes it to assign a
+       random password to the MySQL root accounts, set the "password
+       expired" flag for those accounts, and remove the
+       anonymous-user MySQL accounts. For additional details, see
+       Section 4.4.3, "mysql_install_db --- Initialize MySQL Data
+       Directory." (Install operations using RPMs for Unbreakable
+       Linux Network are unaffected because they do not use
+       mysql_install_db.)
        It is important to make sure that the database directories and
        files are owned by the mysql login account so that the server
        has read and write access to them when you run it later. To
@@ -4856,10 +4892,10 @@ shell> bin/mysqladmin variables
        on your platform and version of MySQL, but should be similar
        to that shown here:
 shell> bin/mysqladmin version
-mysqladmin  Ver 14.12 Distrib 5.6.9, for pc-linux-gnu on i686
+mysqladmin  Ver 14.12 Distrib 5.6.10, for pc-linux-gnu on i686
 ...
 
-Server version          5.6.9
+Server version          5.6.10
 Protocol version        10
 Connection              Localhost via UNIX socket
 UNIX socket             /var/lib/mysql/mysql.sock
@@ -5672,7 +5708,7 @@ mysql> DROP DATABASE test;
    mysql_secure_installation, a command-line utility that automates
    much of the process of securing a MySQL installation. And MySQL
    Workbench is available on all platforms, and also offers the
-   ability to manage user accounts (see Chapter 25, "MySQL Workbench"
+   ability to manage user accounts (see Chapter 24, "MySQL Workbench"
    ).
 
 2.11. Upgrading or Downgrading MySQL
@@ -5719,9 +5755,9 @@ mysql> DROP DATABASE test;
        attention before upgrading. Others require some action after
        upgrading.
 
-     * Read Appendix D, "MySQL Change History" as well, which
-       provides information about features that are new in MySQL 5.6
-       or differ from those found in earlier MySQL releases.
+     * Read Appendix D, "MySQL Release Notes" as well, which provides
+       information about features that are new in MySQL 5.6 or differ
+       from those found in earlier MySQL releases.
 
      * After upgrading to a new version of MySQL, run mysql_upgrade
        (see Section 4.4.7, "mysql_upgrade --- Check and Upgrade MySQL
@@ -5855,7 +5891,7 @@ mysql> DROP DATABASE test;
             features you can use in 5.6 or that differ from those
             found in earlier MySQL releases. Some of these changes
             may result in incompatibilities. See Appendix D, "MySQL
-            Change History."
+            Release Notes."
        Note particularly any changes that are marked Known issue or
        Incompatible change. These incompatibilities with earlier
        versions of MySQL may require your attention before you
@@ -6134,7 +6170,7 @@ documentation for more details).
 
      * To see which new features were added between the version to
        which you are downgrading and your current version, see the
-       change logs (Appendix D, "MySQL Change History").
+       change logs (Appendix D, "MySQL Release Notes").
 
      * Check Section 2.11.3, "Checking Whether Tables or Indexes Must
        Be Rebuilt," to see whether changes to table formats or to
@@ -6564,6 +6600,8 @@ shell> mysqlimport db_name DUMPDIR/*.txt   # load data into tables
    --defaults-group-suffix).
    MYSQL_HISTFILE The path to the mysql history file. If this
    variable is set, its value overrides the default for
+   $HOME/.mysql_history.
+   MYSQL_HISTIGNORE Patterns specifying statements not to log to
    $HOME/.mysql_history.
    MYSQL_HOME The path to the directory in which the server-specific
    my.cnf file resides.

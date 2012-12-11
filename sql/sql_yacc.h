@@ -1287,7 +1287,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 929 "/export/home/pb2/build/sb_0-7228703-1350303276.93/mysql-5.6.8-rc-release-export-4215161/sql/sql_yacc.yy"
+#line 965 "/export/home/pb2/build/sb_0-7655474-1353594618.35/mysql-5.6.9-rc-release-export-4434298_gpl/sql/sql_yacc.yy"
 
   int  num;
   ulong ulong_num;
@@ -1343,11 +1343,12 @@ typedef union YYSTYPE
   Condition_information_item *cond_info_item;
   Condition_information_item::Name cond_info_item_name;
   List<Condition_information_item> *cond_info_list;
+  bool is_not_empty;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 1351 "/export/home/pb2/build/sb_0-7228703-1350303276.93/dist/sql/sql_yacc.h"
+#line 1352 "/export/home/pb2/build/sb_0-7655474-1353594618.35/dist_GPL/sql/sql_yacc.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

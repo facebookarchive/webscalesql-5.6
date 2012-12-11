@@ -1,13 +1,22 @@
 '\" t
 .\"     Title: \fBmysqlaccess\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 08/01/2012
+.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
+.\"      Date: 11/22/2012
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLACCESS\FR" "1" "08/01/2012" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLACCESS\FR" "1" "11/22/2012" "MySQL 5\&.6" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -30,9 +39,9 @@ mysqlaccess \- client for checking access privileges
 is a diagnostic tool that Yves Carlier has provided for the MySQL distribution\&. It checks the access privileges for a host name, user name, and database combination\&. Note that
 \fBmysqlaccess\fR
 checks access using only the
-user,
-db, and
-host
+user
+and
+db
 tables\&. It does not check table, column, or routine privileges specified in the
 tables_priv,
 columns_priv, or
@@ -408,7 +417,7 @@ script at approximately line 18\&. Search for a line that looks like this:
 .RS 4
 .\}
 .nf
-$MYSQL     = \'/usr/local/bin/mysql\';    # path to mysql executable
+$MYSQL     = \*(Aq/usr/local/bin/mysql\*(Aq;    # path to mysql executable
 .fi
 .if n \{\
 .RE

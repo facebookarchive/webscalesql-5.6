@@ -105,8 +105,6 @@ Chapter 2. Installing and Upgrading MySQL
        For information on the MySQL Preference Pane, see Section
        2.4.4, "Installing and Using the MySQL Preference Pane."
 
-     * IBM i5/OS
-
 2.1. General Installation Guidance
 
    The immediately following sections contain the information
@@ -428,9 +426,9 @@ Development Release
    especially take note of what our support customers want and try to
    help them in this regard.
 
-   No one is required to download a new release. The News section
-   helps you determine whether the new release has something you
-   really want. See Appendix D, "MySQL Release Notes."
+   No one is required to download a new release. The Release Notes
+   (http://dev.mysql.com/doc/relnotes/mysql/5.6/en/) help you
+   determine whether the new release has something you really want.
 
    We use the following policy when updating MySQL:
 
@@ -499,8 +497,8 @@ Development Release
 shell> md5sum package_name
 
    Example:
-shell> md5sum mysql-standard-5.6.10-linux-i686.tar.gz
-aaab65abbec64d5e907dcd41b8699945  mysql-standard-5.6.10-linux-i686.ta
+shell> md5sum mysql-standard-5.6.11-linux-i686.tar.gz
+aaab65abbec64d5e907dcd41b8699945  mysql-standard-5.6.11-linux-i686.ta
 r.gz
 
    You should verify that the resulting checksum (the string of
@@ -627,8 +625,8 @@ pg-signature.html
 
    Table 2.1. MySQL Package and Signature Files
        File Type                      File Name
-   Distribution file mysql-standard-5.6.10-linux-i686.tar.gz
-   Signature file    mysql-standard-5.6.10-linux-i686.tar.gz.asc
+   Distribution file mysql-standard-5.6.11-linux-i686.tar.gz
+   Signature file    mysql-standard-5.6.11-linux-i686.tar.gz.asc
 
    Make sure that both files are stored in the same directory and
    then run the following command to verify the signature for the
@@ -636,7 +634,7 @@ pg-signature.html
 shell> gpg --verify package_name.asc
 
    Example:
-shell> gpg --verify mysql-standard-5.6.10-linux-i686.tar.gz.asc
+shell> gpg --verify mysql-standard-5.6.11-linux-i686.tar.gz.asc
 gpg: Signature made Tue 01 Feb 2011 02:38:30 AM CST using DSA key ID
 5072E1F5
 gpg: Good signature from "MySQL Release Engineering <mysql-build@oss.
@@ -656,8 +654,8 @@ oracle.com>"
 shell> rpm --checksig package_name.rpm
 
    Example:
-shell> rpm --checksig MySQL-server-5.6.10-0.glibc23.i386.rpm
-MySQL-server-5.6.10-0.glibc23.i386.rpm: md5 gpg OK
+shell> rpm --checksig MySQL-server-5.6.11-0.glibc23.i386.rpm
+MySQL-server-5.6.11-0.glibc23.i386.rpm: md5 gpg OK
 
    Note
 
@@ -732,7 +730,7 @@ shell> rpm --import mysql_pubkey.asc
 
    MySQL compressed tar file binary distributions have names of the
    form mysql-VERSION-OS.tar.gz, where VERSION is a number (for
-   example, 5.6.10), and OS indicates the type of operating system
+   example, 5.6.11), and OS indicates the type of operating system
    for which the distribution is intended (for example, pc-linux-i686
    or winx64).
 
@@ -1028,7 +1026,7 @@ Perform Postinstallation Setup
    named data under the installation directory. After an installation
    has been performed using this package, the template data directory
    can be copied to set up additional MySQL instances. See Section
-   5.3, "Running Multiple MySQL Instances on One Machine."
+   5.6, "Running Multiple MySQL Instances on One Machine."
 
 2.3.2. Choosing An Installation Package
 
@@ -1036,19 +1034,19 @@ Perform Postinstallation Setup
    from when installing MySQL on Windows:
 
      * MySQL Installer: This package has a file name similar to
-       mysql-installer-community-5.6.10-rc.0.msi and is recommended
+       mysql-installer-community-5.6.11-rc.0.msi and is recommended
        for most users. It is used to both install and upgrade the
        MySQL Server, along with other MySQL products such as the
        MySQL Notifier for Microsoft Windows.
 
      * The Noinstall Archive: This package has a file name similar to
-       mysql-5.6.10-win32.zip and contains all the files found in the
+       mysql-5.6.11-win32.zip and contains all the files found in the
        Complete install package, with the exception of the GUI. This
        package does not include an automated installer, and must be
        manually installed and configured.
 
      * The source code: This package has a file name similar to
-       mysql-5.6.10.zip and contains the source code for compiling
+       mysql-5.6.11.zip and contains the source code for compiling
        the MySQL Server on Windows.
 
    Your choice of install package affects the installation process
@@ -1073,9 +1071,9 @@ Perform Postinstallation Setup
    Download MySQL Installer at
    http://dev.mysql.com/downloads/installer/
 
-   The MySQL Installer Change History (Changelog) is located along
-   with the main Changelog for MySQL. See Section D.9, "MySQL
-   Installer Change History."
+   For release notes detailing the changes in each release of MySQL
+   Installer, see MySQL Installer Release Notes
+   (http://dev.mysql.com/doc/relnotes/mysql-installer/en/).
 
    MySQL Installer is compatible with pre-existing installations, and
    adds them to its list of installed components. And while the MySQL
@@ -1587,7 +1585,7 @@ InnoDB: foreign key constraint system tables created
    something like this, which indicates that the server is ready to
    service client connections:
 mysqld: ready for connections
-Version: '5.6.10'  socket: ''  port: 3306
+Version: '5.6.11'  socket: ''  port: 3306
 
    The server continues to write to the console any further
    diagnostic output it produces. You can open a new console window
@@ -1675,6 +1673,10 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysqladmin" -u root
    Notifier for Microsoft Windows product is selected, then proceed
    with the installation. See the MySQL Installer manual for
    additional details.
+
+   For release notes detailing the changes in each release of MySQL
+   Notifier for Microsoft Windows, see MySQL Notifier Release Notes
+   (http://dev.mysql.com/doc/relnotes/mysql-notifier/en/).
 
    Visit the MySQL Notifier forum
    (http://forums.mysql.com/list.php?173) for additional MySQL
@@ -3343,15 +3345,15 @@ Error in accept: Protocol error
    To use this package, download the corresponding
    mysql-VERSION-solaris10-PLATFORM.pkg.gz file, then decompress it.
    For example:
-shell> gunzip mysql-5.6.10-solaris10-x86_64.pkg.gz
+shell> gunzip mysql-5.6.11-solaris10-x86_64.pkg.gz
 
    To install a new package, use pkgadd and follow the onscreen
    prompts. You must have root privileges to perform this operation:
-shell> pkgadd -d mysql-5.6.10-solaris10-x86_64.pkg
+shell> pkgadd -d mysql-5.6.11-solaris10-x86_64.pkg
 
 The following packages are available:
   1  mysql     MySQL Community Server (GPL)
-               (i86pc) 5.6.10
+               (i86pc) 5.6.11
 
 Select package(s) you wish to process (or 'all' to process
 all packages). (default: all) [?,??,q]:
@@ -3388,7 +3390,7 @@ shell> ln /etc/init.d/mysql /etc/rc0.d/K02mysql
    The typical upgrade sequence is therefore:
 shell> mysqladmin shutdown
 shell> pkgrm mysql
-shell> pkgadd -d mysql-5.6.10-solaris10-x86_64.pkg
+shell> pkgadd -d mysql-5.6.11-solaris10-x86_64.pkg
 shell> mysqld_safe &
 shell> mysql_upgrade
 
@@ -3626,7 +3628,7 @@ Source Installation Methods
        Standard distributions are available as compressed tar files,
        Zip archives, or RPM packages. Distribution files have names
        of the form mysql-VERSION.tar.gz, mysql-VERSION.zip, or
-       mysql-VERSION.rpm, where VERSION is a number like 5.6.10. File
+       mysql-VERSION.rpm, where VERSION is a number like 5.6.11. File
        names for source distributions can be distinguished from those
        for precompiled binary distributions in that source
        distribution names are generic and include no platform name,
@@ -4094,7 +4096,7 @@ shell> bzr log
    MYSQL_UNIX_ADDR options different from those used by your
    production server. For additional information about preventing
    multiple servers from interfering with each other, see Section
-   5.3, "Running Multiple MySQL Instances on One Machine."
+   5.6, "Running Multiple MySQL Instances on One Machine."
 
    Play hard with your new installation. For example, try to make new
    features crash. Start by running make test. See Section 22.1.2,
@@ -4419,7 +4421,7 @@ Feature Options
 
      * -DENABLE_DTRACE=bool
        Whether to include support for DTrace probes. For information
-       about DTrace, wee Section 5.4, "Tracing mysqld Using DTrace"
+       about DTrace, wee Section 5.7, "Tracing mysqld Using DTrace"
 
      * -DENABLE_GCOV=bool
        Whether to include gcov support (Linux only).
@@ -4892,10 +4894,10 @@ shell> bin/mysqladmin variables
        on your platform and version of MySQL, but should be similar
        to that shown here:
 shell> bin/mysqladmin version
-mysqladmin  Ver 14.12 Distrib 5.6.10, for pc-linux-gnu on i686
+mysqladmin  Ver 14.12 Distrib 5.6.11, for pc-linux-gnu on i686
 ...
 
-Server version          5.6.10
+Server version          5.6.11
 Protocol version        10
 Connection              Localhost via UNIX socket
 UNIX socket             /var/lib/mysql/mysql.sock
@@ -5076,7 +5078,7 @@ Can't start server: Bind on TCP/IP port:
 Address already in use
 Can't start server: Bind on unix socket...
        For instructions on setting up multiple servers, see Section
-       5.3, "Running Multiple MySQL Instances on One Machine."
+       5.6, "Running Multiple MySQL Instances on One Machine."
 
      * You do not have write access to the /tmp directory
        If you do not have write access to create temporary files or a
@@ -5343,7 +5345,7 @@ shell> tail host_name.log
        be sure that you have them configured the way you want before
        starting the server. If you are using InnoDB tables, see
        Section 14.2.1.2, "Configuring InnoDB" for guidelines and
-       Section 14.2.7, "InnoDB Startup Options and System Variables"
+       Section 14.2.6, "InnoDB Startup Options and System Variables"
        for option syntax.
        Although storage engines use default values for options that
        you omit, Oracle recommends that you review the available
@@ -5423,7 +5425,7 @@ Can't start server: Bind on unix socket...
        running. If so, shut down the server before starting mysqld
        again. (If another server is running, and you really want to
        run multiple servers, you can find information about how to do
-       so in Section 5.3, "Running Multiple MySQL Instances on One
+       so in Section 5.6, "Running Multiple MySQL Instances on One
        Machine.")
        If no other server is running, execute the command telnet
        your_host_name tcp_ip_port_number. (The default MySQL port
@@ -5755,9 +5757,10 @@ mysql> DROP DATABASE test;
        attention before upgrading. Others require some action after
        upgrading.
 
-     * Read Appendix D, "MySQL Release Notes" as well, which provides
-       information about features that are new in MySQL 5.6 or differ
-       from those found in earlier MySQL releases.
+     * Read the Release Notes
+       (http://dev.mysql.com/doc/relnotes/mysql/5.6/en/) as well,
+       which provide information about features that are new in MySQL
+       5.6 or differ from from those found in earlier MySQL releases.
 
      * After upgrading to a new version of MySQL, run mysql_upgrade
        (see Section 4.4.7, "mysql_upgrade --- Check and Upgrade MySQL
@@ -5887,11 +5890,11 @@ mysql> DROP DATABASE test;
             before upgrading. Others should be dealt with after
             upgrading.
 
-          + The MySQL 5.6 change history describes significant new
-            features you can use in 5.6 or that differ from those
-            found in earlier MySQL releases. Some of these changes
-            may result in incompatibilities. See Appendix D, "MySQL
-            Release Notes."
+          + The MySQL 5.6 Release Notes
+            (http://dev.mysql.com/doc/relnotes/mysql/5.6/en/)
+            describe significant new features you can use in 5.6 or
+            that differ from those found in earlier MySQL releases.
+            Some of these changes may result in incompatibilities.
        Note particularly any changes that are marked Known issue or
        Incompatible change. These incompatibilities with earlier
        versions of MySQL may require your attention before you
@@ -6170,7 +6173,8 @@ documentation for more details).
 
      * To see which new features were added between the version to
        which you are downgrading and your current version, see the
-       change logs (Appendix D, "MySQL Release Notes").
+       Release Notes
+       (http://dev.mysql.com/doc/relnotes/mysql/5.6/en/).
 
      * Check Section 2.11.3, "Checking Whether Tables or Indexes Must
        Be Rebuilt," to see whether changes to table formats or to
@@ -6300,7 +6304,7 @@ Index Incompatibilities
 
    In MySQL 5.6.3, the length limit for index prefix keys is
    increased from 767 bytes to 3072 bytes, for InnoDB tables using
-   ROW_FORMAT=DYNAMIC or ROW_FORMAT=COMPRESSED. See Section 14.2.8,
+   ROW_FORMAT=DYNAMIC or ROW_FORMAT=COMPRESSED. See Section 14.2.7,
    "Limits on InnoDB Tables" for details. This change is also
    backported to MySQL 5.5.14. If you downgrade from one of these
    releases or higher, to an earlier release with a lower length
@@ -6837,10 +6841,5 @@ $sysliblist .= " -lm -lz";
    After this, you must run make realclean and then proceed with the
    installation from the beginning.
 
-   Copyright (c) 1997, 2012, Oracle and/or its affiliates. All rights
-   reserved. [1]Legal Notices
-
-References
-
-
-   1. file://localhost/data0/users/mysqldoc/docs-build/mysqldoc/refman-5.6/installing-nolink.html#legalnotice
+   Copyright (c) 1997, 2013, Oracle and/or its affiliates. All rights
+   reserved. Legal Notices

@@ -2,12 +2,12 @@
 .\"     Title: \fBmyisamchk\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 11/22/2012
+.\"      Date: 01/22/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYISAMCHK\FR" "1" "11/22/2012" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYISAMCHK\FR" "1" "01/22/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -179,7 +179,7 @@ tables and repair any that are corrupted, you can use the following command:
 .\}
 .nf
 shell> \fBmyisamchk \-\-silent \-\-force \-\-fast \-\-update\-state \e\fR
-          \fB\-\-key_buffer_size=64M \-\-sort_buffer_size=64M \e\fR
+          \fB\-\-key_buffer_size=64M \-\-myisam_sort_buffer_size=64M \e\fR
           \fB\-\-read_buffer_size=1M \-\-write_buffer_size=1M \e\fR
           \fB\fI/path/to/datadir/*/*\fR\fR\fB\&.MYI\fR
 .fi
@@ -401,6 +401,7 @@ syntax:
 .\" myisam_block_size myisamchk variable
 .\" read_buffer_size myisamchk variable
 .\" sort_buffer_size myisamchk variable
+.\" myisam_sort_buffer_size myisamchk variable
 .\" sort_key_blocks myisamchk variable
 .\" stats_method myisamchk variable
 .\" write_buffer_size myisamchk variable
@@ -413,6 +414,7 @@ T}:T{
 Default Value
 T}
 .T&
+l l
 l l
 l l
 l l
@@ -455,6 +457,11 @@ T}:T{
 1024
 T}
 T{
+myisam_sort_key_blocks
+T}:T{
+16
+T}
+T{
 read_buffer_size
 T}:T{
 262136
@@ -489,7 +496,18 @@ variables and their default values can be examined with
 .PP
 sort_buffer_size
 is used when the keys are repaired by sorting keys, which is the normal case when you use
-\fB\-\-recover\fR\&.
+\fB\-\-recover\fR\&. As of MySQL 5\&.6\&.9,
+myisam_sort_buffer_size
+is available as an alternative name to
+sort_buffer_size\&.
+myisam_sort_buffer_size
+is preferable to
+sort_buffer_size
+because its name corresponds to the
+myisam_sort_buffer_size
+server system variable that has a similar meaning\&.
+sort_buffer_size
+should be considered deprecated\&.
 .PP
 key_buffer_size
 is used when you are checking the table with
@@ -532,7 +550,7 @@ Repairing through the key buffer takes much less disk space than using sorting, 
 If you want a faster repair, set the
 key_buffer_size
 and
-sort_buffer_size
+myisam_sort_buffer_size
 variables to about 25% of your available memory\&. You can set both variables to large values, because only one of them is used at a time\&.
 .PP
 myisam_block_size
@@ -1034,7 +1052,7 @@ reports that the table cannot be recovered using
 fails, the data file remains intact\&.)
 .sp
 If you have lots of memory, you should increase the value of
-sort_buffer_size\&.
+myisam_sort_buffer_size\&.
 .RE
 .sp
 .RS 4
@@ -2362,7 +2380,7 @@ to operate faster\&. For example, if you have more than 512MB RAM available, you
 .RS 4
 .\}
 .nf
-shell> \fBmyisamchk \-\-sort_buffer_size=256M \e\fR
+shell> \fBmyisamchk \-\-myisam_sort_buffer_size=256M \e\fR
            \fB\-\-key_buffer_size=512M \e\fR
            \fB\-\-read_buffer_size=64M \e\fR
            \fB\-\-write_buffer_size=64M \&.\&.\&.\fR
@@ -2372,7 +2390,7 @@ shell> \fBmyisamchk \-\-sort_buffer_size=256M \e\fR
 .\}
 .PP
 Using
-\fB\-\-sort_buffer_size=16M\fR
+\fB\-\-myisam_sort_buffer_size=16M\fR
 is probably enough for most cases\&.
 .PP
 Be aware that
@@ -2473,7 +2491,7 @@ instead of
 .SH "COPYRIGHT"
 .br
 .PP
-Copyright \(co 1997, 2012, Oracle and/or its affiliates. All rights reserved.
+Copyright \(co 1997, 2013, Oracle and/or its affiliates. All rights reserved.
 .PP
 This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
 .PP

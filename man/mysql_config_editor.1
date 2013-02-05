@@ -2,12 +2,12 @@
 .\"     Title: \fBmysql_config_editor\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 11/22/2012
+.\"      Date: 01/22/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQL_CONFIG_EDIT" "1" "11/22/2012" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQL_CONFIG_EDIT" "1" "01/22/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -360,7 +360,20 @@ file\&.
 .sp
 The
 remove
-command takes this option:
+command takes these options:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-host\fR
+.sp
+Remove the host name from the login path\&.
+.RE
 .sp
 .RS 4
 .ie n \{\
@@ -375,6 +388,62 @@ command takes this option:
 The login path to remove\&. If this option is not given, the default path name is
 client\&.
 .RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-password\fR
+.sp
+Remove the password from the login path\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-user\fR
+.sp
+Remove the user name from the login path\&.
+.RE
+.sp
+The
+\fB\-\-host\fR,
+\fB\-\-user\fR, and
+\fB\-\-password\fR
+options are supported for the
+remove
+command as of MySQL 5\&.6\&.9\&. If any of these options are given, the
+remove
+command removes only the requested values from the login path\&. If none of them is given,
+remove
+removes the entire
+client
+login path\&. For example, this command removes only the
+\fBuser\fR
+value from the
+client
+login path rather than the entire
+client
+login path:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysql_config_editor remove \-\-login\-path=client \-\-user
+.fi
+.if n \{\
+.RE
+.\}
 .RE
 .sp
 .RS 4
@@ -708,7 +777,7 @@ to disable it\&.
 .SH "COPYRIGHT"
 .br
 .PP
-Copyright \(co 1997, 2012, Oracle and/or its affiliates. All rights reserved.
+Copyright \(co 1997, 2013, Oracle and/or its affiliates. All rights reserved.
 .PP
 This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
 .PP

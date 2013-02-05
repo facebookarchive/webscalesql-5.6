@@ -385,10 +385,5 @@ Additional Resources
        Alternatively, you can ignore the bundled MySQL server and
        install MySQL from the package or tarball installation.
 
-   Copyright (c) 1997, 2012, Oracle and/or its affiliates. All rights
-   reserved. [1]Legal Notices
-
-References
-
-
-   1. file://localhost/data0/users/mysqldoc/docs-build/mysqldoc/refman-5.6/macosx-installation-nolink.html#legalnotice
+   Copyright (c) 1997, 2013, Oracle and/or its affiliates. All rights
+   reserved. Legal Notices

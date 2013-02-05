@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqldump\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 11/22/2012
+.\"      Date: 01/22/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLDUMP\FR" "1" "11/22/2012" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLDUMP\FR" "1" "01/22/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -86,7 +86,7 @@ InnoDB
 backups with minimal disruption; it can also back up tables from
 MyISAM
 and other storage engines; and it provides a number of convenient options to accommodate different backup scenarios\&. See
-\m[blue]\fBMySQL Enterprise Backup User\*(Aqs Guide (Version 3\&.6\&.1)\fR\m[]\&\s-2\u[1]\d\s+2\&.
+\m[blue]\fBMySQL Enterprise Backup User\*(Aqs Guide (Version 3\&.8)\fR\m[]\&\s-2\u[1]\d\s+2\&.
 .RE
 .sp
 .RS 4
@@ -1221,6 +1221,58 @@ to point the slave to the correct master server host\&. Add any such parameters 
 .sp
 Prior to MySQL 5\&.6\&.4, this option was required for dumping the replication log tables (see
 Section\ \&16.2.2, \(lqReplication Relay and Status Logs\(rq)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysqldump: set-gtid-purged option
+.\" set-gtid-purged option: mysqldump
+\fB\-\-set\-gtid\-purged=\fR\fB\fIvalue\fR\fR
+.sp
+This option enables control over global transaction ID (GTID) information written to the dump file by indicating whether to add a
+SET @@GLOBAL\&.SET_GTID_PURGED
+statement to the output\&.
+.sp
+The following table shows the permitted option values\&. The default value is
+AUTO\&.
+.TS
+allbox tab(:);
+lB lB.
+T{
+Value
+T}:T{
+Meaning
+T}
+.T&
+l l
+l l
+l l.
+T{
+OFF
+T}:T{
+Add no SET statement to the output\&.
+T}
+T{
+ON
+T}:T{
+Add a SET statement to the output\&. An error occurs if
+                    GTIDs are not enabled on the server\&.
+T}
+T{
+AUTO
+T}:T{
+Add a SET statement to the output if GTIDs are
+                    enabled on the server\&.
+T}
+.TE
+.sp 1
+This option was added in MySQL 5\&.6\&.9\&.
 .RE
         Format Options
 .PP
@@ -2475,7 +2527,7 @@ for a workaround\&.
 .SH "COPYRIGHT"
 .br
 .PP
-Copyright \(co 1997, 2012, Oracle and/or its affiliates. All rights reserved.
+Copyright \(co 1997, 2013, Oracle and/or its affiliates. All rights reserved.
 .PP
 This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
 .PP
@@ -2485,9 +2537,9 @@ You should have received a copy of the GNU General Public License along with the
 .sp
 .SH "NOTES"
 .IP " 1." 4
-MySQL Enterprise Backup User's Guide (Version 3.6.1)
+MySQL Enterprise Backup User's Guide (Version 3.8)
 .RS 4
-\%http://dev.mysql.com/doc/mysql-enterprise-backup/3.6/en/index.html
+\%http://dev.mysql.com/doc/mysql-enterprise-backup/3.8/en/index.html
 .RE
 .SH "SEE ALSO"
 For more information, please refer to the MySQL Reference Manual,

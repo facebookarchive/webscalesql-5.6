@@ -17,7 +17,7 @@
 
    MySQL compressed tar file binary distributions have names of the
    form mysql-VERSION-OS.tar.gz, where VERSION is a number (for
-   example, 5.6.10), and OS indicates the type of operating system
+   example, 5.6.11), and OS indicates the type of operating system
    for which the distribution is intended (for example, pc-linux-i686
    or winx64).
 
@@ -170,10 +170,5 @@ Perform Postinstallation Setup
    passwords for them using the instructions in Section 2.10,
    "Postinstallation Setup and Testing."
 
-   Copyright (c) 1997, 2012, Oracle and/or its affiliates. All rights
-   reserved. [1]Legal Notices
-
-References
-
-
-   1. file://localhost/data0/users/mysqldoc/docs-build/mysqldoc/refman-5.6/binary-installation-nolink.html#legalnotice
+   Copyright (c) 1997, 2013, Oracle and/or its affiliates. All rights
+   reserved. Legal Notices

@@ -1,7 +1,7 @@
-revision-id: bjorn.munch@oracle.com-20121122141233-yg29y0hidnetlygq
-date: 2012-11-22 15:12:33 +0100
-build-date: 2012-11-22 15:28:06 +0100
-revno: 4579
-branch-nick: mysql-5.6.9-rc-release
+revision-id: marc.alff@oracle.com-20130122163423-rhqem20gdpde41rf
+date: 2013-01-22 17:34:23 +0100
+build-date: 2013-01-22 17:45:07 +0100
+revno: 4805
+branch-nick: mysql-5.6.10-release
 
-MySQL source 5.6.9
+MySQL source 5.6.10

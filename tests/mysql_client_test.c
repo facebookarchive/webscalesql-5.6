@@ -19104,8 +19104,10 @@ static void test_wl5924()
 {
   int rc;
   MYSQL *l_mysql;
+#ifdef WITH_PERFSCHEMA_STORAGE_ENGINE
   MYSQL_RES *res;
   MYSQL_ROW row;
+#endif /* WITH_PERFSCHEMA_STORAGE_ENGINE */
 
   myheader("test_wl5924");
   l_mysql= mysql_client_init(NULL);
@@ -19175,6 +19177,7 @@ static void test_wl5924()
                          opt_unix_socket, 0);
   DIE_UNLESS(l_mysql != 0);
 
+#ifdef WITH_PERFSCHEMA_STORAGE_ENGINE
   rc= mysql_query(l_mysql,
                   "SELECT ATTR_NAME, ATTR_VALUE "
                   " FROM performance_schema.session_account_connect_attrs"
@@ -19201,6 +19204,7 @@ static void test_wl5924()
   DIE_UNLESS(0 == strcmp(row[1], "\xca\xee\xe4\xe8\xed\xee\xe2"));
 
   mysql_free_result(res);
+#endif /* WITH_PERFSCHEMA_STORAGE_ENGINE */
 
   l_mysql->reconnect= 1;
   rc= mysql_reconnect(l_mysql);

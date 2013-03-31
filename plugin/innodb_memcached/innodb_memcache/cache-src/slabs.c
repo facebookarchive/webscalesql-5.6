@@ -326,15 +326,15 @@ static void do_slabs_stats(struct default_engine *engine, ADD_STAT add_stats, co
             add_statistics(cookie, add_stats, NULL, i, "mem_requested", "%zu",
                            p->requested);
 #ifdef FUTURE
-            add_statistics(cookie, add_stats, NULL, i, "get_hits", "%"PRIu64,
+            add_statistics(cookie, add_stats, NULL, i, "get_hits", "%" PRIu64,
                            thread_stats.slab_stats[i].get_hits);
-            add_statistics(cookie, add_stats, NULL, i, "cmd_set", "%"PRIu64,
+            add_statistics(cookie, add_stats, NULL, i, "cmd_set", "%" PRIu64,
                            thread_stats.slab_stats[i].set_cmds);
-            add_statistics(cookie, add_stats, NULL, i, "delete_hits", "%"PRIu64,
+            add_statistics(cookie, add_stats, NULL, i, "delete_hits", "%" PRIu64,
                            thread_stats.slab_stats[i].delete_hits);
-            add_statistics(cookie, add_stats, NULL, i, "cas_hits", "%"PRIu64,
+            add_statistics(cookie, add_stats, NULL, i, "cas_hits", "%" PRIu64,
                            thread_stats.slab_stats[i].cas_hits);
-            add_statistics(cookie, add_stats, NULL, i, "cas_badval", "%"PRIu64,
+            add_statistics(cookie, add_stats, NULL, i, "cas_badval", "%" PRIu64,
                            thread_stats.slab_stats[i].cas_badval);
 #endif
             total++;

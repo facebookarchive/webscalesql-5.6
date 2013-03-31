@@ -605,7 +605,7 @@ static ENGINE_ERROR_CODE do_store_item(struct default_engine *engine,
         } else {
             if (engine->config.verbose > 1) {
                 fprintf(stderr,
-                        "CAS:  failure: expected %"PRIu64", got %"PRIu64"\n",
+                        "CAS:  failure: expected %" PRIu64", got %" PRIu64"\n",
                         item_get_cas(old_it),
                         item_get_cas(it));
             }
@@ -823,7 +823,7 @@ static ENGINE_ERROR_CODE do_arithmetic(struct default_engine *engine,
          return ENGINE_KEY_ENOENT;
       } else {
          char buffer[128];
-         int len = snprintf(buffer, sizeof(buffer), "%"PRIu64"\r\n",
+         int len = snprintf(buffer, sizeof(buffer), "%" PRIu64"\r\n",
                             (uint64_t)initial);
 
          item = do_item_alloc(engine, key, nkey, 0, exptime, len, cookie);

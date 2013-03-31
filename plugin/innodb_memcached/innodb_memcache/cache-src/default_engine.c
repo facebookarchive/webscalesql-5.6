@@ -362,17 +362,17 @@ static ENGINE_ERROR_CODE default_get_stats(ENGINE_HANDLE* handle,
       int len;
 
       pthread_mutex_lock(&engine->stats.lock);
-      len = sprintf(val, "%"PRIu64, (uint64_t)engine->stats.evictions);
+      len = sprintf(val, "%" PRIu64, (uint64_t)engine->stats.evictions);
       add_stat("evictions", 9, val, len, cookie);
-      len = sprintf(val, "%"PRIu64, (uint64_t)engine->stats.curr_items);
+      len = sprintf(val, "%" PRIu64, (uint64_t)engine->stats.curr_items);
       add_stat("curr_items", 10, val, len, cookie);
-      len = sprintf(val, "%"PRIu64, (uint64_t)engine->stats.total_items);
+      len = sprintf(val, "%" PRIu64, (uint64_t)engine->stats.total_items);
       add_stat("total_items", 11, val, len, cookie);
-      len = sprintf(val, "%"PRIu64, (uint64_t)engine->stats.curr_bytes);
+      len = sprintf(val, "%" PRIu64, (uint64_t)engine->stats.curr_bytes);
       add_stat("bytes", 5, val, len, cookie);
-      len = sprintf(val, "%"PRIu64, engine->stats.reclaimed);
+      len = sprintf(val, "%" PRIu64, engine->stats.reclaimed);
       add_stat("reclaimed", 9, val, len, cookie);
-      len = sprintf(val, "%"PRIu64, (uint64_t)engine->config.maxbytes);
+      len = sprintf(val, "%" PRIu64, (uint64_t)engine->config.maxbytes);
       add_stat("engine_maxbytes", 15, val, len, cookie);
       pthread_mutex_unlock(&engine->stats.lock);
    } else if (strncmp(stat_key, "slabs", 5) == 0) {
@@ -397,13 +397,13 @@ static ENGINE_ERROR_CODE default_get_stats(ENGINE_HANDLE* handle,
       if (engine->scrubber.started != 0) {
          if (engine->scrubber.stopped != 0) {
             time_t diff = engine->scrubber.started - engine->scrubber.stopped;
-            len = sprintf(val, "%"PRIu64, (uint64_t)diff);
+            len = sprintf(val, "%" PRIu64, (uint64_t)diff);
             add_stat("scrubber:last_run", 17, val, len, cookie);
          }
 
-         len = sprintf(val, "%"PRIu64, engine->scrubber.visited);
+         len = sprintf(val, "%" PRIu64, engine->scrubber.visited);
          add_stat("scrubber:visited", 16, val, len, cookie);
-         len = sprintf(val, "%"PRIu64, engine->scrubber.cleaned);
+         len = sprintf(val, "%" PRIu64, engine->scrubber.cleaned);
          add_stat("scrubber:cleaned", 16, val, len, cookie);
       }
       pthread_mutex_unlock(&engine->scrubber.lock);

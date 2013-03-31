@@ -589,7 +589,7 @@ static ENGINE_ERROR_CODE do_store_item(struct default_engine *engine,
                 EXTENSION_LOGGER_DESCRIPTOR *logger;
                 logger = (void*)engine->server.extension->get_extension(EXTENSION_LOGGER);
                 logger->log(EXTENSION_LOG_INFO, NULL,
-                        "CAS:  failure: expected %"PRIu64", got %"PRIu64"\n",
+                        "CAS:  failure: expected %" PRIu64", got %" PRIu64"\n",
                         item_get_cas(old_it),
                         item_get_cas(it));
             }
@@ -809,7 +809,7 @@ static ENGINE_ERROR_CODE do_arithmetic(struct default_engine *engine,
          return ENGINE_KEY_ENOENT;
       } else {
          char buffer[128];
-         int len = snprintf(buffer, sizeof(buffer), "%"PRIu64,
+         int len = snprintf(buffer, sizeof(buffer), "%" PRIu64,
                             (uint64_t)initial);
 
          item = do_item_alloc(engine, key, nkey, 0, exptime, len, cookie);

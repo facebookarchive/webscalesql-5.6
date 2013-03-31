@@ -3737,27 +3737,27 @@ static void server_stats(ADD_STAT add_stats, conn *c, bool aggregate) {
     APPEND_STAT("curr_connections", "%u", stats.curr_conns);
     APPEND_STAT("total_connections", "%u", stats.total_conns);
     APPEND_STAT("connection_structures", "%u", stats.conn_structs);
-    APPEND_STAT("cmd_get", "%"PRIu64, thread_stats.cmd_get);
-    APPEND_STAT("cmd_set", "%"PRIu64, slab_stats.cmd_set);
-    APPEND_STAT("cmd_flush", "%"PRIu64, thread_stats.cmd_flush);
-    APPEND_STAT("auth_cmds", "%"PRIu64, thread_stats.auth_cmds);
-    APPEND_STAT("auth_errors", "%"PRIu64, thread_stats.auth_errors);
-    APPEND_STAT("get_hits", "%"PRIu64, slab_stats.get_hits);
-    APPEND_STAT("get_misses", "%"PRIu64, thread_stats.get_misses);
-    APPEND_STAT("delete_misses", "%"PRIu64, thread_stats.delete_misses);
-    APPEND_STAT("delete_hits", "%"PRIu64, slab_stats.delete_hits);
-    APPEND_STAT("incr_misses", "%"PRIu64, thread_stats.incr_misses);
-    APPEND_STAT("incr_hits", "%"PRIu64, thread_stats.incr_hits);
-    APPEND_STAT("decr_misses", "%"PRIu64, thread_stats.decr_misses);
-    APPEND_STAT("decr_hits", "%"PRIu64, thread_stats.decr_hits);
-    APPEND_STAT("cas_misses", "%"PRIu64, thread_stats.cas_misses);
-    APPEND_STAT("cas_hits", "%"PRIu64, slab_stats.cas_hits);
-    APPEND_STAT("cas_badval", "%"PRIu64, slab_stats.cas_badval);
-    APPEND_STAT("bytes_read", "%"PRIu64, thread_stats.bytes_read);
-    APPEND_STAT("bytes_written", "%"PRIu64, thread_stats.bytes_written);
-    APPEND_STAT("limit_maxbytes", "%"PRIu64, settings.maxbytes);
+    APPEND_STAT("cmd_get", "%" PRIu64, thread_stats.cmd_get);
+    APPEND_STAT("cmd_set", "%" PRIu64, slab_stats.cmd_set);
+    APPEND_STAT("cmd_flush", "%" PRIu64, thread_stats.cmd_flush);
+    APPEND_STAT("auth_cmds", "%" PRIu64, thread_stats.auth_cmds);
+    APPEND_STAT("auth_errors", "%" PRIu64, thread_stats.auth_errors);
+    APPEND_STAT("get_hits", "%" PRIu64, slab_stats.get_hits);
+    APPEND_STAT("get_misses", "%" PRIu64, thread_stats.get_misses);
+    APPEND_STAT("delete_misses", "%" PRIu64, thread_stats.delete_misses);
+    APPEND_STAT("delete_hits", "%" PRIu64, slab_stats.delete_hits);
+    APPEND_STAT("incr_misses", "%" PRIu64, thread_stats.incr_misses);
+    APPEND_STAT("incr_hits", "%" PRIu64, thread_stats.incr_hits);
+    APPEND_STAT("decr_misses", "%" PRIu64, thread_stats.decr_misses);
+    APPEND_STAT("decr_hits", "%" PRIu64, thread_stats.decr_hits);
+    APPEND_STAT("cas_misses", "%" PRIu64, thread_stats.cas_misses);
+    APPEND_STAT("cas_hits", "%" PRIu64, slab_stats.cas_hits);
+    APPEND_STAT("cas_badval", "%" PRIu64, slab_stats.cas_badval);
+    APPEND_STAT("bytes_read", "%" PRIu64, thread_stats.bytes_read);
+    APPEND_STAT("bytes_written", "%" PRIu64, thread_stats.bytes_written);
+    APPEND_STAT("limit_maxbytes", "%" PRIu64, settings.maxbytes);
     APPEND_STAT("accepting_conns", "%u",  is_listen_disabled() ? 0 : 1);
-    APPEND_STAT("listen_disabled_num", "%"PRIu64, get_listen_disabled_num());
+    APPEND_STAT("listen_disabled_num", "%" PRIu64, get_listen_disabled_num());
     APPEND_STAT("rejected_conns", "%" PRIu64, (unsigned long long)stats.rejected_conns);
     APPEND_STAT("threads", "%d", settings.num_threads);
     APPEND_STAT("conn_yields", "%" PRIu64, (unsigned long long)thread_stats.conn_yields);
@@ -3772,53 +3772,53 @@ static void server_stats(ADD_STAT add_stats, conn *c, bool aggregate) {
     pthread_mutex_unlock(&tap_stats.mutex);
 
     if (ts.sent.connect) {
-        APPEND_STAT("tap_connect_sent", "%"PRIu64, ts.sent.connect);
+        APPEND_STAT("tap_connect_sent", "%" PRIu64, ts.sent.connect);
     }
     if (ts.sent.mutation) {
-        APPEND_STAT("tap_mutation_sent", "%"PRIu64, ts.sent.mutation);
+        APPEND_STAT("tap_mutation_sent", "%" PRIu64, ts.sent.mutation);
     }
     if (ts.sent.checkpoint_start) {
-        APPEND_STAT("tap_checkpoint_start_sent", "%"PRIu64, ts.sent.checkpoint_start);
+        APPEND_STAT("tap_checkpoint_start_sent", "%" PRIu64, ts.sent.checkpoint_start);
     }
     if (ts.sent.checkpoint_end) {
-        APPEND_STAT("tap_checkpoint_end_sent", "%"PRIu64, ts.sent.checkpoint_end);
+        APPEND_STAT("tap_checkpoint_end_sent", "%" PRIu64, ts.sent.checkpoint_end);
     }
     if (ts.sent.delete) {
-        APPEND_STAT("tap_delete_sent", "%"PRIu64, ts.sent.delete);
+        APPEND_STAT("tap_delete_sent", "%" PRIu64, ts.sent.delete);
     }
     if (ts.sent.flush) {
-        APPEND_STAT("tap_flush_sent", "%"PRIu64, ts.sent.flush);
+        APPEND_STAT("tap_flush_sent", "%" PRIu64, ts.sent.flush);
     }
     if (ts.sent.opaque) {
-        APPEND_STAT("tap_opaque_sent", "%"PRIu64, ts.sent.opaque);
+        APPEND_STAT("tap_opaque_sent", "%" PRIu64, ts.sent.opaque);
     }
     if (ts.sent.vbucket_set) {
-        APPEND_STAT("tap_vbucket_set_sent", "%"PRIu64,
+        APPEND_STAT("tap_vbucket_set_sent", "%" PRIu64,
                     ts.sent.vbucket_set);
     }
     if (ts.received.connect) {
-        APPEND_STAT("tap_connect_received", "%"PRIu64, ts.received.connect);
+        APPEND_STAT("tap_connect_received", "%" PRIu64, ts.received.connect);
     }
     if (ts.received.mutation) {
-        APPEND_STAT("tap_mutation_received", "%"PRIu64, ts.received.mutation);
+        APPEND_STAT("tap_mutation_received", "%" PRIu64, ts.received.mutation);
     }
     if (ts.received.checkpoint_start) {
-        APPEND_STAT("tap_checkpoint_start_received", "%"PRIu64, ts.received.checkpoint_start);
+        APPEND_STAT("tap_checkpoint_start_received", "%" PRIu64, ts.received.checkpoint_start);
     }
     if (ts.received.checkpoint_end) {
-        APPEND_STAT("tap_checkpoint_end_received", "%"PRIu64, ts.received.checkpoint_end);
+        APPEND_STAT("tap_checkpoint_end_received", "%" PRIu64, ts.received.checkpoint_end);
     }
     if (ts.received.delete) {
-        APPEND_STAT("tap_delete_received", "%"PRIu64, ts.received.delete);
+        APPEND_STAT("tap_delete_received", "%" PRIu64, ts.received.delete);
     }
     if (ts.received.flush) {
-        APPEND_STAT("tap_flush_received", "%"PRIu64, ts.received.flush);
+        APPEND_STAT("tap_flush_received", "%" PRIu64, ts.received.flush);
     }
     if (ts.received.opaque) {
-        APPEND_STAT("tap_opaque_received", "%"PRIu64, ts.received.opaque);
+        APPEND_STAT("tap_opaque_received", "%" PRIu64, ts.received.opaque);
     }
     if (ts.received.vbucket_set) {
-        APPEND_STAT("tap_vbucket_set_received", "%"PRIu64,
+        APPEND_STAT("tap_vbucket_set_received", "%" PRIu64,
                     ts.received.vbucket_set);
     }
 }
@@ -4138,7 +4138,7 @@ static inline char* process_get_command(conn *c, token_t *tokens, size_t ntokens
                     settings.engine.v1->release(settings.engine.v0, c, it);
                     return NULL;
                   }
-                  int cas_len = snprintf(cas, SUFFIX_SIZE, " %"PRIu64"\r\n",
+                  int cas_len = snprintf(cas, SUFFIX_SIZE, " %" PRIu64"\r\n",
                                          info.cas);
                   if (add_iov(c, "VALUE ", 6) != 0 ||
                       add_iov(c, info.key, info.nkey) != 0 ||
@@ -4367,7 +4367,7 @@ static char* process_arithmetic_command(conn *c, token_t *tokens, const size_t n
         } else {
             STATS_INCR(c, decr_hits, key, nkey);
         }
-        snprintf(temp, sizeof(temp), "%"PRIu64, result);
+        snprintf(temp, sizeof(temp), "%" PRIu64, result);
         out_string(c, temp);
         break;
     case ENGINE_KEY_ENOENT:
@@ -6562,7 +6562,7 @@ static ENGINE_ERROR_CODE internal_arithmetic(ENGINE_HANDLE* handle,
             }
         }
 
-        size_t nb = snprintf(value, sizeof(value), "%"PRIu64, val);
+        size_t nb = snprintf(value, sizeof(value), "%" PRIu64, val);
         *result = val;
         item *nit = NULL;
         if (e->allocate(handle, cookie, &nit, key,
@@ -6585,7 +6585,7 @@ static ENGINE_ERROR_CODE internal_arithmetic(ENGINE_HANDLE* handle,
         e->release(handle, cookie, nit);
     } else if (ret == ENGINE_KEY_ENOENT && create) {
         char value[80];
-        size_t nb = snprintf(value, sizeof(value), "%"PRIu64"\r\n", initial);
+        size_t nb = snprintf(value, sizeof(value), "%" PRIu64"\r\n", initial);
         *result = initial;
         if (e->allocate(handle, cookie, &it, key, nkey, nb, 0, exptime) != ENGINE_SUCCESS) {
             e->release(handle, cookie, it);

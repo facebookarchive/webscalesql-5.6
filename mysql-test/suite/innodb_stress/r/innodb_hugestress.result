@@ -14,7 +14,6 @@ KEY msg_i(msg_prefix))
 ENGINE=INNODB
 ROW_FORMAT=COMPRESSED
 KEY_BLOCK_SIZE=1;
-call mtr.add_suppression(".*");
 Checksum master
 stop slave;
 start slave;

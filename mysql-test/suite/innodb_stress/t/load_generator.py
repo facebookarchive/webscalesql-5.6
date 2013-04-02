@@ -182,7 +182,7 @@ class ChecksumWorker(threading.Thread):
 class Worker(threading.Thread):
   global LG_TMP_DIR
 
-  def __init__(self, num_xactions, xid, con, server_pid, do_blob, max_id, fake_changes, secondary_checks):
+  def __init__(self, num_xactions, xid, con, server_pid, do_blob, max_id, secondary_checks):
     threading.Thread.__init__(self)
     self.do_blob = do_blob
     self.xid = xid
@@ -203,8 +203,6 @@ class Worker(threading.Thread):
     self.num_updates = 0
     self.time_spent = 0
     self.log = open('/%s/worker%02d.log' % (LG_TMP_DIR, self.xid), 'a')
-    if fake_changes:
-        cur.execute("SET innodb_fake_changes=1")
     self.secondary_checks = secondary_checks
     self.start()
 
@@ -385,9 +383,8 @@ if  __name__ == '__main__':
   do_blob = int(sys.argv[10])
   max_id = int(sys.argv[11])
   LG_TMP_DIR = sys.argv[12]
-  fake_changes = int(sys.argv[13])
-  checksum = int(sys.argv[14])
-  secondary_checks = int(sys.argv[15])
+  checksum = int(sys.argv[13])
+  secondary_checks = int(sys.argv[14])
 
   checksum_worker = None
   workers = []
@@ -415,7 +412,7 @@ if  __name__ == '__main__':
   for i in xrange(num_workers):
     worker = Worker(num_xactions_per_worker, i,
                     MySQLdb.connect(user=user, host=host, port=port, db=db),
-                    server_pid, do_blob, max_id, fake_changes, secondary_checks)
+                    server_pid, do_blob, max_id, secondary_checks)
     workers.append(worker)
 
   if kill_db_after:

@@ -4,7 +4,6 @@
 # Check the table against the replica.
 # Reinvoke the threads.
 
-
 --connection master
 #--let $innodb_index_cluster_optimization_save_master = `SELECT @@innodb_prefix_index_cluster_optimization`
 
@@ -14,15 +13,16 @@
 # create the directory for temporary log files.
 --exec mkdir -p $MYSQL_TMP_DIR/load_generator
 
-if ($fake_changes)
-{
-  --exec mkdir -p $MYSQL_TMP_DIR/load_generator_slave
-}
-
 --connection master
 
-# since this test generates lot of errors in log, suppress checking errors
-call mtr.add_suppression(".*");
+--disable_query_log
+# some versions of this test use zipdebug, and so generate this warning in non-debug builds
+call mtr.add_suppression("innodb_zip_debug is enabled and this is a non-debug mysqld. Please disable it immediately if the machine is serving production traffic.");
+# Expected during mysql crash recovery due to partial binlog events written to the binary log
+call mtr.add_suppression("Error in Log_event::read_log_event()");
+# Page corruption are possible during crash tests. This should not fail the test.
+call mtr.add_suppression("Warning: database page corruption or a failed");
+--enable_query_log
 
 --sync_slave_with_master
 
@@ -41,7 +41,7 @@ if ($do_checksum)
     let $exec =
 python $MYSQL_BASEDIR/mysql-test/suite/innodb_stress/t/load_generator.py $pid_file $kill_db_after
 $num_records 0 0 $user $master_host $MASTER_MYPORT
-$table 0 $max_rows $MYSQL_TMP_DIR/load_generator 0 0 0;
+$table 0 $max_rows $MYSQL_TMP_DIR/load_generator 0 0;
     exec $exec;
     let $checksum=query_get_value(CHECKSUM TABLE t1, Checksum, 1);
     # Master needs to be restarted to start with an empty buffer pool so
@@ -70,14 +70,14 @@ while ($num_crashes)
     let $exec =
 python $MYSQL_BASEDIR/mysql-test/suite/innodb_stress/t/load_generator.py $pid_file $kill_db_after
 $num_records  $num_workers $num_transactions $user $master_host $MASTER_MYPORT
-$table 1 $max_rows $MYSQL_TMP_DIR/load_generator 0 $checksum $secondary_index_checks;
+$table 1 $max_rows $MYSQL_TMP_DIR/load_generator $checksum $secondary_index_checks;
   }
   if (!$use_blob)
   {
     let $exec =
 python $MYSQL_BASEDIR/mysql-test/suite/innodb_stress/t/load_generator.py $pid_file $kill_db_after
 $num_records  $num_workers $num_transactions $user $master_host $MASTER_MYPORT
-$table 0 $max_rows $MYSQL_TMP_DIR/load_generator 0 $checksum $secondary_index_checks;
+$table 0 $max_rows $MYSQL_TMP_DIR/load_generator $checksum $secondary_index_checks;
   }
 
   exec $exec;
@@ -101,16 +101,6 @@ $table 0 $max_rows $MYSQL_TMP_DIR/load_generator 0 $checksum $secondary_index_ch
   --source include/wait_for_slave_to_sync_with_master.inc
 
   connection slave;
-  if ($fake_changes)
-  {
-    --echo applying fake updates to the slave
-    let $slave_pid_file = `SELECT @@pid_file`;
-    let $slave_exec =
-python $MYSQL_BASEDIR/mysql-test/suite/innodb_stress/t/load_generator.py $slave_pid_file $kill_db_after
-0  $num_workers $num_transactions $user $master_host $SLAVE_MYPORT
-$table 0 $max_rows $MYSQL_TMP_DIR/load_generator_slave 1 $checksum $secondary_index_checks;
-    exec $slave_exec;
-  }
   --echo Checksum slave
   let $slave_checksum=query_get_value(CHECKSUM TABLE t1, Checksum, 1);
   let $not_same = `SELECT $master_checksum-$slave_checksum`;

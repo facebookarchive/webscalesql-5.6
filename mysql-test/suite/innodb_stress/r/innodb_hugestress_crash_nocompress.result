@@ -12,7 +12,6 @@ msg_length int,
 msg_checksum varchar(128),
 KEY msg_i(msg_prefix))
 ENGINE=INNODB;
-call mtr.add_suppression(".*");
 Wait for reconnect
 Checksum master
 stop slave;

@@ -49,7 +49,7 @@
        Mac OS X and Mac OS X Server depending on the installation
        type you chose. The following table shows the default
        locations by installation type.
-       Table 2.4. MySQL Unix Socket Locations on Mac OS X by
+       Table 2.5. MySQL Unix Socket Locations on Mac OS X by
        Installation Type
 
                Installation Type             Socket Location
@@ -80,6 +80,25 @@ You cannot install this software on this disk. (null)
        destination disk selection again, and you should be able to
        choose the destination disk correctly. We have reported this
        bug to Apple and it is investigating this problem.
+
+     * If you get an "insecure startup item disabled" error when
+       MySQL launches, use the following procedure. Adjust the
+       pathnames appropriately for your system.
+
+         1. Modify the mysql.script using this command (enter it on a
+            single line):
+shell> sudo /Applications/TextEdit.app/Contents/MacOS/TextEdit
+  /usr/local/mysql/support-files/mysql.server
+
+         2. Locate the option file that defines the basedir value and
+            modify it to contain these lines:
+basedir=/usr/local/mysql
+datadir=/usr/local/mysql/data
+            In the /Library/StartupItems/MySQLCOM/ directory, make
+            the following group ID changes from staff to wheel:
+shell> sudo chgrp wheel MySQLCOM StartupParameters.plist
+
+         3. Start the server from System Preferences or Terminal.app.
 
      * Because the MySQL package installer installs the MySQL
        contents into a version and platform specific directory, you
@@ -140,7 +159,7 @@ alias mysqladmin /usr/local/mysql/bin/mysqladmin
    /usr/local/mysql-5.1.39-osx10.5-x86_64 . The following table shows
    the layout of the installation directory.
 
-   Table 2.5. MySQL Installation Layout on Mac OS X
+   Table 2.6. MySQL Installation Layout on Mac OS X
    Directory Contents of Directory
    bin Client programs and the mysqld server
    data Log files, databases
@@ -336,7 +355,7 @@ shell> sudo /Library/StartupItems/MySQLCOM/MySQLCOM stop
    already be installed. The following table shows the versions of
    MySQL that ship with Mac OS X Server versions.
 
-   Table 2.6. MySQL Versions Preinstalled with Mac OS X Server
+   Table 2.7. MySQL Versions Preinstalled with Mac OS X Server
    Mac OS X Server Version MySQL Version
    10.2-10.2.2             3.23.51
    10.2.3-10.2.6           3.23.53
@@ -349,7 +368,7 @@ shell> sudo /Library/StartupItems/MySQLCOM/MySQLCOM stop
    The following table shows the installation layout of MySQL on Mac
    OS X Server.
 
-   Table 2.7. MySQL Directory Layout for Preinstalled MySQL
+   Table 2.8. MySQL Directory Layout for Preinstalled MySQL
    Installations on Mac OS X Server
    Directory Contents of Directory
    /usr/bin Client programs

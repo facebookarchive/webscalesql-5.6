@@ -1,4 +1,4 @@
-/* Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2000, 2013, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -426,11 +426,10 @@ static bool setup_semijoin_dups_elimination(JOIN *join, ulonglong options,
            should not happen since LooseScan strategy is only picked if sorted 
            output is supported.
         */
-        tab->sorted= true;
         if (tab->select && tab->select->quick)
         {
           if (tab->select->quick->index == pos->loosescan_key)
-            tab->select->quick->need_sorted_output(true);
+            tab->select->quick->need_sorted_output();
           else
             tab->select->set_quick(NULL);
         }
@@ -836,7 +835,7 @@ err:
   Explain join.
 */
 
-void
+bool
 JOIN::explain()
 {
   Opt_trace_context * const trace= &thd->opt_trace;
@@ -845,21 +844,22 @@ JOIN::explain()
   trace_exec.add_select_number(select_lex->select_number);
   Opt_trace_array trace_steps(trace, "steps");
   List<Item> *columns_list= &fields_list;
+  bool ret;
   DBUG_ENTER("JOIN::explain");
 
   THD_STAGE_INFO(thd, stage_explaining);
 
   if (prepare_result(&columns_list))
-    DBUG_VOID_RETURN;
+    DBUG_RETURN(true);
 
   if (!tables_list && (tables || !select_lex->with_sum_func))
   {                                           // Only test of functions
-    explain_no_table(thd, this, zero_result_cause ? zero_result_cause 
+    ret= explain_no_table(thd, this, zero_result_cause ? zero_result_cause 
                                                   : "No tables used");
     /* Single select (without union) always returns 0 or 1 row */
     thd->limit_found_rows= send_records;
     thd->set_examined_row_count(0);
-    DBUG_VOID_RETURN;
+    DBUG_RETURN(ret);
   }
   /*
     Don't reset the found rows count if there're no tables as
@@ -871,16 +871,16 @@ JOIN::explain()
 
   if (zero_result_cause)
   {
-    explain_no_table(thd, this, zero_result_cause);
-    DBUG_VOID_RETURN;
+    ret= explain_no_table(thd, this, zero_result_cause);
+    DBUG_RETURN(ret);
   }
 
   if (tables)
-    explain_query_specification(thd, this);
+    ret= explain_query_specification(thd, this);
   else
-    explain_no_table(thd, this, "No tables used");
+    ret= explain_no_table(thd, this, "No tables used");
 
-  DBUG_VOID_RETURN;
+  DBUG_RETURN(ret);
 }
 
 
@@ -1493,18 +1493,18 @@ bool JOIN::set_access_methods()
       continue;                      // Handled in make_join_statistics()
 
     Key_use *const keyuse= tab->position->key;
-    if (!keyuse)
-    {
-      tab->type= JT_ALL;
-      if (tableno > const_tables)
-       full_join= true;
-     }
-    else if (tab->position->sj_strategy == SJ_OPT_LOOSE_SCAN)
+    if (tab->position->sj_strategy == SJ_OPT_LOOSE_SCAN)
     {
       DBUG_ASSERT(tab->keys.is_set(tab->position->loosescan_key));
       tab->type= JT_ALL; // @todo is this consistent for a LooseScan table ?
       tab->index= tab->position->loosescan_key;
      }
+    else if (!keyuse)
+    {
+      tab->type= JT_ALL;
+      if (tableno > const_tables)
+       full_join= true;
+    }
     else
     {
       if (create_ref_for_key(this, tab, keyuse, tab->prefix_tables()))
@@ -1699,7 +1699,7 @@ bool create_ref_for_key(JOIN *join, JOIN_TAB *j, Key_use *org_keyuse,
       j->ref.items[part_no]=keyuse->val;        // Save for cond removal
       j->ref.cond_guards[part_no]= keyuse->cond_guard;
       if (keyuse->null_rejecting) 
-        j->ref.null_rejecting |= 1 << part_no;
+        j->ref.null_rejecting|= (key_part_map)1 << part_no;
       keyuse_uses_no_tables= keyuse_uses_no_tables && !keyuse->used_tables;
 
       store_key* key= get_store_key(thd,
@@ -2104,6 +2104,19 @@ static void push_index_cond(JOIN_TAB *tab, uint keyno, bool other_tbls_ok,
     DBUG_EXECUTE("where", print_where(idx_cond, "idx cond", QT_ORDINARY););
     if (idx_cond)
     {
+      /*
+        Check that the condition to push actually contains fields from
+        the index. Without any fields from the index it is unlikely
+        that it will filter out any records since the conditions on
+        fields from other tables in most cases have already been
+        evaluated.
+      */
+      idx_cond->update_used_tables();
+      if ((idx_cond->used_tables() & tab->table->map) == 0)
+      {
+        DBUG_VOID_RETURN;
+      }
+
       Item *idx_remainder_cond= 0;
       tab->pre_idx_push_cond= tab->condition();
 
@@ -2748,9 +2761,6 @@ make_join_readinfo(JOIN *join, ulonglong options, uint no_jbuf_after)
 {
   const bool statistics= test(!(join->select_options & SELECT_DESCRIBE));
 
-  /* First table sorted if ORDER or GROUP BY was specified */
-  bool sorted= (join->order || join->group_list);
-
   DBUG_ENTER("make_join_readinfo");
 
   Opt_trace_context * const trace= &join->thd->opt_trace;
@@ -2771,14 +2781,6 @@ make_join_readinfo(JOIN *join, ulonglong options, uint no_jbuf_after)
     tab->read_record.table= table;
     tab->next_select=sub_select;		/* normal select */
     tab->cache_idx_cond= 0;
-    /*
-      For eq_ref there is at most one join match for each row from
-      previous tables so ordering is not useful.
-      NOTE: setup_semijoin_dups_elimination() might have requested 
-            'sorted', thus a '|=' is required to preserve that.
-    */
-    tab->sorted|= (sorted && tab->type != JT_EQ_REF);
-    sorted= false;                              // only first must be sorted
     table->status= STATUS_GARBAGE | STATUS_NOT_FOUND;
     tab->read_first_record= NULL; // Access methods not set yet
     tab->read_record.read_record= NULL;
@@ -4253,7 +4255,7 @@ check_reverse_order:
       }
     }
     else if (select && select->quick)
-      select->quick->need_sorted_output(true);
+      select->quick->need_sorted_output();
   } // QEP has been modified
 
 fix_ICP:
@@ -4935,15 +4937,17 @@ bool JOIN::make_tmp_tables_info()
       optimize_distinct();
 
     /*
-      If there is no sorting or grouping, one may turn off
-      requirement that access method should deliver rows in sorted
-      order.  Exception: LooseScan strategy for semijoin requires
+      If there is no sorting or grouping, 'use_order'
+      index result should not have been requested.
+      Exception: LooseScan strategy for semijoin requires
       sorted access even if final result is not to be sorted.
     */
-    if (!sort_and_group &&
+    DBUG_ASSERT(
+      !(ordered_index_usage == ordered_index_void &&
         !plan_is_const() && 
-        join_tab[const_tables].position->sj_strategy != SJ_OPT_LOOSE_SCAN)
-      disable_sorted_access(&join_tab[const_tables]);
+        join_tab[const_tables].position->sj_strategy != SJ_OPT_LOOSE_SCAN &&
+        join_tab[const_tables].use_order()));
+
     /*
       We don't have to store rows in temp table that doesn't match HAVING if:
       - we are sorting the table and writing complete group rows to the
@@ -5063,8 +5067,14 @@ bool JOIN::make_tmp_tables_info()
           DBUG_RETURN(true);
       }
 
-      if (!sort_and_group && !plan_is_const())
-        disable_sorted_access(&join_tab[const_tables]);
+      /*
+        If there is no sorting or grouping, 'use_order'
+        index result should not have been requested.
+      */
+      DBUG_ASSERT(!(ordered_index_usage == ordered_index_void &&
+                    !plan_is_const() &&
+                    join_tab[const_tables].use_order()));
+
       // Setup sum funcs only when necessary, otherwise we might break info
       // for the first table
       if (group_list || tmp_table_param.sum_func_count)

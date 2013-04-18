@@ -2,12 +2,12 @@
 .\"     Title: \fBmysql\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 01/22/2013
+.\"      Date: 04/05/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQL\FR" "1" "01/22/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQL\FR" "1" "04/05/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -84,13 +84,15 @@ Then type an SQL statement, end it with
 \eG
 and press Enter\&.
 .PP
-Typing Control+C causes
+Typing
+Control+C
+causes
 \fBmysql\fR
-to attempt to kill the current statement\&. If this cannot be done, or Control+C is typed again before the statement is killed,
+to attempt to kill the current statement\&. If this cannot be done, or
+Control+C
+is typed again before the statement is killed,
 \fBmysql\fR
-exits\&. Previously, Control+C caused
-\fBmysql\fR
-to exit in all cases\&.
+exits\&.
 .PP
 You can execute SQL statements in a script file (batch file) like this:
 .sp
@@ -106,8 +108,8 @@ shell> \fBmysql \fR\fB\fIdb_name\fR\fR\fB < \fR\fB\fIscript\&.sql\fR\fR\fB > \fR
 .PP
 On Unix, the
 \fBmysql\fR
-client writes a record of executed statements to a history file\&. See
-the section called \(lqMYSQL HISTORY FILE\(rq\&.
+client logs statements executed interactively to a history file\&. See
+the section called \(lqMYSQL LOGGING\(rq\&.
 .SH "MYSQL OPTIONS"
 .\" mysql command options
 .\" command options: mysql
@@ -350,6 +352,24 @@ Compress all information sent between the client and the server if both support 
 .sp -1
 .IP \(bu 2.3
 .\}
+.\" mysql: connect-expired-password option
+.\" connect-expired-password option: mysql
+\fB\-\-connect\-expired\-password\fR
+.sp
+Indicate to the server that the client is can handle sandbox mode if the account used to connect has an expired password\&. This can be useful for noninteractive invocations of
+\fBmysql\fR
+because normally the server disconnects noninteractive clients that attempt to connect using an account with an expired password\&. (See
+Section\ \&6.3.6, \(lqPassword Expiration and Sandbox Mode\(rq\&.) This option was added in MySQL 5\&.6\&.12\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
 .\" mysql: database option
 .\" database option: mysql
 \fB\-\-database=\fR\fB\fIdb_name\fR\fR,
@@ -422,7 +442,7 @@ Print debugging information and memory and CPU usage statistics when the program
 \fB\-\-default\-auth=\fR\fB\fIplugin\fR\fR
 .sp
 The client\-side authentication plugin to use\&. See
-Section\ \&6.3.6, \(lqPluggable Authentication\(rq\&.
+Section\ \&6.3.7, \(lqPluggable Authentication\(rq\&.
 .RE
 .sp
 .RS 4
@@ -505,7 +525,7 @@ the section called \(lqMYSQL COMMANDS\(rq\&.
 Enable the
 mysql_clear_password
 cleartext authentication plugin\&. (See
-Section\ \&6.3.6.3, \(lqThe Cleartext Client-Side Authentication Plugin\(rq\&.) This option was added in MySQL 5\&.6\&.7\&.
+Section\ \&6.3.7.5, \(lqThe Cleartext Client-Side Authentication Plugin\(rq\&.) This option was added in MySQL 5\&.6\&.7\&.
 .RE
 .sp
 .RS 4
@@ -556,8 +576,8 @@ Continue even if an SQL error occurs\&.
 .\" histignore option: mysql
 \fB\-\-histignore\fR
 .sp
-A colon\-separated list of one or more patterns specifying statements not to log to the history file\&. For more information, see
-the section called \(lqMYSQL HISTORY FILE\(rq\&. This option was added in MySQL 5\&.6\&.8\&.
+A colon\-separated list of one or more patterns specifying statements to ignore for logging purposes\&. These patterns are added to the default pattern list ("*IDENTIFIED*:*PASSWORD*")\&. The value specified for this option affects logging of statements written to the history file\&. For more information, see
+the section called \(lqMYSQL LOGGING\(rq\&. This option was added in MySQL 5\&.6\&.8\&.
 .RE
 .sp
 .RS 4
@@ -915,7 +935,7 @@ The directory in which to look for plugins\&. It may be necessary to specify thi
 option is used to specify an authentication plugin but
 \fBmysql\fR
 does not find it\&. See
-Section\ \&6.3.6, \(lqPluggable Authentication\(rq\&.
+Section\ \&6.3.7, \(lqPluggable Authentication\(rq\&.
 .RE
 .sp
 .RS 4
@@ -1121,7 +1141,7 @@ The server sends the public key to the client as needed, so it is not necessary 
 For additional discussion regarding use of the
 sha256_password
 plugin, including how to get the RSA public key, see
-Section\ \&6.3.6.2, \(lqThe SHA-256 Authentication Plugin\(rq\&.
+Section\ \&6.3.7.2, \(lqThe SHA-256 Authentication Plugin\(rq\&.
 .sp
 This option is available only if MySQL was built using OpenSSL\&. It was added in MySQL 5\&.6\&.6 under the name
 \fB\-\-server\-public\-key\fR
@@ -1158,7 +1178,8 @@ Cause warnings to be shown after each statement if there are any\&. This option 
 .sp
 Ignore
 SIGINT
-signals (typically the result of typing Control+C)\&.
+signals (typically the result of typing
+Control+C)\&.
 .RE
 .sp
 .RS 4
@@ -1245,7 +1266,7 @@ localhost, the Unix socket file to use, or, on Windows, the name of the named pi
 Options that begin with
 \fB\-\-ssl\fR
 specify whether to connect to the server using SSL and indicate where to find SSL keys and certificates\&. See
-Section\ \&6.3.8.4, \(lqSSL Command Options\(rq\&.
+Section\ \&6.3.9.4, \(lqSSL Command Options\(rq\&.
 .RE
 .sp
 .RS 4
@@ -1717,7 +1738,7 @@ is set to something other than the default of
 \(lq;\(rq, instances of that character are sent to the server without interpretation\&. However, the server itself still interprets
 \(lq;\(rq
 as a statement delimiter and processes statements accordingly\&. This behavior on the server side comes into play for multiple\-statement execution (see
-Section\ \&21.8.13, \(lqC API Support for Multiple Statement Execution\(rq), and for parsing the body of stored procedures and functions, triggers, and events (see
+Section\ \&21.8.16, \(lqC API Support for Multiple Statement Execution\(rq), and for parsing the body of stored procedures and functions, triggers, and events (see
 Section\ \&18.1, \(lqDefining Stored Programs\(rq)\&.
 .RE
 .sp
@@ -2577,7 +2598,7 @@ mysql>
 .RE
 .\}
 .RE
-.SH "MYSQL HISTORY FILE"
+.SH "MYSQL LOGGING"
 .\" MYSQL_HISTFILE environment variable
 .\" environment variable: MYSQL_HISTFILE
 .\" MYSQL_HISTIGNORE environment variable
@@ -2590,27 +2611,14 @@ mysql>
 .PP
 On Unix, the
 \fBmysql\fR
-client writes a record of executed statements to a history file\&. By default, this file is named
+client logs statements executed interactively to a history file\&. By default, this file is named
 \&.mysql_history
-and is created in your home directory\&. To specify a different file, set the value of the
+in your home directory\&. To specify a different file, set the value of the
 MYSQL_HISTFILE
 environment variable\&.
+        How Logging Occurs
 .PP
-The
-\&.mysql_history
-should be protected with a restrictive access mode because sensitive information might be written to it, such as the text of SQL statements that contain passwords\&. See
-Section\ \&6.1.2.1, \(lqEnd-User Guidelines for Password Security\(rq\&.
-.PP
-\fBmysql\fR
-does not write statements to the history file when used noninteractively (for example, when reading input from a file or a pipe)\&. It is also possible to explicitly suppress logging of statements to the history file by using the
-\fB\-\-batch\fR
-or
-\fB\-\-execute\fR
-option\&.
-.PP
-If you do not want to maintain a history file, first remove
-\&.mysql_history
-if it exists, and then use either of the following techniques:
+Statement logging occurs as follows:
 .sp
 .RS 4
 .ie n \{\
@@ -2620,10 +2628,11 @@ if it exists, and then use either of the following techniques:
 .sp -1
 .IP \(bu 2.3
 .\}
-Set the
-MYSQL_HISTFILE
-variable to
-/dev/null\&. To cause this setting to take effect each time you log in, put the setting in one of your shell\*(Aqs startup files\&.
+Statements are logged only when executed interactively\&. Statements are noninteractive, for example, when read from a file or a pipe\&. It is also possible to suppress statement logging by using the
+\fB\-\-batch\fR
+or
+\fB\-\-execute\fR
+option\&.
 .RE
 .sp
 .RS 4
@@ -2634,23 +2643,79 @@ variable to
 .sp -1
 .IP \(bu 2.3
 .\}
-Create
-\&.mysql_history
-as a symbolic link to
-/dev/null:
+Statements are ignored and not logged if they match any pattern in the
+\(lqignore\(rq
+list\&. This list is described later\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fBmysql\fR
+logs each nonignored, nonempty statement line individually\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+If a nonignored statement spans multiple lines (not including the terminating delimiter),
+\fBmysql\fR
+concatenates the lines to form the complete statement, maps newlines to spaces, and logs the result, plus a delimiter\&.
+.RE
+.PP
+Consequently, an input statement that spans multiple lines can be logged twice\&. Consider this input:
 .sp
 .if n \{\
 .RS 4
 .\}
 .nf
-shell> \fBln \-s /dev/null $HOME/\&.mysql_history\fR
+mysql> \fBSELECT\fR
+    \-> \fB\*(AqToday is\*(Aq\fR
+    \-> \fB,\fR
+    \-> \fBCONCAT()\fR
+    \-> \fB;\fR
 .fi
 .if n \{\
 .RE
 .\}
+.PP
+In this case,
+\fBmysql\fR
+logs the
+\(lqSELECT\(rq,
+\(lq\*(AqToday is\*(Aq\(rq,
+\(lq,\(rq,
+\(lqCONCAT()\(rq, and
+\(lq;\(rq
+lines as it reads them\&. It also logs the complete statement, after mapping
+SELECT\en\*(AqToday is\*(Aq\en,\enCURDATE()
+to
+SELECT \*(AqToday is\*(Aq , CURDATE(), plus a delimiter\&. Thus, these lines appear in logged output:
 .sp
-You need do this only once\&.
+.if n \{\
+.RS 4
+.\}
+.nf
+SELECT
+\*(AqToday is\*(Aq
+,
+CURDATE()
+;
+SELECT \*(AqToday is\*(Aq , CURDATE();
+.fi
+.if n \{\
 .RE
+.\}
 .PP
 As of MySQL 5\&.6\&.8,
 \fBmysql\fR
@@ -2680,12 +2745,12 @@ matches any single character\&.
 .IP \(bu 2.3
 .\}
 *
-matches any sequence of zero or more characters
+matches any sequence of zero or more characters\&.
 .RE
 .PP
 To specify additional patterns, use the
 \fB\-\-histignore\fR
-command option or set the
+option or set the
 MYSQL_HISTIGNORE
 environment variable\&. (If both are specified, the option value takes precedence\&.) The value should be a colon\-separated list of one or more patterns, which are appended to the default pattern list\&.
 .PP
@@ -2701,11 +2766,60 @@ like this:
 .RS 4
 .\}
 .nf
-shell> \fBmysql \-\-histignore="*UPDATE*:*:DELETE*"\fR
+shell> \fBmysql \-\-histignore="*UPDATE*:*DELETE*"\fR
 .fi
 .if n \{\
 .RE
 .\}
+.sp
+        Controlling the History File
+.PP
+The
+\&.mysql_history
+file should be protected with a restrictive access mode because sensitive information might be written to it, such as the text of SQL statements that contain passwords\&. See
+Section\ \&6.1.2.1, \(lqEnd-User Guidelines for Password Security\(rq\&.
+.PP
+If you do not want to maintain a history file, first remove
+\&.mysql_history
+if it exists\&. Then use either of the following techniques to prevent it from being created again:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Set the
+MYSQL_HISTFILE
+environment variable to
+/dev/null\&. To cause this setting to take effect each time you log in, put it in one of your shell\*(Aqs startup files\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Create
+\&.mysql_history
+as a symbolic link to
+/dev/null; this need be done only once:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBln \-s /dev/null $HOME/\&.mysql_history\fR
+.fi
+.if n \{\
+.RE
+.\}
+.RE
 .SH "MYSQL SERVER-SIDE HELP"
 .sp
 .if n \{\
@@ -2816,6 +2930,35 @@ mysql> SHOW BINARY LOGS;
 | binlog\&.000015 |    724935 |
 | binlog\&.000016 |    733481 |
 +\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-+
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The search string can contain the the wildcard characters
+\(lq%\(rq
+and
+\(lq_\(rq\&. These have the same meaning as for pattern\-matching operations performed with the
+LIKE
+operator\&. For example,
+HELP rep%
+returns a list of topics that begin with
+rep:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysql> \fBHELP rep%\fR
+Many help items for your request exist\&.
+To make a more specific request, please type \*(Aqhelp <item>\*(Aq,
+where <item> is one of the following
+topics:
+   REPAIR TABLE
+   REPEAT FUNCTION
+   REPEAT LOOP
+   REPLACE
+   REPLACE FUNCTION
 .fi
 .if n \{\
 .RE
@@ -2931,6 +3074,79 @@ Section\ \&3.5, \(lqUsing mysql in Batch Mode\(rq\&.
 This section describes some techniques that can help you use
 \fBmysql\fR
 more effectively\&.
+.SS "Input\-Line Editing"
+.PP
+\fBmysql\fR
+supports input\-line editing, which enables you to modify the current input line in place or recall previous input lines\&. For example, the
+left\-arrow
+and
+right\-arrow
+keys move horizontally within the current input line, and the
+up\-arror
+and
+down\-arrow
+keys move up and down through the set of previously entered lines\&.
+Backspace
+deletes the character before the cursor and typing new characters enters them at the cursor position\&. To enter the line, press
+Enter\&.
+.PP
+On Windows, the editing key sequences are the same as supported for command editing in console windows\&. On Unix, the key sequences depend on the input library used to build
+\fBmysql\fR
+(for example, the
+libedit
+or
+readline
+library)\&.
+.PP
+Documentation for the
+libedit
+and
+readline
+libraries is available online\&. To change the set of key sequences permitted by a given input library, define key bindings in the library startup file\&. This is a file in your home directory:
+\&.editrc
+for
+libedit
+and
+\&.inputrc
+for
+readline\&.
+.PP
+For example, in
+libedit,
+Control+W
+deletes everything before the current cursor position and
+Control+U
+deletes the entire line\&. In
+readline,
+Control+W
+deletes the word before the cursor and
+Control+U
+deletes everything before the current cursor position\&. If
+\fBmysql\fR
+was built using
+libedit, a user who prefers the
+readline
+behavior for these two keys can put the following lines in the
+\&.editrc
+file (creating the file if necessary):
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+bind "^W" ed\-delete\-prev\-word
+bind "^U" vi\-kill\-line\-prev
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+To see the current set of key bindings, temporarily put a line that says only
+bind
+at the end of
+\&.editrc\&.
+\fBmysql\fR
+will show the bindings when it starts\&.
 .SS "Unicode Support on Windows"
 .PP
 Windows provides APIs based on UTF\-16LE for reading from and writing to the console\&. As of MySQL 5\&.6\&.2, the
@@ -3195,17 +3411,46 @@ client with the
 option\&.
 .PP
 For more information about auto\-reconnect and its effect on state information when a reconnection occurs, see
-Section\ \&21.8.12, \(lqControlling Automatic Reconnection Behavior\(rq\&.
+Section\ \&21.8.15, \(lqControlling Automatic Reconnection Behavior\(rq\&.
 .SH "COPYRIGHT"
 .br
 .PP
 Copyright \(co 1997, 2013, Oracle and/or its affiliates. All rights reserved.
 .PP
-This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+This software and related documentation are provided under a license agreement containing restrictions on use and disclosure and are protected by intellectual property laws. Except as expressly permitted in your license agreement or allowed by law, you may not use, copy, reproduce, translate, broadcast, modify, license, transmit, distribute, exhibit, perform, publish, or display any part, in any form, or by any means. Reverse engineering, disassembly, or decompilation of this software, unless required by law for interoperability, is prohibited.
 .PP
-This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+The information contained herein is subject to change without notice and is not warranted to be error-free. If you find any errors, please report them to us in writing.
 .PP
-You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+If this software or related documentation is delivered to the U.S. Government or anyone licensing it on behalf of the U.S. Government, the following notice is applicable:
+.PP
+U.S. GOVERNMENT RIGHTS Programs, software, databases, and related documentation and technical data delivered to U.S. Government customers are "commercial computer software" or "commercial technical data" pursuant to the applicable Federal Acquisition Regulation and agency-specific supplemental regulations. As such, the use, duplication, disclosure, modification, and adaptation shall be subject to the restrictions and license terms set forth in the applicable Government contract, and, to the extent applicable by the terms of the Government contract, the additional rights set forth in FAR 52.227-19, Commercial Computer Software License (December 2007). Oracle USA, Inc., 500 Oracle Parkway, Redwood City, CA 94065.
+.PP
+This software is developed for general use in a variety of information management applications. It is not developed or intended for use in any inherently dangerous applications, including applications which may create a risk of personal injury. If you use this software in dangerous applications, then you shall be responsible to take all appropriate fail-safe, backup, redundancy, and other measures to ensure the safe use of this software. Oracle Corporation and its affiliates disclaim any liability for any damages caused by use of this software in dangerous applications.
+.PP
+Oracle is a registered trademark of Oracle Corporation and/or its affiliates. MySQL is a trademark of Oracle Corporation and/or its affiliates, and shall not be used without Oracle's express written authorization. Other names may be trademarks of their respective owners.
+.PP
+This software and documentation may provide access to or information on content, products, and services from third parties. Oracle Corporation and its affiliates are not responsible for and expressly disclaim all warranties of any kind with respect to third-party content, products, and services. Oracle Corporation and its affiliates will not be responsible for any loss, costs, or damages incurred due to your access to or use of third-party content, products, or services.
+.PP
+This document in any form, software or printed matter, contains proprietary information that is the exclusive property of Oracle. Your access to and use of this material is subject to the terms and conditions of your Oracle Software License and Service Agreement, which has been executed and with which you agree to comply. This document and information contained herein may not be disclosed, copied, reproduced, or distributed to anyone outside Oracle without prior written consent of Oracle or as specifically provided below. This document is not part of your license agreement nor can it be incorporated into any contractual agreement with Oracle or its subsidiaries or affiliates.
+.PP
+This documentation is NOT distributed under a GPL license. Use of this documentation is subject to the following terms:
+.PP
+You may create a printed copy of this documentation solely for your own personal use. Conversion to other formats is allowed as long as the actual content is not altered or edited in any way. You shall not publish or distribute this documentation in any form or on any media, except if you distribute the documentation in a manner similar to how Oracle disseminates it (that is, electronically for download on a Web site with the software) or on a CD-ROM or similar medium, provided however that the documentation is disseminated together with the software on the same medium. Any other use, such as any dissemination of printed copies or use of this documentation, in whole or in part, in another publication, requires the prior written consent from an authorized representative of Oracle. Oracle and/or its affiliates reserve any and all rights to this documentation not expressly granted above.
+.PP
+For more information on the terms of this license, or for details on how the MySQL documentation is built and produced, please visit
+\m[blue]\fBMySQL Contact & Questions\fR\m[].
+.PP
+For additional licensing information, including licenses for third-party libraries used by MySQL products, see
+Preface and Legal Notices.
+.PP
+For help with using MySQL, please visit either the
+\m[blue]\fBMySQL Forums\fR\m[]
+or
+\m[blue]\fBMySQL Mailing Lists\fR\m[]
+where you can discuss your issues with other MySQL users.
+.PP
+For additional documentation on MySQL products, including translations of the documentation into other languages, and downloadable versions in variety of formats, including HTML and PDF formats, see the
+\m[blue]\fBMySQL Documentation Library\fR\m[].
 .sp
 .SH "SEE ALSO"
 For more information, please refer to the MySQL Reference Manual,

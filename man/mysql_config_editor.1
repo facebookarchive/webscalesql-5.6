@@ -2,12 +2,12 @@
 .\"     Title: \fBmysql_config_editor\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 01/22/2013
+.\"      Date: 04/05/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQL_CONFIG_EDIT" "1" "01/22/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQL_CONFIG_EDIT" "1" "04/05/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -116,11 +116,20 @@ like this:
 .RS 4
 .\}
 .nf
-shell> \fBmysql_config_editor \fR\fB\fIcommand\fR\fR\fB [\fR\fB\fIoptions\fR\fR\fB]\fR
+shell> \fBmysql_config_editor [\fR\fB\fIprogram_options\fR\fR\fB] \fR\fB\fIcommand\fR\fR\fB [\fR\fB\fIcommand_options\fR\fR\fB]\fR
 .fi
 .if n \{\
 .RE
 .\}
+.PP
+\fIprogram_options\fR
+consists of general
+\fBmysql_config_editor\fR
+options\&.
+command
+indicates what command to perform, and
+\fIcommand_options\fR
+indicates any additional options needed by the command\&.
 .PP
 The command indicates what action to perform on the
 \&.mylogin\&.cnf
@@ -131,6 +140,27 @@ remove
 removes a login path, and
 print
 displays login path contents\&. Any options given provide information to the command, such as the login path name and the values to use in the login path\&.
+.PP
+The position of the command name within the set of program arguments is significant\&. For example, these command lines have the same arguments, but produce different results:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysql_config_editor \-\-help set
+mysql_config_editor set \-\-help
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The first command line displays general
+\fBmysql_config_editor\fR
+help, and ignores the
+set
+command\&. The second command line displays help for the
+set
+command\&.
 .PP
 Suppose that you want to establish two login paths named
 local
@@ -246,7 +276,14 @@ shell> \fBmysql \-\-login\-path=remote \-\-host=remote2\&.example\&.com\fR
 .if n \{\
 .RE
 .\}
-.sp
+.PP
+The
+\&.mylogin\&.cnf
+file, if it exists, is read in all cases, even when the
+\fB\-\-no\-defaults\fR
+option is used\&. This permits passwords to be specified in a safer way than on the command line even if
+\fB\-\-no\-defaults\fR
+is present\&.
         \fBmysql_config_editor\fR Commands
 .PP
 This section describes the permitted
@@ -259,19 +296,6 @@ to produce more information as
 \fBmysql_config_editor\fR
 executes\&. This option may be helpful in diagnosing problems if an operation does not have the effect you expect\&. For a list of supported options, see
 \fBmysql_config_editor\fR Options\&.
-.PP
-On the command line, the position of the command name within the set of program arguments does not matter\&. Options given on the command line are interpreted in the context of the command given\&. For example, these command lines are equivalent:
-.sp
-.if n \{\
-.RS 4
-.\}
-.nf
-mysql_config_editor print \-\-all
-mysql_config_editor \-\-all print
-.fi
-.if n \{\
-.RE
-.\}
 .PP
 \fBmysql_config_editor\fR
 supports these commands:
@@ -410,6 +434,32 @@ Remove the password from the login path\&.
 .sp -1
 .IP \(bu 2.3
 .\}
+\fB\-\-port\fR
+.sp
+Remove the TCP/IP port number from the login path\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-socket\fR
+.sp
+Remove the Unix socket file name from the login path\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
 \fB\-\-user\fR
 .sp
 Remove the user name from the login path\&.
@@ -421,13 +471,25 @@ The
 \fB\-\-password\fR
 options are supported for the
 remove
-command as of MySQL 5\&.6\&.9\&. If any of these options are given, the
+command as of MySQL 5\&.6\&.9\&. The
+\fB\-\-port\fR
+and
+\fB\-\-socket\fR
+options are supported for the
 remove
-command removes only the requested values from the login path\&. If none of them is given,
+command as of MySQL 5\&.6\&.11
+.sp
+The
 remove
-removes the entire
-client
-login path\&. For example, this command removes only the
+command removes from the login path only such values as are specified with the
+\fB\-\-host\fR,
+\fB\-\-password\fR,
+\fB\-\-port\fR,
+\fB\-\-socket\fR, and
+\fB\-\-user\fR
+options\&. If none of them is given,
+remove
+removes the entire login path\&. For example, this command removes only the
 \fBuser\fR
 value from the
 client
@@ -527,16 +589,52 @@ Prompt for a password to write to the login path\&.
 .sp -1
 .IP \(bu 2.3
 .\}
+\fB\-\-port=\fR\fB\fIport_num\fR\fR
+.sp
+The TCP/IP port number to write to the login path\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-socket=\fR\fB\fIfile_name\fR\fR
+.sp
+The Unix socket file to write to the login path\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
 \fB\-\-user=\fR\fB\fIuser_name\fR\fR
 .sp
 The user name to write to the login path\&.
 .RE
 .sp
 The
+\fB\-\-port\fR
+and
+\fB\-\-socket\fR
+options are supported for the
+set
+command as of MySQL 5\&.6\&.11
+.sp
+The
 set
 command writes to the login path only such values as are specified with the
 \fB\-\-host\fR,
-\fB\-\-password\fR, and
+\fB\-\-password\fR,
+\fB\-\-port\fR,
+\fB\-\-socket\fR, and
 \fB\-\-user\fR
 options\&. If none of those options are given,
 \fBmysql_config_editor\fR
@@ -587,7 +685,10 @@ supports the following options\&.
 \fB\-\-help\fR,
 \fB\-?\fR
 .sp
-Display a help message and exit\&.
+Display a help message and exit\&. If preceded by a command name such as
+set
+or
+remove, displays information about that command\&.
 .RE
 .sp
 .RS 4
@@ -642,7 +743,9 @@ string is
 .sp
 For the
 set
-command, the host name to write to to the login path\&.
+command, the host name to write to to the login path\&. For the
+remove
+command, removes the host name from the login path\&.
 .RE
 .sp
 .RS 4
@@ -703,6 +806,50 @@ This option does not permit a password value following the option name\&. That i
 \fB\-\-password=\fR\fB\fIpass_val\fR\fR
 or
 \fB\-p\fR\fB\fIpass_val\fR\fR\&. (That practice is insecure and should be avoided, however\&.)
+.sp
+For the
+remove
+command, removes the password from the login path\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysql_config_editor: port option
+.\" port option: mysql_config_editor
+\fB\-\-port=\fR\fB\fIport_num\fR\fR,
+\fB\-P \fR\fB\fIport_num\fR\fR
+.sp
+For the
+set
+command, the TCP/IP port number to write to the login path\&. For the
+remove
+command, removes the port number from the login path\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysql_config_editor: socket option
+.\" socket option: mysql_config_editor
+\fB\-\-socket=\fR\fB\fIfile_name\fR\fR,
+\fB\-S \fR\fB\fIfile_name\fR\fR
+.sp
+For the
+set
+command, the Unix socket file name to write to the login path\&. For the
+remove
+command, removes the socket file from the login path\&.
 .RE
 .sp
 .RS 4
@@ -720,7 +867,9 @@ or
 .sp
 For the
 set
-command, the user name to write to the login path\&.
+command, the user name to write to the login path\&. For the
+remove
+command, removes the user name from the login path\&.
 .RE
 .sp
 .RS 4
@@ -779,11 +928,40 @@ to disable it\&.
 .PP
 Copyright \(co 1997, 2013, Oracle and/or its affiliates. All rights reserved.
 .PP
-This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+This software and related documentation are provided under a license agreement containing restrictions on use and disclosure and are protected by intellectual property laws. Except as expressly permitted in your license agreement or allowed by law, you may not use, copy, reproduce, translate, broadcast, modify, license, transmit, distribute, exhibit, perform, publish, or display any part, in any form, or by any means. Reverse engineering, disassembly, or decompilation of this software, unless required by law for interoperability, is prohibited.
 .PP
-This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+The information contained herein is subject to change without notice and is not warranted to be error-free. If you find any errors, please report them to us in writing.
 .PP
-You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+If this software or related documentation is delivered to the U.S. Government or anyone licensing it on behalf of the U.S. Government, the following notice is applicable:
+.PP
+U.S. GOVERNMENT RIGHTS Programs, software, databases, and related documentation and technical data delivered to U.S. Government customers are "commercial computer software" or "commercial technical data" pursuant to the applicable Federal Acquisition Regulation and agency-specific supplemental regulations. As such, the use, duplication, disclosure, modification, and adaptation shall be subject to the restrictions and license terms set forth in the applicable Government contract, and, to the extent applicable by the terms of the Government contract, the additional rights set forth in FAR 52.227-19, Commercial Computer Software License (December 2007). Oracle USA, Inc., 500 Oracle Parkway, Redwood City, CA 94065.
+.PP
+This software is developed for general use in a variety of information management applications. It is not developed or intended for use in any inherently dangerous applications, including applications which may create a risk of personal injury. If you use this software in dangerous applications, then you shall be responsible to take all appropriate fail-safe, backup, redundancy, and other measures to ensure the safe use of this software. Oracle Corporation and its affiliates disclaim any liability for any damages caused by use of this software in dangerous applications.
+.PP
+Oracle is a registered trademark of Oracle Corporation and/or its affiliates. MySQL is a trademark of Oracle Corporation and/or its affiliates, and shall not be used without Oracle's express written authorization. Other names may be trademarks of their respective owners.
+.PP
+This software and documentation may provide access to or information on content, products, and services from third parties. Oracle Corporation and its affiliates are not responsible for and expressly disclaim all warranties of any kind with respect to third-party content, products, and services. Oracle Corporation and its affiliates will not be responsible for any loss, costs, or damages incurred due to your access to or use of third-party content, products, or services.
+.PP
+This document in any form, software or printed matter, contains proprietary information that is the exclusive property of Oracle. Your access to and use of this material is subject to the terms and conditions of your Oracle Software License and Service Agreement, which has been executed and with which you agree to comply. This document and information contained herein may not be disclosed, copied, reproduced, or distributed to anyone outside Oracle without prior written consent of Oracle or as specifically provided below. This document is not part of your license agreement nor can it be incorporated into any contractual agreement with Oracle or its subsidiaries or affiliates.
+.PP
+This documentation is NOT distributed under a GPL license. Use of this documentation is subject to the following terms:
+.PP
+You may create a printed copy of this documentation solely for your own personal use. Conversion to other formats is allowed as long as the actual content is not altered or edited in any way. You shall not publish or distribute this documentation in any form or on any media, except if you distribute the documentation in a manner similar to how Oracle disseminates it (that is, electronically for download on a Web site with the software) or on a CD-ROM or similar medium, provided however that the documentation is disseminated together with the software on the same medium. Any other use, such as any dissemination of printed copies or use of this documentation, in whole or in part, in another publication, requires the prior written consent from an authorized representative of Oracle. Oracle and/or its affiliates reserve any and all rights to this documentation not expressly granted above.
+.PP
+For more information on the terms of this license, or for details on how the MySQL documentation is built and produced, please visit
+\m[blue]\fBMySQL Contact & Questions\fR\m[].
+.PP
+For additional licensing information, including licenses for third-party libraries used by MySQL products, see
+Preface and Legal Notices.
+.PP
+For help with using MySQL, please visit either the
+\m[blue]\fBMySQL Forums\fR\m[]
+or
+\m[blue]\fBMySQL Mailing Lists\fR\m[]
+where you can discuss your issues with other MySQL users.
+.PP
+For additional documentation on MySQL products, including translations of the documentation into other languages, and downloadable versions in variety of formats, including HTML and PDF formats, see the
+\m[blue]\fBMySQL Documentation Library\fR\m[].
 .sp
 .SH "SEE ALSO"
 For more information, please refer to the MySQL Reference Manual,

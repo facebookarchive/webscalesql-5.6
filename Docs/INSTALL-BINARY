@@ -17,7 +17,7 @@
 
    MySQL compressed tar file binary distributions have names of the
    form mysql-VERSION-OS.tar.gz, where VERSION is a number (for
-   example, 5.6.11), and OS indicates the type of operating system
+   example, 5.6.12), and OS indicates the type of operating system
    for which the distribution is intended (for example, pc-linux-i686
    or winx64).
 
@@ -53,7 +53,7 @@
    /usr/local/mysql). This creates the directories shown in the
    following table.
 
-   Table 2.2. MySQL Installation Layout for Generic Unix/Linux Binary
+   Table 2.3. MySQL Installation Layout for Generic Unix/Linux Binary
    Package
    Directory Contents of Directory
    bin Client programs and the mysqld server

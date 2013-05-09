@@ -658,7 +658,7 @@ buf_dblwr_process()
 				}
 
 				fprintf(stderr,
-					"InnoDB: Warning: database page"
+					"InnoDB: Database page"
 					" corruption or a failed\n"
 					"InnoDB: file read of"
 					" space %lu page %lu.\n"

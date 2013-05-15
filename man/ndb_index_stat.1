@@ -1,0 +1,1014 @@
+'\" t
+.\"     Title: \fBndb_index_stat\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
+.\"      Date: 05/21/2013
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 5.6
+.\"  Language: English
+.\"
+.TH "\FBNDB_INDEX_STAT\FR" "1" "05/21/2013" "MySQL 5\&.6" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.\" ndb_index_stat
+.SH "NAME"
+ndb_index_stat \- NDB index statistics utility
+.SH "SYNOPSIS"
+.HP \w'\fBndb_index_stat\ \fR\fB\fIoptions\fR\fR\ 'u
+\fBndb_index_stat \fR\fB\fIoptions\fR\fR
+.SH "DESCRIPTION"
+.PP
+\fBndb_index_stat\fR
+\&.\&.\&.
+        Usage
+.PP
+To obtain basic index statistics about a given
+NDB
+table, invoke
+\fBndb_index_stat\fR
+as shown here, with the name of the table as the first argument and the name of the database containing this table specified immediately following it, using the
+\fB\-\-database\fR
+(\fB\-d\fR) option:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_index_stat \fItable\fR \-d \fIdatabase\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+In this example, we use
+\fBndb_index_stat\fR
+to obtain such information about an
+NDB
+table named
+mytable
+in the
+test
+database:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_index_stat \-d test mytable\fR
+table:mytable index:PRIMARY fragCount:4
+sampleVersion:2 loadTime:1336751773 sampleCount:0 keyBytes:0
+query cache: valid:1 sampleCount:0 totalBytes:0
+times in ms: save: 12\&.380 sort: 0\&.001
+NDBT_ProgramExit: 0 \- OK
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The
+\fB\-\-verbose\fR
+option provides some additional output, as shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_index_stat \-d test mytable \-\-verbose\fR
+random seed 1337010518
+connected
+loop 1 of 1
+table:mytable index:PRIMARY fragCount:4
+sampleVersion:2 loadTime:1336751773 sampleCount:0 keyBytes:0
+read stats
+query cache created
+query cache: valid:1 sampleCount:0 totalBytes:0
+times in ms: save: 20\&.766 sort: 0\&.001
+disconnected
+NDBT_ProgramExit: 0 \- OK
+shell>
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+        Options
+.PP
+The following table includes options that are specific to the MySQL Cluster
+\fBndb_index_stat\fR
+utility\&. Additional descriptions are listed following the table\&. For options common to most MySQL Cluster programs (including
+\fBndb_index_stat\fR), see
+Options Common to MySQL Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&17.20.\ \&ndb_index_stat Options and Variables: MySQL Cluster NDB 7.3
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added / Removed
+T}
+.T&
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l.
+T{
+.PP
+\-\-database=name,
+.PP
+\-d
+T}:T{
+Name of the database containing the table\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+\-\-delete
+T}:T{
+Delete index statistics for the given table, stopping any auto\-update
+            previously configured\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+\-\-update
+T}:T{
+Update index statistics for the given table, restarting any auto\-update
+            previously configured\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+\-\-dump
+T}:T{
+Print the query cache\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+\-\-query=#
+T}:T{
+Perform a number of random range queries on first key attr (must be int
+            unsigned)\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+\-\-sys\-drop
+T}:T{
+Drop any statistics tables and events in NDB kernel (all statistics are
+            lost)
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+\-\-sys\-create
+T}:T{
+Create all statistics tables and events in NDB kernel, if none of them
+            already exist
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+\-\-sys\-create\-if\-not\-exist
+T}:T{
+Create any statistics tables and events in NDB kernel that do not
+            already exist\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+\-\-sys\-create\-if\-not\-valid
+T}:T{
+Create any statistics tables or events that do not already exist in the
+            NDB kernel\&. after dropping any that are invalid\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+\-\-sys\-check
+T}:T{
+Verify that NDB system index statistics and event tables exist\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+\-\-sys\-skip\-tables
+T}:T{
+Do not apply sys\-* options to tables\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+\-\-sys\-skip\-events
+T}:T{
+Do not apply sys\-* options to events\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+\-\-verbose,
+.PP
+\-v
+T}:T{
+Turn on verbose output
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+\-\-loops=#
+T}:T{
+Set the number of times to perform a given command\&. Default is 0\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+.TE
+.sp 1
+.PP
+\fBndb_index_stat statistics options\fR. The following options are used to generate index statistics\&. They work with a given table and database\&. They cannot be mixed with
+ndb_index_stat system options\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" database option (ndb_index_stat)
+.\" -d option (ndb_index_stat)
+\fB\-\-database=\fR\fB\fIname\fR\fR,
+\fB\-d \fR\fB\fIname\fR\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+l l s s
+^ l l s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-database=name
+T}
+T{
+T}:T{
+\-d
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+string
+T}
+:T{
+\fBDefault\fR
+T}:T{
+[none]
+T}
+:T{
+\fBRange\fR
+T}:T{
+\&.\&.
+T}
+.TE
+.sp 1
+The name of the database that contains the table being queried\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" delete option (ndb_index_stat)
+\fB\-\-delete\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-delete
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+true
+T}
+:T{
+\fBRange\fR
+T}:T{
+\&.\&.
+T}
+.TE
+.sp 1
+Delete the index statistics for the given table, stopping any auto\-update that was previously configured\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" update option (ndb_index_stat)
+\fB\-\-update\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-update
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+true
+T}
+:T{
+\fBRange\fR
+T}:T{
+\&.\&.
+T}
+.TE
+.sp 1
+Update the index statistics for the given table, and restart any auto\-update that previously configured\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" dump option (ndb_index_stat)
+\fB\-\-dump\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-dump
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+true
+T}
+:T{
+\fBRange\fR
+T}:T{
+\&.\&.
+T}
+.TE
+.sp 1
+Dump the contents of the query cache\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" query option (ndb_index_stat)
+\fB\-\-query=\fR\fB\fI#\fR\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-query=#
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+numeric
+T}
+:T{
+\fBDefault\fR
+T}:T{
+0
+T}
+:T{
+\fBRange\fR
+T}:T{
+0 \&.\&. MAX_INT
+T}
+.TE
+.sp 1
+Perform random range queries on first key attribute (must be int unsigned)\&.
+.RE
+.PP
+\fBndb_index_stat system options\fR. The following options are used to generate and update the statistics tables in the NDB kernel\&. They cannot be mixed with
+ndb_index_stat statistics options\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" sys-drop option (ndb_index_stat)
+\fB\-\-sys\-drop\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-sys\-drop
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+true
+T}
+:T{
+\fBRange\fR
+T}:T{
+\&.\&.
+T}
+.TE
+.sp 1
+Drop all statistics tables and events in the NDB kernel\&.
+\fIThis causes all statistics to be lost\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" sys-create option (ndb_index_stat)
+\fB\-\-sys\-create\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-sys\-create
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+true
+T}
+:T{
+\fBRange\fR
+T}:T{
+\&.\&.
+T}
+.TE
+.sp 1
+Create all statistics tables and events in the NDB kernel\&. This works only if none of them exist previously\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" sys-create-if-not-exist option (ndb_index_stat)
+\fBsys\-create\-if\-not\-exist\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-sys\-create\-if\-not\-exist
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+true
+T}
+:T{
+\fBRange\fR
+T}:T{
+\&.\&.
+T}
+.TE
+.sp 1
+Create any NDB system statistics tables or events (or both) that do not already exist when the program is invoked\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" sys-create-if-not-valid option (ndb_index_stat)
+\fB\-\-sys\-create\-if\-not\-valid\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-sys\-create\-if\-not\-valid
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+true
+T}
+:T{
+\fBRange\fR
+T}:T{
+\&.\&.
+T}
+.TE
+.sp 1
+Create any NDB system statistics tables or events that do not already exist, after dropping any that are invalid\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" sys-check option (ndb_index_stat)
+\fB\-\-sys\-check\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-sys\-check
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+true
+T}
+:T{
+\fBRange\fR
+T}:T{
+\&.\&.
+T}
+.TE
+.sp 1
+Verify that all required system statistics tables and events exist in the NDB kernel\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" sys-skip-tables option (ndb_index_stat)
+\fB\-\-sys\-skip\-tables\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-sys\-skip\-tables
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+true
+T}
+:T{
+\fBRange\fR
+T}:T{
+\&.\&.
+T}
+.TE
+.sp 1
+Do not apply any
+\fB\-\-sys\-*\fR
+options to any statistics tables\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" sys-skip-events option (ndb_index_stat)
+\fB\-\-sys\-skip\-events\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-sys\-skip\-events
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+true
+T}
+:T{
+\fBRange\fR
+T}:T{
+\&.\&.
+T}
+.TE
+.sp 1
+Do not apply any
+\fB\-\-sys\-*\fR
+options to any events\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" verbose option (ndb_index_stat)
+\fB\-\-verbose\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+l l s s
+^ l l s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-verbose
+T}
+T{
+T}:T{
+\-v
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+true
+T}
+:T{
+\fBRange\fR
+T}:T{
+\&.\&.
+T}
+.TE
+.sp 1
+Turn on verbose output\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" loops option (ndb_index_stat)
+\fB\-\-loops=\fR\fB\fI#\fR\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-loops=#
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+numeric
+T}
+:T{
+\fBDefault\fR
+T}:T{
+0
+T}
+:T{
+\fBRange\fR
+T}:T{
+0 \&.\&. MAX_INT
+T}
+.TE
+.sp 1
+Repeat commands this number of times (for use in testing)\&.
+.RE
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2013, Oracle and/or its affiliates. All rights reserved.
+.PP
+This software and related documentation are provided under a license agreement containing restrictions on use and disclosure and are protected by intellectual property laws. Except as expressly permitted in your license agreement or allowed by law, you may not use, copy, reproduce, translate, broadcast, modify, license, transmit, distribute, exhibit, perform, publish, or display any part, in any form, or by any means. Reverse engineering, disassembly, or decompilation of this software, unless required by law for interoperability, is prohibited.
+.PP
+The information contained herein is subject to change without notice and is not warranted to be error-free. If you find any errors, please report them to us in writing.
+.PP
+If this software or related documentation is delivered to the U.S. Government or anyone licensing it on behalf of the U.S. Government, the following notice is applicable:
+.PP
+U.S. GOVERNMENT RIGHTS Programs, software, databases, and related documentation and technical data delivered to U.S. Government customers are "commercial computer software" or "commercial technical data" pursuant to the applicable Federal Acquisition Regulation and agency-specific supplemental regulations. As such, the use, duplication, disclosure, modification, and adaptation shall be subject to the restrictions and license terms set forth in the applicable Government contract, and, to the extent applicable by the terms of the Government contract, the additional rights set forth in FAR 52.227-19, Commercial Computer Software License (December 2007). Oracle USA, Inc., 500 Oracle Parkway, Redwood City, CA 94065.
+.PP
+This software is developed for general use in a variety of information management applications. It is not developed or intended for use in any inherently dangerous applications, including applications which may create a risk of personal injury. If you use this software in dangerous applications, then you shall be responsible to take all appropriate fail-safe, backup, redundancy, and other measures to ensure the safe use of this software. Oracle Corporation and its affiliates disclaim any liability for any damages caused by use of this software in dangerous applications.
+.PP
+Oracle is a registered trademark of Oracle Corporation and/or its affiliates. MySQL is a trademark of Oracle Corporation and/or its affiliates, and shall not be used without Oracle's express written authorization. Other names may be trademarks of their respective owners.
+.PP
+This software and documentation may provide access to or information on content, products, and services from third parties. Oracle Corporation and its affiliates are not responsible for and expressly disclaim all warranties of any kind with respect to third-party content, products, and services. Oracle Corporation and its affiliates will not be responsible for any loss, costs, or damages incurred due to your access to or use of third-party content, products, or services.
+.PP
+This document in any form, software or printed matter, contains proprietary information that is the exclusive property of Oracle. Your access to and use of this material is subject to the terms and conditions of your Oracle Software License and Service Agreement, which has been executed and with which you agree to comply. This document and information contained herein may not be disclosed, copied, reproduced, or distributed to anyone outside Oracle without prior written consent of Oracle or as specifically provided below. This document is not part of your license agreement nor can it be incorporated into any contractual agreement with Oracle or its subsidiaries or affiliates.
+.PP
+This documentation is NOT distributed under a GPL license. Use of this documentation is subject to the following terms:
+.PP
+You may create a printed copy of this documentation solely for your own personal use. Conversion to other formats is allowed as long as the actual content is not altered or edited in any way. You shall not publish or distribute this documentation in any form or on any media, except if you distribute the documentation in a manner similar to how Oracle disseminates it (that is, electronically for download on a Web site with the software) or on a CD-ROM or similar medium, provided however that the documentation is disseminated together with the software on the same medium. Any other use, such as any dissemination of printed copies or use of this documentation, in whole or in part, in another publication, requires the prior written consent from an authorized representative of Oracle. Oracle and/or its affiliates reserve any and all rights to this documentation not expressly granted above.
+.PP
+For more information on the terms of this license, or for details on how the MySQL documentation is built and produced, please visit
+\m[blue]\fBMySQL Contact & Questions\fR\m[].
+.PP
+For additional licensing information, including licenses for third-party libraries used by MySQL products, see
+Preface and Legal Notices.
+.PP
+For help with using MySQL, please visit either the
+\m[blue]\fBMySQL Forums\fR\m[]
+or
+\m[blue]\fBMySQL Mailing Lists\fR\m[]
+where you can discuss your issues with other MySQL users.
+.PP
+For additional documentation on MySQL products, including translations of the documentation into other languages, and downloadable versions in variety of formats, including HTML and PDF formats, see the
+\m[blue]\fBMySQL Documentation Library\fR\m[].
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

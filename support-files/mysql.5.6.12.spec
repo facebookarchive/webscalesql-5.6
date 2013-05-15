@@ -1,4 +1,4 @@
-# Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2000, 2013, Oracle and/or its affiliates. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 %define mysql_vendor_2          Sun Microsystems, Inc.
 %define mysql_vendor            Oracle and/or its affiliates
 
-%define mysql_version   5.6.11
+%define mysql_version   5.6.12
 
 %define mysqld_user     mysql
 %define mysqld_group    mysql
@@ -241,7 +241,7 @@
 Name:           MySQL%{product_suffix}
 Summary:        MySQL: a very fast and reliable SQL database server
 Group:          Applications/Databases
-Version:        5.6.11
+Version:        5.6.12
 Release:        %{release}%{?distro_releasetag:.%{distro_releasetag}}
 Distribution:   %{distro_description}
 License:        Copyright (c) 2000, 2013, %{mysql_vendor}. All rights reserved. Under %{license_type} license as shown in the Description field.
@@ -300,7 +300,6 @@ Obsoletes:      mysql mysql-server mysql-advanced mysql-server-advanced
 Obsoletes:      MySQL-server-classic MySQL-server-community MySQL-server-enterprise
 Obsoletes:      MySQL-server-advanced-gpl MySQL-server-enterprise-gpl
 Provides:       msqlormysql MySQL MySQL-server MySQL-server-advanced
-Provides:       mysql
 %endif
 
 %description -n MySQL-server%{product_suffix}

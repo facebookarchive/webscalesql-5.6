@@ -1,5 +1,5 @@
 
-2.2. Installing MySQL from Generic Binaries on Unix/Linux
+2.2. Installing MySQL on Unix/Linux Using Generic Binaries
 
    Oracle provides a set of binary distributions of MySQL. These
    include binary distributions in the form of compressed tar files
@@ -17,7 +17,7 @@
 
    MySQL compressed tar file binary distributions have names of the
    form mysql-VERSION-OS.tar.gz, where VERSION is a number (for
-   example, 5.6.12), and OS indicates the type of operating system
+   example, 5.6.13), and OS indicates the type of operating system
    for which the distribution is intended (for example, pc-linux-i686
    or winx64).
 

@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqldump\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 04/05/2013
+.\"      Date: 05/21/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLDUMP\FR" "1" "04/05/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLDUMP\FR" "1" "05/21/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -62,6 +62,13 @@ option is not used\&. Certain options might require other privileges as noted in
 To reload a dump file, you must have the same privileges needed to create each of the dumped objects by issuing
 CREATE
 statements manually\&.
+.PP
+\fBmysqldump\fR
+output can include
+ALTER DATABASE
+statements that change the database collation\&. These may be used when dumping stored programs to preserve their character encodings\&. To reload a dump file containing such statements, the
+ALTER
+privilege for the affected database is required\&.
         Performance and Scalability Considerations
 .PP
 mysqldump
@@ -1083,151 +1090,9 @@ option automatically turns off
 also is specified, in which case, a global read lock is acquired only for a short time at the beginning of the dump (see the description for
 \fB\-\-single\-transaction\fR)\&. In all cases, any action on logs happens at the exact moment of the dump\&.
 .sp
-It is also possible to set up a slave by dumping an existing slave of the master\&. To do this, use the following procedure on the existing slave:
-.sp
-.RS 4
-.ie n \{\
-\h'-04' 1.\h'+01'\c
-.\}
-.el \{\
-.sp -1
-.IP "  1." 4.2
-.\}
-Stop the slave\*(Aqs SQL thread and get its current status:
-.sp
-.if n \{\
-.RS 4
-.\}
-.nf
-mysql> \fBSTOP SLAVE SQL_THREAD;\fR
-mysql> \fBSHOW SLAVE STATUS;\fR
-.fi
-.if n \{\
-.RE
-.\}
-.RE
-.sp
-.RS 4
-.ie n \{\
-\h'-04' 2.\h'+01'\c
-.\}
-.el \{\
-.sp -1
-.IP "  2." 4.2
-.\}
-From the output of the
-SHOW SLAVE STATUS
-statement, the binary log coordinates of the master server from which the new slave should start replicating are the values of the
-Relay_Master_Log_File
-and
-Exec_Master_Log_Pos
-fields\&. Denote those values as
-\fIfile_name\fR
-and
-\fIfile_pos\fR\&.
-.RE
-.sp
-.RS 4
-.ie n \{\
-\h'-04' 3.\h'+01'\c
-.\}
-.el \{\
-.sp -1
-.IP "  3." 4.2
-.\}
-Dump the slave server:
-.sp
-.if n \{\
-.RS 4
-.\}
-.nf
-shell> \fBmysqldump \-\-master\-data=2 \-\-all\-databases > dumpfile\fR
-.fi
-.if n \{\
-.RE
-.\}
-.sp
-Using
-\fB\-\-master\-data=2\fR
-works only if binary logging has been enabled on the slave\&. Otherwise,
-\fBmysqldump\fR
-fails with the error
-Binlogging on server not active\&. In this case you must handle any locking issues in another manner, using one or more of
-\fB\-\-add\-locks\fR,
-\fB\-\-lock\-tables\fR,
-\fB\-\-lock\-all\-tables\fR, or
-\fB\-\-single\-transaction\fR, as required by your application and environment\&.
-.RE
-.sp
-.RS 4
-.ie n \{\
-\h'-04' 4.\h'+01'\c
-.\}
-.el \{\
-.sp -1
-.IP "  4." 4.2
-.\}
-Restart the slave:
-.sp
-.if n \{\
-.RS 4
-.\}
-.nf
-mysql> \fBSTART SLAVE;\fR
-.fi
-.if n \{\
-.RE
-.\}
-.RE
-.sp
-.RS 4
-.ie n \{\
-\h'-04' 5.\h'+01'\c
-.\}
-.el \{\
-.sp -1
-.IP "  5." 4.2
-.\}
-On the new slave, load the dump file:
-.sp
-.if n \{\
-.RS 4
-.\}
-.nf
-shell> \fBmysql < dumpfile\fR
-.fi
-.if n \{\
-.RE
-.\}
-.RE
-.sp
-.RS 4
-.ie n \{\
-\h'-04' 6.\h'+01'\c
-.\}
-.el \{\
-.sp -1
-.IP "  6." 4.2
-.\}
-On the new slave, set the replication coordinates to those of the master server obtained earlier:
-.sp
-.if n \{\
-.RS 4
-.\}
-.nf
-mysql> \fBCHANGE MASTER TO\fR
-    \-> \fBMASTER_LOG_FILE = \*(Aq\fR\fB\fIfile_name\fR\fR\fB\*(Aq, MASTER_LOG_POS = \fR\fB\fIfile_pos\fR\fR\fB;\fR
-.fi
-.if n \{\
-.RE
-.\}
-.sp
-The
-CHANGE MASTER TO
-statement might also need other parameters, such as
-MASTER_HOST
-to point the slave to the correct master server host\&. Add any such parameters as necessary\&.
-.RE
+It is also possible to set up a slave by dumping an existing slave of the master, using the
+\fB\-\-dump\-slave\fR
+option\&.
 .sp
 Prior to MySQL 5\&.6\&.4, this option was required for dumping the replication log tables (see
 Section\ \&16.2.2, \(lqReplication Relay and Status Logs\(rq)\&.
@@ -2514,6 +2379,11 @@ option\&.
 never dumps the
 performance_schema
 database\&.
+.PP
+\fBmysqldump\fR
+also does not dump the MySQL Cluster
+ndbinfo
+information database\&.
 .PP
 Before MySQL 5\&.6\&.6,
 \fBmysqldump\fR

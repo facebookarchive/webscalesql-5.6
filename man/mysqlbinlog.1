@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqlbinlog\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 04/05/2013
+.\"      Date: 05/21/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLBINLOG\FR" "1" "04/05/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLBINLOG\FR" "1" "05/21/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -971,6 +971,35 @@ option value is treated as a prefix that modifies output file names\&.
 \fB\-\-server\-id=\fR\fB\fIid\fR\fR
 .sp
 Display only those events created by the server having the given server ID\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysqlbinlog: server-id-bits option
+.\" server-id-bits option: mysqlbinlog
+\fB\-\-server\-id\-bits=\fR\fB\fIN\fR\fR
+.sp
+Use only the first
+\fIN\fR
+bits of the
+server_id
+to identify the server\&. If the binary log was written by a
+\fBmysqld\fR
+with server\-id\-bits set to less than 32 and user data stored in the most significant bit, running
+\fBmysqlbinlog\fR
+with
+\fB\-\-server\-id\-bits\fR
+set to 32 enables this data to be seen\&.
+.sp
+This option is supported only by the versions of
+\fBmysqlbinlog\fR
+supplied with the MySQL Cluster distribution, or built from the MySQL Cluster sources\&.
 .RE
 .sp
 .RS 4

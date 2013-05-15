@@ -19,8 +19,8 @@
        privileges using this method, as you can install the MySQL
        server anywhere using this method. For more information on
        using this method, you can use the generic instructions for
-       using a tarball, Section 2.2, "Installing MySQL from Generic
-       Binaries on Unix/Linux."You can use the package installer with
+       using a tarball, Section 2.2, "Installing MySQL on Unix/Linux
+       Using Generic Binaries."You can use the package installer with
        Mac OS X 10.3 and later, and available for both PowerPC and
        Intel architectures, and both 32-bit and 64-bit architectures.
        A Universal Binary, incorporating both Power PC and Intel
@@ -131,7 +131,7 @@ alias mysqladmin /usr/local/mysql/bin/mysqladmin
 2.4.2. Installing MySQL on Mac OS X Using Native Packages
 
    You can install MySQL on Mac OS X 10.3.x ("Panther") or newer
-   using a Mac OS X binary package in PKG format instead of the
+   using a Mac OS X binary package in DMG format instead of the
    binary tarball distribution. Please note that older versions of
    Mac OS X (for example, 10.1.x or 10.2.x) are not supported by this
    package.

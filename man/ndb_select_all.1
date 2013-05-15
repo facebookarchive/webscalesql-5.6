@@ -1,0 +1,619 @@
+'\" t
+.\"     Title: \fBndb_select_all\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
+.\"      Date: 05/21/2013
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 5.6
+.\"  Language: English
+.\"
+.TH "\FBNDB_SELECT_ALL\FR" "1" "05/21/2013" "MySQL 5\&.6" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.\" ndb_select_all
+.SH "NAME"
+ndb_select_all \- print rows from an NDB table
+.SH "SYNOPSIS"
+.HP \w'\fBndb_select_all\ \-c\ \fR\fB\fIconnect_string\fR\fR\fB\ \fR\fB\fItbl_name\fR\fR\fB\ \-d\ \fR\fB\fIdb_name\fR\fR\fB\ [>\ \fR\fB\fIfile_name\fR\fR\fB]\fR\ 'u
+\fBndb_select_all \-c \fR\fB\fIconnect_string\fR\fR\fB \fR\fB\fItbl_name\fR\fR\fB \-d \fR\fB\fIdb_name\fR\fR\fB [> \fR\fB\fIfile_name\fR\fR\fB]\fR
+.SH "DESCRIPTION"
+.PP
+\fBndb_select_all\fR
+prints all rows from an
+NDB
+table to
+stdout\&.
+        Usage
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_select_all \-c \fIconnect_string\fR \fItbl_name\fR \-d \fIdb_name\fR [> \fIfile_name\fR]
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The following table includes options that are specific to the MySQL Cluster native backup restoration program
+\fBndb_select_all\fR\&. Additional descriptions follow the table\&. For options common to most MySQL Cluster programs (including
+\fBndb_select_all\fR), see
+Options Common to MySQL Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&17.23.\ \&ndb_select_all Options and Variables: MySQL Cluster NDB 7.3
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added / Removed
+T}
+.T&
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l.
+T{
+.PP
+--database=dbname,
+.PP
+-d
+T}:T{
+Name of the database in which the table is found
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--parallelism=#,
+.PP
+-p
+T}:T{
+Degree of parallelism
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--lock=#,
+.PP
+-l
+T}:T{
+Lock type
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--order=index,
+.PP
+-o
+T}:T{
+Sort resultset according to index whose name is supplied
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--descending,
+.PP
+-z
+T}:T{
+Sort resultset in descending order (requires order flag)
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--header,
+.PP
+-h
+T}:T{
+Print header (set to 0|FALSE to disable headers in output)
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--useHexFormat,
+.PP
+-x
+T}:T{
+Output numbers in hexadecimal format
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--delimiter=char,
+.PP
+-D
+T}:T{
+Set a column delimiter
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--disk
+T}:T{
+Print disk references (useful only for Disk Data tables having
+            nonindexed columns)
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--rowid
+T}:T{
+Print rowid
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--gci
+T}:T{
+Include GCI in output
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--tup,
+.PP
+-t
+T}:T{
+Scan in tup order
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--nodata
+T}:T{
+Do not print table column data
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+.TE
+.sp 1
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_select_all: database option
+\fB\-\-database=\fR\fB\fIdbname\fR\fR,
+\fB\-d\fR
+\fIdbname\fR
+.sp
+Name of the database in which the table is found\&. The default value is
+TEST_DB\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_select_all: parallelism option
+\fBparallelism=\fR\fB\fI#\fR\fR,
+\fB\-p\fR
+\fI#\fR
+.sp
+Specifies the degree of parallelism\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_select_all: lock option
+.\" lock option: ndb_select_all
+\fB\-\-lock=\fR\fB\fIlock_type\fR\fR,
+\fB\-l \fR\fB\fIlock_type\fR\fR
+.sp
+Employs a lock when reading the table\&. Possible values for
+\fIlock_type\fR
+are:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+0: Read lock
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+1: Read lock with hold
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+2: Exclusive read lock
+.RE
+.sp
+There is no default value for this option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_select_all: order option
+.\" order option: ndb_select_all
+\fB\-\-order=\fR\fB\fIindex_name\fR\fR,
+\fB\-o \fR\fB\fIindex_name\fR\fR
+.sp
+Orders the output according to the index named
+\fIindex_name\fR\&. Note that this is the name of an index, not of a column, and that the index must have been explicitly named when created\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_select_all: descending option
+.\" descending option: ndb_select_all
+\fB\-\-descending\fR,
+\fB\-z\fR
+.sp
+Sorts the output in descending order\&. This option can be used only in conjunction with the
+\fB\-o\fR
+(\fB\-\-order\fR) option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_select_all: header option
+.\" header option: ndb_select_all
+\fB\-\-header=FALSE\fR
+.sp
+Excludes column headers from the output\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_select_all: useHexFormat option
+.\" useHexFormat option: ndb_select_all
+\fB\-\-useHexFormat\fR
+\fB\-x\fR
+.sp
+Causes all numeric values to be displayed in hexadecimal format\&. This does not affect the output of numerals contained in strings or datetime values\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_select_all: delimiter option
+.\" delimiter option: ndb_select_all
+\fB\-\-delimiter=\fR\fB\fIcharacter\fR\fR,
+\fB\-D \fR\fB\fIcharacter\fR\fR
+.sp
+Causes the
+\fIcharacter\fR
+to be used as a column delimiter\&. Only table data columns are separated by this delimiter\&.
+.sp
+The default delimiter is the tab character\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_select_all: disk option
+.\" disk option: ndb_select_all
+\fB\-\-disk\fR
+.sp
+Adds a disk reference column to the output\&. The column is nonempty only for Disk Data tables having nonindexed columns\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_select_all: rowid option
+.\" rowid option: ndb_select_all
+\fB\-\-rowid\fR
+.sp
+Adds a
+ROWID
+column providing information about the fragments in which rows are stored\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_select_all: gci option
+.\" gci option: ndb_select_all
+\fB\-\-gci\fR
+.sp
+Adds a column to the output showing the global checkpoint at which each row was last updated\&. See
+Section\ \&17.1, \(lqMySQL Cluster Overview\(rq, and
+Section\ \&17.5.6.2, \(lqMySQL Cluster Log Events\(rq, for more information about checkpoints\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_select_all: tupscan option
+.\" tupscan option: ndb_select_all
+\fB\-\-tupscan\fR,
+\fB\-t\fR
+.sp
+Scan the table in the order of the tuples\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_select_all: nodata option
+.\" nodata option: ndb_select_all
+\fB\-\-nodata\fR
+.sp
+Causes any table data to be omitted\&.
+.RE
+        Sample Output
+.PP
+Output from a MySQL
+SELECT
+statement:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysql> \fBSELECT * FROM ctest1\&.fish;\fR
++\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-+
+| id | name      |
++\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-+
+|  3 | shark     |
+|  6 | puffer    |
+|  2 | tuna      |
+|  4 | manta ray |
+|  5 | grouper   |
+|  1 | guppy     |
++\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-+
+6 rows in set (0\&.04 sec)
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Output from the equivalent invocation of
+\fBndb_select_all\fR:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fB\&./ndb_select_all \-c localhost fish \-d ctest1\fR
+id      name
+3       [shark]
+6       [puffer]
+2       [tuna]
+4       [manta ray]
+5       [grouper]
+1       [guppy]
+6 rows returned
+NDBT_ProgramExit: 0 \- OK
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Note that all string values are enclosed by square brackets (\(lq[\&.\&.\&.]\(rq) in the output of
+\fBndb_select_all\fR\&. For a further example, consider the table created and populated as shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+CREATE TABLE dogs (
+    id INT(11) NOT NULL AUTO_INCREMENT,
+    name VARCHAR(25) NOT NULL,
+    breed VARCHAR(50) NOT NULL,
+    PRIMARY KEY pk (id),
+    KEY ix (name)
+)
+TABLESPACE ts STORAGE DISK
+ENGINE=NDBCLUSTER;
+INSERT INTO dogs VALUES
+    (\*(Aq\*(Aq, \*(AqLassie\*(Aq, \*(Aqcollie\*(Aq),
+    (\*(Aq\*(Aq, \*(AqScooby\-Doo\*(Aq, \*(AqGreat Dane\*(Aq),
+    (\*(Aq\*(Aq, \*(AqRin\-Tin\-Tin\*(Aq, \*(AqAlsatian\*(Aq),
+    (\*(Aq\*(Aq, \*(AqRosscoe\*(Aq, \*(AqMutt\*(Aq);
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This demonstrates the use of several additional
+\fBndb_select_all\fR
+options:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fB\&./ndb_select_all \-d ctest1 dogs \-o ix \-z \-\-gci \-\-disk\fR
+GCI     id name          breed        DISK_REF
+834461  2  [Scooby\-Doo]  [Great Dane] [ m_file_no: 0 m_page: 98 m_page_idx: 0 ]
+834878  4  [Rosscoe]     [Mutt]       [ m_file_no: 0 m_page: 98 m_page_idx: 16 ]
+834463  3  [Rin\-Tin\-Tin] [Alsatian]   [ m_file_no: 0 m_page: 34 m_page_idx: 0 ]
+835657  1  [Lassie]      [Collie]     [ m_file_no: 0 m_page: 66 m_page_idx: 0 ]
+4 rows returned
+NDBT_ProgramExit: 0 \- OK
+.fi
+.if n \{\
+.RE
+.\}
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2013, Oracle and/or its affiliates. All rights reserved.
+.PP
+This software and related documentation are provided under a license agreement containing restrictions on use and disclosure and are protected by intellectual property laws. Except as expressly permitted in your license agreement or allowed by law, you may not use, copy, reproduce, translate, broadcast, modify, license, transmit, distribute, exhibit, perform, publish, or display any part, in any form, or by any means. Reverse engineering, disassembly, or decompilation of this software, unless required by law for interoperability, is prohibited.
+.PP
+The information contained herein is subject to change without notice and is not warranted to be error-free. If you find any errors, please report them to us in writing.
+.PP
+If this software or related documentation is delivered to the U.S. Government or anyone licensing it on behalf of the U.S. Government, the following notice is applicable:
+.PP
+U.S. GOVERNMENT RIGHTS Programs, software, databases, and related documentation and technical data delivered to U.S. Government customers are "commercial computer software" or "commercial technical data" pursuant to the applicable Federal Acquisition Regulation and agency-specific supplemental regulations. As such, the use, duplication, disclosure, modification, and adaptation shall be subject to the restrictions and license terms set forth in the applicable Government contract, and, to the extent applicable by the terms of the Government contract, the additional rights set forth in FAR 52.227-19, Commercial Computer Software License (December 2007). Oracle USA, Inc., 500 Oracle Parkway, Redwood City, CA 94065.
+.PP
+This software is developed for general use in a variety of information management applications. It is not developed or intended for use in any inherently dangerous applications, including applications which may create a risk of personal injury. If you use this software in dangerous applications, then you shall be responsible to take all appropriate fail-safe, backup, redundancy, and other measures to ensure the safe use of this software. Oracle Corporation and its affiliates disclaim any liability for any damages caused by use of this software in dangerous applications.
+.PP
+Oracle is a registered trademark of Oracle Corporation and/or its affiliates. MySQL is a trademark of Oracle Corporation and/or its affiliates, and shall not be used without Oracle's express written authorization. Other names may be trademarks of their respective owners.
+.PP
+This software and documentation may provide access to or information on content, products, and services from third parties. Oracle Corporation and its affiliates are not responsible for and expressly disclaim all warranties of any kind with respect to third-party content, products, and services. Oracle Corporation and its affiliates will not be responsible for any loss, costs, or damages incurred due to your access to or use of third-party content, products, or services.
+.PP
+This document in any form, software or printed matter, contains proprietary information that is the exclusive property of Oracle. Your access to and use of this material is subject to the terms and conditions of your Oracle Software License and Service Agreement, which has been executed and with which you agree to comply. This document and information contained herein may not be disclosed, copied, reproduced, or distributed to anyone outside Oracle without prior written consent of Oracle or as specifically provided below. This document is not part of your license agreement nor can it be incorporated into any contractual agreement with Oracle or its subsidiaries or affiliates.
+.PP
+This documentation is NOT distributed under a GPL license. Use of this documentation is subject to the following terms:
+.PP
+You may create a printed copy of this documentation solely for your own personal use. Conversion to other formats is allowed as long as the actual content is not altered or edited in any way. You shall not publish or distribute this documentation in any form or on any media, except if you distribute the documentation in a manner similar to how Oracle disseminates it (that is, electronically for download on a Web site with the software) or on a CD-ROM or similar medium, provided however that the documentation is disseminated together with the software on the same medium. Any other use, such as any dissemination of printed copies or use of this documentation, in whole or in part, in another publication, requires the prior written consent from an authorized representative of Oracle. Oracle and/or its affiliates reserve any and all rights to this documentation not expressly granted above.
+.PP
+For more information on the terms of this license, or for details on how the MySQL documentation is built and produced, please visit
+\m[blue]\fBMySQL Contact & Questions\fR\m[].
+.PP
+For additional licensing information, including licenses for third-party libraries used by MySQL products, see
+Preface and Legal Notices.
+.PP
+For help with using MySQL, please visit either the
+\m[blue]\fBMySQL Forums\fR\m[]
+or
+\m[blue]\fBMySQL Mailing Lists\fR\m[]
+where you can discuss your issues with other MySQL users.
+.PP
+For additional documentation on MySQL products, including translations of the documentation into other languages, and downloadable versions in variety of formats, including HTML and PDF formats, see the
+\m[blue]\fBMySQL Documentation Library\fR\m[].
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

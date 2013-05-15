@@ -1,0 +1,2115 @@
+'\" t
+.\"     Title: \fBndb_restore\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
+.\"      Date: 05/21/2013
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 5.6
+.\"  Language: English
+.\"
+.TH "\FBNDB_RESTORE\FR" "1" "05/21/2013" "MySQL 5\&.6" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.\" MySQL Cluster: backups
+.\" backups: in MySQL Cluster
+.\" MySQL Cluster: restoring backups
+.\" restoring backups: in MySQL Cluster
+.\" ndb_restore
+.SH "NAME"
+ndb_restore \- restore a MySQL Cluster backup
+.SH "SYNOPSIS"
+.HP \w'\fBndb_restore\ \fR\fB\fIoptions\fR\fR\ 'u
+\fBndb_restore \fR\fB\fIoptions\fR\fR
+.SH "DESCRIPTION"
+.PP
+The cluster restoration program is implemented as a separate command\-line utility
+\fBndb_restore\fR, which can normally be found in the MySQL
+bin
+directory\&. This program reads the files created as a result of the backup and inserts the stored information into the database\&.
+.PP
+\fBndb_restore\fR
+must be executed once for each of the backup files that were created by the
+START BACKUP
+command used to create the backup (see
+Section\ \&17.5.3.2, \(lqUsing The MySQL Cluster Management Client to Create a Backup\(rq)\&. This is equal to the number of data nodes in the cluster at the time that the backup was created\&.
+.\" single user mode (MySQL Cluster): and ndb_restore
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+Before using
+\fBndb_restore\fR, it is recommended that the cluster be running in single user mode, unless you are restoring multiple data nodes in parallel\&. See
+Section\ \&17.5.8, \(lqMySQL Cluster Single User Mode\(rq, for more information\&.
+.sp .5v
+.RE
+.PP
+The following table includes options that are specific to the MySQL Cluster native backup restoration program
+\fBndb_restore\fR\&. Additional descriptions follow the table\&. For options common to most MySQL Cluster programs (including
+\fBndb_restore\fR), see
+Options Common to MySQL Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&17.22.\ \&ndb_restore Options and Variables: MySQL Cluster NDB 7.3
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added / Removed
+T}
+.T&
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l.
+T{
+.PP
+--connect,
+.PP
+-c
+T}:T{
+Same as connectstring
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--nodeid=#,
+.PP
+-n
+T}:T{
+Back up files from node with this ID
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--backupid=#,
+.PP
+-b
+T}:T{
+Restore from the backup with the given ID
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--restore_data
+T}:T{
+Restore table data and logs into NDB Cluster using the NDB API
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--restore_meta,
+.PP
+-m
+T}:T{
+Restore metadata to NDB Cluster using the NDB API
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--no-upgrade,
+.PP
+-u
+T}:T{
+Do not upgrade array type for varsize attributes which do not already
+            resize VAR data, and do not change column attributes
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--promote-attributes,
+.PP
+-A
+T}:T{
+Allow attributes to be promoted when restoring data from backup
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--preserve-trailing-spaces,
+.PP
+-P
+T}:T{
+Allow preservation of trailing spaces (including padding) when promoting
+            fixed\-width string types to variable\-width types
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--no-restore-disk-objects,
+.PP
+-d
+T}:T{
+Do not restore objects relating to Disk Data
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--restore_epoch,
+.PP
+-e
+T}:T{
+Restore epoch info into the status table\&. Convenient on a MySQL Cluster
+            replication slave for starting replication\&. The row in
+            mysql\&.ndb_apply_status with id 0 will be updated/inserted\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--skip-table-check,
+.PP
+-s
+T}:T{
+Skip table structure check during restoring of data
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--parallelism=#,
+.PP
+-p
+T}:T{
+Number of parallel transactions to use while restoring data
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--print
+T}:T{
+Print metadata, data and log to stdout (equivalent to \-\-print_meta
+            \-\-print_data \-\-print_log)
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--print_meta
+T}:T{
+Print metadata to stdout
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--print_data
+T}:T{
+Print data to stdout
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--print_log
+T}:T{
+Print to stdout
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--backup_path=path
+T}:T{
+Path to backup files directory
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--dont_ignore_systab_0,
+.PP
+-f
+T}:T{
+Do not ignore system table during restore\&. Experimental only; not for
+            production use
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--ndb-nodegroup-map=map,
+.PP
+-z
+T}:T{
+Nodegroup map for NDBCLUSTER storage engine\&. Syntax: list of
+            (source_nodegroup, destination_nodegroup)
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--fields-enclosed-by=char
+T}:T{
+Fields are enclosed with the indicated character
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--fields-terminated-by=char
+T}:T{
+Fields are terminated by the indicated character
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--fields-optionally-enclosed-by
+T}:T{
+Fields are optionally enclosed with the indicated character
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--lines-terminated-by=char
+T}:T{
+Lines are terminated by the indicated character
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--hex
+T}:T{
+Print binary types in hexadecimal format
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--tab=path,
+.PP
+-T
+T}:T{
+Creates a tab\-separated \&.txt file for each table in the given path
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--append
+T}:T{
+Append data to a tab\-delimited file
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--progress-frequency=#
+T}:T{
+Print status of restoration each given number of seconds
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--no-binlog
+T}:T{
+If a mysqld is connected and using binary logging, do not log the
+            restored data
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--verbose=#
+T}:T{
+Level of verbosity in output
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--include-databases=db-list
+T}:T{
+List of one or more databases to restore (excludes those not named)
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--exclude-databases=db-list
+T}:T{
+List of one or more databases to exclude (includes those not named)
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--include-tables=table-list
+T}:T{
+List of one or more tables to restore (excludes those in same database
+            that are not named); each table reference must include the
+            database name
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--exclude-tables=table-list
+T}:T{
+List of one or more tables to exclude (includes those in same database
+            that are not not named); each table reference must include
+            the database name
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--exclude-missing-columns
+T}:T{
+Causes columns from the backup version of a table that are missing from
+            the version of the table in the database to be ignored\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--disable-indexes
+T}:T{
+Causes indexes from a backup to be ignored; may decrease time needed to
+            restore data\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--rebuild-indexes
+T}:T{
+Causes multi\-threaded ordered index rebuilding of indexes found in the
+            backup\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--skip-broken-objects
+T}:T{
+Causes missing blob tables in the backup file to be ignored\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--skip-unknown-objects
+T}:T{
+Causes schema objects not recognized by ndb_restore to be ignored when
+            restoring a backup made from a newer MySQL Cluster version
+            to an older version\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--rewrite-database=olddb,newdb
+T}:T{
+Restores to a database with a different name than the original
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--lossy-conversions,
+.PP
+-L
+T}:T{
+Allow lossy conversions of column values (type demotions or changes in
+            sign) when restoring data from backup
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--restore-privilege-tables
+T}:T{
+Restore MySQL privilege tables that were previously moved to NDB\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+.TE
+.sp 1
+.PP
+Typical options for this utility are shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_restore [\-c \fIconnectstring\fR] \-n \fInode_id\fR [\-m] \-b \fIbackup_id\fR \e
+    \-r \-\-backup_path=\fI/path/to/backup/files\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+.\" restore_connect option (ndb_restore)
+The
+\fB\-c\fR
+option is used to specify a connectstring which tells
+ndb_restore
+where to locate the cluster management server\&. (See
+Section\ \&17.3.2.3, \(lqThe MySQL Cluster Connectstring\(rq, for information on connectstrings\&.) If this option is not used, then
+\fBndb_restore\fR
+attempts to connect to a management server on
+localhost:1186\&. This utility acts as a cluster API node, and so requires a free connection
+\(lqslot\(rq
+to connect to the cluster management server\&. This means that there must be at least one
+[api]
+or
+[mysqld]
+section that can be used by it in the cluster
+config\&.ini
+file\&. It is a good idea to keep at least one empty
+[api]
+or
+[mysqld]
+section in
+config\&.ini
+that is not being used for a MySQL server or other application for this reason (see
+Section\ \&17.3.2.7, \(lqDefining SQL and Other API Nodes in a MySQL Cluster\(rq)\&.
+.PP
+You can verify that
+\fBndb_restore\fR
+is connected to the cluster by using the
+\fBSHOW\fR
+command in the
+\fBndb_mgm\fR
+management client\&. You can also accomplish this from a system shell, as shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_mgm \-e "SHOW"\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+.\" restore_nodeid option (ndb_restore)
+\fB\-n\fR
+is used to specify the node ID of the data node on which the backups were taken\&.
+.PP
+The first time you run the
+\fBndb_restore\fR
+restoration program, you also need to restore the metadata\&. In other words, you must re\-create the database tables\(emthis can be done by running it with the
+\fB\-\-restore_meta\fR
+(\fB\-m\fR) option\&. Restoring the metdata need be done only on a single data node; this is sufficient to restore it to the entire cluster\&. Note that the cluster should have an empty database when starting to restore a backup\&. (In other words, you should start
+\fBndbd\fR
+with
+\fB\-\-initial\fR
+prior to performing the restore\&.)
+.PP
+.\" restore_skip-table-check option (ndb_restore)
+It is possible to restore data without restoring table metadata\&. The default behavior when doing this is for
+\fBndb_restore\fR
+to fail with an error if table data do not match the table schema; this can be overridden using the
+\fB\-\-skip\-table\-check\fR
+or
+\fB\-s\fR
+option\&.
+.PP
+Some of the restrictions on mismatches in column definitions when restoring data using
+\fBndb_restore\fR
+are relaxed; when one of these types of mismatches is encountered,
+\fBndb_restore\fR
+does not stop with an error as it did previously, but rather accepts the data and inserts it into the target table while issuing a warning to the user that this is being done\&. This behavior occurs whether or not either of the options
+\fB\-\-skip\-table\-check\fR
+or
+\fB\-\-promote\-attributes\fR
+is in use\&. These differences in column definitions are of the following types:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Different
+COLUMN_FORMAT
+settings (FIXED,
+DYNAMIC,
+DEFAULT)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Different
+STORAGE
+settings (MEMORY,
+DISK)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Different default values
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Different distribution key settings
+.RE
+.PP
+.\" attribute promotion: ndb_restore
+.\" ndb_restore: attribute promotion
+.\" promote-attributes option (ndb_restore)
+\fBndb_restore\fR
+supports limited
+attribute promotion
+in much the same way that it is supported by MySQL replication; that is, data backed up from a column of a given type can generally be restored to a column using a
+\(lqlarger, similar\(rq
+type\&. For example, data from a
+CHAR(20)
+column can be restored to a column declared as
+VARCHAR(20),
+VARCHAR(30), or
+CHAR(30); data from a
+MEDIUMINT
+column can be restored to a column of type
+INT
+or
+BIGINT\&. See
+Section\ \&16.4.1.9.2, \(lqReplication of Columns Having Different Data Types\(rq, for a table of type conversions currently supported by attribute promotion\&.
+.PP
+Attribute promotion by
+\fBndb_restore\fR
+must be enabled explicitly, as follows:
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 1.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  1." 4.2
+.\}
+Prepare the table to which the backup is to be restored\&.
+\fBndb_restore\fR
+cannot be used to re\-create the table with a different definition from the original; this means that you must either create the table manually, or alter the columns which you wish to promote using
+ALTER TABLE
+after restoring the table metadata but before restoring the data\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 2.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  2." 4.2
+.\}
+Invoke
+\fBndb_restore\fR
+with the
+\fB\-\-promote\-attributes\fR
+option (short form
+\fB\-A\fR) when restoring the table data\&. Attribute promotion does not occur if this option is not used; instead, the restore operation fails with an error\&.
+.RE
+.PP
+.\" ndb_restore: lossy-conversions option
+.\" lossy-conversions option (ndb_restore)
+\fB\-\-lossy\-conversions\fR,
+\fB\-L\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-lossy\-conversions
+T}
+T{
+T}:T{
+\-L
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+.PP
+This option is intended to complement the
+\fB\-\-promote\-attributes\fR
+option\&. Using
+\fB\-\-lossy\-conversions\fR
+allows lossy conversions of column values (type demotions or changes in sign) when restoring data from backup\&. With some exceptions, the rules governing demotion are the same as for MySQL replication; see
+Section\ \&16.4.1.9.2, \(lqReplication of Columns Having Different Data Types\(rq, for information about specific type conversions currently supported by attribute demotion\&.
+.PP
+\fBndb_restore\fR
+reports any truncation of data that it performs during lossy conversions once per attribute and column\&.
+.PP
+.\" preserve-trailing-spaces option (ndb_restore)
+The
+\fB\-\-preserve\-trailing\-spaces\fR
+option (short form
+\fB\-R\fR) causes trailing spaces to be preserved when promoting a fixed\-width character data type to its variable\-width equivalent\(emthat is, when promoting a
+CHAR
+column value to
+VARCHAR
+or a
+BINARY
+column value to
+VARBINARY\&. Otherwise, any trailing spaces are dropped from such column values when they are inserted into the new columns\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+Although you can promote
+CHAR
+columns to
+VARCHAR
+and
+BINARY
+columns to
+VARBINARY, you cannot promote
+VARCHAR
+columns to
+CHAR
+or
+VARBINARY
+columns to
+BINARY\&.
+.sp .5v
+.RE
+.PP
+.\" backupid option (ndb_restore)
+The
+\fB\-b\fR
+option is used to specify the ID or sequence number of the backup, and is the same number shown by the management client in the
+Backup \fIbackup_id\fR completed
+message displayed upon completion of a backup\&. (See
+Section\ \&17.5.3.2, \(lqUsing The MySQL Cluster Management Client to Create a Backup\(rq\&.)
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBImportant\fR
+.ps -1
+.br
+.PP
+When restoring cluster backups, you must be sure to restore all data nodes from backups having the same backup ID\&. Using files from different backups will at best result in restoring the cluster to an inconsistent state, and may fail altogether\&.
+.sp .5v
+.RE
+.PP
+.\" restore_epoch option (ndb_restore)
+\fB\-\-restore_epoch\fR
+(short form:
+\fB\-e\fR) adds (or restores) epoch information to the cluster replication status table\&. This is useful for starting replication on a MySQL Cluster replication slave\&. When this option is used, the row in the
+mysql\&.ndb_apply_status
+having
+0
+in the
+id
+column is updated if it already exists; such a row is inserted if it does not already exist\&. (See
+Section\ \&17.6.9, \(lqMySQL Cluster Backups With MySQL Cluster Replication\(rq\&.)
+.PP
+.\" restore_data option (ndb_restore)
+\fB\-\-restore_data\fR
+.PP
+This option causes
+\fBndb_restore\fR
+to output
+NDB
+table data and logs\&.
+.PP
+.\" restore_meta option (ndb_restore)
+\fB\-\-restore_meta\fR
+.PP
+This option causes
+\fBndb_restore\fR
+to print
+NDB
+table metadata\&. Generally, you need only use this option when restoring the first data node of a cluster; additional data nodes can obtain the metadata from the first one\&.
+.PP
+.\" restore-privilege-tables option (ndb_restore)
+.\" ndb_restore: restore-privilege-tables option
+\fB\-\-restore\-privilege\-tables\fR
+.PP
+\fBndb_restore\fR
+does not by default restore distributed MySQL privilege tables\&. This option causes
+\fBndb_restore\fR
+to restore the privilege tables\&.
+.PP
+This works only if the privilege tables were converted to
+NDB
+before the backup was taken\&. For more information, see
+Section\ \&17.5.14, \(lqDistributed MySQL Privileges for MySQL Cluster\(rq\&.
+.PP
+.\" backup_path option (ndb_restore)
+.\" ndb_restore: backup_path option
+\fB\-\-backup_path\fR
+.PP
+The path to the backup directory is required; this is supplied to
+\fBndb_restore\fR
+using the
+\fB\-\-backup_path\fR
+option, and must include the subdirectory corresponding to the ID backup of the backup to be restored\&. For example, if the data node\*(Aqs
+DataDir
+is
+/var/lib/mysql\-cluster, then the backup directory is
+/var/lib/mysql\-cluster/BACKUP, and the backup files for the backup with the ID 3 can be found in
+/var/lib/mysql\-cluster/BACKUP/BACKUP\-3\&. The path may be absolute or relative to the directory in which the
+\fBndb_restore\fR
+executable is located, and may be optionally prefixed with
+\fBbackup_path=\fR\&.
+.PP
+It is possible to restore a backup to a database with a different configuration than it was created from\&. For example, suppose that a backup with backup ID
+12, created in a cluster with two database nodes having the node IDs
+2
+and
+3, is to be restored to a cluster with four nodes\&. Then
+\fBndb_restore\fR
+must be run twice\(emonce for each database node in the cluster where the backup was taken\&. However,
+\fBndb_restore\fR
+cannot always restore backups made from a cluster running one version of MySQL to a cluster running a different MySQL version\&. See
+Section\ \&17.2.7, \(lqUpgrading and Downgrading MySQL Cluster NDB 7.3\(rq, for more information\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBImportant\fR
+.ps -1
+.br
+.PP
+It is not possible to restore a backup made from a newer version of MySQL Cluster using an older version of
+\fBndb_restore\fR\&. You can restore a backup made from a newer version of MySQL to an older cluster, but you must use a copy of
+\fBndb_restore\fR
+from the newer MySQL Cluster version to do so\&.
+.PP
+For example, to restore a cluster backup taken from a cluster running MySQL Cluster NDB 7\&.2\&.5 to a cluster running MySQL Cluster NDB 7\&.1\&.21, you must use the
+\fBndb_restore\fR
+that comes with the MySQL Cluster NDB 7\&.2\&.5 distribution\&.
+.sp .5v
+.RE
+.PP
+For more rapid restoration, the data may be restored in parallel, provided that there is a sufficient number of cluster connections available\&. That is, when restoring to multiple nodes in parallel, you must have an
+[api]
+or
+[mysqld]
+section in the cluster
+config\&.ini
+file available for each concurrent
+\fBndb_restore\fR
+process\&. However, the data files must always be applied before the logs\&.
+.PP
+.\" no-upgrade option (ndb_restore)
+.\" ndb_restore: no-upgrade option
+\fB\-\-no\-upgrade\fR
+.PP
+When using
+\fBndb_restore\fR
+to restore a backup,
+VARCHAR
+columns created using the old fixed format are resized and recreated using the variable\-width format now employed\&. This behavior can be overridden using the
+\fB\-\-no\-upgrade\fR
+option (short form:
+\fB\-u\fR) when running
+\fBndb_restore\fR\&.
+.PP
+.\" print_data option (ndb_restore)
+.\" ndb_restore: print_data option
+\fB\-\-print_data\fR
+.PP
+The
+\fB\-\-print_data\fR
+option causes
+\fBndb_restore\fR
+to direct its output to
+stdout\&.
+.PP
+TEXT
+and
+BLOB
+column values are always truncated to the first 256 bytes in the output; this cannot currently be overridden when using
+\fB\-\-print_data\fR\&.
+.PP
+Several additional options are available for use with the
+\fB\-\-print_data\fR
+option in generating data dumps, either to
+stdout, or to a file\&. These are similar to some of the options used with
+\fBmysqldump\fR, and are shown in the following list:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_restore: tab option
+.\" tab option (ndb_restore)
+\fB\-\-tab\fR,
+\fB\-T\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-tab=path
+T}
+T{
+T}:T{
+\-T
+T}
+.TE
+.sp 1
+This option causes
+\fB\-\-print_data\fR
+to create dump files, one per table, each named
+\fItbl_name\fR\&.txt\&. It requires as its argument the path to the directory where the files should be saved; use
+\&.
+for the current directory\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_restore: fields-enclosed-by option
+.\" fields-enclosed-by option (ndb_restore)
+\fB\-\-fields\-enclosed\-by=\fR\fB\fIstring\fR\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-fields\-enclosed\-by=char
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+string
+T}
+:T{
+\fBDefault\fR
+T}:T{
+T}
+.TE
+.sp 1
+Each column values are enclosed by the string passed to this option (regardless of data type; see next item)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_restore: fields-optionally-enclosed-by option
+.\" fields-optionally-enclosed-by option (ndb_restore)
+\fB\-\-fields\-optionally\-enclosed\-by=\fR\fB\fIstring\fR\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-fields\-optionally\-enclosed\-by
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+string
+T}
+:T{
+\fBDefault\fR
+T}:T{
+T}
+.TE
+.sp 1
+The string passed to this option is used to enclose column values containing character data (such as
+CHAR,
+VARCHAR,
+BINARY,
+TEXT, or
+ENUM)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_restore: fields-terminated-by option
+.\" fields-terminated-by option (ndb_restore)
+\fB\-\-fields\-terminated\-by=\fR\fB\fIstring\fR\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-fields\-terminated\-by=char
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+string
+T}
+:T{
+\fBDefault\fR
+T}:T{
+\et (tab)
+T}
+.TE
+.sp 1
+The string passed to this option is used to separate column values\&. The default value is a tab character (\et)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_restore: hex option
+.\" hex option (ndb_restore)
+\fB\-\-hex\fR
+.TS
+allbox tab(:);
+l l s s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-hex
+T}
+.TE
+.sp 1
+If this option is used, all binary values are output in hexadecimal format\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_restore: fields-terminated-by option
+.\" fields-terminated-by option (ndb_restore)
+\fB\-\-fields\-terminated\-by=\fR\fB\fIstring\fR\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-fields\-terminated\-by=char
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+string
+T}
+:T{
+\fBDefault\fR
+T}:T{
+\et (tab)
+T}
+.TE
+.sp 1
+This option specifies the string used to end each line of output\&. The default is a linefeed character (\en)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_restore: append option
+.\" append option (ndb_restore)
+\fB\-\-append\fR
+.TS
+allbox tab(:);
+l l s s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-append
+T}
+.TE
+.sp 1
+When used with the
+\fB\-\-tab\fR
+and
+\fB\-\-print_data\fR
+options, this causes the data to be appended to any existing files having the same names\&.
+.RE
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+If a table has no explicit primary key, then the output generated when using the
+\fB\-\-print_data\fR
+option includes the table\*(Aqs hidden primary key\&.
+.sp .5v
+.RE
+.PP
+.\" ndb_restore: print_meta option
+.\" print_meta option (ndb_restore)
+\fB\-\-print_meta\fR
+.PP
+This option causes
+\fBndb_restore\fR
+to print all metadata to
+stdout\&.
+.PP
+.\" ndb_restore: print_log option
+.\" print_log option (ndb_restore)
+\fB\-\-print_log\fR
+.PP
+The
+\fB\-\-print_log\fR
+option causes
+\fBndb_restore\fR
+to output its log to
+stdout\&.
+.PP
+.\" ndb_restore: print option
+.\" print option (ndb_restore)
+\fB\-\-print\fR
+.PP
+Causes
+\fBndb_restore\fR
+to print all data, metadata, and logs to
+stdout\&. Equivalent to using the
+\fB\-\-print_data\fR,
+\fB\-\-print_meta\fR, and
+\fB\-\-print_log\fR
+options together\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+Use of
+\fB\-\-print\fR
+or any of the
+\fB\-\-print_*\fR
+options is in effect performing a dry run\&. Including one or more of these options causes any output to be redirected to
+stdout; in such cases,
+\fBndb_restore\fR
+makes no attempt to restore data or metadata to a MySQL Cluster\&.
+.sp .5v
+.RE
+.PP
+.\" ndb_restore: dont_ignore_systab_0 option
+.\" dont_ignore_systab_0 option (ndb_restore)
+\fB\-\-dont_ignore_systab_0\fR
+.PP
+Normally, when restoring table data and metadata,
+\fBndb_restore\fR
+ignores the copy of the
+NDB
+system table that is present in the backup\&.
+\fB\-\-dont_ignore_systab_0\fR
+causes the system table to be restored\&.
+\fIThis option is intended for experimental and development use only, and is not recommended in a production environment\fR\&.
+.PP
+.\" ndb_restore: ndb-nodegroup-map option
+.\" ndb-nodegroup-map option (ndb_restore)
+\fB\-\-ndb\-nodegroup\-map\fR,
+\fB\-z\fR
+.PP
+This option can be used to restore a backup taken from one node group to a different node group\&. Its argument is a list of the form
+\fIsource_node_group\fR, \fItarget_node_group\fR\&.
+.PP
+.\" ndb_restore: no-binlog option
+.\" no-binlog option (ndb_restore)
+\fB\-\-no\-binlog\fR
+.PP
+This option prevents any connected SQL nodes from writing data restored by
+\fBndb_restore\fR
+to their binary logs\&.
+.PP
+.\" ndb_restore: no-restore-disk-objects option
+.\" no-restore-disk-objects option (ndb_restore)
+\fB\-\-no\-restore\-disk\-objects\fR,
+\fB\-d\fR
+.PP
+This option stops
+\fBndb_restore\fR
+from restoring any MySQL Cluster Disk Data objects, such as tablespaces and log file groups; see
+Section\ \&17.5.12, \(lqMySQL Cluster Disk Data Tables\(rq, for more information about these\&.
+.PP
+.\" ndb_restore: parallelism option
+.\" parallelism option (ndb_restore)
+\fB\-\-parallelism=#\fR,
+\fB\-p\fR
+.PP
+Determines the maximum number of parallel transactions that
+\fBndb_restore\fR
+tries to use\&. By default, this is 128; the minimum is 1, and the maximum is 1024\&.
+.PP
+.\" ndb_restore: progress-frequency option
+.\" progress-frequency option (ndb_restore)
+\fB\-\-progress\-frequency=\fR\fB\fIN\fR\fR
+.PP
+Print a status report each
+\fIN\fR
+seconds while the backup is in progress\&. 0 (the default) causes no status reports to be printed\&. The maximum is 65535\&.
+.PP
+.\" ndb_restore: verbose option
+.\" verbose option (ndb_restore)
+\fB\-\-verbose=#\fR
+.PP
+Sets the level for the verbosity of the output\&. The minimum is 0; the maximum is 255\&. The default value is 1\&.
+.PP
+It is possible to restore only selected databases, or selected tables from a single database, using the syntax shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_restore \fIother_options\fR \fIdb_name\fR,[\fIdb_name\fR[,\&.\&.\&.] | \fItbl_name\fR[,\fItbl_name\fR][,\&.\&.\&.]]
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+In other words, you can specify either of the following to be restored:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+All tables from one or more databases
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+One or more tables from a single database
+.RE
+.PP
+.\" ndb_restore: include-databases option
+.\" include-databases option (ndb_restore)
+\fB\-\-include\-databases=\fR\fB\fIdb_name\fR\fR\fB[,\fR\fB\fIdb_name\fR\fR\fB][,\&.\&.\&.]\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-include\-databases=db\-list
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+string
+T}
+:T{
+\fBDefault\fR
+T}:T{
+T}
+.TE
+.sp 1
+.PP
+.\" ndb_restore: include-tables option
+.\" include-tables option (ndb_restore)
+\fB\-\-include\-tables=\fR\fB\fIdb_name\&.tbl_name\fR\fR\fB[,\fR\fB\fIdb_name\&.tbl_name\fR\fR\fB][,\&.\&.\&.]\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-include\-tables=table\-list
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+string
+T}
+:T{
+\fBDefault\fR
+T}:T{
+T}
+.TE
+.sp 1
+.PP
+Use the
+\fB\-\-include\-databases\fR
+option or the
+\fB\-\-include\-tables\fR
+option for restoring only specific databases or tables, respectively\&.
+\fB\-\-include\-databases\fR
+takes a comma\-delimited list of databases to be restored\&.
+\fB\-\-include\-tables\fR
+takes a comma\-delimited list of tables (in
+\fIdatabase\fR\&.\fItable\fR
+format) to be restored\&.
+.PP
+When
+\fB\-\-include\-databases\fR
+or
+\fB\-\-include\-tables\fR
+is used, only those databases or tables named by the option are restored; all other databases and tables are excluded by
+\fBndb_restore\fR, and are not restored\&.
+.PP
+The following table shows several invocations of
+\fBndb_restore\fR
+using
+\fB\-\-include\-*\fR
+options (other options possibly required have been omitted for clarity), and the effects these have on restoring from a MySQL Cluster backup:
+.TS
+allbox tab(:);
+lB lB.
+T{
+Option Used
+T}:T{
+Result
+T}
+.T&
+l l
+l l
+l l
+l l.
+T{
+\fB\-\-include\-databases=db1\fR
+T}:T{
+Only tables in database db1 are restored; all tables
+                in all other databases are ignored
+T}
+T{
+\fB\-\-include\-databases=db1,db2\fR (or
+                \fB\-\-include\-databases=db1\fR
+                \fB\-\-include\-databases=db2\fR)
+T}:T{
+Only tables in databases db1 and
+                db2 are restored; all tables in all
+                other databases are ignored
+T}
+T{
+\fB\-\-include\-tables=db1\&.t1\fR
+T}:T{
+Only table t1 in database db1 is
+                restored; no other tables in db1 or
+                in any other database are restored
+T}
+T{
+\fB\-\-include\-tables=db1\&.t2,db2\&.t1\fR (or
+                \fB\-\-include\-tables=db1\&.t2\fR
+                \fB\-\-include\-tables=db2\&.t1\fR)
+T}:T{
+Only the table t2 in database db1
+                and the table t1 in database
+                db2 are restored; no other tables in
+                db1, db2, or any
+                other database are restored
+T}
+.TE
+.sp 1
+.PP
+You can also use these two options together\&. For example, the following causes all tables in databases
+db1
+and
+db2, together with the tables
+t1
+and
+t2
+in database
+db3, to be restored (and no other databases or tables):
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_restore [\&.\&.\&.] \-\-include\-databases=db1,db2 \-\-include\-tables=db3\&.t1,db3\&.t2\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+(Again we have omitted other, possibly required, options in the example just shown\&.)
+.PP
+.\" ndb_restore: exclude-databases option
+.\" exclude-databases option (ndb_restore)
+\fB\-\-exclude\-databases=\fR\fB\fIdb_name\fR\fR\fB[,\fR\fB\fIdb_name\fR\fR\fB][,\&.\&.\&.]\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-exclude\-databases=db\-list
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+string
+T}
+:T{
+\fBDefault\fR
+T}:T{
+T}
+.TE
+.sp 1
+.PP
+.\" ndb_restore: exclude-tables option
+.\" exclude-tables option (ndb_restore)
+\fB\-\-exclude\-tables=\fR\fB\fIdb_name\&.tbl_name\fR\fR\fB[,\fR\fB\fIdb_name\&.tbl_name\fR\fR\fB][,\&.\&.\&.]\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-exclude\-tables=table\-list
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+string
+T}
+:T{
+\fBDefault\fR
+T}:T{
+T}
+.TE
+.sp 1
+.PP
+It is possible to prevent one or more databases or tables from being restored using the
+\fBndb_restore\fR
+options
+\fB\-\-exclude\-databases\fR
+and
+\fB\-\-exclude\-tables\fR\&.
+\fB\-\-exclude\-databases\fR
+takes a comma\-delimited list of one or more databases which should not be restored\&.
+\fB\-\-exclude\-tables\fR
+takes a comma\-delimited list of one or more tables (using
+\fIdatabase\fR\&.\fItable\fR
+format) which should not be restored\&.
+.PP
+When
+\fB\-\-exclude\-databases\fR
+or
+\fB\-\-exclude\-tables\fR
+is used, only those databases or tables named by the option are excluded; all other databases and tables are restored by
+\fBndb_restore\fR\&.
+.PP
+This table shows several invocations of
+\fBndb_restore\fR
+usng
+\fB\-\-exclude\-*\fR
+options (other options possibly required have been omitted for clarity), and the effects these options have on restoring from a MySQL Cluster backup:
+.TS
+allbox tab(:);
+lB lB.
+T{
+Option Used
+T}:T{
+Result
+T}
+.T&
+l l
+l l
+l l
+l l.
+T{
+\fB\-\-exclude\-databases=db1\fR
+T}:T{
+All tables in all databases except db1 are restored;
+                no tables in db1 are restored
+T}
+T{
+\fB\-\-exclude\-databases=db1,db2\fR (or
+                \fB\-\-exclude\-databases=db1\fR
+                \fB\-\-exclude\-databases=db2\fR)
+T}:T{
+All tables in all databases except db1 and
+                db2 are restored; no tables in
+                db1 or db2 are
+                restored
+T}
+T{
+\fB\-\-exclude\-tables=db1\&.t1\fR
+T}:T{
+All tables except t1 in database
+                db1 are restored; all other tables in
+                db1 are restored; all tables in all
+                other databases are restored
+T}
+T{
+\fB\-\-exclude\-tables=db1\&.t2,db2\&.t1\fR (or
+                \fB\-\-exclude\-tables=db1\&.t2\fR
+                \fB\-\-exclude\-tables=db2\&.t1)\fR
+T}:T{
+All tables in database db1 except for
+                t2 and all tables in database
+                db2 except for table
+                t1 are restored; no other tables in
+                db1 or db2 are
+                restored; all tables in all other databases are restored
+T}
+.TE
+.sp 1
+.PP
+You can use these two options together\&. For example, the following causes all tables in all databases
+\fIexcept for\fR
+databases
+db1
+and
+db2, along with the tables
+t1
+and
+t2
+in database
+db3,
+\fInot\fR
+to be restored:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_restore [\&.\&.\&.] \-\-exclude\-databases=db1,db2 \-\-exclude\-tables=db3\&.t1,db3\&.t2\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+(Again, we have omitted other possibly necessary options in the interest of clarity and brevity from the example just shown\&.)
+.PP
+You can use
+\fB\-\-include\-*\fR
+and
+\fB\-\-exclude\-*\fR
+options together, subject to the following rules:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The actions of all
+\fB\-\-include\-*\fR
+and
+\fB\-\-exclude\-*\fR
+options are cumulative\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+All
+\fB\-\-include\-*\fR
+and
+\fB\-\-exclude\-*\fR
+options are evaluated in the order passed to ndb_restore, from right to left\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+In the event of conflicting options, the first (rightmost) option takes precedence\&. In other words, the first option (going from right to left) that matches against a given database or table
+\(lqwins\(rq\&.
+.RE
+.PP
+For example, the following set of options causes
+\fBndb_restore\fR
+to restore all tables from database
+db1
+except
+db1\&.t1, while restoring no other tables from any other databases:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\-\-include\-databases=db1 \-\-exclude\-tables=db1\&.t1
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+However, reversing the order of the options just given simply causes all tables from database
+db1
+to be restored (including
+db1\&.t1, but no tables from any other database), because the
+\fB\-\-include\-databases\fR
+option, being farthest to the right, is the first match against database
+db1
+and thus takes precedence over any other option that matches
+db1
+or any tables in
+db1:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\-\-exclude\-tables=db1\&.t1 \-\-include\-databases=db1
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+.\" ndb_restore: exclude-missing-columns option
+.\" exclude-missing-columns option (ndb_restore)
+\fB\-\-exclude\-missing\-columns\fR
+.TS
+allbox tab(:);
+l l s s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-exclude\-missing\-columns
+T}
+.TE
+.sp 1
+.PP
+It is also possible to restore only selected table columns using the
+\fB\-\-exclude\-missing\-columns\fR
+option\&. When this option is used,
+\fBndb_restore\fR
+ignores any columns missing from tables being restored as compared to the versions of those tables found in the backup\&. This option applies to all tables being restored\&. If you wish to apply this option only to selected tables or databases, you can use it in combination with one or more of the options described in the previous paragraph to do so, then restore data to the remaining tables using a complementary set of these options\&.
+.PP
+.\" ndb_restore: disable-indexes option
+.\" disable-indexes option (ndb_restore)
+\fB\-\-disable\-indexes\fR
+.TS
+allbox tab(:);
+l l s s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-disable\-indexes
+T}
+.TE
+.sp 1
+.PP
+Disable restoration of indexes during restoration of the data from a native NDB backup\&. Afterwards, you can restore indexes for all tables at once with multi\-threaded building of indexes using
+\fB\-\-rebuild\-indexes\fR, which should be faster than rebuilding indexes concurrently for very large tables\&.
+.PP
+.\" ndb_restore: rebuild-indexes option
+.\" rebuild-indexes option (ndb_restore)
+\fB\-\-rebuild\-indexes\fR
+.TS
+allbox tab(:);
+l l s s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-rebuild\-indexes
+T}
+.TE
+.sp 1
+.PP
+You can use this option with
+\fBndb_restore\fR
+to cause multi\-threaded rebuilding of the ordered indexes while restoring a native
+NDB
+backup\&.
+.PP
+.\" ndb_restore: skip-broken-objects option
+.\" skip-broken-objects option (ndb_restore)
+\fB\-\-skip\-broken\-objects\fR
+.TS
+allbox tab(:);
+l l s s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-skip\-broken\-objects
+T}
+.TE
+.sp 1
+.PP
+This option causes
+\fBndb_restore\fR
+to ignore corrupt tables while reading a native
+NDB
+backup, and to continue restoring any remaining tables (that are not also corrupted)\&. Currently, the
+\fB\-\-skip\-broken\-objects\fR
+option works only in the case of missing blob parts tables\&.
+.PP
+.\" ndb_restore: skip-unknown-objects option
+.\" skip-unknown-objects option (ndb_restore)
+\fB\-\-skip\-unknown\-objects\fR
+.TS
+allbox tab(:);
+l l s s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-skip\-unknown\-objects
+T}
+.TE
+.sp 1
+.PP
+This option causes
+\fBndb_restore\fR
+to ignore any schema objects it does not recognize while reading a native
+NDB
+backup\&. This can be used for restoring a backup made from a cluster running MySQL Cluster NDB 7\&.3 to a cluster running MySQL Cluster NDB 7\&.2\&.
+.PP
+.\" ndb_restore: rewrite-database option
+.\" rewrite-database option (ndb_restore)
+\fB\-\-rewrite\-database=\fR\fB\fIold_dbname\fR\fR\fB,\fR\fB\fInew_dbname\fR\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-rewrite\-database=olddb,newdb
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+string
+T}
+:T{
+\fBDefault\fR
+T}:T{
+none
+T}
+.TE
+.sp 1
+.PP
+This option makes it possible to restore to a database having a different name from that used in the backup\&. For example, if a backup is made of a database named
+products, you can restore the data it contains to a database named
+inventory, use this option as shown here (omitting any other options that might be required):
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> ndb_restore \-\-rewrite\-database=product,inventory
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The option can be employed multiple times in a single invocation of
+\fBndb_restore\fR\&. Thus it is possible to restore simultaneously from a database named
+db1
+to a database named
+db2
+and from a database named
+db3
+to one named
+db4
+using
+\fB\-\-rewrite\-database=db1,db2 \-\-rewrite\-database=db3,db4\fR\&. Other
+\fBndb_restore\fR
+options may be used between multiple occurrences of
+\fB\-\-rewrite\-database\fR\&.
+.PP
+In the event of conflicts between multiple
+\fB\-\-rewrite\-database\fR
+options, the last
+\fB\-\-rewrite\-database\fR
+option used, reading from left to right, is the one that takes effect\&. For example, if
+\fB\-\-rewrite\-database=db1,db2 \-\-rewrite\-database=db1,db3\fR
+is used, only
+\fB\-\-rewrite\-database=db1,db3\fR
+is honored, and
+\fB\-\-rewrite\-database=db1,db2\fR
+is ignored\&. It is also possible to restore from multiple databases to a single database, so that
+\fB\-\-rewrite\-database=db1,db3 \-\-rewrite\-database=db2,db3\fR
+restores all tables and data from databases
+db1
+and
+db2
+into database
+db3\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBImportant\fR
+.ps -1
+.br
+.PP
+When restoring from multiple backup databases into a single target database using
+\fB\-\-rewrite\-database\fR, no check is made for collisions between table or other object names, and the order in which rows are restored is not guaranteed\&. This means that it is possible in such cases for rows to be overwritten and updates to be lost\&.
+.sp .5v
+.RE
+.PP
+\fBError reporting\fR. .\" ndb_restore: errors
+\fBndb_restore\fR
+reports both temporary and permanent errors\&. In the case of temporary errors, it may able to recover from them, and reports
+Restore successful, but encountered temporary error, please look at configuration
+in such cases\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBImportant\fR
+.ps -1
+.br
+.PP
+After using
+\fBndb_restore\fR
+to initialize a MySQL Cluster for use in circular replication, binary logs on the SQL node acting as the replication slave are not automatically created, and you must cause them to be created manually\&. To cause the binary logs to be created, issue a
+SHOW TABLES
+statement on that SQL node before running
+START SLAVE\&. This is a known issue in MySQL Cluster\&.
+.sp .5v
+.RE
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2013, Oracle and/or its affiliates. All rights reserved.
+.PP
+This software and related documentation are provided under a license agreement containing restrictions on use and disclosure and are protected by intellectual property laws. Except as expressly permitted in your license agreement or allowed by law, you may not use, copy, reproduce, translate, broadcast, modify, license, transmit, distribute, exhibit, perform, publish, or display any part, in any form, or by any means. Reverse engineering, disassembly, or decompilation of this software, unless required by law for interoperability, is prohibited.
+.PP
+The information contained herein is subject to change without notice and is not warranted to be error-free. If you find any errors, please report them to us in writing.
+.PP
+If this software or related documentation is delivered to the U.S. Government or anyone licensing it on behalf of the U.S. Government, the following notice is applicable:
+.PP
+U.S. GOVERNMENT RIGHTS Programs, software, databases, and related documentation and technical data delivered to U.S. Government customers are "commercial computer software" or "commercial technical data" pursuant to the applicable Federal Acquisition Regulation and agency-specific supplemental regulations. As such, the use, duplication, disclosure, modification, and adaptation shall be subject to the restrictions and license terms set forth in the applicable Government contract, and, to the extent applicable by the terms of the Government contract, the additional rights set forth in FAR 52.227-19, Commercial Computer Software License (December 2007). Oracle USA, Inc., 500 Oracle Parkway, Redwood City, CA 94065.
+.PP
+This software is developed for general use in a variety of information management applications. It is not developed or intended for use in any inherently dangerous applications, including applications which may create a risk of personal injury. If you use this software in dangerous applications, then you shall be responsible to take all appropriate fail-safe, backup, redundancy, and other measures to ensure the safe use of this software. Oracle Corporation and its affiliates disclaim any liability for any damages caused by use of this software in dangerous applications.
+.PP
+Oracle is a registered trademark of Oracle Corporation and/or its affiliates. MySQL is a trademark of Oracle Corporation and/or its affiliates, and shall not be used without Oracle's express written authorization. Other names may be trademarks of their respective owners.
+.PP
+This software and documentation may provide access to or information on content, products, and services from third parties. Oracle Corporation and its affiliates are not responsible for and expressly disclaim all warranties of any kind with respect to third-party content, products, and services. Oracle Corporation and its affiliates will not be responsible for any loss, costs, or damages incurred due to your access to or use of third-party content, products, or services.
+.PP
+This document in any form, software or printed matter, contains proprietary information that is the exclusive property of Oracle. Your access to and use of this material is subject to the terms and conditions of your Oracle Software License and Service Agreement, which has been executed and with which you agree to comply. This document and information contained herein may not be disclosed, copied, reproduced, or distributed to anyone outside Oracle without prior written consent of Oracle or as specifically provided below. This document is not part of your license agreement nor can it be incorporated into any contractual agreement with Oracle or its subsidiaries or affiliates.
+.PP
+This documentation is NOT distributed under a GPL license. Use of this documentation is subject to the following terms:
+.PP
+You may create a printed copy of this documentation solely for your own personal use. Conversion to other formats is allowed as long as the actual content is not altered or edited in any way. You shall not publish or distribute this documentation in any form or on any media, except if you distribute the documentation in a manner similar to how Oracle disseminates it (that is, electronically for download on a Web site with the software) or on a CD-ROM or similar medium, provided however that the documentation is disseminated together with the software on the same medium. Any other use, such as any dissemination of printed copies or use of this documentation, in whole or in part, in another publication, requires the prior written consent from an authorized representative of Oracle. Oracle and/or its affiliates reserve any and all rights to this documentation not expressly granted above.
+.PP
+For more information on the terms of this license, or for details on how the MySQL documentation is built and produced, please visit
+\m[blue]\fBMySQL Contact & Questions\fR\m[].
+.PP
+For additional licensing information, including licenses for third-party libraries used by MySQL products, see
+Preface and Legal Notices.
+.PP
+For help with using MySQL, please visit either the
+\m[blue]\fBMySQL Forums\fR\m[]
+or
+\m[blue]\fBMySQL Mailing Lists\fR\m[]
+where you can discuss your issues with other MySQL users.
+.PP
+For additional documentation on MySQL products, including translations of the documentation into other languages, and downloadable versions in variety of formats, including HTML and PDF formats, see the
+\m[blue]\fBMySQL Documentation Library\fR\m[].
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

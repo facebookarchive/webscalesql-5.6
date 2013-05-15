@@ -1,0 +1,294 @@
+'\" t
+.\"     Title: \fBndb_mgm\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
+.\"      Date: 05/21/2013
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 5.6
+.\"  Language: English
+.\"
+.TH "\FBNDB_MGM\FR" "1" "05/21/2013" "MySQL 5\&.6" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.\" ndb_mgm
+.\" MySQL Cluster: ndb_mgm
+.\" MySQL Cluster: management client (ndb_mgm)
+.\" management client (MySQL Cluster)
+.\" ndb_mgm
+.\" MySQL Cluster: administration
+.\" administration of MySQL Cluster
+.SH "NAME"
+ndb_mgm \- the MySQL Cluster management client
+.SH "SYNOPSIS"
+.HP \w'\fBndb_mgm\ \fR\fB\fIoptions\fR\fR\ 'u
+\fBndb_mgm \fR\fB\fIoptions\fR\fR
+.SH "DESCRIPTION"
+.PP
+The
+\fBndb_mgm\fR
+management client process is actually not needed to run the cluster\&. Its value lies in providing a set of commands for checking the cluster\*(Aqs status, starting backups, and performing other administrative functions\&. The management client accesses the management server using a C API\&. Advanced users can also employ this API for programming dedicated management processes to perform tasks similar to those performed by
+\fBndb_mgm\fR\&.
+.PP
+To start the management client, it is necessary to supply the host name and port number of the management server:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_mgm [\fR\fB\fIhost_name\fR\fR\fB [\fR\fB\fIport_num\fR\fR\fB]]\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_mgm ndb_mgmd\&.mysql\&.com 1186\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The default host name and port number are
+localhost
+and 1186, respectively\&.
+.\" MySQL Cluster: administration
+.\" MySQL Cluster: commands
+.\" command options (MySQL Cluster): ndb_mgm
+.\" MySQL Cluster: mgm process
+.PP
+The following table includes options that are specific to the MySQL Cluster management client program
+\fBndb_mgm\fR\&. Additional descriptions follow the table\&. For options common to most MySQL Cluster programs (including
+\fBndb_mgm\fR), see
+Options Common to MySQL Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&17.13.\ \&ndb_mgm Options and Variables: MySQL Cluster NDB 7.3
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added / Removed
+T}
+.T&
+l l l
+l l l.
+T{
+.PP
+--try-reconnect=#,
+.PP
+-t
+T}:T{
+Specify number of tries for connecting to ndb_mgmd (0 = infinite)
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--execute=name,
+.PP
+-e
+T}:T{
+Execute command and exit
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+.TE
+.sp 1
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" execute option (ndb_mgm)
+.\" -e option (ndb_mgm)
+\fB\-\-execute=\fR\fBcommand\fR,
+\fB\-e \fR\fBcommand\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-execute=name
+T}
+T{
+T}:T{
+\-e
+T}
+.TE
+.sp 1
+This option can be used to send a command to the MySQL Cluster management client from the system shell\&. For example, either of the following is equivalent to executing
+SHOW
+in the management client:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_mgm \-e "SHOW"\fR
+shell> \fBndb_mgm \-\-execute="SHOW"\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+This is analogous to how the
+\fB\-\-execute\fR
+or
+\fB\-e\fR
+option works with the
+\fBmysql\fR
+command\-line client\&. See
+Section\ \&4.2.3.1, \(lqUsing Options on the Command Line\(rq\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+If the management client command to be passed using this option contains any space characters, then the command
+\fImust\fR
+be enclosed in quotation marks\&. Either single or double quotation marks may be used\&. If the management client command contains no space characters, the quotation marks are optional\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-try\-reconnect=\fR\fB\fInumber\fR\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-try\-reconnect=#
+T}
+T{
+T}:T{
+\-t
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+TRUE
+T}
+.TE
+.sp 1
+If the connection to the management server is broken, the node tries to reconnect to it every 5 seconds until it succeeds\&. By using this option, it is possible to limit the number of attempts to
+\fInumber\fR
+before giving up and reporting an error instead\&.
+.RE
+.PP
+Additional information about using
+\fBndb_mgm\fR
+can be found in
+Section\ \&17.5.2, \(lqCommands in the MySQL Cluster Management Client\(rq\&.
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2013, Oracle and/or its affiliates. All rights reserved.
+.PP
+This software and related documentation are provided under a license agreement containing restrictions on use and disclosure and are protected by intellectual property laws. Except as expressly permitted in your license agreement or allowed by law, you may not use, copy, reproduce, translate, broadcast, modify, license, transmit, distribute, exhibit, perform, publish, or display any part, in any form, or by any means. Reverse engineering, disassembly, or decompilation of this software, unless required by law for interoperability, is prohibited.
+.PP
+The information contained herein is subject to change without notice and is not warranted to be error-free. If you find any errors, please report them to us in writing.
+.PP
+If this software or related documentation is delivered to the U.S. Government or anyone licensing it on behalf of the U.S. Government, the following notice is applicable:
+.PP
+U.S. GOVERNMENT RIGHTS Programs, software, databases, and related documentation and technical data delivered to U.S. Government customers are "commercial computer software" or "commercial technical data" pursuant to the applicable Federal Acquisition Regulation and agency-specific supplemental regulations. As such, the use, duplication, disclosure, modification, and adaptation shall be subject to the restrictions and license terms set forth in the applicable Government contract, and, to the extent applicable by the terms of the Government contract, the additional rights set forth in FAR 52.227-19, Commercial Computer Software License (December 2007). Oracle USA, Inc., 500 Oracle Parkway, Redwood City, CA 94065.
+.PP
+This software is developed for general use in a variety of information management applications. It is not developed or intended for use in any inherently dangerous applications, including applications which may create a risk of personal injury. If you use this software in dangerous applications, then you shall be responsible to take all appropriate fail-safe, backup, redundancy, and other measures to ensure the safe use of this software. Oracle Corporation and its affiliates disclaim any liability for any damages caused by use of this software in dangerous applications.
+.PP
+Oracle is a registered trademark of Oracle Corporation and/or its affiliates. MySQL is a trademark of Oracle Corporation and/or its affiliates, and shall not be used without Oracle's express written authorization. Other names may be trademarks of their respective owners.
+.PP
+This software and documentation may provide access to or information on content, products, and services from third parties. Oracle Corporation and its affiliates are not responsible for and expressly disclaim all warranties of any kind with respect to third-party content, products, and services. Oracle Corporation and its affiliates will not be responsible for any loss, costs, or damages incurred due to your access to or use of third-party content, products, or services.
+.PP
+This document in any form, software or printed matter, contains proprietary information that is the exclusive property of Oracle. Your access to and use of this material is subject to the terms and conditions of your Oracle Software License and Service Agreement, which has been executed and with which you agree to comply. This document and information contained herein may not be disclosed, copied, reproduced, or distributed to anyone outside Oracle without prior written consent of Oracle or as specifically provided below. This document is not part of your license agreement nor can it be incorporated into any contractual agreement with Oracle or its subsidiaries or affiliates.
+.PP
+This documentation is NOT distributed under a GPL license. Use of this documentation is subject to the following terms:
+.PP
+You may create a printed copy of this documentation solely for your own personal use. Conversion to other formats is allowed as long as the actual content is not altered or edited in any way. You shall not publish or distribute this documentation in any form or on any media, except if you distribute the documentation in a manner similar to how Oracle disseminates it (that is, electronically for download on a Web site with the software) or on a CD-ROM or similar medium, provided however that the documentation is disseminated together with the software on the same medium. Any other use, such as any dissemination of printed copies or use of this documentation, in whole or in part, in another publication, requires the prior written consent from an authorized representative of Oracle. Oracle and/or its affiliates reserve any and all rights to this documentation not expressly granted above.
+.PP
+For more information on the terms of this license, or for details on how the MySQL documentation is built and produced, please visit
+\m[blue]\fBMySQL Contact & Questions\fR\m[].
+.PP
+For additional licensing information, including licenses for third-party libraries used by MySQL products, see
+Preface and Legal Notices.
+.PP
+For help with using MySQL, please visit either the
+\m[blue]\fBMySQL Forums\fR\m[]
+or
+\m[blue]\fBMySQL Mailing Lists\fR\m[]
+where you can discuss your issues with other MySQL users.
+.PP
+For additional documentation on MySQL products, including translations of the documentation into other languages, and downloadable versions in variety of formats, including HTML and PDF formats, see the
+\m[blue]\fBMySQL Documentation Library\fR\m[].
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

@@ -41,8 +41,8 @@ Chapter 2. Installing and Upgrading MySQL
 
     4. Install the distribution.
        To install MySQL from a binary distribution, use the
-       instructions in Section 2.2, "Installing MySQL from Generic
-       Binaries on Unix/Linux."
+       instructions in Section 2.2, "Installing MySQL on Unix/Linux
+       Using Generic Binaries."
        To install MySQL from a source distribution or from the
        current development source tree, use the instructions in
        Section 2.9, "Installing MySQL from Source."
@@ -66,8 +66,8 @@ Chapter 2. Installing and Upgrading MySQL
      * Unix, Linux, FreeBSD
        For instructions on installing MySQL on most Linux and Unix
        platforms using a generic binary (for example, a .tar.gz
-       package), see Section 2.2, "Installing MySQL from Generic
-       Binaries on Unix/Linux."
+       package), see Section 2.2, "Installing MySQL on Unix/Linux
+       Using Generic Binaries."
        For information on building MySQL entirely from the source
        code distributions or the source code repositories, see
        Section 2.9, "Installing MySQL from Source"
@@ -114,7 +114,7 @@ Chapter 2. Installing and Upgrading MySQL
    instructions in later sections of the chapter describe how to
    install the distribution that you choose. For binary
    distributions, see the instructions at Section 2.2, "Installing
-   MySQL from Generic Binaries on Unix/Linux" or the corresponding
+   MySQL on Unix/Linux Using Generic Binaries" or the corresponding
    section for your platform if available. To build MySQL from
    source, use the instructions in Section 2.9, "Installing MySQL
    from Source."
@@ -266,7 +266,7 @@ Production Releases
 
    If you want to use the very latest sources containing all current
    patches and bugfixes, you can use one of our source code
-   repositories (see Section 2.9.3, "Installing MySQL from a
+   repositories (see Section 2.9.3, "Installing MySQL Using a
    Development Source Tree"). These are not "releases" as such, but
    are available as previews of the code on which future releases are
    to be based.
@@ -330,7 +330,7 @@ Production Releases
 
      * An internal test suite.  The mysql-test directory contains an
        extensive set of test cases. We run these tests for every
-       server binary. See Section 22.1.2, "The MySQL Test Suite," for
+       server binary. See Section 23.1.2, "The MySQL Test Suite," for
        more information about this test suite.
 
      * The MySQL benchmark suite.  This suite runs a range of common
@@ -354,9 +354,9 @@ Production Releases
    distribution. In most cases, you should probably use a binary
    distribution, if one exists for your platform. Binary
    distributions are available in native format for many platforms,
-   such as RPM files for Linux or PKG package installers for Mac OS X
-   or Solaris. Distributions also are available as Zip archives or
-   compressed tar files.
+   such as RPM packages for Linux, DMG packages for Mac OS X, and PKG
+   packages for Solaris. Distributions are also available in more
+   generic formats such as Zip archives or compressed tar files.
 
    Reasons to choose a binary distribution include the following:
 
@@ -391,6 +391,8 @@ Production Releases
             compression
 
           + -DWITH_DEBUG=1 for debugging support
+       For additional information, see Section 2.9.4, "MySQL
+       Source-Configuration Options."
 
      * You want to configure mysqld without some features that are
        included in the standard binary distributions. For example,
@@ -464,7 +466,7 @@ Production Releases
    and how to report a bad or out-of-date mirror.
 
    To obtain the latest development source, see Section 2.9.3,
-   "Installing MySQL from a Development Source Tree."
+   "Installing MySQL Using a Development Source Tree."
 
 2.1.4. Verifying Package Integrity Using MD5 Checksums or GnuPG
 
@@ -511,11 +513,11 @@ Production Releases
    Windows examples will assume the name md5.exe.
 
    Linux and Microsoft Windows examples:
-shell> md5sum mysql-standard-5.6.12-linux-i686.tar.gz
-aaab65abbec64d5e907dcd41b8699945  mysql-standard-5.6.12-linux-i686.ta
+shell> md5sum mysql-standard-5.6.13-linux-i686.tar.gz
+aaab65abbec64d5e907dcd41b8699945  mysql-standard-5.6.13-linux-i686.ta
 r.gz
-shell> md5.exe mysql-installer-community-5.6.12.msi
-aaab65abbec64d5e907dcd41b8699945  mysql-installer-community-5.6.12.ms
+shell> md5.exe mysql-installer-community-5.6.13.msi
+aaab65abbec64d5e907dcd41b8699945  mysql-installer-community-5.6.13.ms
 i
 
    You should verify that the resulting checksum (the string of
@@ -625,8 +627,8 @@ shell> rpm --import mysql_pubkey.asc
 
    Table 2.1. MySQL Package and Signature Files for Source files
        File Type                      File Name
-   Distribution file mysql-standard-5.6.12-linux-i686.tar.gz
-   Signature file    mysql-standard-5.6.12-linux-i686.tar.gz.asc
+   Distribution file mysql-standard-5.6.13-linux-i686.tar.gz
+   Signature file    mysql-standard-5.6.13-linux-i686.tar.gz.asc
 
    Make sure that both files are stored in the same directory and
    then run the following command to verify the signature for the
@@ -635,7 +637,7 @@ shell> gpg --verify package_name.asc
 
    If the downloaded package is valid, you will see a "Good
    signature" similar to:
-shell> gpg --verify mysql-standard-5.6.12-linux-i686.tar.gz.asc
+shell> gpg --verify mysql-standard-5.6.13-linux-i686.tar.gz.asc
 gpg: Signature made Tue 01 Feb 2011 02:38:30 AM CST using DSA key ID
 5072E1F5
 gpg: Good signature from "MySQL Release Engineering <mysql-build@oss.
@@ -644,7 +646,7 @@ oracle.com>"
    The Good signature message indicates that the file signature is
    valid, when compared to the signature listed on our site. But you
    might also see warnings, like so:
-shell> gpg --verify mysql-standard-5.6.12-linux-i686.tar.gz.asc
+shell> gpg --verify mysql-standard-5.6.13-linux-i686.tar.gz.asc
 gpg: Signature made Wed 23 Jan 2013 02:25:45 AM PST using DSA key ID
 5072E1F5
 gpg: checking the trustdb
@@ -726,8 +728,8 @@ Primary key fingerprint: A4A9 4068 76FC BD3C 4567  70C8 8C71 8D3B 507
    Table 2.2. MySQL Package and Signature Files for MySQL Installer
    for Microsoft Windows
        File Type                    File Name
-   Distribution file mysql-installer-community-5.6.12.msi
-   Signature file    mysql-installer-community-5.6.12.msi.asc
+   Distribution file mysql-installer-community-5.6.13.msi
+   Signature file    mysql-installer-community-5.6.13.msi.asc
 
    Make sure that both files are stored in the same directory and
    then run the following command to verify the signature for the
@@ -763,8 +765,8 @@ Primary key fingerprint: A4A9 4068 76FC BD3C 4567  70C8 8C71 8D3B 507
 shell> rpm --checksig package_name.rpm
 
    Example:
-shell> rpm --checksig MySQL-server-5.6.12-0.glibc23.i386.rpm
-MySQL-server-5.6.12-0.glibc23.i386.rpm: md5 gpg OK
+shell> rpm --checksig MySQL-server-5.6.13-0.glibc23.i386.rpm
+MySQL-server-5.6.13-0.glibc23.i386.rpm: md5 gpg OK
 
    Note
 
@@ -807,7 +809,8 @@ pg-signature.html
      * Section 2.2, "MySQL Installation Layout for Generic Unix/Linux
        Binary Package"
 
-     * Section 2.5.1, "MySQL Installation Layout for Linux RPM"
+     * Section 2.5.1, "MySQL Installation Layout for Linux RPM
+       Packages"
 
      * Section 2.4.2, "MySQL Installation Layout on Mac OS X"
 
@@ -824,7 +827,7 @@ pg-signature.html
 
      * SSL support is not included.
 
-2.2. Installing MySQL from Generic Binaries on Unix/Linux
+2.2. Installing MySQL on Unix/Linux Using Generic Binaries
 
    Oracle provides a set of binary distributions of MySQL. These
    include binary distributions in the form of compressed tar files
@@ -842,7 +845,7 @@ pg-signature.html
 
    MySQL compressed tar file binary distributions have names of the
    form mysql-VERSION-OS.tar.gz, where VERSION is a number (for
-   example, 5.6.12), and OS indicates the type of operating system
+   example, 5.6.13), and OS indicates the type of operating system
    for which the distribution is intended (for example, pc-linux-i686
    or winx64).
 
@@ -1027,13 +1030,13 @@ Perform Postinstallation Setup
 
      * If you plan to connect to the MySQL server using ODBC, you
        need a Connector/ODBC driver. For more information, including
-       installation and configuration instructions, see Section 21.1,
+       installation and configuration instructions, see Section 22.1,
        "MySQL Connector/ODBC." But note that MySQL Installer will
        install and configure Connector/ODBC for you.
 
      * If you plan to use MySQL server with .NET applications, you
        need the Connector/Net driver. For more information, including
-       installation and configuration instructions, see Section 21.2,
+       installation and configuration instructions, see Section 22.2,
        "MySQL Connector/Net." But note that MySQL Installer will
        install and configure Connector/NET for you.
 
@@ -1079,7 +1082,7 @@ Perform Postinstallation Setup
        If you need tables with a size larger than 4GB, install MySQL
        on an NTFS or newer file system. Do not forget to use MAX_ROWS
        and AVG_ROW_LENGTH when you create tables. See Section
-       13.1.14, "CREATE TABLE Syntax."
+       13.1.17, "CREATE TABLE Syntax."
 
      * MySQL and Virus Checking Software
        Using virus scanning software such as Norton/Symantec
@@ -1115,13 +1118,16 @@ Perform Postinstallation Setup
    All of the files are located within this parent directory, using
    the structure shown in the following table.
 
-   Table 2.4. MySQL Installation Layout for Windows
-   Directory Contents of Directory
+   Table 2.4. Default MySQL Installation Layout for Microsoft Windows
+   Directory Contents of Directory Notes
    bin Client programs and the mysqld server
-   C:\Documents and Settings\All Users\Application Data\MySQL Log
-   files, databases (Windows XP, Windows Server 2003)
-   C:\ProgramData\MySQL Log files, databases (Windows 7, Windows
-   Server 2008)
+   %ALLUSERSPROFILE%\MySQL\MySQL Server 5.6\ Log files, databases
+   (Windows XP, Windows Server 2003) The Windows system variable
+   %ALLUSERSPROFILE% defaults to C:\Documents and Settings\All
+   Users\Application Data
+   %PROGRAMDATA%\MySQL\MySQL Server 5.6\ Log files, databases (Vista,
+   Windows 7, Windows Server 2008, and newer) The Windows system
+   variable %PROGRAMDATA% defaults to C:\ProgramData
    examples Example programs and scripts
    include Include (header) files
    lib Libraries
@@ -1132,7 +1138,7 @@ Perform Postinstallation Setup
 
    If you install MySQL using the MySQL Installer, this package
    creates and sets up the data directory that the installed server
-   will use, but also creates a pristine "template" data directory
+   will use, and also creates a pristine "template" data directory
    named data under the installation directory. After an installation
    has been performed using this package, the template data directory
    can be copied to set up additional MySQL instances. See Section
@@ -1144,8 +1150,8 @@ Perform Postinstallation Setup
    from when installing MySQL on Windows:
 
      * MySQL Installer: This package has a file name similar to
-       mysql-installer-community-5.6.12.0.msi or
-       mysql-installer-commercial-5.6.12.0.msi, and utilizes MSI's to
+       mysql-installer-community-5.6.13.0.msi or
+       mysql-installer-commercial-5.6.13.0.msi, and utilizes MSI's to
        automatically install MySQL server and other products. It will
        download and apply updates to itself, and for each of the
        installed products. It also configures the additional
@@ -1166,7 +1172,7 @@ Perform Postinstallation Setup
        Using MySQL Installer."
 
      * The Noinstall Archive: This package has a file name similar to
-       mysql-5.6.12-win32.zip or mysql-5.6.12-winx64.zip, and
+       mysql-5.6.13-win32.zip or mysql-5.6.13-winx64.zip, and
        contains all the files found in the Complete install package,
        with the exception of the GUI. This package does not include
        an automated installer, and must be manually installed and
@@ -1191,21 +1197,36 @@ Perform Postinstallation Setup
    Installer is only available for Microsoft Windows, and includes
    both a GUI and command-line interface.
 
-Community edition
+Installer package types
 
-   Download the community edition of MySQL Installer at
-   http://dev.mysql.com/downloads/installer/. It will install the
-   community version of all MySQL products.
 
-Commercial edition
+     * Full: Bundles all of the MySQL products (including MySQL
+       Server). The file is over 160MB, and have names of the form
+       mysql-installer-community-VERSION.N.msi where VERSION is the
+       MySQL Server version number such as 5.6 and N is the package
+       number, which begins at 0.
 
-   Download the commercial edition of MySQL Installer at either My
-   Oracle Support (https://support.oracle.com/) (MOS) or
-   https://edelivery.oracle.com/. It will install the commercial
-   version of all MySQL products, including Workbench SE. It also
-   integrates with your MOS account, so enter in your MOS credentials
-   to automatically receive updates for your commercial MySQL
-   products.
+     * Web: Only contains the Installer and configuration files, and
+       it only downloads the MySQL products you choose to install.
+       The file is about 2MB, and have names of the form
+       mysql-installer-community-web-VERSION.N.msi where VERSION is
+       the MySQL Server version number such as 5.6 and N is the
+       package number, which begins at 0.
+
+Installer editions
+
+
+     * Community edition: Downloadable at
+       http://dev.mysql.com/downloads/installer/. It installs the
+       community edition of all MySQL products.
+
+     * Commercial edition: Downloadable at either My Oracle Support
+       (https://support.oracle.com/) (MOS) or
+       https://edelivery.oracle.com/. It installs the commercial
+       version of all MySQL products, including Workbench SE. It also
+       integrates with your MOS account, so enter in your MOS
+       credentials to automatically receive updates for your
+       commercial MySQL products.
 
    For release notes detailing the changes in each release of MySQL
    Installer, see MySQL Installer Release Notes
@@ -1515,7 +1536,7 @@ C:\> MySQLInstallerConsole --help
 2.3.4. Installing MySQL on Microsoft Windows Using a noinstall Zip
 Archive
 
-   Users who are installing from the Noinstall package can use the
+   Users who are installing from the noinstall package can use the
    instructions in this section to manually install MySQL. The
    process for installing MySQL from a Zip archive is as follows:
 
@@ -1736,7 +1757,7 @@ InnoDB: foreign key constraint system tables created
    something like this, which indicates that the server is ready to
    service client connections:
 mysqld: ready for connections
-Version: '5.6.12'  socket: ''  port: 3306
+Version: '5.6.13'  socket: ''  port: 3306
 
    The server continues to write to the console any further
    diagnostic output it produces. You can open a new console window
@@ -2499,8 +2520,8 @@ C:\> C:\mysql\bin\mysql -e "SELECT Host,Db,User FROM mysql.db"
        privileges using this method, as you can install the MySQL
        server anywhere using this method. For more information on
        using this method, you can use the generic instructions for
-       using a tarball, Section 2.2, "Installing MySQL from Generic
-       Binaries on Unix/Linux."You can use the package installer with
+       using a tarball, Section 2.2, "Installing MySQL on Unix/Linux
+       Using Generic Binaries."You can use the package installer with
        Mac OS X 10.3 and later, and available for both PowerPC and
        Intel architectures, and both 32-bit and 64-bit architectures.
        A Universal Binary, incorporating both Power PC and Intel
@@ -2611,7 +2632,7 @@ alias mysqladmin /usr/local/mysql/bin/mysqladmin
 2.4.2. Installing MySQL on Mac OS X Using Native Packages
 
    You can install MySQL on Mac OS X 10.3.x ("Panther") or newer
-   using a Mac OS X binary package in PKG format instead of the
+   using a Mac OS X binary package in DMG format instead of the
    binary tarball distribution. Please note that older versions of
    Mac OS X (for example, 10.1.x or 10.2.x) are not supported by this
    package.
@@ -2888,31 +2909,35 @@ Additional Resources
 
    Linux supports a number of different solutions for installing
    MySQL. The recommended method is to use one of the distributions
-   from Oracle. If you choose this method, there are three options
+   from Oracle. If you choose this method, there are several options
    available:
 
      * Installing from a generic binary package in .tar.gz format.
-       See Section 2.2, "Installing MySQL from Generic Binaries on
-       Unix/Linux" for more information.
+       See Section 2.2, "Installing MySQL on Unix/Linux Using Generic
+       Binaries" for more information.
 
      * Extracting and compiling MySQL from a source distribution. For
        detailed instructions, see Section 2.9, "Installing MySQL from
        Source."
 
-     * Installing using a pre-compiled RPM package. For more
-       information on using the RPM solution, see Section 2.5.1,
-       "Installing MySQL from RPM Packages on Linux."
+     * Installing using a precompiled RPM package. For more
+       information, see Section 2.5.1, "Installing MySQL on Linux
+       Using RPM Packages."
+
+     * Installing using a precompiled Debian package. For more
+       information, see Section 2.5.2, "Installing MySQL on Linux
+       Using Debian Packages."
 
    As an alternative, you can use the native package manager within
    your Linux distribution to automatically download and install
    MySQL for you. Native package installations can take of the
    download and dependencies required to run MySQL, but the MySQL
-   version will often be some way behind the currently available
-   release. You will also normally be unable to install developmental
+   version will often be some versions behind the currently available
+   release. You will also normally be unable to install development
    releases, as these are not usually made available in the native
    repository. For more information on using the native package
-   installers, see Section 2.5.2, "Installing MySQL on Linux using
-   Native Package Manager."
+   installers, see Section 2.5.3, "Installing MySQL on Linux Using
+   Native Package Managers."
    Note
 
    For many Linux installations, you will want to set up MySQL to be
@@ -2925,7 +2950,7 @@ Additional Resources
    for automatic MySQL startup and shutdown. See Section 2.10.1.2,
    "Starting and Stopping MySQL Automatically."
 
-2.5.1. Installing MySQL from RPM Packages on Linux
+2.5.1. Installing MySQL on Linux Using RPM Packages
 
    Note
 
@@ -2939,13 +2964,13 @@ Additional Resources
    see Section 2.1.3, "How to Get MySQL."
 
    For non-RPM Linux distributions, you can install MySQL using a
-   .tar.gz package. See Section 2.2, "Installing MySQL from Generic
-   Binaries on Unix/Linux."
+   .tar.gz package. See Section 2.2, "Installing MySQL on Unix/Linux
+   Using Generic Binaries."
 
    Installations created from our Linux RPM distributions result in
-   files under the following system directories.
+   files under the system directories shown in the following table.
 
-   Table 2.9. MySQL Installation Layout for Linux RPM
+   Table 2.9. MySQL Installation Layout for Linux RPM Packages
    Directory Contents of Directory
    /usr/bin Client programs and scripts
    /usr/sbin The mysqld server
@@ -2993,18 +3018,14 @@ Additional Resources
    use mysql_install_db.)
 
    RPMs for MySQL Cluster.  Standard MySQL server RPMs built by MySQL
-   do not provide support for the NDBCLUSTER
-   (http://dev.mysql.com/doc/refman/5.5/en/mysql-cluster.html)
-   storage engine.
+   do not provide support for the NDBCLUSTER storage engine.
    Important
 
    When upgrading a MySQL Cluster RPM installation, you must upgrade
    all installed RPMs, including the Server and Client RPMs.
 
    For more information about installing MySQL Cluster from RPMs, see
-   MySQL Cluster Installation and Upgrades
-   (http://dev.mysql.com/doc/refman/5.5/en/mysql-cluster-installation
-   .html).
+   Section 17.2, "MySQL Cluster Installation."
 
    For upgrades, if your installation was originally produced by
    installing multiple RPM packages, it is best to upgrade all the
@@ -3030,14 +3051,17 @@ Additional Resources
        to install this package.
 
      * MySQL-devel-VERSION.glibc23.i386.rpm
-       The libraries and include files that are needed if you want to
-       compile other MySQL clients, such as the Perl modules.
+       The libraries and include files that are needed if to compile
+       other MySQL clients, such as the Perl modules. Install this
+       RPM if you intend to compile C API applications.
 
      * MySQL-shared-VERSION.glibc23.i386.rpm
        This package contains the shared libraries
        (libmysqlclient.so*) that certain languages and applications
        need to dynamically load and use MySQL. It contains
-       single-threaded and thread-safe libraries.
+       single-threaded and thread-safe libraries. Install this RPM if
+       you intend to compile or run C API applications that depend on
+       the shared client library.
 
      * MySQL-shared-compat-VERSION.glibc23.i386.rpm
        This package includes the shared libraries for older releases,
@@ -3094,7 +3118,7 @@ Additional Resources
    The CPU value indicates the processor type or family for which the
    package is built.
 
-   Table 2.11. MySQL Installation Packages for Linux CPU Identifier
+   Table 2.11. MySQL Installation Packages for Linux CPU Identifiers
       CPU Value      Intended Processor Type or Family
    i386, i586, i686 Pentium processor or better, 32 bit
    x86_64           64-bit x86 processor
@@ -3113,9 +3137,9 @@ shell> rpm -i MySQL-client-VERSION.glibc23.i386.rpm
 shell> rpm -i MySQL-client-VERSION.glibc23.i386.rpm
 
    RPM provides a feature to verify the integrity and authenticity of
-   packages before installing them. If you would like to learn more
-   about this feature, see Section 2.1.4, "Verifying Package
-   Integrity Using MD5 Checksums or GnuPG."
+   packages before installing them. To learn more about this feature,
+   see Section 2.1.4, "Verifying Package Integrity Using MD5
+   Checksums or GnuPG."
 
    The server RPM places data under the /var/lib/mysql directory. The
    RPM also creates a login account for a user named mysql (if one
@@ -3141,8 +3165,8 @@ shell> rpm -i MySQL-client-VERSION.glibc23.i386.rpm
    the end of the installation.
 
    If something goes wrong, you can find more information in the
-   binary installation section. See Section 2.2, "Installing MySQL
-   from Generic Binaries on Unix/Linux."
+   binary installation section. See Section 2.2, "Installing MySQL on
+   Unix/Linux Using Generic Binaries."
    Note
 
    The accounts that are listed in the MySQL grant tables initially
@@ -3208,7 +3232,42 @@ shell> rpm -ivh MySQL-server-NEWVERSION.glibc23.i386.rpm
 shell> yum remove MySQL-server-OLDVERSION.glibc23.i386.rpm
 shell> yum install MySQL-server-NEWVERSION.glibc23.i386.rpm
 
-2.5.2. Installing MySQL on Linux using Native Package Manager
+2.5.2. Installing MySQL on Linux Using Debian Packages
+
+   Oracle provides Debian packages for installation on Debian or
+   Debian-like Linux systems. To obtain a package, see Section 2.1.3,
+   "How to Get MySQL."
+   Note
+
+   Debian distributions of MySQL are also provided by other vendors.
+   Be aware that they may differ from those built by us in features,
+   capabilities, and conventions (including communication setup), and
+   that the instructions in this manual do not necessarily apply to
+   installing them. The vendor's instructions should be consulted
+   instead.
+
+   Debian package files have names in mysql-MVER-DVER-CPU.deb format.
+   MVER is the MySQL version and DVER is the Debian version. The CPU
+   value indicates the processor type or family for which the package
+   is built, as shown in the following table.
+
+   Table 2.12. MySQL Installation Packages for Linux CPU Identifiers
+   CPU Value  Intended Processor Type or Family
+   i686      Pentium processor or better, 32 bit
+   x86_64    64-bit x86 processor
+
+   After downloading a Debian package, use the following command to
+   install it;
+shell> dpkg -i mysql-MVER-DVER-CPU.deb
+
+   The Debian package installs files in the /opt/mysql/server-5.6
+   directory.
+
+   You may also need to install the libaio library if it is not
+   already present on your system:
+shell> apt-get install libaio1
+
+2.5.3. Installing MySQL on Linux Using Native Package Managers
 
    Many Linux distributions include a version of the MySQL server,
    client tools, and development components into the standard package
@@ -3220,8 +3279,8 @@ shell> yum install MySQL-server-NEWVERSION.glibc23.i386.rpm
    Native package installations can take care of the download and
    dependencies required to run MySQL, but the MySQL version will
    often be some way behind the currently available release. You will
-   also normally be unable to install developmental releases, as
-   these are not usually made available in the native repository.
+   also normally be unable to install development releases, as these
+   are not usually made available in the native repository.
 
    Distribution specific instructions are shown below:
 
@@ -3480,7 +3539,7 @@ root-shell> rc-update add mysql default
    different formats.
 
      * For information on installing using the native Solaris PKG
-       format, see Section 2.6.1, "Installing MySQL on Solaris using
+       format, see Section 2.6.1, "Installing MySQL on Solaris Using
        a Solaris PKG."
 
      * On OpenSolaris, the standard package repositories include
@@ -3488,12 +3547,12 @@ root-shell> rc-update add mysql default
        entries for the Service Management Framework (SMF) to enable
        control of the installation using the SMF administration
        commands. For more information, see Section 2.6.2, "Installing
-       MySQL on OpenSolaris using IPS."
+       MySQL on OpenSolaris Using IPS."
 
      * To use a standard tar binary installation, use the notes
-       provided in Section 2.2, "Installing MySQL from Generic
-       Binaries on Unix/Linux." Check the notes and hints at the end
-       of this section for Solaris specific notes that you may need
+       provided in Section 2.2, "Installing MySQL on Unix/Linux Using
+       Generic Binaries." Check the notes and hints at the end of
+       this section for Solaris specific notes that you may need
        before or after installation.
 
    To obtain a binary MySQL distribution for Solaris in tarball or
@@ -3543,24 +3602,24 @@ Error in accept: Protocol error
        will be generated using the mode 600 and owned by the
        superuser.
 
-2.6.1. Installing MySQL on Solaris using a Solaris PKG
+2.6.1. Installing MySQL on Solaris Using a Solaris PKG
 
    You can install MySQL on Solaris and OpenSolaris using a binary
    package using the native Solaris PKG format instead of the binary
    tarball distribution.
 
    To use this package, download the corresponding
-   mysql-VERSION-solaris10-PLATFORM.pkg.gz file, then decompress it.
+   mysql-VERSION-solaris10-PLATFORM.pkg.gz file, then uncompress it.
    For example:
-shell> gunzip mysql-5.6.12-solaris10-x86_64.pkg.gz
+shell> gunzip mysql-5.6.13-solaris10-x86_64.pkg.gz
 
    To install a new package, use pkgadd and follow the onscreen
    prompts. You must have root privileges to perform this operation:
-shell> pkgadd -d mysql-5.6.12-solaris10-x86_64.pkg
+shell> pkgadd -d mysql-5.6.13-solaris10-x86_64.pkg
 
 The following packages are available:
   1  mysql     MySQL Community Server (GPL)
-               (i86pc) 5.6.12
+               (i86pc) 5.6.13
 
 Select package(s) you wish to process (or 'all' to process
 all packages). (default: all) [?,??,q]:
@@ -3572,10 +3631,11 @@ all packages). (default: all) [?,??,q]:
    Alternatively, you can run the mysql_secure_installation script
    that comes with the installation.
 
-   The default installation directory is /opt/mysql. You can only
-   change the root path of the installation when using pkgadd, which
-   can be used to install MySQL in a different Solaris zone. If you
-   need to install in a specific directory, use the binary tar file.
+   By default, the PKG package installs MySQL under the root path
+   /opt/mysql. You can change only the installation root path when
+   using pkgadd, which can be used to install MySQL in a different
+   Solaris zone. If you need to install in a specific directory, use
+   a binary tar file distribution.
 
    The pkg installer copies a suitable startup script for MySQL into
    /etc/init.d/mysql. To enable MySQL to startup and shutdown
@@ -3597,14 +3657,14 @@ shell> ln /etc/init.d/mysql /etc/rc0.d/K02mysql
    The typical upgrade sequence is therefore:
 shell> mysqladmin shutdown
 shell> pkgrm mysql
-shell> pkgadd -d mysql-5.6.12-solaris10-x86_64.pkg
+shell> pkgadd -d mysql-5.6.13-solaris10-x86_64.pkg
 shell> mysqld_safe &
 shell> mysql_upgrade
 
    You should check the notes in Section 2.11, "Upgrading or
    Downgrading MySQL" before performing any upgrade.
 
-2.6.2. Installing MySQL on OpenSolaris using IPS
+2.6.2. Installing MySQL on OpenSolaris Using IPS
 
    OpenSolaris includes standard packages for MySQL in the core
    repository. The MySQL packages are based on a specific release of
@@ -3658,8 +3718,8 @@ shell> svcadm restart mysql
    You can also use SMF to configure the data directory and enable
    full 64-bit mode. For example, to set the data directory used by
    MySQL:
-shell> svccfg
-svc:> select mysql:version_56
+shell> svccfg 
+svc:> select mysql:version_56 
 svc:/application/database/mysql:version_56> setprop mysql/data=/data0
 /mysql
 
@@ -3681,13 +3741,13 @@ shell> svcadm refresh mysql
        http://dev.mysql.com/downloads/. Please read the general notes
        on HP-UX installation before continuing. For more information
        on DEPOT installations, see Section 2.7.2, "Installing MySQL
-       on HP-UX using DEPOT."
+       on HP-UX Using DEPOT Packages."
 
      * Using a binary tarball distribution provided at
        http://dev.mysql.com/downloads/. Please read the general notes
        on HP-UX installation before continuing. For more information
-       on binary installations, see Section 2.2, "Installing MySQL
-       from Generic Binaries on Unix/Linux."
+       on binary installations, see Section 2.2, "Installing MySQL on
+       Unix/Linux Using Generic Binaries."
 
 2.7.1. General Notes on Installing MySQL on HP-UX
 
@@ -3709,7 +3769,7 @@ PHNE_22397 ARPA cumulative
        This solves the problem of getting EWOULDBLOCK from recv() and
        EBADF from accept() in threaded applications.
 
-2.7.2. Installing MySQL on HP-UX using DEPOT
+2.7.2. Installing MySQL on HP-UX Using DEPOT Packages
 
    The HP-UX DEPOT format packages can be installed using the
    swinstall command. You should install the ncurses and zlib
@@ -3720,7 +3780,7 @@ PHNE_22397 ARPA cumulative
    To install using the MySQL DEPOT packages, follow this guide:
 
     1. Download the MySQL DEPOT package from
-       http://dev.mysql.com/downloads/. You must decompress the
+       http://dev.mysql.com/downloads/. You must uncompress the
        package before installation:
 root-shell> gunzip mysql-5.1.48-hpux11.31-ia64-64bit.depot.gz
 
@@ -3758,7 +3818,7 @@ root-shell> mysqld_safe --user=mysql &
 
    You can install MySQL on FreeBSD by using the binary distribution
    provided by Oracle. For more information, see Section 2.2,
-   "Installing MySQL from Generic Binaries on Unix/Linux."
+   "Installing MySQL on Unix/Linux Using Generic Binaries."
 
    The easiest (and preferred) way to install MySQL is to use the
    mysql-server and mysql-client ports available at
@@ -3821,7 +3881,7 @@ root-shell> mysqld_safe --user=mysql &
    effort into ensuring that our binaries are built with the best
    possible options for optimal performance. Instructions for
    installing binary distributions are available in Section 2.2,
-   "Installing MySQL from Generic Binaries on Unix/Linux."
+   "Installing MySQL on Unix/Linux Using Generic Binaries."
 
 Source Installation Methods
 
@@ -3830,12 +3890,12 @@ Source Installation Methods
      * Use a standard MySQL source distribution. To obtain a standard
        distribution, see Section 2.1.3, "How to Get MySQL." For
        instructions on building from a standard distribution, see
-       Section 2.9.2, "Installing MySQL from a Standard Source
+       Section 2.9.2, "Installing MySQL Using a Standard Source
        Distribution."
        Standard distributions are available as compressed tar files,
        Zip archives, or RPM packages. Distribution files have names
        of the form mysql-VERSION.tar.gz, mysql-VERSION.zip, or
-       mysql-VERSION.rpm, where VERSION is a number like 5.6.12. File
+       mysql-VERSION.rpm, where VERSION is a number like 5.6.13. File
        names for source distributions can be distinguished from those
        for precompiled binary distributions in that source
        distribution names are generic and include no platform name,
@@ -3848,7 +3908,7 @@ Source Installation Methods
        release distributions, so this installation method is usually
        required only if you need the most recent code changes. For
        information on building from one of the development trees, see
-       Section 2.9.3, "Installing MySQL from a Development Source
+       Section 2.9.3, "Installing MySQL Using a Development Source
        Tree."
 
 Source Installation System Requirements
@@ -3951,7 +4011,7 @@ Source Installation System Requirements
    options described at Section 2.9.4, "MySQL Source-Configuration
    Options."
 
-2.9.2. Installing MySQL from a Standard Source Distribution
+2.9.2. Installing MySQL Using a Standard Source Distribution
 
    To install MySQL from a standard source distribution:
 
@@ -3979,13 +4039,13 @@ Source Installation System Requirements
 shell> rpmbuild --rebuild --clean MySQL-VERSION.src.rpm
 
    The result is one or more binary RPM packages that you install as
-   indicated in Section 2.5.1, "Installing MySQL from RPM Packages on
-   Linux."
+   indicated in Section 2.5.1, "Installing MySQL on Linux Using RPM
+   Packages."
 
    The sequence for installation from a compressed tar file or Zip
    archive source distribution is similar to the process for
    installing from a generic binary distribution (see Section 2.2,
-   "Installing MySQL from Generic Binaries on Unix/Linux"), except
+   "Installing MySQL on Unix/Linux Using Generic Binaries"), except
    that it is used on all platforms and includes steps to configure
    and compile the distribution. For example, with a compressed tar
    file source distribution on Unix, the basic installation command
@@ -4027,7 +4087,7 @@ Perform Preconfiguration Setup
    On Unix, set up the mysql user and group that will be used to run
    and execute the MySQL server and own the database directory. For
    details, see Creating a mysql System User and Group, in Section
-   2.2, "Installing MySQL from Generic Binaries on Unix/Linux." Then
+   2.2, "Installing MySQL on Unix/Linux Using Generic Binaries." Then
    perform the following steps as the mysql user, except as noted.
 
 Obtain and Unpack the Distribution
@@ -4190,7 +4250,7 @@ shell> make package
 
    This operation produces one or more .tar.gz files that can be
    installed like generic binary distribution packages. See Section
-   2.2, "Installing MySQL from Generic Binaries on Unix/Linux." If
+   2.2, "Installing MySQL on Unix/Linux Using Generic Binaries." If
    you run CMake with -DCPACK_MONOLITHIC_INSTALL=1, the operation
    produces a single file. Otherwise, it produces multiple files.
 
@@ -4217,7 +4277,7 @@ Perform Postinstallation Setup
    passwords for them using the instructions in Section 2.10,
    "Postinstallation Setup and Testing."
 
-2.9.3. Installing MySQL from a Development Source Tree
+2.9.3. Installing MySQL Using a Development Source Tree
 
    This section discusses how to install MySQL from the latest
    development source code. Development trees have not necessarily
@@ -4292,7 +4352,7 @@ shell> bzr log
 
    After you have the local branch, you can build MySQL server from
    the source code. For information, see Section 2.9.2, "Installing
-   MySQL from a Standard Source Distribution," except that you skip
+   MySQL Using a Standard Source Distribution," except that you skip
    the part about obtaining and unpacking the distribution.
 
    Be careful about installing a build from a distribution source
@@ -4306,7 +4366,7 @@ shell> bzr log
    5.6, "Running Multiple MySQL Instances on One Machine."
 
    Play hard with your new installation. For example, try to make new
-   features crash. Start by running make test. See Section 22.1.2,
+   features crash. Start by running make test. See Section 23.1.2,
    "The MySQL Test Suite."
 
 2.9.4. MySQL Source-Configuration Options
@@ -4328,7 +4388,7 @@ shell> ccmake .
    directory. This value is used as the parent location for several
    of the installation subdirectories.
 
-   Table 2.12. MySQL Source-Configuration Option Reference (CMake)
+   Table 2.13. MySQL Source-Configuration Option Reference (CMake)
    Formats Description Default Introduced Removed
    BUILD_CONFIG Use same build options as official releases
    CMAKE_BUILD_TYPE Type of build to produce RelWithDebInfo
@@ -4370,6 +4430,7 @@ shell> ccmake .
    INSTALL_SQLBENCHDIR sql-bench directory PREFIX
    INSTALL_SUPPORTFILESDIR Extra support files directory
    PREFIX/support-files
+   MEMCACHED_HOME Path to memcached [none]
    MYSQL_DATADIR Data directory
    MYSQL_MAINTAINER_MODE Whether to enable MySQL maintainer-specific
    development environment OFF
@@ -4380,18 +4441,40 @@ shell> ccmake .
    ODBC_LIB_DIR ODBC library directory
    OPTIMIZER_TRACE Whether to support optimizer tracing 5.6.3
    SYSCONFDIR Option file directory
+   WITH_BUNDLED_LIBEVENT Use bundled libevent when building
+   ndbmemcache ON
+   WITH_BUNDLED_MEMCACHED Use bundled memcached when building
+   ndbmemcache ON
+   WITH_CLASSPATH Classpath to use when building MySQL Cluster
+   Connector for Java. Default is an empty string.
    WITH_DEBUG Whether to include debugging support OFF
    WITH_DEFAULT_COMPILER_OPTIONS Whether to use default compiler
    options ON 5.6.6
    WITH_DEFAULT_FEATURE_SET Whether to use default feature set ON
    5.6.6
+   WITH_EDITLINE Which libedit/editline library to use bundled 5.6.12
+
    WITH_EMBEDDED_SERVER Whether to build embedded server OFF
    WITH_xxx_STORAGE_ENGINE Compile storage engine xxx statically into
    server
+   WITH_ERROR_INSERT Enable error injection in the NDB storage
+   engine. Should not be used for building binaries intended for
+   production. OFF
    WITH_EXTRA_CHARSETS Which extra character sets to include all
-   WITH_LIBEDIT Use bundled libedit library ON
+   WITH_LIBEDIT Use bundled libedit library ON   5.6.12
    WITH_LIBWRAP Whether to include libwrap (TCP wrappers) support OFF
 
+   WITH_NDB_BINLOG Enable binary logging by default by mysqld. ON
+   WITH_NDB_DEBUG Produce a debug build for testing or
+   troubleshooting. OFF
+   WITH_NDB_JAVA Enable building of Java and ClusterJ support.
+   Enabled by default. Supported in MySQL Cluster only. ON
+   WITH_NDB_PORT Default port used by a management server built with
+   this option. If this option was not used to build it, the
+   management server's default port is 1186. [none]
+   WITH_NDB_TEST Include NDB API test programs. OFF
+   WITH_NDBCLUSTER_STORAGE_ENGINE Build the NDB storage engine ON
+   WITH_NDBMTD Build multi-threaded data node. ON
    WITH_READLINE Use bundled readline library OFF   5.6.5
    WITH_SSL Type of SSL support no
    WITH_UNIXODBC Enable unixODBC support OFF
@@ -4406,6 +4489,8 @@ shell> ccmake .
      * Installation Layout Options
 
      * Feature Options
+
+     * Options for Compiling MySQL Cluster
 
      * Compiler Flags
 
@@ -4569,13 +4654,24 @@ Storage Engine Options
 
    To compile a storage engine statically into the server, use
    -DWITH_engine_STORAGE_ENGINE=1. Some permissible engine values are
-   ARCHIVE, BLACKHOLE, EXAMPLE, FEDERATED, INNOBASE (InnoDB),
-   PARTITION (partitioning support), and PERFSCHEMA (Performance
-   Schema). Examples:
+   ARCHIVE, BLACKHOLE, EXAMPLE, FEDERATED, INNOBASE (InnoDB), NDB or
+   NDBCLUSTER (NDB), PARTITION (partitioning support), and PERFSCHEMA
+   (Performance Schema). Examples:
 -DWITH_INNOBASE_STORAGE_ENGINE=1
 -DWITH_ARCHIVE_STORAGE_ENGINE=1
 -DWITH_BLACKHOLE_STORAGE_ENGINE=1
 -DWITH_PERFSCHEMA_STORAGE_ENGINE=1
+
+   Note
+
+   WITH_NDBCLUSTER_STORAGE_ENGINE is supported only when building
+   MySQL Cluster using the MySQL Cluster sources. It cannot be used
+   to enable clustering support in other MySQL source trees or
+   distributions. In MySQL Cluster NDB 7.3 source distributions, it
+   is enabled by default. See Section 17.2.1.3, "Building MySQL
+   Cluster from Source on Linux," and Section 17.2.2.2, "Compiling
+   and Installing MySQL Cluster from Source on Windows," for more
+   information.
 
    To exclude a storage engine from the build, use
    -DWITHOUT_engine_STORAGE_ENGINE=1. Examples:
@@ -4710,6 +4806,12 @@ Feature Options
        cmake/build_configurations/feature_set.cmake. This option was
        added in MySQL 5.6.6.
 
+     * -DWITH_EDITLINE=value
+       Which libedit/editline library to use. The permitted values
+       are bundled (the default) and system.
+       WITH_EDITLINE was added in MySQL 5.6.12. It replaces
+       WITH_LIBEDIT, which has been removed.
+
      * -DWITH_EMBEDDED_SERVER=bool
        Whether to build the libmysqld embedded server library.
 
@@ -4725,6 +4827,8 @@ Feature Options
      * -DWITH_LIBEDIT=bool
        Whether to use the libedit library bundled with the
        distribution.
+       WITH_LIBEDIT was removed in MySQL 5.6.12. Use WITH_EDITLINE
+       instead.
 
      * -DWITH_LIBWRAP=bool
        Whether to include libwrap (TCP wrappers) support.
@@ -4787,6 +4891,94 @@ shell> cmake [options]
        By default, authentication for connections to the embedded
        server is disabled. To enable connection authentication,
        define this flag.
+
+CMake Options for Compiling MySQL Cluster
+
+   The following options are for use when building MySQL Cluster with
+   the MySQL Cluster sources; they are not currently supported when
+   using sources from the MySQL 5.6 Server tree.
+
+     * -DMEMCACHED_HOME=path
+       Perform the build using the memcached (version 1.6 or later)
+       installed in the system directory indicated by path. Files
+       from this installation that are used in the build include the
+       memcached binary, header files, and libraries, as well as the
+       memcached_utilities library and the header file
+       engine_testapp.h.
+       You must leave this option unset when building ndbmemcache
+       using the bundled memcached sources (WITH_BUNDLED_MEMCACHED
+       option); in other words, the bundled sources are used by
+       default).
+       This option was added in MySQL Cluster NDB 7.2.2.
+       While additional CMake options---such as for SASL
+       authorization and for providing dtrace support---are available
+       for use when compiling memcached from external sources, these
+       options are currently not enabled for the memcached sources
+       bundled with MySQL Cluster.
+
+     * -DWITH_BUNDLED_LIBEVENT={ON|OFF}
+       Use the libevent included in the MySQL Cluster sources when
+       building MySQL Cluster with ndbmemcached support (MySQL
+       Cluster NDB 7.2.2 and later). Enabled by default. OFF causes
+       the system's libevent to be used instead.
+
+     * -DWITH_BUNDLED_MEMCACHED={ON|OFF}
+       Build the memcached sources included in the MySQL Cluster
+       source tree (MySQL Cluster NDB 7.2.3 and later), then use the
+       resulting memcached server when building the ndbmemcache
+       engine. In this case, make install places the memcached binary
+       in the installation bin directory, and the ndbmemcache engine
+       shared object file ndb_engine.so in the installation lib
+       directory.
+       This option is ON by default.
+
+     * -DWITH_CLASSPATH=path
+       Sets the classpath for building MySQL Cluster Connector for
+       Java. Default is empty. In MySQL Cluster NDB 7.2.9 and later,
+       this option is ignored if -DWITH_NDB_JAVA=OFF is used.
+
+     * -DWITH_ERROR_INSERT={ON|OFF}
+       Enables error injection in the NDB kernel. For testing only;
+       not intended for use in building production binaries. Default
+       is OFF.
+
+     * -DWITH_NDBCLUSTER_STORAGE_ENGINE={ON|OFF}
+       Build and link in support for the NDB (NDBCLUSTER) storage
+       engine in mysqld. Default is ON.
+
+     * -DWITH_NDBCLUSTER={ON|OFF}
+       This is an alias for WITH_NDBCLUSTER_STORAGE_ENGINE.
+
+     * -DWITH_NDBMTD={ON|OFF}
+       Build the multithreaded data node executable ndbmtd. Default
+       is ON.
+
+     * -DWITH_NDB_BINLOG={ON|OFF}
+       Enable binary logging by default in the mysqld built using
+       this option. ON by default.
+
+     * -DWITH_NDB_DEBUG={ON|OFF}
+       Enable building the debug versions of the MySQL Cluster
+       binaries. OFF by default.
+
+     * -DWITH_NDB_JAVA={ON|OFF}
+       Enable building MySQL Cluster with Java support, including
+       ClusterJ.
+       This option was added in MySQL Cluster NDB 7.2.9, and is ON by
+       default. If you do not wish to compile MySQL Cluster with Java
+       support, you must disable it explicitly by specifying
+       -DWITH_NDB_JAVA=OFF when running CMake. Otherwise, if Java
+       cannot be found, configuration of the build fails.
+
+     * -DWITH_NDB_PORT=port
+       Causes the MySQL Cluster management server (ndb_mgmd) that is
+       built to use this port by default. If this option is unset,
+       the resulting management server tries to use port 1186 by
+       default.
+
+     * -DWITH_NDB_TEST={ON|OFF}
+       If enabled, include a set of NDB API test programs. The
+       default is OFF.
 
 2.9.5. Dealing with Problems Compiling MySQL
 
@@ -4935,7 +5127,7 @@ ATCH
        Debian Linux, Ubuntu Linux, Gentoo Linux and others, the
        mysql_install_db command is run for you.
 
-     * If you install MySQL on Mac OS X using a PKG distribution, the
+     * If you install MySQL on Mac OS X using a DMG distribution, the
        installer runs mysql_install_db.
 
    For other platforms and installation types, including generic
@@ -4961,7 +5153,7 @@ ATCH
    name of a different existing login account that you plan to use
    for running the server. For information about creating the
    account, see Creating a mysql System User and Group, in Section
-   2.2, "Installing MySQL from Generic Binaries on Unix/Linux."
+   2.2, "Installing MySQL on Unix/Linux Using Generic Binaries."
 
     1. Change location into the top-level directory of your MySQL
        installation, represented here by BASEDIR:
@@ -5120,10 +5312,10 @@ shell> bin/mysqladmin variables
        on your platform and version of MySQL, but should be similar
        to that shown here:
 shell> bin/mysqladmin version
-mysqladmin  Ver 14.12 Distrib 5.6.12, for pc-linux-gnu on i686
+mysqladmin  Ver 14.12 Distrib 5.6.13, for pc-linux-gnu on i686
 ...
 
-Server version          5.6.12
+Server version          5.6.13
 Protocol version        10
 Connection              Localhost via UNIX socket
 UNIX socket             /var/lib/mysql/mysql.sock
@@ -5407,7 +5599,7 @@ shell> bin/mysql mysql
      * Use the Solaris/OpenSolaris service management framework (SMF)
        system to initiate and control MySQL startup. For more
        information, see Section 2.6.2, "Installing MySQL on
-       OpenSolaris using IPS."
+       OpenSolaris Using IPS."
 
    The mysqld_safe and mysql.server scripts, Windows server,
    Solaris/OpenSolaris SMF, and the Mac OS X Startup Item (or MySQL
@@ -5444,7 +5636,7 @@ shell> mysql.server stop
    (MySQL-server-VERSION.rpm), or a native Linux package
    installation, the mysql.server script may be installed in the
    /etc/init.d directory with the name mysql. See Section 2.5.1,
-   "Installing MySQL from RPM Packages on Linux," for more
+   "Installing MySQL on Linux Using RPM Packages," for more
    information on the Linux RPM packages.
 
    Some vendors provide RPM packages that install a startup script
@@ -5518,7 +5710,7 @@ basedir=/usr/local/mysql
    The following table shows which option groups the server and each
    startup script read from option files.
 
-   Table 2.13. MySQL Startup scripts and supported server option
+   Table 2.14. MySQL Startup scripts and supported server option
    groups
       Script                  Option Groups
    mysqld       [mysqld], [server], [mysqld-major_version]
@@ -5566,13 +5758,11 @@ shell> tail host_name.log
        are using. You can create a my.cnf file and specify startup
        options for the engines that you plan to use. If you are going
        to use storage engines that support transactional tables
-       (InnoDB, NDB
-       (http://dev.mysql.com/doc/refman/5.5/en/mysql-cluster.html)),
-       be sure that you have them configured the way you want before
-       starting the server. If you are using InnoDB tables, see
-       Section 14.2.1.2, "Configuring InnoDB" for guidelines and
-       Section 14.2.6, "InnoDB Startup Options and System Variables"
-       for option syntax.
+       (InnoDB, NDB), be sure that you have them configured the way
+       you want before starting the server. If you are using InnoDB
+       tables, see Section 14.2.1.2, "Configuring InnoDB" for
+       guidelines and Section 14.2.6, "InnoDB Startup Options and
+       System Variables" for option syntax.
        Although storage engines use default values for options that
        you omit, Oracle recommends that you review the available
        options and specify explicit values for any options whose
@@ -5936,7 +6126,7 @@ mysql> DROP DATABASE test;
    mysql_secure_installation, a command-line utility that automates
    much of the process of securing a MySQL installation. And MySQL
    Workbench is available on all platforms, and also offers the
-   ability to manage user accounts (see Chapter 24, "MySQL Workbench"
+   ability to manage user accounts (see Chapter 25, "MySQL Workbench"
    ).
 
 2.11. Upgrading or Downgrading MySQL
@@ -6621,10 +6811,9 @@ Index Incompatibilities
    report, the bug number is given.
 
    The list applies both for binary upgrades and downgrades. For
-   example, Bug #27877 was fixed in MySQL 5.1.24 and 5.4.0, so it
-   applies to upgrades from versions older than 5.1.24 to 5.1.24 or
-   newer, and to downgrades from 5.1.24 or newer to versions older
-   than 5.1.24.
+   example, Bug #27877 was fixed in MySQL 5.1.24, so it applies to
+   upgrades from versions older than 5.1.24 to 5.1.24 or newer, and
+   to downgrades from 5.1.24 or newer to versions older than 5.1.24.
 
    In many cases, you can use CHECK TABLE ... FOR UPGRADE to identify
    tables for which index rebuilding is required. It will report this
@@ -6641,7 +6830,7 @@ Please do "REPAIR TABLE `tbl_name`" or dump/reload to fix it!
 
    These changes cause index rebuilding to be necessary:
 
-     * MySQL 5.1.24, 5.4.0 (Bug #27877)
+     * MySQL 5.1.24 (Bug #27877)
        Affects indexes that use the utf8_general_ci or
        ucs2_general_ci collation for columns that contain 'ß' LATIN
        SMALL LETTER SHARP S (German). The bug fix corrected an error
@@ -6649,7 +6838,7 @@ Please do "REPAIR TABLE `tbl_name`" or dump/reload to fix it!
        such that 'ß' compares equal to characters with which it
        previously compared different.
        Affected tables can be detected by CHECK TABLE ... FOR UPGRADE
-       as of MySQL 5.1.30, 5.4.0 (see Bug #40053).
+       as of MySQL 5.1.30 (see Bug #40053).
        A workaround for this issue is implemented as of MySQL 5.1.62,
        5.5.21, and 5.6.5. The workaround involves altering affected
        columns to use the utf8_general_mysql500_ci and
@@ -6663,13 +6852,13 @@ Please do "REPAIR TABLE `tbl_name`" or dump/reload to fix it!
        ACCENT, '[' LEFT SQUARE BRACKET, '\' REVERSE SOLIDUS, ']'
        RIGHT SQUARE BRACKET, '~' TILDE
        Affected tables can be detected by CHECK TABLE ... FOR UPGRADE
-       as of MySQL 5.1.29, 5.4.0 (see Bug #39585).
+       as of MySQL 5.1.29 (see Bug #39585).
 
      * MySQL 5.0.48, 5.1.21 (Bug #29461)
        Affects indexes for columns that use any of these character
        sets: eucjpms, euc_kr, gb2312, latin7, macce, ujis
        Affected tables can be detected by CHECK TABLE ... FOR UPGRADE
-       as of MySQL 5.1.29, 5.4.0 (see Bug #39585).
+       as of MySQL 5.1.29 (see Bug #39585).
 
 2.11.4. Rebuilding or Repairing Tables or Indexes
 

@@ -1,0 +1,1381 @@
+'\" t
+.\"     Title: \fBndb_mgmd\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
+.\"      Date: 05/21/2013
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 5.6
+.\"  Language: English
+.\"
+.TH "\FBNDB_MGMD\FR" "8" "05/21/2013" "MySQL 5\&.6" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.\" ndb_mgmd (MySQL Cluster process)
+.\" MySQL Cluster: ndb_mgmd process
+.\" MySQL Cluster: management nodes
+.\" management nodes (MySQL Cluster)
+.\" ndb_mgmd
+.SH "NAME"
+ndb_mgmd \- the MySQL Cluster management server daemon
+.SH "SYNOPSIS"
+.HP \w'\fBndb_mgmd\ \fR\fB\fIoptions\fR\fR\ 'u
+\fBndb_mgmd \fR\fB\fIoptions\fR\fR
+.SH "DESCRIPTION"
+.PP
+The management server is the process that reads the cluster configuration file and distributes this information to all nodes in the cluster that request it\&. It also maintains a log of cluster activities\&. Management clients can connect to the management server and check the cluster\*(Aqs status\&.
+.\" MySQL Cluster: administration
+.\" MySQL Cluster: commands
+.\" command options (MySQL Cluster): ndb_mgmd
+.\" MySQL Cluster: mgmd process
+.PP
+The following table includes options that are specific to the MySQL Cluster management server program
+\fBndb_mgmd\fR\&. Additional descriptions follow the table\&. For options common to most MySQL Cluster programs (including
+\fBndb_mgmd\fR), see
+Options Common to MySQL Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&17.12.\ \&ndb_mgmd Options and Variables: MySQL Cluster NDB 7.3
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added / Removed
+T}
+.T&
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l.
+T{
+.PP
+--config-file=file,
+.PP
+-f,
+.PP
+-c
+T}:T{
+Specify the cluster configuration file; in NDB\-6\&.4\&.0 and later, needs
+            \-\-reload or \-\-initial to override configuration cache if
+            present
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--configdir=directory
+T}:T{
+Specify the cluster management server\*(Aqs configuration cache directory
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--bind-address=ip_address
+T}:T{
+Local bind address
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--print-full-config,
+.PP
+-P
+T}:T{
+Print full configuration and exit
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--daemon,
+.PP
+-d
+T}:T{
+Run ndb_mgmd in daemon mode (default)
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--nodaemon
+T}:T{
+Do not run ndb_mgmd as a daemon
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--interactive
+T}:T{
+Run ndb_mgmd in interactive mode (not officially supported in
+            production; for testing purposes only)
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--log-name=name
+T}:T{
+A name to use when writing messages applying to this node in the cluster
+            log\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--no-nodeid-checks
+T}:T{
+Do not provide any node id checks
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--mycnf
+T}:T{
+Read cluster configuration data from the my\&.cnf file
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--reload
+T}:T{
+Causes the management server to compare the configuration file with its
+            configuration cache
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--initial
+T}:T{
+Causes the management server reload its configuration data from the
+            configuration file, bypassing the configuration cache
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--nowait-nodes=list
+T}:T{
+Do not wait for these management nodes when starting this management
+            server\&. Also requires \-\-ndb\-nodeid to be used\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--config-cache=value
+T}:T{
+Enable the management server configuration cache; ON by default\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--install[=name]
+T}:T{
+Used to install the management server process as a Windows service\&. Does
+            not apply on non\-Windows platforms\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--remove[=name]
+T}:T{
+Used to remove a management server process that was previously installed
+            as a Windows service, optionally specifying the name of the
+            service to be removed\&. Does not apply on non\-Windows
+            platforms\&.
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+.TE
+.sp 1
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" bind-address option (ndb_mgmd)
+\fB\-\-bind\-address=\fR\fB\fIhost\fR\fR\fB[:\fR\fB\fIport\fR\fR\fB]\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-bind\-address=ip_address
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+string
+T}
+:T{
+\fBDefault\fR
+T}:T{
+[none]
+T}
+.TE
+.sp 1
+When specified, this option limits management server connections by management clients to clients at the specified host name or IP address (and possibly port, if this is also specified)\&. In such cases, a management client attempting to connect to the management server from any other address fails with the error
+Unable to setup port: \fIhost\fR:\fIport\fR!
+.sp
+If the
+\fIport\fR
+is not specified, the management client attempts to use port 1186\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" no-nodeid-checks option (ndb_mgmd)
+\fB\-\-no\-nodeid\-checks\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-no\-nodeid\-checks
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Do not perform any checks of node IDs\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" configdir option (ndb_mgmd)
+\fB\-\-configdir=\fR\fB\fIpath\fR\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-configdir=directory
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+file name
+T}
+:T{
+\fBDefault\fR
+T}:T{
+$INSTALLDIR/mysql\-cluster
+T}
+.TE
+.sp 1
+Specifies the cluster management server\*(Aqs configuration cache directory\&.
+\fB\-\-config\-dir\fR
+is an alias for this option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" config-cache option (ndb_mgmd)
+This option, whose default value is
+1
+(or
+TRUE, or
+ON), can be used to disable the management server\*(Aqs configuration cache, so that it reads its configuration from
+config\&.ini
+every time it starts (see
+Section\ \&17.3.2, \(lqMySQL Cluster Configuration Files\(rq)\&. You can do this by starting the
+\fBndb_mgmd\fR
+process with any one of the following options:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-config\-cache=0\fR
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-config\-cache=FALSE\fR
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-config\-cache=OFF\fR
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-skip\-config\-cache\fR
+.RE
+.sp
+Using one of the options just listed is effective only if the management server has no stored configuration at the time it is started\&. If the management server finds any configuration cache files, then the
+\fB\-\-config\-cache\fR
+option or the
+\fB\-\-skip\-config\-cache\fR
+option is ignored\&. Therefore, to disable configuration caching, the option should be used the
+\fIfirst\fR
+time that the management server is started\&. Otherwise\(emthat is, if you wish to disable configuration caching for a management server that has
+\fIalready\fR
+created a configuration cache\(emyou must stop the management server, delete any existing configuration cache files manually, then restart the management server with
+\fB\-\-skip\-config\-cache\fR
+(or with
+\fB\-\-config\-cache\fR
+set equal to 0,
+OFF, or
+FALSE)\&.
+.sp
+Configuration cache files are normally created in a directory named
+mysql\-cluster
+under the installation directory (unless this location has been overridden using the
+\fB\-\-configdir\fR
+option)\&. Each time the management server updates its configuration data, it writes a new cache file\&. The files are named sequentially in order of creation using the following format:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_\fInode\-id\fR_config\&.bin\&.\fIseq\-number\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+\fInode\-id\fR
+is the management server\*(Aqs node ID;
+\fIseq\-number\fR
+is a sequence number, beginning with 1\&. For example, if the management server\*(Aqs node ID is 5, then the first three configuration cache files would, when they are created, be named
+ndb_5_config\&.bin\&.1,
+ndb_5_config\&.bin\&.2, and
+ndb_5_config\&.bin\&.3\&.
+.sp
+If your intent is to purge or reload the configuration cache without actually disabling caching, you should start
+\fBndb_mgmd\fR
+with one of the options
+\fB\-\-reload\fR
+or
+\fB\-\-initial\fR
+instead of
+\fB\-\-skip\-config\-cache\fR\&.
+.sp
+To re\-enable the configuration cache, simply restart the management server, but without the
+\fB\-\-config\-cache\fR
+or
+\fB\-\-skip\-config\-cache\fR
+option that was used previously to disable the configuration cache\&.
+.sp
+\fBndb_mgmd\fR
+does not check for the configuration directory (\fB\-\-configdir\fR) or attempts to create one when
+\fB\-\-skip\-config\-cache\fR
+is used\&. (Bug #13428853)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" config-file option (ndb_mgmd)
+.\" -f option (ndb_mgmd)
+.\" -c option (ndb_mgmd) (OBSOLETE)
+\fB\-\-config\-file=\fR\fB\fIfilename\fR\fR,
+\fB\-f \fR\fB\fIfilename\fR\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-config\-file=file
+T}
+T{
+T}:T{
+\-f
+T}
+T{
+T}:T{
+\-c
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+file name
+T}
+:T{
+\fBDefault\fR
+T}:T{
+\&./config\&.ini
+T}
+.TE
+.sp 1
+Instructs the management server as to which file it should use for its configuration file\&. By default, the management server looks for a file named
+config\&.ini
+in the same directory as the
+\fBndb_mgmd\fR
+executable; otherwise the file name and location must be specified explicitly\&.
+.sp
+This option is ignored unless the management server is forced to read the configuration file, either because
+\fBndb_mgmd\fR
+was started with the
+\fB\-\-reload\fR
+or
+\fB\-\-initial\fR
+option, or because the management server could not find any configuration cache\&. This option is also read if
+\fBndb_mgmd\fR
+was started with
+\fB\-\-config\-cache=OFF\fR\&. See
+Section\ \&17.3.2, \(lqMySQL Cluster Configuration Files\(rq, for more information\&.
+.sp
+Formerly, using this option together with
+\fB\-\-initial\fR
+caused removal of the configuration cache even if the file was not found\&. This issue was resolved in MySQL Cluster NDB 7\&.3\&.2\&. (Bug #1299289)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_mgmd: mycnf option
+.\" mycnf option: ndb_mgmd
+\fB\-\-mycnf\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-mycnf
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Read configuration data from the
+my\&.cnf
+file\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" daemon option (ndb_mgmd)
+.\" -d option (ndb_mgmd)
+\fB\-\-daemon\fR,
+\fB\-d\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-daemon
+T}
+T{
+T}:T{
+\-d
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+TRUE
+T}
+.TE
+.sp 1
+Instructs
+\fBndb_mgmd\fR
+to start as a daemon process\&. This is the default behavior\&.
+.sp
+This option has no effect when running
+\fBndb_mgmd\fR
+on Windows platforms\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" interactive option (ndb_mgmd)
+\fB\-\-interactive\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-interactive
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Starts
+\fBndb_mgmd\fR
+in interactive mode; that is, an
+\fBndb_mgm\fR
+client session is started as soon as the management server is running\&. This option does not start any other MySQL Cluster nodes\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" initial option (ndb_mgmd)
+\fB\-\-initial\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-initial
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Configuration data is cached internally, rather than being read from the cluster global configuration file each time the management server is started (see
+Section\ \&17.3.2, \(lqMySQL Cluster Configuration Files\(rq)\&. Using the
+\fB\-\-initial\fR
+option overrides this behavior, by forcing the management server to delete any existing cache files, and then to re\-read the configuration data from the cluster configuration file and to build a new cache\&.
+.sp
+This differs in two ways from the
+\fB\-\-reload\fR
+option\&. First,
+\fB\-\-reload\fR
+forces the server to check the configuration file against the cache and reload its data only if the contents of the file are different from the cache\&. Second,
+\fB\-\-reload\fR
+does not delete any existing cache files\&.
+.sp
+If
+\fBndb_mgmd\fR
+is invoked with
+\fB\-\-initial\fR
+but cannot find a global configuration file, the management server cannot start\&.
+.sp
+When a management server starts, it checks for another management server in the same MySQL Cluster and tries to use the other management server\*(Aqs configuration data;
+\fBndb_mgmd\fR
+ignores
+\fB\-\-initial\fR
+unless it is the only management server running\&. This behavior also has implications when performing a rolling restart of a MySQL Cluster with multiple management nodes\&. See
+Section\ \&17.5.5, \(lqPerforming a Rolling Restart of a MySQL Cluster\(rq, for more information\&.
+.sp
+Formerly, using this option together with the
+\fB\-\-config\-file\fR
+option caused removal of the configuration cache even if the file was not found\&. Starting with MySQL Cluster NDB 7\&.3\&.2, the cache is cleared in such cases only if the configuration file is actually found\&. (Bug #1299289)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" log-name option (ndb_mgmd)
+\fB\-\-log\-name=\fR\fB\fIname\fR\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-log\-name=name
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+string
+T}
+:T{
+\fBDefault\fR
+T}:T{
+MgmtSrvr
+T}
+.TE
+.sp 1
+Provides a name to be used for this node in the cluster log\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" nodaemon option (ndb_mgmd)
+\fB\-\-nodaemon\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-nodaemon
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Instructs
+\fBndb_mgmd\fR
+not to start as a daemon process\&.
+.sp
+The default behavior for
+\fBndb_mgmd\fR
+on Windows is to run in the foreground, making this option unnecessary on Windows platforms\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" print-full-config option (ndb_mgmd)
+.\" -P option (ndb_mgmd)
+\fB\-\-print\-full\-config\fR,
+\fB\-P\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-print\-full\-config
+T}
+T{
+T}:T{
+\-P
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Shows extended information regarding the configuration of the cluster\&. With this option on the command line the
+\fBndb_mgmd\fR
+process prints information about the cluster setup including an extensive list of the cluster configuration sections as well as parameters and their values\&. Normally used together with the
+\fB\-\-config\-file\fR
+(\fB\-f\fR) option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" reload option (ndb_mgmd)
+\fB\-\-reload\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-reload
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+In MySQL Cluster NDB 7\&.3, configuration data is stored internally rather than being read from the cluster global configuration file each time the management server is started (see
+Section\ \&17.3.2, \(lqMySQL Cluster Configuration Files\(rq)\&. Using this option forces the management server to check its internal data store against the cluster configuration file and to reload the configuration if it finds that the configuration file does not match the cache\&. Existing configuration cache files are preserved, but not used\&.
+.sp
+This differs in two ways from the
+\fB\-\-initial\fR
+option\&. First,
+\fB\-\-initial\fR
+causes all cache files to be deleted\&. Second,
+\fB\-\-initial\fR
+forces the management server to re\-read the global configuration file and construct a new cache\&.
+.sp
+If the management server cannot find a global configuration file, then the
+\fB\-\-reload\fR
+option is ignored\&.
+.sp
+When a management server starts, it checks for another management server in the same MySQL Cluster and tries to use the other management server\*(Aqs configuration data;
+\fBndb_mgmd\fR
+ignores
+\fB\-\-reload\fR
+unless it is the only management server running\&. This behavior also has implications when performing a rolling restart of a MySQL Cluster with multiple management nodes\&. See
+Section\ \&17.5.5, \(lqPerforming a Rolling Restart of a MySQL Cluster\(rq, for more information\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" nowait-nodes option (ndb_mgmd)
+\fB\-\-nowait\-nodes\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-nowait\-nodes=list
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+numeric
+T}
+:T{
+\fBDefault\fR
+T}:T{
+T}
+:T{
+\fBRange\fR
+T}:T{
+1 \&.\&. 255
+T}
+.TE
+.sp 1
+When starting a MySQL Cluster is configured with two management nodes, each management server normally checks to see whether the other
+\fBndb_mgmd\fR
+is also operational and whether the other management server\*(Aqs configuration is identical to its own\&. However, it is sometimes desirable to start the cluster with only one management node (and perhaps to allow the other
+\fBndb_mgmd\fR
+to be started later)\&. This option causes the management node to bypass any checks for any other management nodes whose node IDs are passed to this option, permitting the cluster to start as though configured to use only the management node that was started\&.
+.sp
+For purposes of illustration, consider the following portion of a
+config\&.ini
+file (where we have omitted most of the configuration parameters that are not relevant to this example):
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[ndbd]
+NodeId = 1
+HostName = 192\&.168\&.0\&.101
+[ndbd]
+NodeId = 2
+HostName = 192\&.168\&.0\&.102
+[ndbd]
+NodeId = 3
+HostName = 192\&.168\&.0\&.103
+[ndbd]
+NodeId = 4
+HostName = 192\&.168\&.0\&.104
+[ndb_mgmd]
+NodeId = 10
+HostName = 192\&.168\&.0\&.150
+[ndb_mgmd]
+NodeId = 11
+HostName = 192\&.168\&.0\&.151
+[api]
+NodeId = 20
+HostName = 192\&.168\&.0\&.200
+[api]
+NodeId = 21
+HostName = 192\&.168\&.0\&.201
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Assume that you wish to start this cluster using only the management server having node ID
+10
+and running on the host having the IP address 192\&.168\&.0\&.150\&. (Suppose, for example, that the host computer on which you intend to the other management server is temporarily unavailable due to a hardware failure, and you are waiting for it to be repaired\&.) To start the cluster in this way, use a command line on the machine at 192\&.168\&.0\&.150 to enter the following command:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_mgmd \-\-ndb\-nodeid=10 \-\-nowait\-nodes=11\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+As shown in the preceding example, when using
+\fB\-\-nowait\-nodes\fR, you must also use the
+\fB\-\-ndb\-nodeid\fR
+option to specify the node ID of this
+\fBndb_mgmd\fR
+process\&.
+.sp
+You can then start each of the cluster\*(Aqs data nodes in the usual way\&. If you wish to start and use the second management server in addition to the first management server at a later time without restarting the data nodes, you must start each data node with a connectstring that references both management servers, like this:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndbd \-c 192\&.168\&.0\&.150,192\&.168\&.0\&.151\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+The same is true with regard to the connectstring used with any
+\fBmysqld\fR
+processes that you wish to start as MySQL Cluster SQL nodes connected to this cluster\&. See
+Section\ \&17.3.2.3, \(lqThe MySQL Cluster Connectstring\(rq, for more information\&.
+.sp
+When used with
+\fBndb_mgmd\fR, this option affects the behavior of the management node with regard to other management nodes only\&. Do not confuse it with the
+\fB\-\-nowait\-nodes\fR
+option used with
+\fBndbd\fR
+or
+\fBndbmtd\fR
+to permit a cluster to start with fewer than its full complement of data nodes; when used with data nodes, this option affects their behavior only with regard to other data nodes\&.
+.sp
+Multiple management node IDs may be passed to this option as a comma\-separated list\&. Each node ID must be no less than 1 and no greater than 255\&. In practice, it is quite rare to use more than two management servers for the same MySQL Cluster (or to have any need for doing so); in most cases you need to pass to this option only the single node ID for the one management server that you do not wish to use when starting the cluster\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+When you later start the
+\(lqmissing\(rq
+management server, its configuration must match that of the management server that is already in use by the cluster\&. Otherwise, it fails the configuration check performed by the existing management server, and does not start\&.
+.sp .5v
+.RE
+.RE
+.PP
+It is not strictly necessary to specify a connectstring when starting the management server\&. However, if you are using more than one management server, a connectstring should be provided and each node in the cluster should specify its node ID explicitly\&.
+.PP
+See
+Section\ \&17.3.2.3, \(lqThe MySQL Cluster Connectstring\(rq, for information about using connectstrings\&.
+\fBndb_mgmd\fR(8), describes other options for
+\fBndb_mgmd\fR\&.
+.PP
+The following files are created or used by
+\fBndb_mgmd\fR
+in its starting directory, and are placed in the
+DataDir
+as specified in the
+config\&.ini
+configuration file\&. In the list that follows,
+\fInode_id\fR
+is the unique node identifier\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" MySQL Cluster: configuration
+.\" configuring MySQL Cluster
+.\" config.ini (MySQL Cluster)
+config\&.ini
+is the configuration file for the cluster as a whole\&. This file is created by the user and read by the management server\&.
+Section\ \&17.3, \(lqMySQL Cluster Configuration\(rq, discusses how to set up this file\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ndb_\fInode_id\fR_cluster\&.log
+is the cluster events log file\&. Examples of such events include checkpoint startup and completion, node startup events, node failures, and levels of memory usage\&. A complete listing of cluster events with descriptions may be found in
+Section\ \&17.5, \(lqManagement of MySQL Cluster\(rq\&.
+.sp
+When the size of the cluster log reaches one million bytes, the file is renamed to
+ndb_\fInode_id\fR_cluster\&.log\&.\fIseq_id\fR, where
+\fIseq_id\fR
+is the sequence number of the cluster log file\&. (For example: If files with the sequence numbers 1, 2, and 3 already exist, the next log file is named using the number
+4\&.)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ndb_\fInode_id\fR_out\&.log
+is the file used for
+stdout
+and
+stderr
+when running the management server as a daemon\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ndb_\fInode_id\fR\&.pid
+is the process ID file used when running the management server as a daemon\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" install option (ndb_mgmd)
+\fB\-\-install[=\fR\fB\fIname\fR\fR\fB]\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-install[=name]
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+string
+T}
+:T{
+\fBDefault\fR
+T}:T{
+ndb_mgmd
+T}
+.TE
+.sp 1
+Causes
+\fBndb_mgmd\fR
+to be installed as a Windows service\&. Optionally, you can specify a name for the service; if not set, the service name defaults to
+ndb_mgmd\&. Although it is preferable to specify other
+\fBndb_mgmd\fR
+program options in a
+my\&.ini
+or
+my\&.cnf
+configuration file, it is possible to use them together with
+\fB\-\-install\fR\&. However, in such cases, the
+\fB\-\-install\fR
+option must be specified first, before any other options are given, for the Windows service installation to succeed\&.
+.sp
+It is generally not advisable to use this option together with the
+\fB\-\-initial\fR
+option, since this causes the configuration cache to be wiped and rebuilt every time the service is stopped and started\&. Care should also be taken if you intend to use any other
+\fBndb_mgmd\fR
+options that affect the starting of the management server, and you should make absolutely certain you fully understand and allow for any possible consequences of doing so\&.
+.sp
+The
+\fB\-\-install\fR
+option has no effect on non\-Windows platforms\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" remove option (ndb_mgmd)
+\fB\-\-remove[=\fR\fB\fIname\fR\fR\fB]\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-remove[=name]
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values \fR
+T}
+:T{
+\fBType\fR
+T}:T{
+string
+T}
+:T{
+\fBDefault\fR
+T}:T{
+ndb_mgmd
+T}
+.TE
+.sp 1
+Causes an
+\fBndb_mgmd\fR
+process that was previously installed as a Windows service to be removed\&. Optionally, you can specify a name for the service to be uninstalled; if not set, the service name defaults to
+ndb_mgmd\&.
+.sp
+The
+\fB\-\-remove\fR
+option has no effect on non\-Windows platforms\&.
+.RE
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2013, Oracle and/or its affiliates. All rights reserved.
+.PP
+This software and related documentation are provided under a license agreement containing restrictions on use and disclosure and are protected by intellectual property laws. Except as expressly permitted in your license agreement or allowed by law, you may not use, copy, reproduce, translate, broadcast, modify, license, transmit, distribute, exhibit, perform, publish, or display any part, in any form, or by any means. Reverse engineering, disassembly, or decompilation of this software, unless required by law for interoperability, is prohibited.
+.PP
+The information contained herein is subject to change without notice and is not warranted to be error-free. If you find any errors, please report them to us in writing.
+.PP
+If this software or related documentation is delivered to the U.S. Government or anyone licensing it on behalf of the U.S. Government, the following notice is applicable:
+.PP
+U.S. GOVERNMENT RIGHTS Programs, software, databases, and related documentation and technical data delivered to U.S. Government customers are "commercial computer software" or "commercial technical data" pursuant to the applicable Federal Acquisition Regulation and agency-specific supplemental regulations. As such, the use, duplication, disclosure, modification, and adaptation shall be subject to the restrictions and license terms set forth in the applicable Government contract, and, to the extent applicable by the terms of the Government contract, the additional rights set forth in FAR 52.227-19, Commercial Computer Software License (December 2007). Oracle USA, Inc., 500 Oracle Parkway, Redwood City, CA 94065.
+.PP
+This software is developed for general use in a variety of information management applications. It is not developed or intended for use in any inherently dangerous applications, including applications which may create a risk of personal injury. If you use this software in dangerous applications, then you shall be responsible to take all appropriate fail-safe, backup, redundancy, and other measures to ensure the safe use of this software. Oracle Corporation and its affiliates disclaim any liability for any damages caused by use of this software in dangerous applications.
+.PP
+Oracle is a registered trademark of Oracle Corporation and/or its affiliates. MySQL is a trademark of Oracle Corporation and/or its affiliates, and shall not be used without Oracle's express written authorization. Other names may be trademarks of their respective owners.
+.PP
+This software and documentation may provide access to or information on content, products, and services from third parties. Oracle Corporation and its affiliates are not responsible for and expressly disclaim all warranties of any kind with respect to third-party content, products, and services. Oracle Corporation and its affiliates will not be responsible for any loss, costs, or damages incurred due to your access to or use of third-party content, products, or services.
+.PP
+This document in any form, software or printed matter, contains proprietary information that is the exclusive property of Oracle. Your access to and use of this material is subject to the terms and conditions of your Oracle Software License and Service Agreement, which has been executed and with which you agree to comply. This document and information contained herein may not be disclosed, copied, reproduced, or distributed to anyone outside Oracle without prior written consent of Oracle or as specifically provided below. This document is not part of your license agreement nor can it be incorporated into any contractual agreement with Oracle or its subsidiaries or affiliates.
+.PP
+This documentation is NOT distributed under a GPL license. Use of this documentation is subject to the following terms:
+.PP
+You may create a printed copy of this documentation solely for your own personal use. Conversion to other formats is allowed as long as the actual content is not altered or edited in any way. You shall not publish or distribute this documentation in any form or on any media, except if you distribute the documentation in a manner similar to how Oracle disseminates it (that is, electronically for download on a Web site with the software) or on a CD-ROM or similar medium, provided however that the documentation is disseminated together with the software on the same medium. Any other use, such as any dissemination of printed copies or use of this documentation, in whole or in part, in another publication, requires the prior written consent from an authorized representative of Oracle. Oracle and/or its affiliates reserve any and all rights to this documentation not expressly granted above.
+.PP
+For more information on the terms of this license, or for details on how the MySQL documentation is built and produced, please visit
+\m[blue]\fBMySQL Contact & Questions\fR\m[].
+.PP
+For additional licensing information, including licenses for third-party libraries used by MySQL products, see
+Preface and Legal Notices.
+.PP
+For help with using MySQL, please visit either the
+\m[blue]\fBMySQL Forums\fR\m[]
+or
+\m[blue]\fBMySQL Mailing Lists\fR\m[]
+where you can discuss your issues with other MySQL users.
+.PP
+For additional documentation on MySQL products, including translations of the documentation into other languages, and downloadable versions in variety of formats, including HTML and PDF formats, see the
+\m[blue]\fBMySQL Documentation Library\fR\m[].
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

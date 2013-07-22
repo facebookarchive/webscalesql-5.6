@@ -48,26 +48,53 @@ MACRO (MYSQL_CHECK_ZLIB_WITH_COMPRESS)
     ENDIF()
   ENDIF()
   
+  # See if WITH_ZLIB is of the form </path/to/custom/installation>
+  FILE(GLOB WITH_ZLIB_HEADER ${WITH_ZLIB}/include/zlib.h)
+  IF (WITH_ZLIB_HEADER)
+    SET(WITH_ZLIB_PATH ${WITH_ZLIB} CACHE PATH "path to custom ZLIB installation")
+  ENDIF()
+
   IF(WITH_ZLIB STREQUAL "bundled")
     MYSQL_USE_BUNDLED_ZLIB()
-  ELSE()
-    SET(ZLIB_FIND_QUIETLY TRUE)
-    INCLUDE(FindZLIB)
-    IF(ZLIB_FOUND)
-     INCLUDE(CheckFunctionExists)
+  ELSEIF(WITH_ZLIB STREQUAL "system" OR
+         WITH_ZLIB STREQUAL "yes" OR
+         WITH_ZLIB_PATH)
+    # First search in WITH_SSL_PATH.
+    FIND_PATH(ZLIB_ROOT_DIR
+      NAMES include/zlib.h
+      NO_CMAKE_PATH
+      NO_CMAKE_ENVIRONMENT_PATH
+      HINTS ${WITH_ZLIB_PATH}
+    )
+    # Then search in standard places (if not found above).
+    FIND_PATH(ZLIB_ROOT_DIR
+      NAMES include/zlib.h
+    )
+
+    IF(ZLIB_ROOT_DIR)
+      INCLUDE(CheckFunctionExists)
       SET(CMAKE_REQUIRED_LIBRARIES z)
       CHECK_FUNCTION_EXISTS(crc32 HAVE_CRC32)
       CHECK_FUNCTION_EXISTS(compressBound HAVE_COMPRESSBOUND)
       CHECK_FUNCTION_EXISTS(deflateBound HAVE_DEFLATEBOUND)
       SET(CMAKE_REQUIRED_LIBRARIES)
       IF(HAVE_CRC32 AND HAVE_COMPRESSBOUND AND HAVE_DEFLATEBOUND)
-        SET(ZLIB_LIBRARY ${ZLIB_LIBRARIES} CACHE INTERNAL "System zlib library")
-        SET(WITH_ZLIB "system" CACHE STRING
-          "Which zlib to use (possible values are 'bundled' or 'system')")
+        SET(ZLIB_LIBRARY "${ZLIB_ROOT_DIR}/lib/libz.so")
+        SET(ZLIB_INCLUDE_DIR "${ZLIB_ROOT_DIR}/include")
+        FILE(READ "${ZLIB_INCLUDE_DIR}/zlib.h" ZLIB_H)
+        STRING(REGEX REPLACE ".*#define ZLIB_VERSION \"([0-9]+)\\.([0-9]+)\\.([0-9]+)\".*" "\\1.\\2.\\3" ZLIB_VERSION_STRING "${ZLIB_H}")
+        SET(ZLIB_INCLUDE_DIRS ${ZLIB_INCLUDE_DIR})
+        SET(ZLIB_FOUND TRUE CACHE INTERNAL "Zlib found")
+        IF(WITH_ZLIB_PATH)
+          SET(WITH_ZLIB "${WITH_ZLIB_PATH}" CACHE STRING "Using a custom zlib path")
+        ELSE()
+          SET(WITH_ZLIB "system" CACHE STRING
+              "Which zlib to use (possible values are 'bundled' or 'system')")
+        ENDIF()
         SET(ZLIB_SOURCES "")
       ELSE()
         SET(ZLIB_FOUND FALSE CACHE INTERNAL "Zlib found but not usable")
-        MESSAGE(STATUS "system zlib found but not usable")
+        MESSAGE(SEND_ERROR "system zlib found but not usable")
       ENDIF()
     ENDIF()
     IF(NOT ZLIB_FOUND)

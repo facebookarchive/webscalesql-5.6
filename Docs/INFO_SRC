@@ -1,7 +1,7 @@
-revision-id: tor.didriksen@oracle.com-20130521150701-f8yefhvyk9499pph
-date: 2013-05-21 17:07:01 +0200
-build-date: 2013-05-21 17:10:24 +0200
-revno: 5085
-branch-nick: mysql-5.6.12-release
+revision-id: balasubramanian.kandasamy@oracle.com-20130710160248-svgp0n99q1w83rhw
+date: 2013-07-10 18:02:48 +0200
+build-date: 2013-07-10 18:04:09 +0200
+revno: 5290
+branch-nick: mysql-5.6.13-release
 
-MySQL source 5.6.12
+MySQL source 5.6.13

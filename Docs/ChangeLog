@@ -1,1181 +1,2727 @@
 ------------------------------------------------------------
-revno: 5085
-committer: Tor Didriksen <tor.didriksen@oracle.com>
-branch nick: 5.6.12-release
-timestamp: Tue 2013-05-21 17:07:01 +0200
-message:
-  Backport of fix for:
-  Bug#69119 Bug#16760474 Wrong FOUND_ROWS() on MySQL 5.6.11
-------------------------------------------------------------
-revno: 5084
+revno: 5290
 committer: Balasubramanian Kandasamy <balasubramanian.kandasamy@oracle.com>
-branch nick: mysql-5.6.12-release
-timestamp: Mon 2013-05-13 10:19:07 +0200
+branch nick: mysql-5.6.13-release
+timestamp: Wed 2013-07-10 18:02:48 +0200
 message:
-  Updated copyright year information
+  Updated spec file for Bug#17080138
 ------------------------------------------------------------
-revno: 5083
+revno: 5289
 committer: Balasubramanian Kandasamy <balasubramanian.kandasamy@oracle.com>
-branch nick: mysql-5.6.12-release
-timestamp: Mon 2013-05-13 09:50:34 +0200
+branch nick: mysql-5.6.13-release
+timestamp: Wed 2013-07-10 16:21:04 +0200
 message:
-   Adding fix for Bug#16798868
+  Cleaned up spec file to handle advanced to community downgrade
 ------------------------------------------------------------
-revno: 5082
-committer: Marko M?kel? <marko.makela@oracle.com>
-branch nick: mysql-5.6.12-release
-timestamp: Thu 2013-05-09 07:31:00 +0300
-message:
-  Push to 5.6.12 release clone:
-  
-  ------------------------------------------------------------
-  revno: 5097
-  revision-id: marko.makela@oracle.com-20130508201655-4uefvpqc1vytohpp
-  parent: marko.makela@oracle.com-20130508201601-e9furpa8h3z9eeyl
-  committer: Marko M?kel? <marko.makela@oracle.com>
-  branch nick: mysql-5.6
-  timestamp: Wed 2013-05-08 23:16:55 +0300
-  message:
-    Bug#16774118 RACE CONDITION IN BLOB ACCESS DURING ONLINE ALTER TABLE
-    
-    This is a race condition in BLOB access during online ALTER TABLE,
-    when applying the table modification log for other than the very last
-    log block.
-    
-    row_log_table_apply_convert_mrec(): Acquire the index B-tree lock to
-    protect the access to log->blobs and the BLOB page itself.
-    
-    rb#2401 approved by Kevin Lewis
-------------------------------------------------------------
-revno: 5081
-committer: Annamalai Gurusami <annamalai.gurusami@oracle.com>
-branch nick: mysql-5.6.12-release
-timestamp: Mon 2013-05-06 20:28:02 +0530
-message:
-  Bug #16722314 FOREIGN KEY ID MODIFIED DURING EXPORT
-  Bug #16754901 PARS_INFO_FREE NOT CALLED IN DICT_CREATE_ADD_FOREIGN_TO_DICTIONARY
-  
-  Merging the fix from mysql-5.6 to mysql-5.6.12-release.
-------------------------------------------------------------
-revno: 5080
-committer: Jon Olav Hauglid <jon.hauglid@oracle.com>
-branch nick: mysql-5.6.12-release
-timestamp: Mon 2013-05-06 16:04:21 +0200
-message:
-  Bug#16757869: INNODB: POSSIBLE REGRESSION IN 5.5.31, BUG#16004999
-  
-  The problem was that if UPDATE with subselect caused a
-  deadlock inside InnoDB, this deadlock was not properly
-  handled by the SQL layer. This meant that the SQL layer
-  would try to unlock the row after InnoDB had rolled
-  back the transaction. This caused an assertion inside
-  InnoDB.
-  
-  This patch fixes the problem by checking for errors
-  reported by SQL_SELECT::skip_record() and not calling
-  unlock_row() if any errors have been reported.
-  
-  This bug is similar to Bug#13586591, but for UPDATE
-  rather than DELETE. Similar issues in filesort/opt_range/
-  sql_select will be investigated and handled in the scope
-  of Bug#16767929
-------------------------------------------------------------
-revno: 5079
-committer: Balasubramanian Kandasamy <balasubramanian.kandasamy@oracle.com>
-branch nick: mysql-5.6.12-release
-timestamp: Mon 2013-05-06 15:45:13 +0200
-message:
-  Updated spec file for Bug16488773
-------------------------------------------------------------
-revno: 5078
-committer: Marko M?kel? <marko.makela@oracle.com>
-branch nick: mysql-5.6.12-release
-timestamp: Mon 2013-05-06 14:50:12 +0300
-message:
-  Cherry-pick from mysql-5.6 into mysql-5.6.12-release:
-  
-  revno: 5079
-  revision-id: marko.makela@oracle.com-20130506113412-2b24o44ojkp6mo4a
-  parent: mysql-build@oss.oracle.com-20130506103306-y5nnl41oy5e2pe54
-  committer: Marko M?kel? <marko.makela@oracle.com>
-  branch nick: mysql-5.6
-  timestamp: Mon 2013-05-06 14:34:12 +0300
-  message:
-    Bug#16765255 Bug#16735660 ASSERT TABLE2 == NULL NOT FIXED COMPLETELY
-  
-    Fix a regression introduced by
-    Bug#16593427 ROLLBACK OF RECOVERED TRANSACTION CORRUPTS CREATE INDEX
-  
-    The fix in Bug#16735660 was incomplete.
-  
-    Approved on IM by Jimmy Yang.
-------------------------------------------------------------
-revno: 5077 [merge]
-tags: clone-5.6.12-build
-committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
+revno: 5288 [merge]
+tags: clone-5.6.13-build
+committer: Hery Ramilison <hery.ramilison@oracle.com>
 branch nick: mysql-5.6
-timestamp: Mon 2013-05-06 11:02:01 +0200
+timestamp: Mon 2013-07-08 20:10:38 +0200
 message:
   Empty version change upmerge
     ------------------------------------------------------------
-    revno: 2875.437.86 [merge]
-    committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
+    revno: 2875.437.160
+    author: hery.ramilison@oracle.com
+    committer: Hery Ramilison <hery.ramilison@oracle.com>
     branch nick: mysql-5.5
-    timestamp: Mon 2013-05-06 10:56:48 +0200
+    timestamp: Mon 2013-07-08 19:41:40 +0200
     message:
-      Empty version change upmerge
-        ------------------------------------------------------------
-        revno: 2661.876.27
-        author: murthy.narkedimilli@oracle.com
-        committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
-        branch nick: mysql-5.1
-        timestamp: Mon 2013-05-06 10:25:03 +0200
-        message:
-          Raise version number after cloning 5.1.70
+      Raise version number after cloning 5.5.33
 ------------------------------------------------------------
-revno: 5076 [merge]
-committer: Balasubramanian Kandasamy <balasubramanian.kandasamy@oracle.com>
-branch nick: mysql-5.6
-timestamp: Mon 2013-05-06 10:22:08 +0200
+revno: 5287
+committer: Andrei Elkin <andrei.elkin@oracle.com>
+branch nick: 5.6-fixes
+timestamp: Mon 2013-07-08 16:08:41 +0300
 message:
-  Empty version change upmerge
+  BUG#16594095
+  
+  Post-push refinement to fix a valgrind issue.
+  The basic pushed patch did not expect a block of
+   if (!ret_worker->checkpoint_notified) {}
+  be executed multiple times during scheduling of one group.
+  In fact it should have been left intact to continue to be executed at T-event
+  time that guarantees its single time run.
+  And that is restored, that is the former patch part is reverted.
+  
+  As the matter of fact the physical coordinates were unknown to the Worker 
+  only during time of the first transaction scheduling upon master binlog
+  rotation or the very first one at MTS start.
+  Information about the master binlog at such points is passed to the Worker
+  now via augmented notification mechanism.
+  The new notification is light as in implementation so in terms of execution
+  (is supposed to be pretty rare) and never more that once during one transaction
+  scheduling (as asserted in the DBUG version of the patch).
+  
+  Attention to rpl_conflicts.test is paid to sort out 
+  rpl_{row,stm}conflicts.test failing on PB2.
+------------------------------------------------------------
+revno: 5286
+committer: Anitha Gopi <anitha.gopi@oracle.com>
+branch nick: mysql-5.6
+timestamp: Mon 2013-07-08 12:21:42 +0200
+message:
+  Removed tests that are fixed from experimental list
+------------------------------------------------------------
+revno: 5285 [merge]
+committer: Aditya A <aditya.a@oracle.com>
+branch nick: mysql-5.6
+timestamp: Fri 2013-07-05 14:37:37 +0530
+message:
+  Bug#17033706 SINCE 5.5.32 & 5.6.12, INNODB CANT START WITH OWN
+               MULTI-FILE TABLESPACE
+  [ Merge from 5.5 ]
     ------------------------------------------------------------
-    revno: 2875.437.85
-    author: balasubramanian.kandasamy@oracle.com
-    committer: Balasubramanian Kandasamy <balasubramanian.kandasamy@oracle.com>
+    revno: 2875.437.159
+    tags: clone-5.5.33-build
+    committer: Aditya A <aditya.a@oracle.com>
     branch nick: mysql-5.5
-    timestamp: Mon 2013-05-06 09:51:25 +0200
+    timestamp: Fri 2013-07-05 14:30:15 +0530
     message:
-      Raise version number after cloning 5.5.32
-------------------------------------------------------------
-revno: 5075 [merge]
-committer: Marko M?kel? <marko.makela@oracle.com>
-branch nick: mysql-5.6
-timestamp: Fri 2013-05-03 16:56:38 +0300
-message:
-  Merge mysql-5.5 to mysql-5.6.
-    ------------------------------------------------------------
-    revno: 2875.437.84
-    tags: clone-5.5.32-build
-    committer: Marko M?kel? <marko.makela@oracle.com>
-    branch nick: mysql-5.5
-    timestamp: Fri 2013-05-03 16:39:17 +0300
-    message:
-      Attempt to fix a test failure on Windows
-      by not accessing a file while the server is running.
-------------------------------------------------------------
-revno: 5074
-committer: Nuno Carvalho <nuno.carvalho@oracle.com>
-branch nick: mysql-5.6
-timestamp: Thu 2013-05-02 21:52:14 +0100
-message:
-  BUG#16715809: REPLICATION WAS BROKEN WHILE EXECUTING FLUSH TABLES
-  
-  Fix for BUG 16062608, which disallowed commands that were not
-  flagged as write commands but implicit commit when GTID_NEXT type
-  is different of AUTOMATIC, introduced some regressions, more
-  precisely made some commands to break replication.
-  
-  In order to fix this incorrect behaviour, that fix was reverted.
-------------------------------------------------------------
-revno: 5073
-committer: Marko M?kel? <marko.makela@oracle.com>
-branch nick: mysql-5.6
-timestamp: Thu 2013-05-02 22:02:59 +0300
-message:
-  Bug#16754776 MEMORY LEAK IN TRX_ROLLBACK_OR_CLEAN_RECOVERED()
-  
-  trx_rollback_resurrected(): Free the trx object after calling
-  trx_cleanup_at_db_startup() or trx_rollback_active().
-  
-  rb#2366 approved by Kevin Lewis
-------------------------------------------------------------
-revno: 5072
-committer: Jorgen Loland <jorgen.loland@oracle.com>
-branch nick: mysql-5.6
-timestamp: Thu 2013-05-02 13:53:53 +0200
-message:
-  Bug#16437940: BAD CHANGE FROM REF TO RANGE DUE TO HEURISTICS
-  
-  The MySQL optimizer has the following heuristic: "if decision 
-  is to use ref access on index 'i', and it is possible to use 
-  range access utilizing more keyparts than ref on the same 
-  index 'i' => switch to range access".
-  
-  This heuristic makes sense when ref access refers to a 
-  constant, but is not so good when it refers to a column of a 
-  table earlier in the join sequence. In this case the range 
-  access method will not utilize the join condition.
-  
-  Fix: don't apply the heuristic if 'ref' access refers to a 
-  column of another table.
-------------------------------------------------------------
-revno: 5071
-committer: Anil Toshniwal <anil.toshniwal@oracle.com>
-branch nick: mysql-5.6.11
-timestamp: Thu 2013-05-02 16:50:08 +0530
-message:
-  Bug#16737332 MEMORY LEAK IN DICT_CHECK_TABLESPACES_AND_STORE_MAX_ID()
-  Problem: Memory leak in dict_check_tablespaces_and_store_max_id() when
-  space_id is zero.
-  
-  Approved by Marko. rb#2360
-------------------------------------------------------------
-revno: 5070
-committer: Thayumanavar <thayumanavar.x.sachithanantha@oracle.com>
-branch nick: mysql-5.6
-timestamp: Thu 2013-05-02 16:22:57 +0530
-message:
-  BUG#11765644: DEBUG 'D' LIST SHOULD STAY EMPTY AFTER SET
-                DEBUG="+D,<SYMBOL>"
-  PROBLEM AND FIX:
-  When the debug 'd' flag has been set to empty, then all
-  DBUG_ macros are enabled. But if one then sets debug="
-  +d,foo" then only foo, all others are turned off. The
-  expected/intended behaviour should be to add debug for
-  'symbol' in addition to whatever was enabled before.
-  The fix adds keyword to the stack of active keyword list
-  if debug was not enabled for all symbols. Also turn debug
-  off if the last keyword is removed from the stack of
-  keywords. NOTE: This shall require a change in the docs
-  to reflect the changed behaviour in this bug
-------------------------------------------------------------
-revno: 5069
-committer: Marko M?kel? <marko.makela@oracle.com>
-branch nick: mysql-5.6
-timestamp: Thu 2013-05-02 13:02:45 +0300
-message:
-  Fix a race condition in the test.
-------------------------------------------------------------
-revno: 5068
-committer: Marko M?kel? <marko.makela@oracle.com>
-branch nick: mysql-5.6
-timestamp: Thu 2013-05-02 13:02:06 +0300
-message:
-  Make the test work with different page sizes.
-------------------------------------------------------------
-revno: 5067
-committer: Neeraj Bisht <neeraj.x.bisht@oracle.com>
-branch nick: 5.6
-timestamp: Thu 2013-05-02 13:57:09 +0530
-message:
-  Bug#16346367 : QUERY PROC RE-EXECUTE OF STORED ROUTINE, 
-  INEFFICIENT QUERY PLAN
-        
-    --patch for the test case failure in DAILY-TRUNK with 
-    "--mysqld=--query_cache_type=1 --mysqld=--query_cache_size=1M"
-------------------------------------------------------------
-revno: 5066
-committer: Jorgen Loland <jorgen.loland@oracle.com>
-branch nick: mysql-5.6
-timestamp: Thu 2013-05-02 09:36:04 +0200
-message:
-  Bug#16697792: POOR EXECUTION PLAN WHEN ORDER BY WITH LIMIT X
-  
-  When we have a LIMIT that is lower than the row estimate on 
-  the first table, the optimizer checks whether or not it's 
-  possible to switch to an index that provides correct ordering.
-  If there is, execution can be short-cut'ed immediately after
-  finding 'limit' number of records. The optimizer (in 
-  make_join_select()) will in such cases go through all ORDER BY
-  items and make note of all indexes that can be used to 
-  provide ordering for that item and then run the range optimizer
-  to see if changing index makes sense.
-  
-  That happens for this bug too. make_join_select() looks at 
-  the ORDER BY clause and finds indexes that cover the fields.
-  The range optimizer is then run to see if those indexes are
-  useful. In the bug, the indexes with that index number may not
-  be used, so range access is discarded. The problem is that the 
-  first table - the one we run range optimizer for - is not the 
-  same table referred to in the ORDER BY clause. Thus, the range 
-  optimizer will check if an index in a different table is 
-  useful.
-  
-  The fix is to check if the fields in the ORDER BY clause are 
-  from the table being analyzed, and leave the query plan as 
-  earlier computed if any of them belong to a different table.
-------------------------------------------------------------
-revno: 5065
-committer: Marko M?kel? <marko.makela@oracle.com>
-branch nick: mysql-5.6
-timestamp: Thu 2013-05-02 10:23:54 +0300
-message:
-  Remove a race condition and unnecessary filtering from a test case.
-------------------------------------------------------------
-revno: 5064
-committer: Neeraj Bisht <neeraj.x.bisht@oracle.com>
-branch nick: 5.6
-timestamp: Wed 2013-05-01 12:43:04 +0530
-message:
-  Bug#16296268 : UNEXCEPTED "USING WHERE" IN "EXPLAIN UPDATE/DELETE"
-  
-  Problem:-
-  In a single-table update, when there is a constant equality predicate
-  on a key.The bug reporter is expecting explain output type as const.
-  
-  Analysis:-
-  In query like
-  create table tb(id int primary key , c int); 
-  
-  mysql> explain update tb set c=2 where id=1\G
-  id    1
-  select_type    SIMPLE
-  table    tb
-  type    range            
-  possible_keys    PRIMARY
-  key    PRIMARY
-  key_len    4
-  ref    NULL
-  rows    1                
-  Extra    Using where 
-  
-  EXPLAIN does not print type: eq_ref/const even though we have an equality 
-  predicate on a Unique key field.
-  
-  However, we can't  show const/eq_ref as range access is used, and 
-  single-table UPDATE/DELETE "optimizer" does not even consider index 
-  lookups. The proper fix for this bug would be to make single-table U/D go 
-  through the normal query optimizer, but that's a complex task(for which WL#6367 
-  Single code path for multi-table and single-table UPDATE(DELETE) is created).
-  
-  But to improve readability, we are changing value of the ref column to ref:const.
-------------------------------------------------------------
-revno: 5063 [merge]
-committer: Luis Soares <luis.soares@oracle.com>
-branch nick: mysql-5.6-push
-timestamp: Tue 2013-04-30 22:09:49 +0100
-message:
-  BUG#16532543
-  
-  Automerged bzr bundle into latest mysql-5.6.
-    ------------------------------------------------------------
-    revno: 5055.2.1
-    committer: Luis Soares <luis.soares@oracle.com>
-    branch nick: mysql-5.6
-    timestamp: Tue 2013-04-30 01:18:43 +0100
-    message:
-      BUG#16532543: MYSQLBINLOG + MULTIPLE GTID BINLOGS + MYSQL => UNABLE TO
-      APPLY LOGS: ERROR 1837
+      Bug#17033706 SINCE 5.5.32 & 5.6.12, INNODB CANT START WITH OWN
+                   MULTI-FILE TABLESPACE
       
-      When using mysqlbinlog and mysql client to roll forward two (or more)
-      binary logs with GTIDs enabled, the server will report an error when
-      switching from the first to the second binary log.
+      ANALYSIS
+      --------
       
-      This happens because the variable GTID_NEXT is not properly reset when
-      the first log file ends. Therefore, when executing the format
-      description event of the second log file, GTID_NEXT will still be set
-      to the last transaction identifier from the first log. Ultimately,
-      this results in the following error: 1837.
+      When a tablespace has multiple data files, InnoDB fails to 
+      open the tablespace.  This is because for each ibd file, 
+      the first page is checked.But the first page of all ibd file
+      need not be the first page of the tablespace.  Only the first
+      page of the tablespace contains the tablespace header. When 
+      we check the first page of an ibd file that is not the first
+      page of the tablespace, then the "tablespace flags" is not
+      really available.This was wrongly used to check if a page is
+      corrupt or not.
       
-      The fix is to make mysqlbinlog to output SET
-      @@SESSION.GTID_NEXT=AUTOMATIC when processing a non-fake rotate
-      event. Furthermore, even though transactions do not span multiple
-      binary log files, they can span multiple relay-log files. Therefore,
-      the resetting of GTID_NEXT should only occur if mysqlbinlog is not
-      handling a rotate event in the middle of a transaction (as it may be
-      the case when parsing relay-logs).
+      FIX
+      ---
+      Use the tablespace flags only if the page number is 0 
+      in a tablespace.  
       
-      In this patch, I also fixed:
-        1. a few replace_regex in some .inc files
-        2. some result files that had strange results after the defective
-           regex kicked in
+      [Approved by Inaam rb#2836 ]
 ------------------------------------------------------------
-revno: 5062 [merge]
-committer: michael.izioumtchenko@oracle.com
-branch nick: mysql_src_c563
-timestamp: Tue 2013-04-30 20:42:01 +0200
+revno: 5284
+committer: Andrei Elkin <andrei.elkin@oracle.com>
+branch nick: 5.6-fixes
+timestamp: Fri 2013-07-05 10:20:19 +0300
 message:
-  merge from mysql-5.5
-    ------------------------------------------------------------
-    revno: 2875.437.83 [merge]
-    committer: michael.izioumtchenko@oracle.com
-    branch nick: mysql_src_c553
-    timestamp: Tue 2013-04-30 20:40:38 +0200
-    message:
-      merge from mysql-5.1
-        ------------------------------------------------------------
-        revno: 2661.876.26
-        tags: clone-5.1.70-build
-        committer: michael.izioumtchenko@oracle.com
-        branch nick: mysql_src_c2s3
-        timestamp: Tue 2013-04-30 20:39:12 +0200
-        message:
-          Bug#16405422 - RECOVERY FAILURE, ASSERT !RECV_NO_LOG_WRITE
-          
-          eliminate a race condition over recv_sys->n_addrs which might result in a database corruption
-          in recovery, without reporting a recovery error.
-          
-          recv_recover_page_func(): move the code segment that decrements recv_sys->n_addrs
-            to the end of the function, after the call to mtr_commit()
-          
-          rb://2282 approved by Inaam
+  bug#16931177 BGC and slave binlog rotate causes slave sql_thread to stop
+  bug#16594095 NOT VERBOSE ENOUGH ERROR REPORTING BY MTS WORKER
+  
+  A slave applier thread stops with an error when it is about to rotate binlog but
+  finds it's already done by a thread before it in the committing group.
+  
+  Notice that it's the slave applier that reacts to such situation
+  even though the regular use session also senses it in MBL::commit().
+  But unlike the slave applier the "master" user session does not propagate
+  any error to the top level (which is actually an issue being addressed by Bug16579083).
+  
+  It appears that the reason of this trouble is actual overreaction.
+  About to rotate session should not raise any error when it's merely beaten to by
+  some other.
+  And that is fixed.
+  ******
+  bug#16594095 NOT VERBOSE ENOUGH ERROR REPORTING BY MTS WORKER
+  
+  In case a Worker fails to apply an event the Slave applier (SQL thread +
+  Workers) stops. An error that the Worker faced is displayed in
+  Show-Slave-Status. However unlike the sequential execution there's 
+  no event coordinates that makes the failed event identification rather difficult.
+  
+  Fixed with adding a new prefix part to Last_SQL_Error message that
+  carries the physical (master binlog) coordinates and GTID_NEXT when one is set.
+  In case of simultaneous multiple Worker failures the error log must be consulted
+  as well.
+  
+  ******
+  merge from 5.6 repo.
 ------------------------------------------------------------
-revno: 5061 [merge]
-committer: Neeraj Bisht <neeraj.x.bisht@oracle.com>
-branch nick: 5.6
-timestamp: Tue 2013-04-30 22:48:21 +0530
+revno: 5283
+committer: Praveenkumar Hulakund <praveenkumar.hulakund@oracle.com>
+branch nick: mysql_5_6
+timestamp: Fri 2013-07-05 12:30:12 +0530
 message:
-  BUG#16222245 - CRASH WITH EXPLAIN FOR A QUERY WITH LOOSE SCAN FOR 
-  GROUP BY, MYISAM 
-  Merge fix for Bug#16222245 from mysql-5.5 to mysql-5.6
-    ------------------------------------------------------------
-    revno: 2875.437.82 [merge]
-    committer: Neeraj Bisht <neeraj.x.bisht@oracle.com>
-    branch nick: 5.5
-    timestamp: Tue 2013-04-30 22:46:37 +0530
-    message:
-      BUG#16222245 - CRASH WITH EXPLAIN FOR A QUERY WITH LOOSE SCAN FOR 
-      GROUP BY, MYISAM 
-      
-      Merge fix for Bug#16222245 from mysql-5.1 to mysql-5.5
-        ------------------------------------------------------------
-        revno: 2661.876.25
-        committer: Neeraj Bisht <neeraj.x.bisht@oracle.com>
-        branch nick: 5.1
-        timestamp: Tue 2013-04-30 22:38:34 +0530
-        message:
-          BUG#16222245 - CRASH WITH EXPLAIN FOR A QUERY WITH LOOSE SCAN FOR 
-          GROUP BY, MYISAM 
-          
-          Problem:-
-          In a query, where we are using loose index scan optimization and 
-          we have MIN() causes segmentation fault(where table row length 
-          is less then key_length).
-          
-          Analysis:
-          
-          While using loose index scan for MIN(), we call key_copy(), to copy 
-          the key data from record.
-          This function is using temporary record buffer to store key data 
-          from the record buffer.But in case where the key length is greater 
-          then the buffer length, this will cause a segmentation fault.
-          
-          
-          Solution:
-          Give a proper buffer to store a key record.
-------------------------------------------------------------
-revno: 5060
-committer: Dmitry Shulga <Dmitry.Shulga@oracle.com>
-branch nick: mysql-5.6-bug16388996
-timestamp: Tue 2013-04-30 20:51:41 +0700
-message:
-  This is a patch for bug#16388996 - ASSERTION IN TRX_START_IF_NOT_STARTED_LOW
-                                     WITH QUERY CACHE ENABLED.
-  
-  This bug relates to working with XA-transaction when query cache is enabled.
-  In some cases when XA-transaction is in a state either IDLE or PREPARED
-  the execution of QUERY with query_cache enable could led to a crash for the
-  server built in debug mode.
-  
-  To fix this bug we added checking for a state of XA-transaction before
-  looking for the query in the cache. If a state of XA-transaction is an IDLE or
-  PREPARED the query cache isn't called to look for the result of query
-  execution.
-------------------------------------------------------------
-revno: 5059
-committer: Marko M?kel? <marko.makela@oracle.com>
-branch nick: mysql-5.6
-timestamp: Tue 2013-04-30 14:57:39 +0300
-message:
-  Bug#16735660 ASSERT TABLE2 == NULL, ROLLBACK OF RESURRECTED TXNS,
-  DICT_TABLE_ADD_TO_CACHE
-  
-  trx_resurrect_table_locks(): Do not resurrect locks for tables whose
-  tablespace file is missing.
-  
-  rb#2357 approved by Jimmy Yang
-------------------------------------------------------------
-revno: 5058 [merge]
-committer: Marko M?kel? <marko.makela@oracle.com>
-branch nick: mysql-5.6
-timestamp: Tue 2013-04-30 14:45:16 +0300
-message:
-  Merge mysql-5.5 to mysql-5.6.
-    ------------------------------------------------------------
-    revno: 2875.437.81
-    committer: Marko M?kel? <marko.makela@oracle.com>
-    branch nick: mysql-5.5
-    timestamp: Tue 2013-04-30 13:39:50 +0300
-    message:
-      Bug#16720368 INNODB IGNORES *.IBD FILE BREAKAGE AT STARTUP
-      
-      After a clean shutdown, InnoDB will not check the *.ibd file headers,
-      for maximum performance. This is unchanged before and after this
-      patch.
-      
-      What this fix addresses is the case when crash recovery is
-      needed. Previously, InnoDB could load a corrupted tablespace file.
-      
-      buf_page_is_corrupted(): Add the parameter check_lsn.
-      
-      fil_check_first_page(): New function, to perform a consistency check
-      on the first page of a file. This can be overridden by setting
-      innodb_force_recovery.
-      
-      fil_read_first_page(), fil_open_single_table_tablespace(),
-      fil_load_single_table_tablespace(): Invoke fil_check_first_page().
-      
-      open_or_create_data_files(): Check the status of
-      fil_open_single_table_tablespace().
-      
-      rb#2352 approved by Jimmy Yang
-------------------------------------------------------------
-revno: 5057
-committer: Neeraj Bisht <neeraj.x.bisht@oracle.com>
-branch nick: 5.6
-timestamp: Tue 2013-04-30 14:54:09 +0530
-message:
-  Bug#16346367 : QUERY PROC RE-EXECUTE OF STORED ROUTINE, INEFFICIENT QUERY PLAN
-  
-  Problem:-
-  In derived tables implementation, We only get to use indexes on derived tables 
-  on the first execution of a procedure and  in later execution we are not able 
-  to use indexes.
-  
-  
-  Analysis:-
-  In case of derived tables, we call add_key_field() to add new fake keys for 
-  range optimizer. To choose the best key to read data. After creating the actual 
-  keys from this fake keys. 
-  We set the variable in TABLE_LIST::derived_keys_ready, to show that actual 
-  keys are created.
-  This table_list is maintained in the memory after our exection is completed.                       
-  So when we call our procedure second time, this TABLE_LIST::derived_keys_ready 
-  is already set and we assume that actual keys are already being created, but we 
-  will not find any key, which cause change in query execution plan.
-  
-  Solution:-
-  Reset the TABLE_LIST::derived_keys_ready at the time JOIN_TAB::cleanup.
-------------------------------------------------------------
-revno: 5056 [merge]
-committer: Luis Soares <luis.soares@oracle.com>
-branch nick: mysql-5.6
-timestamp: Mon 2013-04-29 22:55:26 +0100
-message:
-  BUG#16621923
-  
-  Automerge into latest mysql-5.6.
-    ------------------------------------------------------------
-    revno: 5055.1.1
-    committer: Luis Soares <luis.soares@oracle.com>
-    branch nick: mysql-5.6
-    timestamp: Mon 2013-04-29 22:51:54 +0100
-    message:
-      BUG#16621923: RBR: HASH_SCAN LOOKUP MAY FAIL WHEN NULL FIELDS ARE
-      INVOLVED
-      
-      The HASH_SCAN lookup mechanism was not working properly.
-      
-      This mechanism works as follow: (i) For each before image in an
-      Update_rows_log_event or Delete_rows_log_event, it hashes this
-      image and saves its coordinates on an hash table. If it is an
-      Update_rows_log_event, it also saves the coordinates of the after
-      image. (ii) Then the table is scanned once, and each record
-      fetched from the physical table is hashed and looked up on the
-      hash table. If the lookup succeeds, then the changes are applied.
-      And this is fine.
-      
-      Unfortunately, when a field contains a NULL value, the engine may
-      return garbage as the field content. Then the hash of the
-      physical record will not match the hash calculated from the
-      (Delete_|Update_)rows_log_event. This makes the applier assume
-      that it cannot find the record to apply and stop.
-      
-      This patch fixes this, by discarding from the hash calculation
-      those fields that are marked as NULL. This is the bulk of the
-      fix. 
-      
-      Additionally, this patch also: (i) fixes the limitation of not
-      considering BLOBs and BIT fields as part of the hash
-      calculation. They had not been considered since their data may
-      not be stored inside the record itself, but on a different memory
-      area. We circumvent this by getting the value explicitly through
-      the member function: val_str. Similar pattern may be found in the
-      function: mysql_checksum_table. (ii) Fixes some comments and
-      indentation. (iii) Refactors a few parts in
-      do_hash_scan_and_update_record (splits it into two simpler member
-      functions). (iv) Fixes a potential issue with the fact that we
-      unpack the before image on top of previous unpacked data, thus
-      might have implications with partial rows. We call prepare_record
-      before we unpack now. (v) Removes unnecessary memory structures
-      for after image positions that are not used.
-------------------------------------------------------------
-revno: 5055
-committer: Tor Didriksen <tor.didriksen@oracle.com>
-branch nick: 5.6
-timestamp: Mon 2013-04-29 15:07:37 +0200
-message:
-  BUG#16556597: DBUG_PRINT EXPRESSION IS EVALUATED EVEN WHEN
-  
-  Postpush fix for:
-  : error LNK2001: unresolved external symbol _dbug_on_
-------------------------------------------------------------
-revno: 5054
-committer: Igor Solodovnikov <igor.solodovnikov@oracle.com>
-branch nick: mysql-5.6
-timestamp: Mon 2013-04-29 13:43:32 +0300
-message:
-  Bug #16591288 	WINAUTH PLUGIN LEAKS MEMORY AFTER EACH CONNECTION
-  
-  Memory leak was caused by Security_buffer helper class. Its free() method was implemented to set m_allocated=false after freeing context buffer. Since Security_buffer has no means to set m_allocated back to true this leads to not freeing all subsequent context buffers.
-  
-  Fixed by:
-  - making Security_buffer::m_allocated const object (so it can be assigned by constructor only)
-  - rewriting Security_buffer::free() to not alter value of Security_buffer::m_allocated
-  - Disallow copying/assignment of Security_buffer class instances to prevent new memory leaks in the future
-  
-  This patch also fixes minor bugs in Map_cache class.
-------------------------------------------------------------
-revno: 5053
-committer: Thayumanavar <thayumanavar.x.sachithanantha@oracle.com>
-branch nick: mysql-5.6
-timestamp: Mon 2013-04-29 13:52:46 +0530
-message:
-  BUG#16556597: DBUG_PRINT EXPRESSION IS EVALUATED EVEN WHEN
-                THE CONDITION DOES NOT HOLD. 
-  PROBLEM AND FIX:
-  DBUG_PRINT("label",("printf-style format",...)) is a macro
-  that should evaluate the printf style part when DEBUG is
-  enabled and the label keyword is active. However in the
-  current code, the printf-style part gets evaluated and the
-  condition evaluation for checking whether DEBUG and label
-  keyword is active is being done in the function _db_doprnt_
-  .This result in CPU cycles being consumed even when no
-  --debug option or SET DEBUG is being used.
-    The fix redefines the macro DBUG_PRINT so that _db_prnt_
-  is being called only when DEBUG and the label keyword is
-  active. 
-------------------------------------------------------------
-revno: 5052
-committer: Ramil Kalimullin <ramil.kalimullin@oracle.com>
-branch nick: mysql-5.6
-timestamp: Mon 2013-04-29 11:28:02 +0400
-message:
-  Bug#12772601 CENTROID FUNCTION ASSERTS: ASSERTION FAILED: N_LINEAR_RINGS > 0
-  Bug#16510712 SERVER CRASHES IN GET_POINT ON A GEOMETRY QUERY
-  
-  Addendum: variable initialization added to keep compiler happy.
-------------------------------------------------------------
-revno: 5051
-committer: Marko M?kel? <marko.makela@oracle.com>
-branch nick: mysql-5.6
-timestamp: Mon 2013-04-29 09:48:05 +0300
-message:
-  Fix regression from Bug#16593427 fix.
-  
-  fil_space_create(): Use "%lu" instead of IB_ID_FMT for printing out
-  tablespace id, which is 32-bit, not 64-bit in the data files.
-------------------------------------------------------------
-revno: 5050
-committer: Manish Kumar<manish.4.kumar@oracle.com>
-branch nick: mysql-5.6
-timestamp: Mon 2013-04-29 11:00:16 +0530
-message:
-  Bug#16475866 - START SLAVE AFTER IMPORT OF TABLE-BASED REPOSITORIES GIVES EMPTY
-                 ERROR MESSAGE
-        
-  Problem - Trying to START SLAVE after loading slave_master_info and
-            slave_relay_log_info into a clean MySQL instance results in an 
-            empty error message:
-        
-            mysql 5.6.10-log (root) [test]> start slave;
-            ERROR 1593 (HY000): Fatal error: %s
-                  
-  Analysis - The slave code just prints the ER(slave_errno) in the start_slave
-             function call and since the error is due to non initialization
-             of the master info and relay log info structures, ie. error number 1593, 
-             the corresponding error message is printed which is " Fatal error: %s ".
-        
-  Fix - Fixed the problem by introducing a two new error codes for handeling the 
-        failure during the initialization of the master info and relay log info
-        structure from the repository.
-------------------------------------------------------------
-revno: 5049
-committer: Bill Qu <bill.qu@Oracle.com>
-branch nick: mysql-5.6
-timestamp: Sun 2013-04-28 09:21:43 +0800
-message:
-  Bug #16666456 	A REGRESSION IN 5.6 CRASH RECOVERY ATOMICITY
-  
-  A crash commit error causes the last transaction to loss in an InnoDB table after
-  RESET MASTER. The root cause is that the prepare phase causes fsync while the
-  commit phase does not cause fsync inside InnoDB. That means the last transaction
-  is not fsynced inside InnoDB. But RESET MASTER erases binlog events of the last
-  transaction. In the following crash commit error, InnoDB has the last prepared
-  row on recovery and calls server on how to deal with the prepared row and server
-  does not find relevant binlog events from binary log file and rolls it back finally.
-  
-  To fix the problem, RESET MASTER should cause to flush logs for storage engines, so
-  that the last transaction is fsynced inside storage engines. The same solution to
-  internal EXPIRE_LOGS_DAYS. There is not the problem with PURGE BINARY LOGS TO, as
-  the binlog events of last transaction in current binlog file is not purged.
-------------------------------------------------------------
-revno: 5048
-committer: Ramil Kalimullin <ramil.kalimullin@oracle.com>
-branch nick: b12772601-5.6
-timestamp: Sat 2013-04-27 17:23:03 +0400
-message:
-  Bug#12772601 CENTROID FUNCTION ASSERTS: ASSERTION FAILED: N_LINEAR_RINGS > 0
-  Bug#16510712 SERVER CRASHES IN GET_POINT ON A GEOMETRY QUERY
-  
-  Problem: most of the Geometry methods that work with WKB
-  did not properly validate input data, so they could
-  access memory beyond the range of provided data, which
-  led to crashes and/or valgrind errors.
-  
-  Fix: introducing new class wkb_parser with methods
-  that strictly validate the provided WKB data;
-  convenience changes and clean-ups in the related code.
-------------------------------------------------------------
-revno: 5047
-committer: Bill Qu <bill.qu@Oracle.com>
-branch nick: mysql-5.6
-timestamp: Sat 2013-04-27 18:25:29 +0800
-message:
-  Bug#16579028 	"SEMI-SYNC MASTER WAIT FOR REPLY FAIL TO GET WAIT TIME" HAPPENS OCCASIONALLY
-    
-  The error of 'Semi-sync master wait for reply fail to get wait time'
-  happens if the time taken by dump thread on waiting for binlog reply
-  from slave is less than zero.
-    
-  The precision of OS timer apparently causes this problem. But this
-  problem will not affect any function of the server, so it's not
-  good to print an error into the log file as the error will confuse
-  the user. It's more appropriate to print a note into the log file.
-------------------------------------------------------------
-revno: 5046 [merge]
-committer: Bill Qu <bill.qu@Oracle.com>
-branch nick: mysql-5.6
-timestamp: Sat 2013-04-27 16:27:39 +0800
-message:
-  Bug #13004581 	BLACKHOLE BINARY LOG WITH ROW IGNORES UPDATE AND DELETE STATEMENTS
-  
-  Merge from 5.5.
-    ------------------------------------------------------------
-    revno: 2875.437.80
-    committer: Bill Qu <bill.qu@Oracle.com>
-    branch nick: mysql-5.5
-    timestamp: Sat 2013-04-27 16:04:54 +0800
-    message:
-      Bug #13004581 	BLACKHOLE BINARY LOG WITH ROW IGNORES UPDATE AND DELETE STATEMENTS
-        
-      When logging to the binary log in row, updates and deletes to a BLACKHOLE
-      engine table are skipped.
-        
-      It is impossible to log binary log in row format for updates and deletes to
-      a BLACKHOLE engine table, as no row events can be generated in these cases.
-      After fix, generate a warning for UPDATE/DELETE statements that modify a
-      BLACKHOLE table, as row events are not logged in row format.
-------------------------------------------------------------
-revno: 5045
-committer: Marko M?kel? <marko.makela@oracle.com>
-branch nick: mysql-5.6
-timestamp: Fri 2013-04-26 12:16:52 +0300
-message:
-  Bug#16593427 ROLLBACK OF RECOVERED TRANSACTION CORRUPTS NON-ONLINE ADD INDEX
-  
-  Resurrect table IX locks for recovered transactions. This fixes a race
-  condition between the rollback of a recovered transaction and creating
-  a secondary index in a locked operation. This race condition could
-  corrupt the secondary index that is being created.
-  
-  lock_table_ix_resurrect(), trx_resurrect_table_locks(): New functions.
-  
-  trx_undo_get_prev_rec_from_prev_page(), trx_undo_get_prev_rec(): Add a
-  flag for specifying if the page should be X-latched or S-latched.
-  
-  lock_remove_recovered_trx_record_locks(): Remove also the table lock
-  of a recovered transaction.
-  
-  mtr_memo_release(): Return a Boolean, indicating if the object was removed.
-  
-  dict_table_open_on_id(): Replace the Boolean parameter try_drop with a
-  new enum dict_table_op_t, with a third value
-  DICT_TABLE_OP_LOAD_TABLESPACE to silently load a tablespace when it is
-  missing. This is needed to suppress a warning in
-  trx_resurrect_table_locks() during the innodb.innodb_bug59641 test.
-  
-  dict_err_ignore_t: Add the flag DICT_ERR_IGNORE_LOAD, to silently load
-  the tablespace when it has not been loaded yet, and to skip loading
-  the definitions of incomplete secondary indexes.
-  
-  dict_check_tablespaces_and_store_max_id(): Replace the Boolean
-  parameter in_crash_recovery with a new enum dict_check_t, with a third
-  value DICT_CHECK_SOME_LOADED to silently skip tablespaces that were
-  already loaded by trx_resurrect_table_locks() during crash recovery.
-  This is needed to suppress a warning in trx_resurrect_table_locks()
-  during the innodb.innodb_bug59641 test.
-  
-  rb#2283 approved by Jimmy Yang
-------------------------------------------------------------
-revno: 5044
-committer: Vinay Fisrekar <vinay.fisrekar@oracle.com>
-branch nick: mysql-5.6
-timestamp: Fri 2013-04-26 13:38:27 +0530
-message:
-  Adjusting result file for processlist_priv_ps test.
-------------------------------------------------------------
-revno: 5043
-committer: kevin.lewis@oracle.com
-branch nick: mysql-5.6
-timestamp: Thu 2013-04-25 12:16:51 -0600
-message:
-  Bug#16338667 - DROP DATABASE FAILS ON EXTERNAL DATA DIRECTORY
-  
-  MySQL cleans up the database directory if there are only files that
-  it recognizes.  If there are unknown file types, the DROP DATABASE
-  will fail.  We forgot to tell the server in ha_innobase::bas_ext()
-  that one if the possible extentions of InnoDB files is ".isl".
-  
-  Approved by Marco in http://rb.no.oracle.com/rb/r/2337/
-------------------------------------------------------------
-revno: 5042
-committer: Inaam Rana <inaam.rana@oracle.com>
-branch nick: mysql-5.6
-timestamp: Thu 2013-04-25 13:26:54 -0400
-message:
-  Bug#16723686 MISSING COMMA IN INNODB STATUS BREAKS MEM PARSING
-------------------------------------------------------------
-revno: 5041 [merge]
-committer: Venkatesh Duggirala<venkatesh.duggirala@oracle.com>
-branch nick: mysql-5.6
-timestamp: Thu 2013-04-25 12:06:22 +0530
-message:
-  BUG#16698172-CANNOT DO POINT-IN-TIME RECOVERY FOR
-  SINGLE DATABASE; MYSQLBINLOG
-  Merge from mysql-5.5 + set the unflushed_events
-  flag to false which is required only for mysql-5.6
-    ------------------------------------------------------------
-    revno: 2875.437.79
-    committer: Venkatesh Duggirala<venkatesh.duggirala@oracle.com>
-    branch nick: mysql-5.5
-    timestamp: Thu 2013-04-25 11:56:26 +0530
-    message:
-      BUG#16698172-CANNOT DO POINT-IN-TIME RECOVERY FOR
-      SINGLE DATABASE; MYSQLBINLOG
-            
-      Problem: If last subevent inside a RBR event
-      is skipped while replaying a binary log
-      using mysqlbinlog with --database=... option,
-      generated output is missing end marker('/*!*/;)
-      for that RBR event. Thence causing syntax error
-      while replaying the generated output.
-            
-      Fix: Append end marker ('/*!*/;) if the last 
-      subevent is getting skipped.
-      Append end marker if the last 
-      subevent is getting skipped.
-------------------------------------------------------------
-revno: 5040 [merge]
-committer: Georgi Kodinov <georgi.kodinov@oracle.com>
-branch nick: B16680313-5.6
-timestamp: Wed 2013-04-24 17:24:06 +0300
-message:
-  merge 5.5->5.6
-    ------------------------------------------------------------
-    revno: 2875.437.78
-    committer: Georgi Kodinov <georgi.kodinov@oracle.com>
-    branch nick: B16680313-5.5
-    timestamp: Wed 2013-04-24 17:21:42 +0300
-    message:
-      Bug #16680313: CLIENT DOESN'T READ PLUGIN-DIR FROM MY.CNF SET BY
-            MYSQL_READ_DEFAULT_FILE
-      Parsing of the plugin-dir config file option was not working due to a typo.
-      Fixed the typo. No test case can be added due to lack of support for 
-      defaults-exitra-file testing in mysql-test-run.pl.
-      Thanks to Sinisa for contributing the fix.
-------------------------------------------------------------
-revno: 5039 [merge]
-committer: Sujatha Sivakumar <sujatha.sivakumar@oracle.com>
-branch nick: Bug14324766_mysql-5.6
-timestamp: Wed 2013-04-24 13:38:21 +0530
-message:
-  Merge from mysql-5.5 to mysql-5.6
-    ------------------------------------------------------------
-    revno: 2875.437.77 [merge]
-    committer: Sujatha Sivakumar <sujatha.sivakumar@oracle.com>
-    branch nick: Bug14324766_mysql-5.5
-    timestamp: Wed 2013-04-24 13:34:11 +0530
-    message:
-      Merge from mysql-5.1 to mysql-5.5
-        ------------------------------------------------------------
-        revno: 2661.876.24
-        committer: Sujatha Sivakumar <sujatha.sivakumar@oracle.com>
-        branch nick: Bug14324766_mysql-5.1
-        timestamp: Wed 2013-04-24 13:31:10 +0530
-        message:
-          Bug#14324766:PARTIALLY WRITTEN INSERT STATEMENT IN BINLOG
-          NO ERRORS REPORTED
-                
-          Fixing a post push test script failure.
-------------------------------------------------------------
-revno: 5038 [merge]
-committer: Annamalai Gurusami <annamalai.gurusami@oracle.com>
-branch nick: mysql-5.6
-timestamp: Wed 2013-04-24 08:49:27 +0200
-message:
-  Null merge from mysql-5.5 to mysql-5.6
-    ------------------------------------------------------------
-    revno: 2875.437.76 [merge]
-    committer: Annamalai Gurusami <annamalai.gurusami@oracle.com>
-    branch nick: mysql-5.5
-    timestamp: Wed 2013-04-24 08:48:34 +0200
-    message:
-      Null merge from mysql-5.1 to mysql-5.5
-        ------------------------------------------------------------
-        revno: 2661.876.23
-        committer: Annamalai Gurusami <annamalai.gurusami@oracle.com>
-        branch nick: mysql-5.1
-        timestamp: Wed 2013-04-24 08:47:30 +0200
-        message:
-          Bug #15973904 INNODB PARTITION CODE HOLDS LOCK_OPEN AND SLEEPS WHILE 
-          OPENING MISSING PARTITION
-          
-          In the ha_innobase::open() call, for normal tables, there is no retry logic.
-          But for partitioned tables, there is a retry logic introduced as fix for:
-          
-          http://bugs.mysql.com/bug.php?id=33349  
-          https://support.mysql.com/view.php?id=21080
-          
-          The Bug#33349, does not provide sufficient information to analyze the original
-          problem.  The original problem reported by bug#33349 is also minor (just an
-          annoyance and no loss of functionality).  Most importantly, the retry logic
-          has been introduced without any associated test case.
-          
-          So we are removing the retry logic for partitioned tables.  When the original
-          problem occurs, a different solution will be explored.
-------------------------------------------------------------
-revno: 5037 [merge]
-committer: Annamalai Gurusami <annamalai.gurusami@oracle.com>
-branch nick: mysql-5.6
-timestamp: Wed 2013-04-24 08:43:52 +0200
-message:
-  Null merge from mysql-5.5 to mysql-5.6
-    ------------------------------------------------------------
-    revno: 2875.437.75
-    committer: Annamalai Gurusami <annamalai.gurusami@oracle.com>
-    branch nick: mysql-5.5
-    timestamp: Wed 2013-04-24 08:42:59 +0200
-    message:
-      Merge from mysql-5.1 to mysql-5.5
-------------------------------------------------------------
-revno: 5036
-committer: Annamalai Gurusami <annamalai.gurusami@oracle.com>
-branch nick: mysql-5.6
-timestamp: Wed 2013-04-24 08:34:18 +0200
-message:
-  Merge from mysql-5.5 to mysql-5.6
-------------------------------------------------------------
-revno: 5035
-committer: Shivji Kumar Jha <shivji.jha@oracle.com>
-branch nick: mysql-5.6_b16316123
-timestamp: Wed 2013-04-24 11:33:56 +0530
-message:
-  BUG#16316123- MYSQLBINLOG DOES NOT RESET THE "AT" BYTE POSITION COUNTER FOR NEW BINLOG FILE
-  
-  Problem:
-  mysqlbinlog exits when the given log file has been
-  processed by it. The "stop-never" option keeps
-  mysqlbinlog connected to the server instead. The
-  "stop-never" option also sets the "to-last-log" option
-  which instructs mysqlbinlog to not stop at the end
-  of the requested binlog from a MySQL server, but
-  rather continue printing until the end of the last
-  binlog.
-  
-  The issue was that mysqlbinlog did not reset the
-  "# at pos" field before printing the events from
-  the next binlog file.
-  
-  Fix:
-  Reset the at position before events from next binlog file
-  are picked by mysqlbinlog --stop-never. In particular,
-  reset the position before printing the fake rotate event.
-------------------------------------------------------------
-revno: 5034 [merge]
-committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
-branch nick: mysql-5.6
-timestamp: Mon 2013-04-22 14:38:27 +0200
-message:
-  Upmerge of the 5.1.69 build
-    ------------------------------------------------------------
-    revno: 2875.437.74 [merge]
-    committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
-    branch nick: mysql-5.5
-    timestamp: Mon 2013-04-22 14:30:47 +0200
-    message:
-      Upmerge of the 5.1.69 build
-        ------------------------------------------------------------
-        revno: 2661.876.22
-        author: murthy.narkedimilli@oracle.com
-        committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
-        branch nick: mysql-5.1
-        timestamp: Mon 2013-04-22 14:01:07 +0200
-        message:
-          Merge from mysql-5.1.69-release
-------------------------------------------------------------
-revno: 5033 [merge]
-committer: Neeraj Bisht <neeraj.x.bisht@oracle.com>
-branch nick: 5.6
-timestamp: Sat 2013-04-20 12:58:28 +0530
-message:
-  Bug#16073689 : CRASH IN ITEM_FUNC_MATCH::INIT_SEARCH 
-  
-  Problem:
-  In query like
-  select 1 from .. order by match .. against ...;
-  causes a debug assert failue.
+  Bug#16983143 - CRASH WITH STORED ROUTINE, SELECT FROM CURSOR,
+                 UNION 
   
   Analysis:
-  In union type query like
+  -----------
+  The problem was that fetching rows from CURSOR of SELECT 
+  having UNION was crashing. The column meta-data stored
+  with cursor had a dangling pointer "orig_table". Accessing
+  this member was resulting in crash.
   
-  (select * from order by a) order by b;
-  or
-  (select * from order by a) union (select * from order by b);
+  The SELECT query of CURSOR used a intermediate table for
+  the UNION. Then, Select_materialize::send_result_set_metadata
+  created a temporary table for storing the query result. The
+  column meta-data for the query is obtained by calling function
+  get_field_list. get_field_list returns "st_select_lex_unit::
+  item_list" for UNION, which is a list of fields which 
+  pointing to intermediate temporary table of union query. So, while
+  creating the temporary table to store query result for cursor,
+  the orig_table was set as intermediate temporary table of the
+  union. "Materialized_cursor:item_list" was also populated
+  with Materialized tables field meta-data. But at the end of
+  open cursor statement execution, intermediate temporary
+  table created for union is dropped. Because of this "orig_table"
+  became dangling.
   
-  We skip resolving of order by a for 1st query and order by of a and b in 
-  2nd query.
+  Fix:
+  ------
+  The problem is solved by using the column meta-data list
+  "st_select_lex_unit::types" when creating the Materialized table
+  of cursor instead of the column meta-data of the intermediate
+  table created for union query. 
+------------------------------------------------------------
+revno: 5282
+committer: Inaam Rana <inaam.rana@oracle.com>
+branch nick: mysql-5.6
+timestamp: Fri 2013-07-05 01:04:41 -0400
+message:
+  Bug#16864741 DROP/ALTER TABLE TAKES MUCH LONGER TIME IN 5.6 THAN 5.5
   
+  rb://2841
+  approved by:
   
-  This means that, in case when our order by have Item_func_match class, 
-  we skip resolving it.
-  But we maintain a ft_func_list and at the time of optimization, when we 
-  Perform FULLTEXT search before all regular searches on the bases of the 
-  list we call Item_func_match::init_search() which will cause debug assert 
-  as the item is not resolved.
+  Fixes a regression in 5.6 where we search for AHI entries to be dropped
+  when we are DROPping a table. AHI entries need not to be searched
+  because they are already dropped during fseg_free_step().
+------------------------------------------------------------
+revno: 5281
+committer: Roy Lyseng <roy.lyseng@oracle.com>
+branch nick: mysql-5.6
+timestamp: Thu 2013-07-04 14:58:56 +0200
+message:
+  Fixing build break from bug#16817453
+------------------------------------------------------------
+revno: 5280 [merge]
+committer: Venkata Sidagam <venkata.sidagam@oracle.com>
+branch nick: 5.6
+timestamp: Thu 2013-07-04 17:00:45 +0530
+message:
+  Bug #16567381 	DATETIME FIELD COMPARISONS DO NOT WORK PROPERLY 
+                  WITH UTF8_UNICODE_CI COLLATION.
   
-  
-  Solution:
-  We will skip execution if the item is not fixed and we will not 
-  fix index(Item_func_match::fix_index()) for which 
-  Item_func_match::fix_field() is not called so that on later changes 
-  we can check the dependency on fix field.
+  Null merge from mysql-5.5
     ------------------------------------------------------------
-    revno: 2875.437.73 [merge]
-    committer: Neeraj Bisht <neeraj.x.bisht@oracle.com>
+    revno: 2875.437.158
+    committer: Venkata Sidagam <venkata.sidagam@oracle.com>
     branch nick: 5.5
-    timestamp: Sat 2013-04-20 12:36:11 +0530
+    timestamp: Thu 2013-07-04 16:59:09 +0530
     message:
-      Bug#16073689 : CRASH IN ITEM_FUNC_MATCH::INIT_SEARCH 
-      
-      Problem:
-      In query like
-      select 1 from .. order by match .. against ...;
-      causes a debug assert failue.
+      Bug #16567381 	DATETIME FIELD COMPARISONS DO NOT WORK PROPERLY 
+                      WITH UTF8_UNICODE_CI COLLATION
+      Problem Description:
+      When comparing datetime values with strings, the utf8_unicode_ci collation 
+      prevents correct comparisons. Consider the below set of queries, it is not 
+      showing any results on a table which has tuples that satisfies the query. 
+      But for collation utf8_general_ci it shows one tuple.
+      set names utf8 collate utf8_unicode_ci;;
+      select * from lang where dt='1979-12-09';
       
       Analysis:
-      In union type query like
+      The comparison function is not chosen in case of collation utf8_unicode_ci.
+      In agg_item_set_converter() because the collation state is having 
+      "MY_CS_NONASCII" for collation type "utf8_unicode_ci". The conversion 
+      of the collation is happening for the date field. And because of that 
+      it is unable to pickup proper compare function(i.e CMP_DATE_WITH_STR).
       
-      (select * from order by a) order by b;
-      or
-      (select * from order by a) union (select * from order by b);
+      Actually the bug is accidentally introduced by the WL#3759 in 5.5. 
+      And in 5.6 it is been fixed by the WL#3664.
       
-      We skip resolving of order by a for 1st query and order by of a and b in 
-      2nd query.
+      Fix:
+      I have backported the changes from the file strings/ctype-uca.c which 
+      are related to "utf8" introduced by the WL#3664.
+      This change helps in choosing the correct comparison function for all 
+      the collations of utf8 charset.
+------------------------------------------------------------
+revno: 5279
+committer: Sujatha Sivakumar <sujatha.sivakumar@oracle.com>
+branch nick: Bug16856735_mysql-5.6
+timestamp: Thu 2013-07-04 11:54:53 +0530
+message:
+  Addressing post push warning on PB2 machines.
+------------------------------------------------------------
+revno: 5278
+committer: Jimmy Yang <jimmy.yang@oracle.com>
+branch nick: mysql-5.6
+timestamp: Thu 2013-07-04 10:14:20 +0800
+message:
+  Fix Bug #16896647 WASTED WORK IN METHOD ROW_CHECK_INDEX_FOR_MYSQL()
+  
+  rb://2740 approved by Sunny Bains
+------------------------------------------------------------
+revno: 5277
+committer: Tor Didriksen <tor.didriksen@oracle.com>
+branch nick: 5.6
+timestamp: Wed 2013-07-03 15:42:55 +0200
+message:
+  Bug#17003702 ADDRESSSANITIZER BUG IN RUN_PLUGIN_AUTH
+  
+  Do not access the message buffer of a closed connection.
+------------------------------------------------------------
+revno: 5276
+committer: Sujatha Sivakumar <sujatha.sivakumar@oracle.com>
+branch nick: Bug16856735_mysql-5.6
+timestamp: Wed 2013-07-03 16:44:14 +0530
+message:
+  Bug#16856735: SLAVE DEADLOCK CAUSED BY STOP SLAVE,
+  SHOW SLAVE STATUS AND GLOBAL READ LOCK.
+  
+  Problem:
+  =======
+  SLAVE DEADLOCK CAUSED BY STOP SLAVE, SHOW SLAVE STATUS AND
+  GLOBAL READ LOCK
+  
+  Analysis:
+  ========
+  "FLUSH TABLES WITH READ LOCK" command blocks all DML and
+  DDL operations by taking "global read lock".  Hence when a
+  DML or DDL statement is received at slave, post "global read
+  lock" acquisition this operation will be blocked.  This 
+  causes slave sql thread to be blocked.
+  
+  At this time when  STOP SLAVE command is issued in new slave
+  connection this command will acquire "LOCK_active_mi" and it
+  waits till the "sql thread" terminates.
+  
+  Now in the first connection issue SHOW SLAVE STATUS command
+  which needs 'LOCK_active_mi' will be blocked till the above
+  lock is released by "STOP SLAVE".  Since "UNLOCK TABLES" can
+  only be done in first connection which is not possible any 
+  more, which causes a deadlock.
+  
+  Fix:
+  ===
+  Provide a new option to make the "STOP SLAVE" command to
+  timeout after specified number of seconds rather than
+  waiting for an year.
+  
+  During testing the fix another deadlock issue was identified
+  with "STOP SLAVE" + "MTS" + "FLUSH TABLES WITH READ LOCK".
+  This was caused as "rli->run_lock" was moved as par of
+  BUG#13635612 fix to eliminate false suspects.  But since
+  this change is not necessary the "rli->run_lock" is moved
+  back to the appropriate place.
+------------------------------------------------------------
+revno: 5275
+committer: bin.x.su@oracle.com
+branch nick: mysql-5.6-bug16817453
+timestamp: Wed 2013-07-03 19:03:21 +0800
+message:
+  Bug#16817453 PLEASE BACKPORT BUG #14834698 TO 5.6
+  
+  Backport the patch for Bug#14834698 to 5.6
+------------------------------------------------------------
+revno: 5274
+committer: Chaithra Gopalareddy <chaithra.gopalareddy@oracle.com>
+branch nick: mysql-5.6
+timestamp: Wed 2013-07-03 13:43:51 +0530
+message:
+  Bug #16436567:REGRESSION: CRASH AFTER JOIN::MAKE_TMP_TABLES_INFO()
+        
+  Problem:
+  While creating temporary table, server crashes checking if
+  optimizer is using loose_index_scan.
+       
+  Analysis:
+  In get_best_combination(), join_tab structures are created
+  based on the number of primary tables, semi-join nests and
+  temp_tables. While calculating the number of temp_tables,
+  optimizer estimates it to be 'one' for the query
+  "select ( select distinct q.a+ variance(g.a) from g q ) from g; "
+  as there is only distinct in it.  As a result space for only
+  two join_tab structures is allocated(one for the primary
+  table and one for the tmp table).
       
+  In make_tmp_tables_info(), we see that
+  "using_indirect_summary_function" is enabled and as a result
+  optimizer has to create the second tmp table. Here, its presumed
+  that the join_tab structure for the second tmp table is
+  already allocated and hence it tries to write on to this memory
+  while creating the intermediate temp table.
+  In doing so, it over-writes some of the  memory allocated for
+  "select" and later leads to crash.
+     
+  Solution:
+  Calculate the number of outer aggregation functions while
+  counting field types and use the same to allocate the second
+  join_tab structure in get_best_combination.
+------------------------------------------------------------
+revno: 5273
+committer: Tor Didriksen <tor.didriksen@oracle.com>
+branch nick: 5.6-merge
+timestamp: Tue 2013-07-02 13:55:12 +0200
+message:
+  Address sanitizer fix for unit test: different error message for segfault.
+------------------------------------------------------------
+revno: 5272
+committer: Tiago Jorge <tiago.jorge@oracle.com>
+branch nick: mysql-5.6
+timestamp: Tue 2013-07-02 12:09:08 +0100
+message:
+  Problem: 
+  An error message shows a variable that is not available 
+  to change.
+              
+  Analysis: 
+  
+  Several error messages have an explicit reference to 
+  @@SESSION.GTID_NEXT_LIST. 
+  The issue is that SESSION.GTID_NEXT_LIST is not 
+  available to be changed and nor it should be, since it is a
+  future feature to be integrated in NDB, thus not being 
+  available in the server mainline. The error messages are 
+  misleading to a user.
+  
+  Fix: 
+  Change the error messages in order to state the only 
+  possible source of error. Also corrected the binlog
+  tests that were expecting that specific message.
+------------------------------------------------------------
+revno: 5271
+committer: Shaohua Wang <shaohua.wang@oracle.com>
+branch nick: mysql-5.6
+timestamp: Tue 2013-07-02 10:07:30 +0800
+message:
+  BUG#17035359 - BACKPORT BUG#16429688 - FTS: SYNTAX ERROR, UNEXPECTED '*', EXPECTING $END
+  
+  rb://2223 approved by Sunny.Bains.
+------------------------------------------------------------
+revno: 5270 [merge]
+committer: Tor Didriksen <tor.didriksen@oracle.com>
+branch nick: 5.6-merge
+timestamp: Mon 2013-07-01 15:44:50 +0200
+message:
+  Merge 5.5 => 5.6
+    ------------------------------------------------------------
+    revno: 2875.437.157 [merge]
+    committer: Tor Didriksen <tor.didriksen@oracle.com>
+    branch nick: 5.5-merge
+    timestamp: Mon 2013-07-01 15:38:16 +0200
+    message:
+      merge 5.1 => 5.5
+        ------------------------------------------------------------
+        revno: 2661.876.48
+        committer: Tor Didriksen <tor.didriksen@oracle.com>
+        branch nick: 5.1
+        timestamp: Mon 2013-07-01 15:30:55 +0200
+        message:
+          Bug#58165: "my_empty_string" gets modified and causes LOAD DATA to fail and
+          Cleanup test case (left outfile in data dir)
+------------------------------------------------------------
+revno: 5269
+committer: Bharathy Satish <bharathy.x.satish@oracle.com>
+branch nick: mysql-5.6
+timestamp: Mon 2013-07-01 18:06:24 +0530
+message:
+  Bug #16971432 MYSQL CLIENT WASTE TIME IN SPRINTF MAKING INFO MESSAGES THAT
+                ARE NOT PRINTED
+  
+  Problem: When the client program is in batch mode by default the message
+  like  "Query OK, 1 row affected" are not shown, but instead the buffer is
+  prepared using sprintf call which takes some cpu time when the import file
+  is too large.
+  
+  Fix: Fix is to check if the client is running in batch mode then skip the
+  sprintf statement in /client/mysql.cc in com_go(). put_info ignores the 
+  buffer built by prepare only when in batch mode and verbose < 2. Hence 
+  skip the sprintf in com_go() only in this case.
+------------------------------------------------------------
+revno: 5268 [merge]
+committer: Annamalai Gurusami <annamalai.gurusami@oracle.com>
+branch nick: mysql-5.6
+timestamp: Mon 2013-07-01 16:54:17 +0530
+message:
+  Null merge from mysql-5.5 to mysql-5.6
+    ------------------------------------------------------------
+    revno: 2875.437.156
+    committer: Annamalai Gurusami <annamalai.gurusami@oracle.com>
+    branch nick: mysql-5.5
+    timestamp: Mon 2013-07-01 16:53:30 +0530
+    message:
+      I have added --innodb_file_per_table=1 InnoDB config option to run
+      i_innodb.innodb_bug16417635 test case.
+------------------------------------------------------------
+revno: 5267
+committer: Shaohua Wang <shaohua.wang@oracle.com>
+branch nick: mysql-5.6
+timestamp: Mon 2013-07-01 10:49:55 +0800
+message:
+  BUG#16660607 - INNODB TABLE FULLTEXT INDEX IN BOOLEAN MODE IGNORES LEADING *
+  
+  InnoDB returns syntax error when MyISAM ignores the leading '*'.
+  In order to make transferring from MyISAM to InnoDB smooth for old users,
+  we follow MyISAM's behavior by a simple modification of syntax file.
+  
+  rb://2717 approved by Jimmy.
+------------------------------------------------------------
+revno: 5266 [merge]
+committer: Georgi Kodinov <georgi.kodinov@oracle.com>
+branch nick: B16996656-5.6
+timestamp: Fri 2013-06-28 17:42:20 +0300
+message:
+  merge
+    ------------------------------------------------------------
+    revno: 5264.1.2 [merge]
+    committer: Georgi Kodinov <georgi.kodinov@oracle.com>
+    branch nick: B16996656-5.6
+    timestamp: Fri 2013-06-28 17:16:25 +0300
+    message:
+      merge 5.5->5.6
+        ------------------------------------------------------------
+        revno: 2875.437.155 [merge]
+        committer: Georgi Kodinov <georgi.kodinov@oracle.com>
+        branch nick: B16996656-5.5
+        timestamp: Fri 2013-06-28 17:13:44 +0300
+        message:
+          merge back to the 5.5 tree and fix indentation
+    ------------------------------------------------------------
+    revno: 5264.1.1 [merge]
+    committer: Georgi Kodinov <georgi.kodinov@oracle.com>
+    branch nick: B16996656-5.6
+    timestamp: Fri 2013-06-28 17:15:27 +0300
+    message:
+      merged back the 5.6 tree
+        ------------------------------------------------------------
+        revno: 5251.1.1 [merge]
+        committer: Georgi Kodinov <georgi.kodinov@oracle.com>
+        branch nick: B16996656-5.6
+        timestamp: Wed 2013-06-26 13:58:23 +0300
+        message:
+          merge
+            ------------------------------------------------------------
+            revno: 2875.449.1
+            committer: Georgi Kodinov <georgi.kodinov@oracle.com>
+            branch nick: B16996656-5.5
+            timestamp: Wed 2013-06-26 12:19:02 +0300
+            message:
+              Bug #16996656: UNIQUE OPTION PREFIXES NOT DEPRECATED IN 5.5+
+              
+              Backported the deprecation warnings from WL#6978 to 5.5
+------------------------------------------------------------
+revno: 5265
+committer: Christopher Powers <chris.powers@oracle.com>
+branch nick: mysql-5.6-bug16750433
+timestamp: Fri 2013-06-28 07:48:12 -0500
+message:
+  Bug#16750433 - THE STATEMENT DIGEST DOES NOT SHOW THE SLAVE SQL
+                 THREAD STATEMENTS
+  
+  1) New instrumentation to capture replicated statements
+  
+     The new instrument "statement/rpl/relay_log" controls
+     instrumentation for statements executed from the relay log.
+  
+  2) New test rpl_statements.test verifies new instrumentation
+  
+  3) Renamed instrument "statement/com/(stmt_info_new_packet)"
+     to "statement/com/new_packet".
+  
+  4) Updated tests affected by the new instrumentation
+  
+  
+  ******
+  Bug#16750433 - THE STATEMENT DIGEST DOES NOT SHOW THE SLAVE SQL
+                 THREAD STATEMENTS
+        
+  1) New instrumentation to capture replicated statements.
+        
+     The new instrument "statement/rpl/relay_log" controls
+     instrumentation for statements executed from the relay log.
+        
+  2) New test rpl_statements.test verifies new instrumentation.
+        
+  3) Renamed instrument "statement/com/(stmt_info_new_packet)"
+     to "statement/com/new_packet".
+       
+  4) Updated tests affected by the new instrumentation.
+------------------------------------------------------------
+revno: 5264 [merge]
+committer: Mattias Jonsson <mattias.jonsson@oracle.com>
+branch nick: topush-5.6
+timestamp: Fri 2013-06-28 13:40:52 +0200
+message:
+  Manual merge of bug#16589511 to mysql-5.6
+    ------------------------------------------------------------
+    revno: 2875.437.154
+    committer: Mattias Jonsson <mattias.jonsson@oracle.com>
+    branch nick: topush-5.5
+    timestamp: Fri 2013-06-28 13:18:16 +0200
+    message:
+      Bug#16589511: MYSQL_UPGRADE FAILS TO WRITE OUT ENTIRE
+      ALTER TABLE ... ALGORITHM= ... STATEMENT
       
-      This means that, in case when our order by have Item_func_match class, 
-      we skip resolving it.
-      But we maintain a ft_func_list and at the time of optimization, when we 
-      Perform FULLTEXT search before all regular searches on the bases of the 
-      list we call Item_func_match::init_search() which will cause debug assert 
-      as the item is not resolved.
+      The problem was an intermediate buffer of smaller size,
+      which truncated the alter statement.
       
+      Solved by providing the size of the buffer to be allocated through
+      the function call, instead of using an one-size-fits-all stack buffer
+      inside the function.
+------------------------------------------------------------
+revno: 5263
+committer: Tor Didriksen <tor.didriksen@oracle.com>
+branch nick: 5.6-bug16988012valgrind
+timestamp: Fri 2013-06-28 10:24:31 +0200
+message:
+  Bug#16988012 RQG_OPT_SUBQUERY_VALGRIND DETECTED UNINITIALIZED VAR ITEM_FIELD::VAL_STR
+  
+  Do not mark_as_null_row() for const tables in JOIN::clear()
+  
+  This is a regression from
+  Bug#16620047 INCORRECT QUERY RESULT (AFTER SERVER UPGRADE)
+------------------------------------------------------------
+revno: 5262
+committer: Jorgen Loland <jorgen.loland@oracle.com>
+branch nick: mysql-5.6
+timestamp: Fri 2013-06-28 09:27:11 +0200
+message:
+  Bug#16960800: RANGE OPTIMIZER BELIEVES THAT GEOM FUNCTIONS 
+                      RETURN ROWID ORDERED RESULTS
+        
+  The range optimizer needs to know if the rows returned from a 
+  range scan are ordered on ROWID. Multiple indexes that have 
+  this property can be intersected or union'ed.
+        
+  However, the range optimizer believes that any GEOM function 
+  on a spatial index returns rows in ROWID order. This is not 
+  correct. The result is that the range optimizer may choose to 
+  do index merge intersect or index merge union involving a 
+  spatial index. This may in turn result in missing rows.
+  
+  The fix is to let ha_myisam::index_flags() return the 
+  HA_KEY_SCAN_NOT_ROR bit for spatial indexes.
+------------------------------------------------------------
+revno: 5261
+committer: Guilhem Bichot <guilhem.bichot@oracle.com>
+branch nick: 5.6
+timestamp: Thu 2013-06-27 21:37:12 +0200
+message:
+  fix for pb2
+------------------------------------------------------------
+revno: 5260
+committer: Guilhem Bichot <guilhem.bichot@oracle.com>
+branch nick: 5.6
+timestamp: Thu 2013-06-27 10:47:41 +0200
+message:
+  Fix for Bug#16961803 UNION OF DERIVED TABLES RETURNS WRONG RESULTS WITH "1=0/FALSE"-CLAUSES
+  (almost a copy of Roy's suggestion - thanks!).
+  Bug introduced by revid:guilhem.bichot@oracle.com-20121124143402-g8wueuzfm4hm8br1 .
+  There already existed some logic so that if we are optimizing SELECT2
+  in SELECT1 ... FROM (SELECT2)
+  we never set best_rowcount to zero or one unless we are sure that this
+  count is exact.
+  Indeed a count of zero or one has the consequence that SELECT1 treats
+  the derived table as constant, a decision which cannot be rolled back,
+  and which leads to catastrophic consequences if, when we later
+  materialize, the derived table turns out to not have the anticipated
+  row count.
+  The logic in question forgot to apply itself to this case:
+  SELECT1 ... FROM (SELECT2 UNION SELECT3 etc.)
+------------------------------------------------------------
+revno: 5259
+committer: Jorgen Loland <jorgen.loland@oracle.com>
+branch nick: mysql-5.6
+timestamp: Thu 2013-06-27 16:46:44 +0200
+message:
+  BUG#16916596 Post push fix
+------------------------------------------------------------
+revno: 5258
+committer: Jimmy Yang <jimmy.yang@oracle.com>
+branch nick: mysql-5.6
+timestamp: Thu 2013-06-27 16:30:15 +0800
+message:
+  Need have_debug.inc for i_innodb/innodb_fts_misc.test
+------------------------------------------------------------
+revno: 5257 [merge]
+committer: Balasubramanian Kandasamy <balasubramanian.kandasamy@oracle.com>
+branch nick: mysql-5.6
+timestamp: Thu 2013-06-27 10:11:06 +0200
+message:
+  - null merge from 5.5 to 5.6
+    ------------------------------------------------------------
+    revno: 2875.437.153
+    committer: Balasubramanian Kandasamy <balasubramanian.kandasamy@oracle.com>
+    branch nick: mysql-5.5
+    timestamp: Thu 2013-06-27 10:08:30 +0200
+    message:
+      Updated copyright year in the spec file
+------------------------------------------------------------
+revno: 5256 [merge]
+committer: Balasubramanian Kandasamy <balasubramanian.kandasamy@oracle.com>
+branch nick: mysql-5.6
+timestamp: Thu 2013-06-27 09:55:56 +0200
+message:
+   Null merge from 5.5 to 5.6, updated the spec file for 5.6.13 release
+   - Added changelog entries
+    ------------------------------------------------------------
+    revno: 2875.437.152
+    committer: Balasubramanian Kandasamy <balasubramanian.kandasamy@oracle.com>
+    branch nick: mysql-5.5
+    timestamp: Thu 2013-06-27 09:18:48 +0200
+    message:
+      - Spec file cleanup for 5.5.33 release to resolve rpm dependencies bugs
+      
+      Bug16785036 - RPM REQUIRES: MISSING PACKAGES ON RHEL 6 (AND PROBABLY 5)
+      Bug 16878042 - CANNOT KEEP SEVERAL MAJOR VERSIONS OF MYSQL IN THE SAME YUM REPOSITORY
+    ------------------------------------------------------------
+    revno: 2875.437.151
+    committer: Balasubramanian Kandasamy <balasubramanian.kandasamy@oracle.com>
+    branch nick: mysql-5.5
+    timestamp: Wed 2013-06-26 11:43:44 +0200
+    message:
+      Cleaned up spec file for 5.5.33 release
+------------------------------------------------------------
+revno: 5255
+committer: Roy Lyseng <roy.lyseng@oracle.com>
+branch nick: mysql-5.6-sb2
+timestamp: Thu 2013-06-27 08:50:06 +0200
+message:
+  Bug#16369522: Assertion failed: !tables || thd->lex->is_query_tables_locked()
+  
+  The server exits when presented with a query like the following
+  
+  SELECT (SELECT 1 FROM t1) IN (SELECT a FROM t1);
+  
+  when attempting to evaluate the constant left-hand argument to the
+  IN subquery predicate. This constant evaluation occurs already in
+  Item_in_subselect::fix_fields(), through the call convert_constant_item().
+  
+  Even though the subquery is const, we do not allow execution of subqueries
+  before tables have been locked.
+  
+  The problem is the Item_cache object that is used to wrap the left-hand
+  argument to the IN predicate. It does not propagate the correct const-ness
+  attributes, and hence the resolver thinks it is safe to evaluate the
+  subquery. This happens because the Item_cache is not a first class
+  Item object. Among other things, it does not have a fix_fields()
+  function. Instead, it relies on ad-hoc code to assign values to
+  attributes such as used_tables() and const_item().
+  
+  In this particular use of Item_cache, it also adjusts used_tables
+  information for the left-hand expression: During subquery transformation,
+  the left-hand expression and the expressions selected from the subquery
+  are converted to an equality that is attached to the subquery's query
+  block. Originally, the LHE is resolved in scope of the outer query block
+  and thus has used_tables information relative to this, but this
+  information has to be replaced with an OUTER_REF indicator when being
+  attached to the inner query block. The Item_cache object took care of
+  this by explicitly setting the OUTER_REF bit when a table was referenced
+  in the LHE.
+  
+  However, when building the equality predicate, an Item_direct_ref
+  object is always used to wrap the included expressions. This object
+  can naturally handle the OUTER_REF by setting depended_from for the
+  object to the outer query block (together with select_lex->context
+  pointing to the inner query block).
+  
+  The implementation of Item_ref::const_item() returns FALSE for all
+  objects that have non-zero used_tables() which is true because the
+  OUTER_REF indicator is set, and hence early evaluation is prevented.
+  
+  Notice also that const items need not be designated as outer.
+  Ignoring those occurrences was required to preserve multiple equality
+  handling for equalities involving constant values.
+  
+  We have a change in EXPLAIN for the following type of query:
+  
+  SELECT col_varchar_key
+  FROM t1
+  WHERE ((SELECT i1 FROM t0 WHERE i1 = 7),
+         (SELECT i1 FROM t0 WHERE i1 = 2)) NOT IN
+      (SELECT col_int_key, col_int_nokey FROM t2);
+  
+  When transforming the NOT IN subquery using IN-TO-EXISTS, the subqueries in
+  the left hand side are tested for const-ness. The tests fail because tables are not yet locked at this point. Hence, left->depended_from is set to the outer
+  query block.
+  
+  As a result, in get_store_key(), a store_key_item is created instead of a
+  store_key_const_item, which causes explain_ref_key() to print "func" for
+  the key reference instread of "const".
+  
+  A similar query is causing change in
+  mysql-test/suite/opt_trace/r/bugs_no_prot_none.result.
+  
+  sql/item.h
+    Class Item_cache needed a specific implementation of
+    resolved_used_tables() that forwarded the call to the example member.
+  
+  sql/item_cmpfunc.cc
+    In Item_in_optimizer::fix_left(), used tables setting for cache object
+    could be simplified.
+  
+  sql/item_subselect.cc
+    In Item_in_subselect::single_value_transformer() and
+    Item_in_subselect::row_value_in_to_exists_transformer, when wrapping
+    the left-hand expressions in an Item_direct_ref object, set the
+    depended_from field of the Item_direct_ref to point to the query block
+    where the subquery predicate is located, unless the expression is const.
+------------------------------------------------------------
+revno: 5254
+committer: Roy Lyseng <roy.lyseng@oracle.com>
+branch nick: mysql-5.6-sb3
+timestamp: Wed 2013-06-26 16:15:01 +0200
+message:
+  Bug#16436383: Crash in Item_ident::fix_after_pullout
+  
+  The problem occurs because an Item_aggregate_ref object contains
+  something that I thought was illegal:
+  
+    depended_from != NULL && context->select_lex == depended_from
+  
+  Usually, if depended_from is non-NULL, it points to a query block that
+  is different from context->select_lex, but in this case they are equal.
+  
+  Because of this, the loop in Item_ident::fix_after_pullout() that
+  iterates over all nested query blocks from context->select_lex
+  to depended_from will never find the end criterion and is thus likely
+  to fail.
+  
+  However, the reason for this is that the aggregation of set
+  functions in a subquery, where the set function is placed more than 2
+  levels from the qualifying query, is wrong. This query with the
+  outer query as the qualifying query and the inner-most subquery
+  containing the set operation is OK (the query blocks are 2 levels apart):
+  
+  SELECT (SELECT (SELECT COUNT(ot.a) FROM t1) ) FROM t1 AS ot;
+  
+  The SQL standard tells that the aggregation of COUNT(ot.a) should be
+  performed in the "inner-most qualifying query" of the set function,
+  and the qualifying query for the column reference ot.a is the
+  outer-most query.
+  
+  However, if we extend the statement with another subquery, so that the
+  inner query is at level 3 (the outer-most query is at level 0), then
+  the code in Item_sum::register_sum_func() will attach the query to
+  the second inner-most query block instead of the outer-most block.
+  
+  Item_sum::register_sum_func() is modified so that it will attach the
+  set function to the outer-most query block where the function can be
+  aggregated. (If there are more than one outer reference in such set
+  function, the set function should be aggregated on the inner-most level,
+  where each level is calculated as described above).
+  
+  I am not convinced that the current identification of aggregation query
+  block is correct - I think that sometimes we accept invalid queries.
+  However, this bug fix must be pushed now because of BPS. I will follow
+  up with a new bug report that spots invalid aggregation queries
+  (if I find them).
+  
+  include/my_global.h
+    Changed nesting_map to always be a 64-bit data type. Thus, there will
+    be no platform issues concerning this type.
+    Validated on mysql-5.6-itch.
+  
+  mysql-test/r/select_all.result
+  mysql-test/r/select_all_bka.result
+  mysql-test/r/select_all_bka_nixbnl.result
+  mysql-test/r/select_icp_mrr.result
+  mysql-test/r/select_icp_mrr_bka.result
+  mysql-test/r/select_icp_mrr_bka_nixbnl.result
+  mysql-test/r/select_none.result
+  mysql-test/r/select_none_bka.result
+  mysql-test/r/select_none_bka_nixbnl.result
+    Updated earlier wrong plans because of the aggregation placement bug.
+  
+  sql/item_sum.cc
+    In Item_sum::register_sum_func(), update the way that query block
+    for an Item_sum object is calculated.
+    Also added some simple refactoring:
+    - master_unit()->outer_select() replaced with synonym outer_select()
+    - logic simplified so if statement is made redundant.
+------------------------------------------------------------
+revno: 5253
+committer: Venkatesh Duggirala<venkatesh.duggirala@oracle.com>
+branch nick: mysql-5.6
+timestamp: Wed 2013-06-26 17:16:48 +0530
+message:
+  BUG#16904035 SHOW STATUS - EXCESSIVE LOCKING ON
+  LOCK_ACTIVE_MI AND ACTIVE_MI->RLI->DATA_LOCK
+  
+  Fixing a post push issue in test script
+------------------------------------------------------------
+revno: 5252
+committer: Jorgen Loland <jorgen.loland@oracle.com>
+branch nick: mysql-5.6
+timestamp: Wed 2013-06-26 13:09:49 +0200
+message:
+  BUG#16916596: Post-push fix
+------------------------------------------------------------
+revno: 5251
+committer: Jimmy Yang <jimmy.yang@oracle.com>
+branch nick: mysql-5.6
+timestamp: Wed 2013-06-26 15:08:04 +0800
+message:
+  Fix Bug#16834860 - FTS: CRASH AFTER RENAMING TABLE TO DIFFERENT DATABASE 
+  
+  rb://2480 approved by Inaam
+------------------------------------------------------------
+revno: 5250 [merge]
+committer: Annamalai Gurusami <annamalai.gurusami@oracle.com>
+branch nick: mysql-5.6
+timestamp: Wed 2013-06-26 10:04:33 +0530
+message:
+  Null merge from mysql-5.5 to mysql-5.6
+    ------------------------------------------------------------
+    revno: 2875.437.150
+    committer: Annamalai Gurusami <annamalai.gurusami@oracle.com>
+    branch nick: mysql-5.5
+    timestamp: Wed 2013-06-26 10:02:42 +0530
+    message:
+      Bug #16994338 PARSING TAP OUTPUT OF UNIT TEST EXPLAIN_FILENAME-T FAILS
+      
+      Problem:
+      
+      The problem is that explain_filename-t is not printing a test plan as
+      required by the TAP protocol. The test invokes plan(NO_PLAN) but does not
+      invoke exit_status() at the end, where the plan would be printed.
       
       Solution:
-      We will skip execution if the item is not fixed and we will not 
-      fix index(Item_func_match::fix_index()) for which 
-      Item_func_match::fix_field() is not called so that on later changes 
-      we can check the dependency on fix field.
-      bz
-        ------------------------------------------------------------
-        revno: 2661.876.21
-        tags: mysql-5.1.69
-        committer: Neeraj Bisht <neeraj.x.bisht@oracle.com>
-        branch nick: 5.1
-        timestamp: Sat 2013-04-20 12:28:22 +0530
-        message:
-          Bug#16073689 : CRASH IN ITEM_FUNC_MATCH::INIT_SEARCH 
-          
-          Problem:
-          In query like
-          select 1 from .. order by match .. against ...;
-          causes a debug assert failue.
-          
-          Analysis:
-          In union type query like
-          
-          (select * from order by a) order by b;
-          or
-          (select * from order by a) union (select * from order by b);
-          
-          We skip resolving of order by a for 1st query and order by of a and b in 
-          2nd query.
-          
-          
-          This means that, in case when our order by have Item_func_match class, 
-          we skip resolving it.
-          But we maintain a ft_func_list and at the time of optimization, when we 
-          Perform FULLTEXT search before all regular searches on the bases of the 
-          list we call Item_func_match::init_search() which will cause debug assert 
-          as the item is not resolved.
-          
-          
-          Solution:
-          We will skip execution if the item is not fixed and we will not 
-          fix index(Item_func_match::fix_index()) for which 
-          Item_func_match::fix_field() is not called so that on later changes 
-          we can check the dependency on fix field.
+      
+      Invoke exit_status() at the end.
 ------------------------------------------------------------
-revno: 5032
-committer: Satya Bodapati <satya.bodapati@oracle.com>
-branch nick: mysql-5.6
-timestamp: Fri 2013-04-19 15:56:16 +0530
+revno: 5249
+committer: Tor Didriksen <tor.didriksen@oracle.com>
+branch nick: 5.6
+timestamp: Tue 2013-06-25 08:54:02 +0200
 message:
-  Testfix for Bug#16267120 - PAGE REORGANIZE ASSUMES INNODB_LOG_COMPRESSED_PAGES=OFF
+  Bug#16809055 MYSQL 5.6 AND 5.7 STILL USE LIBMYSQLCLIENT.SO.18
   
-  Parse only redo records of the tablespace t1 and ignoring the records of
-  system tablespace
+  Post-push fix: remove some debug output.
 ------------------------------------------------------------
-revno: 5031
-committer: Georgi Kodinov <georgi.kodinov@oracle.com>
+revno: 5248
+committer: Jorgen Loland <jorgen.loland@oracle.com>
 branch nick: mysql-5.6
-timestamp: Fri 2013-04-19 11:36:00 +0300
+timestamp: Tue 2013-06-25 08:34:10 +0200
 message:
-  Addendum 1 to bug #14799187 : fix naugty test scripts
+  Bug#16916596: "ORDER BY...LIMIT" OPTIMIZATION CHOSE 
+                NON-ORDERING INDEX
+  
+  Consider a table with a compound index "idx (kp1, kp2, kp3)"
+  and the query "SELECT ... ORDER BY kp3 LIMIT x".
+  
+  For this query, the optimizer may decide that although index 'idx'
+  did not seem like the best way to access the table in the first 
+  place, it may still be a good index when LIMIT is taken into 
+  account iff index 'idx' gives correct ordering. The reason is
+  that even an expensive index (index that produces too many 
+  rows) like 'idx' may be cheap if execution is allowed to exit
+  early due to the LIMIT.
+  
+  However, for index 'idx' to provide sorted rows, the query
+  must have equality predicates on kp1 and kp2. In this bug, 
+  the query only had equality predicate on kp1. Even so, the 
+  ORDER BY... LIMIT optimization was used to switch to index 
+  'idx', effecively chosing a much worse index without achieving 
+  the intention.
+  
+  The fix is to only consider indexes that provide correct 
+  ordering. This previously worked for single keypart indexes but
+  not multiple keypart indexes. However, instead of adding yet 
+  another if() block, all the tests for applicable ORDER BY...
+  LIMIT indexes in make_join_select() are replaced by a call to
+  test_if_order_by_key() which exists for the very same 
+  purpose - to answer the question "does this index provide 
+  ordered output".
 ------------------------------------------------------------
-revno: 5030
+revno: 5247
+committer: Anitha Gopi <anitha.gopi@oracle.com>
+branch nick: mysql-5.6
+timestamp: Tue 2013-06-25 07:26:42 +0200
+message:
+  Removed running in embedded mode with 4k and 8k page size as agreed in discussion with developer. 
+  Removed debug-server runs with embedded since we do not build debug version of embedded server
+  Fixed a typo
+------------------------------------------------------------
+revno: 5246 [merge]
 committer: bin.x.su@oracle.com
-branch nick: mysql-5.6-bug16208542
-timestamp: Fri 2013-04-19 15:13:17 +0800
-message:
-  Testcase including restart_mysqld.inc does not work in embedded mode,
-  and it has to include not_embedded.inc too.
-------------------------------------------------------------
-revno: 5029 [merge]
-author: akhil.mohan@oracle.com
-committer: Akhil Mohan <akhil.mohan@oracle.com>
 branch nick: mysql-5.6
-timestamp: Thu 2013-04-18 16:25:27 +0200
+timestamp: Tue 2013-06-25 11:50:18 +0800
 message:
-  Merge from mysql-5.6.11-release
+  Null merge from mysql-5.5
     ------------------------------------------------------------
-    revno: 4852.1.16
-    tags: mysql-5.6.11
-    committer: Marko M?kel? <marko.makela@oracle.com>
-    branch nick: mysql-5.6.11-release
-    timestamp: Fri 2013-04-05 09:04:03 +0300
+    revno: 2875.437.149
+    committer: bin.x.su@oracle.com
+    branch nick: mysql-5.5-bug16876388
+    timestamp: Tue 2013-06-25 09:42:54 +0800
     message:
-      Merge from mysql-5.6 to the 5.6.11 release clone.
-      ------------------------------------------------------------
-      revno: 5006
-      revision-id: marko.makela@oracle.com-20130403124730-s8ixii9q152cchtz
-      parent: ritheesh.vedire@oracle.com-20130403104310-53u66hzx3pvb0doa
-      committer: Marko M?kel? <marko.makela@oracle.com>
-      branch nick: mysql-5.6
-      timestamp: Wed 2013-04-03 15:47:30 +0300
-      message:
-        Fix regression Bug#16544143 ENABLE PARTIAL ROLLBACK DURING ONLINE ALTER TABLE
+      Bug 16876388 - PLEASE BACKPORT BUG#16208542 TO 5.5
+      
+      Straight forward backport.
+      
+      Approved by Jimmy, rb#2656
+------------------------------------------------------------
+revno: 5245
+committer: bin.x.su@oracle.com
+branch nick: mysql-5.6
+timestamp: Tue 2013-06-25 10:03:56 +0800
+message:
+  Null merge from 5.5
+------------------------------------------------------------
+revno: 5244
+committer: Tor Didriksen <tor.didriksen@oracle.com>
+branch nick: 5.6
+timestamp: Mon 2013-06-24 17:15:35 +0200
+message:
+  Bug#16809055 MYSQL 5.6 AND 5.7 STILL USE LIBMYSQLCLIENT.SO.18
+  
+  With this patch, the libmysql/ directory contains:
+  libmysqlclient.a
+  libmysqlclient_r.a -> libmysqlclient.a
+  libmysqlclient_r.so -> libmysqlclient.so*
+  libmysqlclient_r.so.18 -> libmysqlclient.so.18*
+  libmysqlclient_r.so.18.1.0 -> libmysqlclient.so.18.1.0*
+  libmysqlclient.so -> libmysqlclient.so.18*
+  libmysqlclient.so.18 -> libmysqlclient.so.18.1.0*
+  libmysqlclient.so.18.1.0*
+------------------------------------------------------------
+revno: 5243
+committer: Oystein Grovlen <oystein.grovlen@oracle.com>
+branch nick: mysql-5.6
+timestamp: Mon 2013-06-24 14:11:43 +0200
+message:
+  Bug#16434374 - INCORRECT RESULTS FOR FULL TEXT USING IN BOOLEAN 
+                 MODE ( INNODB ONLY )
+  
+  Addendum:  Hardcode engine when creating tables for InnoDB.
+  Including have_innodb.inc does not change default engine 
+  in embedded mode.
+------------------------------------------------------------
+revno: 5242
+committer: Venkatesh Duggirala<venkatesh.duggirala@oracle.com>
+branch nick: mysql-5.6
+timestamp: Mon 2013-06-24 16:47:38 +0530
+message:
+  Bug#15831300 SLAVE_TYPE_CONVERSIONS=ALL_NON_LOSSY NOT
+  WORKING AS EXPECTED
+  
+  Problem: In RBR format, slave_type_conversions='ALL_NON_LOSSY'
+  was not working properly in some cases like 'int unsigned'
+  column at master was altered directly on slave into
+  'bigint signed/bigint unsigned'.
+  
+  Analysis: In RBR format, when there is a datatype mismatch
+  and it is smaller datatype->larger datatype, slave
+  checks whether `slave_type_conversions` set contains
+  'ALL_NON_LOSSY' or not. If it contains 'ALL_NON_LOSSY', it
+  allows the conversion. In the process of converting the data
+  from smaller datatype value to larger datatype value,
+  slave prepares a conversion temporary table for all the
+  mismatched columns. The column signedness information is not
+  transferred from master to slave. Hence for this temporary
+  table columns, slave treated signedness of the column as
+  'signed' for all the columns. Due to this treatment, any data
+  for unsigned column at master was creating issues at slave
+  (correct data was not getting inserted).
+  
+  Fix: Introduced two values in slave_type_conversions set
+  'ALL_SIGNED' and 'ALL_UNSIGNED'. This value tells the slave
+  how to treat the values which are coming from master
+  If 'ALL_SIGNED' is set, then treat all integer type column
+  data as signed values (default behaviour). If 'ALL_UNSIGNED'
+  is set, then treat all integer type column data as unsigned
+  values. If both 'ALL_SIGNED','ALL_UNSIGNED' are specified,
+  then 'ALL_SIGNED' will take higher priority than 'ALL_UNSIGNED'.
+  Eg: SET slave_type_conversions='ALL_NON_LOSSY,ALL_UNSIGNED'.
+------------------------------------------------------------
+revno: 5241 [merge]
+committer: Vasil Dimov <vasil.dimov@oracle.com>
+branch nick: mysql-5.6
+timestamp: Mon 2013-06-24 14:02:21 +0300
+message:
+  Merge mysql-5.5 -> mysql-5.6
+    ------------------------------------------------------------
+    revno: 2875.437.148
+    committer: Vasil Dimov <vasil.dimov@oracle.com>
+    branch nick: mysql-5.5
+    timestamp: Mon 2013-06-24 13:56:11 +0300
+    message:
+      Fix nondeterminism in innodb_bug16417635.test
+------------------------------------------------------------
+revno: 5240
+committer: Krunal Bauskar krunal.bauskar@oracle.com
+branch nick: mysql-5.6
+timestamp: Mon 2013-06-24 11:50:36 +0530
+message:
+  - bug#16066351: valgrind: uninitialized value when parsing weird table names
+    - Restart the server to ensure clearing of stale entries introduce due to
+      failure of create table statement.
+------------------------------------------------------------
+revno: 5239 [merge]
+committer: Sujatha Sivakumar <sujatha.sivakumar@oracle.com>
+branch nick: Bug16753869_mysql-5.6
+timestamp: Mon 2013-06-24 11:30:42 +0530
+message:
+  Merge from mysql-5.5 to mysql-5.6
+    ------------------------------------------------------------
+    revno: 2875.437.147
+    committer: Sujatha Sivakumar <sujatha.sivakumar@oracle.com>
+    branch nick: Bug16753869_mysql-5.5
+    timestamp: Mon 2013-06-24 11:11:55 +0530
+    message:
+      Bug#16753869:INCORRECT TRUNCATION OF LONG SET EXPRESSION IN
+      LOAD DATA CAN CAUSE SQL INJECTION
+      
+      Problem:
+      =======
+      A long SET expression in LOAD DATA is incorrectly truncated
+      when written to the binary log.
+      
+      Analysis:
+      ========
+      LOAD DATA statements are reconstructed once again before
+      they are written to the binary log. When SET clauses are
+      specified as part of LOAD DATA statement, these SET clause
+      user command strings need to be stored as it is inorder to
+      reconstruct the original user command.  At present these
+      strings are stored as part of SET clause item tree's
+      top most Item node's name itself which is incorrect. As an
+      Item::name can be of MAX_ALIAS_NAME (256) size. Hence the
+      name will get truncated to "255".
+      
+      Because of this the rewritten LOAD DATA statement will be
+      terminated incorrectly.  When this statment is read back by
+      the mysqlbinlog tool it reads a starting single quote and
+      continuos to read till it finds an ending quote. Hence any
+      statement written post ending quote will be considered as
+      a new statement.
+      
+      Fix:
+      ===
+      As name field has length restriction the string value
+      should not be stored in Item::name.  A new String list is
+      maintained to store the SET expression values and this list
+      is read during reconstrution.
+------------------------------------------------------------
+revno: 5238
+committer: Krunal Bauskar krunal.bauskar@oracle.com
+branch nick: mysql-5.6
+timestamp: Mon 2013-06-24 11:15:22 +0530
+message:
+  - bug#16066351: valgrind: uninitialized value when parsing weird table names
+    Test case needs debug variable setting. Added prerequisite for the same.
+------------------------------------------------------------
+revno: 5237 [merge]
+committer: Prabeen Pradhan <prabeen.pradhan@oracle.com>
+branch nick: mysql-5.6
+timestamp: Mon 2013-06-24 10:49:21 +0530
+message:
+  Bug#169900529 :Move nist suite to internal
+    ------------------------------------------------------------
+    revno: 2875.437.146
+    committer: Prabeen Pradhan <prabeen.pradhan@oracle.com>
+    branch nick: mysql-5.5
+    timestamp: Mon 2013-06-24 10:42:40 +0530
+    message:
+      Bug#169900529 :Move nist suite to internal
+------------------------------------------------------------
+revno: 5236
+committer: Krunal Bauskar krunal.bauskar@oracle.com
+branch nick: mysql-5.6
+timestamp: Mon 2013-06-24 09:53:13 +0530
+message:
+  - bug#16066351: valgrind: uninitialized value when parsing weird table names
+  
+    Initial checkin corrected the fix but failed to remove stale entries/files
+    causing issues while these files are listed using list_files command.
+    Corrected TCs to remove the stale table entries/files.
+------------------------------------------------------------
+revno: 5235
+committer: Libing Song <libing.song@oracle.com>
+branch nick: mysql-5.6
+timestamp: Sun 2013-06-23 09:55:39 +0800
+message:
+  Bug#16878043 SEMI-SYNC REPLICATION IS VERY SLOW WITH MANY CLIENTS
+  
+  if rpl_semi_sync_master_timeout is set to a huge value,
+  semi-synchronous replication becomes very slow, especially when
+  many sessions are working parallel. semisync code uses a loop method
+  to calculate woken time, before it starts to wait. Bigger
+  rpl_semi_sync_master_timeout value causes more interations.
+  
+  In the patch, an effective method is used instead of the original
+  method to calculate woken time. And the code is moved out the wait loop,
+  so it is executed only once before starting the wait loop.
+------------------------------------------------------------
+revno: 5234
+committer: Bjorn Munch <bjorn.munch@oracle.com>
+branch nick: openfile-56
+timestamp: Sat 2013-06-22 14:54:16 +0200
+message:
+  Bug #16990423 SOME TESTS FOR TABLE CACHE VARIABLES FAIL IF OPEN FILES LIMIT IS TOO LOW
+  
+    Make affected tests skip if open_files_limit < 5000
+    Modified backport from trunk
+------------------------------------------------------------
+revno: 5233
+committer: Bjorn Munch <bjorn.munch@oracle.com>
+branch nick: main-56
+timestamp: Fri 2013-06-21 20:33:48 +0200
+message:
+  Emergency fix: test i_innodb.innodb_bug16066351 freezes windows tests
+------------------------------------------------------------
+revno: 5232
+committer: Tor Didriksen <tor.didriksen@oracle.com>
+branch nick: 5.6-merge
+timestamp: Fri 2013-06-21 15:51:28 +0200
+message:
+  Sql_condition::set_subclass_origin() did
+  memcmp("MySQL", STRING_WITH_LEN("ISO 9075"))
+  which is undefined behaviour
+  
+  Solution: refactor set_class_origin() and set_subclass_origin()
+  into one function set_class_origins()
+------------------------------------------------------------
+revno: 5231 [merge]
+committer: Tor Didriksen <tor.didriksen@oracle.com>
+branch nick: 5.6-merge
+timestamp: Fri 2013-06-21 15:31:44 +0200
+message:
+  merge 5.5 => 5.6
+    ------------------------------------------------------------
+    revno: 2875.437.145
+    committer: Tor Didriksen <tor.didriksen@oracle.com>
+    branch nick: 5.5
+    timestamp: Fri 2013-06-21 14:18:01 +0200
+    message:
+      Bug#16945503 ADDRESSSANITIZER BUG IN SYS_VARS
+      Sys_var_keycache inherits from some variant of Sys_var_integer
+      
+      Instances of Sys_var_keycache are initialized using the KEYCACHE_VAR macro,
+      which takes an offset within st_key_cache.
+      However, the Sys_var_integer CTOR treats the offset as if it was within
+      global_system_variables (hidden within some layers of macros and fuction
+      pointers)
+      
+      The result is that we write arbitrary data to arbitrary locations in memory.
+      This all happens during static initialization of global objects,
+      i.e. before we have even entered the main() function.
+      
+      
+      Bug#12325449 TYPO IN CMAKE/DTRACE.CMAKE
+      Fix typo in dtrace.cmake
+------------------------------------------------------------
+revno: 5230
+committer: Krunal Bauskar krunal.bauskar@oracle.com
+branch nick: mysql-5.6
+timestamp: Fri 2013-06-21 16:37:05 +0530
+message:
+  - bug#16066351: valgrind: uninitialized value when parsing weird table names
+  
+    While printing UTF-8 table name, innodb was truncating the table-name
+    then lead to half-cooked buffer causing valgrind issue.
+    Infact with newly introduce debug error point we also see issue of improper
+    error message.
+  
+    Buffer allocation constant needed update to new constant defined in univ.i
+  
+    Added test-case to cover the same.
+  
+    Approved by: Jimmy (rb#2691)
+------------------------------------------------------------
+revno: 5229
+committer: Norvald H. Ryeng <norvald.ryeng@oracle.com>
+branch nick: mysql-5.6-16319671
+timestamp: Fri 2013-06-21 10:33:06 +0200
+message:
+  Bug#16319671 RE-EXECUTE PROCEDURE, CRASH IN ITEM_FIELD::USED_TABLES
+  
+  Problem: Transforming some subqueries that select date/time types or
+  BIGINT to semijoin crashes the server on second execution of prepared
+  statements or stored programs.
+  
+  In JOIN::flatten_subqueries() during the first execution, the server
+  switches to the statement mem root.
+  
+  The semijoin transformation in convert_subquery_to_semijoin() creates
+  an Item_func_eq with an Item_singlerow_subselect on the right hand
+  side. For this Item_func_eq, Item_func::fix_fields() calls
+  Item_bool_func2::fix_length_and_dec(), which calls
+  Item_bool_func2::convert_constant_arg(). If the field given as
+  parameter is a date or time type or BIGINT, convert_constant_item() is
+  called to replace the item with an integer. This conversion results in
+  execution of the subquery to evaluate is_null().
+  
+  During this subquery execution, JOIN::optimize() switches to the
+  statement mem root before converting outer joins to inner joins. The
+  statement mem root is already the current mem root, so this is a
+  switch from the statement mem root to the statement mem root. The mem
+  root switch takes a backup copy of the current thd->free_list and
+  copies thd->stmt_arena->free_list to thd->free_list. JOIN::optimize()
+  then calls conds->real_item()->copy_andor_structure(thd), which
+  creates a new set of Item_cond_and and Item_cond_or objects, and these
+  are added to thd->free_list. JOIN::optimize() then switches back to
+  the old mem root, so thd->free_list is copied to
+  thd->stmt_arena->free_list and the old thd->free_list is restored from
+  the backup copy.
+  
+  When JOIN::flatten_subqueries() is done, it switches back from the
+  statement mem root to the execution mem root, so thd->free_list is
+  copied to thd->stmt_arena->free_list. This means that the
+  Item_cond_and and Item_cond_or objects created during subquery
+  optimization are lost from the free_list.
+  
+  After the first execution, cleanup_items() is called to reset
+  Item::fixed of all items in the statement free_list. The Item_cond_and
+  and Item_cond_or objects that were lost from the free_list are not
+  reset.
+  
+  During preparation for the second execution, fix_fields() will not be
+  called on already fixed items. Item_fields that are descendants of
+  lost Item_cond_and or Item_cond_or objects are therefore not
+  resolved. Later, the server crashes when trying to dereference a null
+  pointer of an unresolved Item_field,
+  
+  Fix: In JOIN::optimize(), replace manual mem root switching with
+  Prepared_stmt_arena_holder. The Prepared_stmt_arena_holder will test
+  if the statement mem root is already active before switching.
+------------------------------------------------------------
+revno: 5228
+committer: Oystein Grovlen <oystein.grovlen@oracle.com>
+branch nick: mysql-5.6
+timestamp: Thu 2013-06-20 15:31:42 +0200
+message:
+  Bug#16434374 - INCORRECT RESULTS FOR FULL TEXT USING IN BOOLEAN 
+                 MODE ( INNODB ONLY )
+  
+  Fix parameter name that gave warning with Sun compiler
+------------------------------------------------------------
+revno: 5227
+committer: Shaohua Wang <shaohua.wang@oracle.com>
+branch nick: mysql-5.6
+timestamp: Thu 2013-06-20 12:03:40 +0800
+message:
+  BUG#16927092 - ASSERT RANKING->WORDS, FTS SELECT BOOLEAN MODE
+  
+  Analysis & Solution:
+  Regression of bug#16516193:LITERAL PHRASES CANNOT BE COMBINED WITH + OR - OPERATOR
+  
+  We should not assert(ranking->words != NULL) in fts_query_intersect_doc_id,
+  because we can check the same doc id here more than once.
+  
+  rb#2680 approved by Jimmy Yang.
+------------------------------------------------------------
+revno: 5226
+committer: Oystein Grovlen <oystein.grovlen@oracle.com>
+branch nick: mysql-5.6
+timestamp: Wed 2013-06-19 15:06:32 +0200
+message:
+  Bug#16434374 - INCORRECT RESULTS FOR FULL TEXT USING IN BOOLEAN 
+                 MODE ( INNODB ONLY )
+  
+  Unlike, MyISAM, InnoDB does not support Boolean full text search (FTS) on
+  non-indexed columns.  Before this fix, code allowed non-indexed columns
+  in MATCH expression for BOOLEAN mode, but not for NATURAL LANGUAGE mode.
+  This patch fixes this issue by restricting the exception for BOOLEAN mode to 
+  only apply to MyISAM and not to InnoDB.
+  
+  This is patch is a bit ad-hoc in the way it determines whether to allow
+  non-indexed columns or not.  It exploits the fact that InnoDB supports
+  an extended FTS API, while MyISAM does not.  In other words, non-indexed
+  columns are only allowed if the storage engine does NOT support the 
+  extended FTS API.
+  
+  A side effect of this patch is that when reporting an error due to 
+  non-indexed columns in MATCH expression, we will no longer distinguish
+  between tables without any fulltext indexes and tables with no applicable
+  fulltext indexes.  In the first case, the error used to be
+  ER_TABLE_HAS_NO_FT.  Now, one will get ER_FT_MATCHING_KEY_NOT_FOUND in 
+  both cases.  This matches the existing behavior of NATURAL LANGUAGE mode 
+  for both InnoDB and MyISAM.
+------------------------------------------------------------
+revno: 5225
+committer: Tor Didriksen <tor.didriksen@oracle.com>
+branch nick: 5.6
+timestamp: Wed 2013-06-19 12:41:31 +0200
+message:
+  Fix valgrind errors in unit tests.
+  
+  How to repeat:
+  valgrind --leak-check=full <executable> --gtest_filter="-*DeathTest*" > foo
+------------------------------------------------------------
+revno: 5224
+committer: Sergey Glukhov <sergey.glukhov@oracle.com>
+branch nick: mysql-5.6
+timestamp: Wed 2013-06-19 14:24:08 +0400
+message:
+  Bug#16620047 INCORRECT QUERY RESULT (AFTER SERVER UPGRADE)
+  Regression is introduced in Bug11760517. According to the
+  comment for the Bug11760517 fix, there is an additional cleanup
+  in field.h(Field::is_null() function):
+  Field::is_null() now checks table->null_row before checking
+  the NULL bits.
+  
+  Order of NULLity checking is changed, firts it checks table->null_row
+  and then null_ptr[row_offset]. In our case when we evaluate first
+  result record, evaluate_null_complemented_join_record() function
+  is called for outer table and it sets table->null_row to true.
+  Then second result record field uses table->null_row to check
+  if the field is null and result is NULL instead of real value.
+  
+  The fix is partial reversion of the field.h change
+  (return original order of NULL check). Unfortunately this
+  is not sufficient. A lot of test fails in the main suite
+  after reversion. It happens because of another additional
+  cleanup introduced Bug11760517 fix(see the comment):
+     @ sql/table.h
+       mark_as_null_row() no longer sets the NULL bits of the buffer
         
-        row_log_allocate(): Initialize the added fields.
+  Reversion of this change fixes all the problems except one, test case
+  for Bug13541761 which is actually another regression of Bug11760517 fix.
+  The fix of this problem is to not touch TABLE::null_flags during
+  JOIN::cleanup.
+------------------------------------------------------------
+revno: 5223 [merge]
+committer: Aditya A <aditya.a@oracle.com>
+branch nick: mysql-5.6
+timestamp: Wed 2013-06-19 15:01:20 +0530
+message:
+  Bug#11829813  UNUSED MUTEX COMMIT_THREADS_M
+  
+  [Merge from 5.5]
+    ------------------------------------------------------------
+    revno: 2875.437.144 [merge]
+    committer: Aditya A <aditya.a@oracle.com>
+    branch nick: mysql-5.5
+    timestamp: Wed 2013-06-19 14:55:46 +0530
+    message:
+      Bug#11829813  UNUSED MUTEX COMMIT_THREADS_M
+      
+      [Merge from 5.1]
+        ------------------------------------------------------------
+        revno: 2661.876.47
+        committer: Aditya A <aditya.a@oracle.com>
+        branch nick: mysql-5.1
+        timestamp: Wed 2013-06-19 14:43:15 +0530
+        message:
+          Bug#11829813  UNUSED MUTEX COMMIT_THREADS_M
+          
+          Analysis
+          --------
+          The pthread_mutex commit_threads_m was initiliazed but never
+          used. 
+          
+          Fix
+          ---
+          Removing the commit_threads_m mutex from the code base.
+          
+          [ Approved by Marko rb#2475]
+------------------------------------------------------------
+revno: 5222 [merge]
+committer: Marc Alff <marc.alff@oracle.com>
+branch nick: mysql-5.6-push
+timestamp: Tue 2013-06-18 22:00:19 +0200
+message:
+  Local merge
+    ------------------------------------------------------------
+    revno: 5208.1.1
+    committer: Marc Alff <marc.alff@oracle.com>
+    branch nick: mysql-5.6-bug16939689
+    timestamp: Fri 2013-06-14 13:48:10 +0200
+    message:
+      Bug#16939689 VALGRIND ERROR IN PFS_SPAWN_THREAD
+      
+      Before this fix, valgrind errors could be reported under stress tests.
+      
+      In particular, the following line in pfs_spawn_thread()
+        memcpy(pfs->m_username, parent->m_username, sizeof(pfs->m_username));
+      
+      could cause memcpy to be called for the same source and destination,
+      which should not happen.
+      
+      The root cause, by analysis, is that the code is reading attributes 
+      from the parent thread, while the parent thread instrumentation is already 
+      destroyed (and was reused for the child, triggering valgrind complaints).
+      
+      The fix is to capture all the parent attributes needed:
+      - the thread internal id
+      - the thread user name
+      - the thread host name
+      in the parent thread, before spawning a child,
+      and use that to initialize the child instrumentation,
+      instead of pasing a pointer that might become invalid.
+------------------------------------------------------------
+revno: 5221 [merge]
+committer: Vasil Dimov <vasil.dimov@oracle.com>
+branch nick: mysql-5.6
+timestamp: Tue 2013-06-18 17:14:27 +0300
+message:
+  Null merge mysql-5.5 -> mysql-5.6 (Bug#16907783 does not exist in 5.6)
+    ------------------------------------------------------------
+    revno: 2875.437.143
+    committer: Vasil Dimov <vasil.dimov@oracle.com>
+    branch nick: mysql-5.5
+    timestamp: Tue 2013-06-18 17:12:28 +0300
+    message:
+      Fix Bug#16907783 5.5 STILL CRASHES IN DICT_UPDATE_STATISTICS WITH CONCURRENT
+      DDL AND I_S QUERIES
+      
+      Skip partially created indexes (ones whose name starts with TEMP_INDEX_PREFIX)
+      from stats gathering.
+      
+      Because InnoDB reports HA_INPLACE_ADD_INDEX_NO_WRITE to MySQL, the latter
+      allows parallel execution of ha_innobase::add_index() and ha_innobase::info().
+      
+      Reviewed by:	Inaam (rb:2613)
+------------------------------------------------------------
+revno: 5220
+committer: Vasil Dimov <vasil.dimov@oracle.com>
+branch nick: mysql-5.6
+timestamp: Tue 2013-06-18 15:35:25 +0300
+message:
+  Backport vasil.dimov@oracle.com-20130611080934-zr5a0d41aucsyvs5 from
+  mysql-trunk into mysql-5.6:
+  
+    * revision-id: vasil.dimov@oracle.com-20130611080934-zr5a0d41aucsyvs5
+    * committer: Vasil Dimov <vasil.dimov@oracle.com>
+    * branch nick: mysql-trunk
+    * timestamp: Tue 2013-06-11 11:09:34 +0300
+    * message:
+    *   Fix Bug#16369955 MYSQL_INSTALL_DB EXITS WITH "UNKNOWN/UNSUPPORTED STORAGE
+    *   ENGINE: INNODB"
+    *
+    *   Do not try to create mysql.innodb_table_stats and mysql.innodb_index_stats
+    *   during mysql_install_db time if InnoDB is not present (not compiled in).
+------------------------------------------------------------
+revno: 5219 [merge]
+committer: Aditya A <aditya.a@oracle.com>
+branch nick: mysql-5.6
+timestamp: Tue 2013-06-18 15:50:30 +0530
+message:
+  Bug#13548704 ALGORITHM USED FOR DROPPING PARTITIONED TABLE CAN LEAD
+               TO INCONSISTENCY 
+  
+  [ Disabling the test for valgrind ]
+    ------------------------------------------------------------
+    revno: 2875.437.142 [merge]
+    committer: Aditya A <aditya.a@oracle.com>
+    branch nick: mysql-5.5
+    timestamp: Tue 2013-06-18 15:49:13 +0530
+    message:
+      Bug#13548704 ALGORITHM USED FOR DROPPING PARTITIONED TABLE CAN LEAD
+                   TO INCONSISTENCY 
+      
+      [ Disabling the test for valgrind ]
+        ------------------------------------------------------------
+        revno: 2661.876.46
+        committer: Aditya A <aditya.a@oracle.com>
+        branch nick: mysql-5.1
+        timestamp: Tue 2013-06-18 15:48:00 +0530
+        message:
+          Bug#13548704 ALGORITHM USED FOR DROPPING PARTITIONED TABLE CAN LEAD
+                       TO INCONSISTENCY 
+          
+          [ Disabling the test for valgrind ]
+------------------------------------------------------------
+revno: 5218
+committer: Roy Lyseng <roy.lyseng@oracle.com>
+branch nick: mysql-5.6-sb2
+timestamp: Tue 2013-06-18 11:18:04 +0200
+message:
+  Bug#16316564: Crash in do_copy_not_null()
+  
+  The problem here is a failure in do_copy_not_null() because the pointer
+  copy->from_null_ptr is NULL, and hence accessing its contents fails.
+  If we look at the similar function do_copy_null(), it has been enhanced
+  with a NULL pointer check for the same pointer.
+  The pointer is NULL for any field that is originally not nullable, but
+  we may still have a NULL value because of the table->null_row
+  technique, used for outer-joined tables. The table t2 is semi-joined
+  to the table t1 (alias z), which is outer-joined, hence it also gets
+  the outer-join capability, and do_copy_null() has to be used even though
+  the field is originally not nullable.
+  
+  I expect the missing NULL pointer check in do_copy_not_null() to be
+  an oversight, and adding it indeed fixes the problem.
+  
+  sql/field_conv.cc
+    In do_copy_not_null(), add NULL pointer check for copy->from_null_ptr.
+------------------------------------------------------------
+revno: 5217
+committer: Prabeen Pradhan <prabeen.pradhan@oracle.com>
+branch nick: mysql-5.6
+timestamp: Tue 2013-06-18 11:42:49 +0530
+message:
+  Bug#16917425 : added check to skip tests where few tests were failing in absence of plugin
+------------------------------------------------------------
+revno: 5216 [merge]
+committer: Thayumanavar <thayumanavar.x.sachithanantha@oracle.com>
+branch nick: mysql-5.6
+timestamp: Tue 2013-06-18 10:22:47 +0530
+message:
+  Merge from 5.5 to 5.6
+    ------------------------------------------------------------
+    revno: 2875.437.141
+    committer: Thayumanavar <thayumanavar.x.sachithanantha@oracle.com>
+    branch nick: mysql-5.5
+    timestamp: Tue 2013-06-18 10:20:30 +0530
+    message:
+       BUG#14081240 - THREAD POOL BASED CONNECTIONS CAUSE
+                      ABORTED_CLIENTS TO BE INCREMENTED.
+      PROBLEM AND FIX:
+      The global status indicate Aborted_clients increment
+      when thread pool connections are gracefully terminated.
+      The thd killed flag is set for all connection cleanup. The
+      fix is not to set thd killed in tp_full_cleanup so that
+      Aborted_clients doesn't increment for normal client disconnects.
+------------------------------------------------------------
+revno: 5215
+committer: Mattias Jonsson <mattias.jonsson@oracle.com>
+branch nick: b16657588-56
+timestamp: Fri 2013-06-14 12:46:41 +0200
+message:
+  Bug#16657588: VARIABLE OPEN_FILES_LIMIT DOES NOT
+  SHOW MAXIMUM NUMBER OF OPEN FILES
+  
+  The read-only system variable open_files_limit did not
+  show maximum number of open files the mysqld process
+  could have, but instead the number that was requested
+  after adjusting the start-up option open_files_limit.
+  
+  Fixed by adding internal variable for propagating
+  the requested number of files, since that was used
+  for adjusting other start-up options. And set
+  the read-only system variable open_files_limit
+  to the real maximum value.
+------------------------------------------------------------
+revno: 5214 [merge]
+committer: bin.x.su@oracle.com
+branch nick: mysql-5.6
+timestamp: Mon 2013-06-17 10:55:20 +0800
+message:
+  Fix for test case failure in weekly-trunk regression
+  Not to assume the pages, whose page type is INDEX, with NULL index_name 
+  and table_name won't exist during the test
+  Approved by Jimmy in mail
+    ------------------------------------------------------------
+    revno: 2875.437.140
+    committer: bin.x.su@oracle.com
+    branch nick: mysql-5.5
+    timestamp: Mon 2013-06-17 10:49:53 +0800
+    message:
+      Fix for test case failure in weekly-trunk regression
+      Not to assume the pages, whose page type is INDEX, with NULL index_name
+      and table_name won't exist during the test
+      Approved by Jimmy in mail
+------------------------------------------------------------
+revno: 5213 [merge]
+committer: kevin.lewis@oracle.com
+branch nick: mysql-5.6
+timestamp: Fri 2013-06-14 13:47:22 -0500
+message:
+  Merge of Bug#16914007 from mysql-5.5
+    ------------------------------------------------------------
+    revno: 2875.437.139
+    committer: kevin.lewis@oracle.com
+    branch nick: mysql-5.5
+    timestamp: Fri 2013-06-14 13:33:37 -0500
+    message:
+      Bug#16914007-INNODB: CHECK TABLE SHOULD MARK AN INDEX AS CORRUPTED
+      IF IT HAS A WRONG COUNT
+      
+      If CHECK TABLE finds that a secondary index contains the wrong
+      number of entries, it used to report an error but not mark the
+      index as corrupt. The error means that the index should be rebuilt,
+      which can be done with ALTER TABLE DROP INDEX and ALTER TABLE ADD
+      INDEX.  But just in case the DBA does not pay any attention to the
+      output of CHECK TABLE, the secondary index should be marked as
+      corrupted so that it is not used again.
+      
+      Approved by Inaam in RB:2607
+------------------------------------------------------------
+revno: 5212 [merge]
+committer: kevin.lewis@oracle.com
+branch nick: mysql-5.6
+timestamp: Fri 2013-06-14 12:33:31 -0500
+message:
+  Merge Bug#16914007 from mysql-5.5.
+  The testcase for innodb_bug14707452 was changed to also test
+  this scenario since the ability to introduce this kind of corruption
+  existed in mysql-5.6+.
+    ------------------------------------------------------------
+    revno: 2875.448.1
+    committer: kevin.lewis@oracle.com
+    branch nick: mysql-5.5
+    timestamp: Fri 2013-06-14 09:29:04 -0500
+    message:
+      Bug#16914007-INNODB: CHECK TABLE SHOULD MARK AN INDEX AS CORRUPTED
+      IF IT HAS A WRONG COUNT
+      
+      If CHECK TABLE finds that a secondary index contains the wrong
+      number of entries, it used to report an error but not mark the
+      index as corrupt. The error means that the index should be rebuilt,
+      which can be done with ALTER TABLE DROP INDEX and ALTER TABLE ADD
+      INDEX.  But just in case the DBA does not pay any attention to the
+      output of CHECK TABLE, the secondary index should be marked as
+      corrupted so that it is not used again.
+      
+      Approved by Inaam in RB:2607
+------------------------------------------------------------
+revno: 5211
+committer: Tor Didriksen <tor.didriksen@oracle.com>
+branch nick: 5.6-merge
+timestamp: Fri 2013-06-14 17:37:44 +0200
+message:
+  Bug#16945343 ADDRESSSANITIZER BUG IN DBUG.C
+  
+  Remove the #undef SAFE_MUTEX
+  With the undef, debug.o and thread utilitis in mysys
+  have different ideas about the size and contents of a mutex.
+  
+  We were writing out-of-bounds in my_rw_init() here:
+  #ifdef SAFE_MUTEX
+    rwp->write_thread   = 0;
+  #endif
+------------------------------------------------------------
+revno: 5210 [merge]
+committer: Tor Didriksen <tor.didriksen@oracle.com>
+branch nick: 5.6-merge
+timestamp: Fri 2013-06-14 16:57:08 +0200
+message:
+  merge 5.5 -> 5.6
+    ------------------------------------------------------------
+    revno: 2875.437.138
+    committer: Tor Didriksen <tor.didriksen@oracle.com>
+    branch nick: 5.5
+    timestamp: Fri 2013-06-14 16:38:27 +0200
+    message:
+      Bug#14834378 ADDRESSSANITIZER BUG IN FILENAME_TO_TABLENAME
+      Backport to 5.5
+    ------------------------------------------------------------
+    revno: 2875.437.137
+    committer: Tor Didriksen <tor.didriksen@oracle.com>
+    branch nick: 5.5
+    timestamp: Fri 2013-06-14 10:52:23 +0200
+    message:
+      Bug#16729109: FIX COMPILATION WARNINGS WITH GCC 4.8
+      Backport to 5.5
+      (external Bug#69407 Build warnings with mysql)
+------------------------------------------------------------
+revno: 5209 [merge]
+committer: Aditya A <aditya.a@oracle.com>
+branch nick: mysql-5.6
+timestamp: Fri 2013-06-14 16:56:55 +0530
+message:
+  Bug#13548704 ALGORITHM USED FOR DROPPING PARTITIONED TABLE CAN LEAD
+  
+  [ Disabling the test for embedded server ]
+    ------------------------------------------------------------
+    revno: 2875.437.136 [merge]
+    committer: Aditya A <aditya.a@oracle.com>
+    branch nick: mysql-5.5
+    timestamp: Fri 2013-06-14 16:55:37 +0530
+    message:
+      Bug#13548704 ALGORITHM USED FOR DROPPING PARTITIONED TABLE CAN LEAD
+      
+      [ Disabling the test for embedded server ]
+        ------------------------------------------------------------
+        revno: 2661.876.45
+        committer: Aditya A <aditya.a@oracle.com>
+        branch nick: mysql-5.1
+        timestamp: Fri 2013-06-14 16:44:49 +0530
+        message:
+          Bug#13548704 ALGORITHM USED FOR DROPPING PARTITIONED TABLE CAN LEAD
+          
+          [ Disabling the test for embedded server ]
+------------------------------------------------------------
+revno: 5208 [merge]
+committer: Marc Alff <marc.alff@oracle.com>
+branch nick: mysql-5.6-push
+timestamp: Fri 2013-06-14 11:44:02 +0200
+message:
+  Push to mysql-5.6
+    ------------------------------------------------------------
+    revno: 5202.1.2 [merge]
+    committer: Marc Alff <marc.alff@oracle.com>
+    branch nick: mysql-5.6-bug16945618
+    timestamp: Fri 2013-06-14 11:42:16 +0200
+    message:
+      Local merge
+    ------------------------------------------------------------
+    revno: 5202.1.1
+    committer: Marc Alff <marc.alff@oracle.com>
+    branch nick: mysql-5.6-bug16945618
+    timestamp: Thu 2013-06-13 10:59:26 +0200
+    message:
+      Bug#16945618 PERFORMANCE SCHEMA, DEGRADATION UNDER STRESS WHEN INTERNAL
+      BUFFERS ARE FULL
+      
+      The performance schema uses internal buffers of a fixed size.
+      The size comes from configuration options.
+      
+      When the sizing is adequate for the workload, things work properly.
+      
+      When the sizing is too tight for the workload, the performance schema
+      spends a lot of time in an internal spin loop to attempt to allocate a memory
+      buffer, and fails.
+      
+      Before this bug, this spin loop would happen for each call to instrument an
+      object, which can be a very frequent operation.
+      
+      With this fix, when a failure to allocate memory is noticed, a flag is set 
+      that indicates the corresponding buffer is full.
+      
+      Subsequent call to allocate memory from the same buffer will fail 
+      immediately, avoiding the need for a spin loop that fill fail anyway.
+      
+      When an object is released, the corresponding buffer is not flagged as full
+      any more, indicating that memory allocation can be attempted again.
+      
+      With this fix, when running the performance schema with undersized buffers,
+      the functional result is unchanged: some events are lost and reported as 
+      such. What is changed is that the performance degradation in this mode, 
+      which could be catastrophic in some cases, is now avoided.
+------------------------------------------------------------
+revno: 5207 [merge]
+committer: Aditya A <aditya.a@oracle.com>
+branch nick: mysql-5.6
+timestamp: Fri 2013-06-14 11:41:32 +0530
+message:
+  Bug#13548704 ALGORITHM USED FOR DROPPING PARTITIONED TABLE CAN LEAD
+               TO INCONSISTENCY 
+  [Merge from 5.5]
+    ------------------------------------------------------------
+    revno: 2875.437.135 [merge]
+    committer: Aditya A <aditya.a@oracle.com>
+    branch nick: mysql-5.5
+    timestamp: Fri 2013-06-14 11:28:29 +0530
+    message:
+      Bug#13548704 ALGORITHM USED FOR DROPPING PARTITIONED TABLE CAN LEAD
+                   TO INCONSISTENCY 
+      [Merge from 5.1]
+        ------------------------------------------------------------
+        revno: 2661.876.44
+        committer: Aditya A <aditya.a@oracle.com>
+        branch nick: mysql-5.1
+        timestamp: Fri 2013-06-14 11:22:05 +0530
+        message:
+          Bug#13548704 ALGORITHM USED FOR DROPPING PARTITIONED TABLE CAN LEAD
+                       TO INCONSISTENCY 
+          
+          PROBLEM
+          --------
+          When we drop a partitoned table , we first gather the
+          information about partitions in the table from the 
+          table_name.par file and store it in an internal data 
+          structure.Then we delete this file and the data in 
+          the table. If the server crashes  after deleting the
+          file,then after recovering we cannot access the table
+          .Even we cannot drop the table ,because drop algorithm
+          requires par file to read the partition information.
+          
+          
+          FIX
+          ---
+          1. We move the part of deleting par file after deleting 
+             all the table data from the storage egine.
+          2. During drop operation if we detect that the par 
+             file is missing then we delete the .frm file,since 
+             there is no way of recovering without par file.
+            
+          [Approved by Mattias rb#2576 ]   
+------------------------------------------------------------
+revno: 5206
+committer: Annamalai Gurusami <annamalai.gurusami@oracle.com>
+branch nick: mysql-5.6
+timestamp: Fri 2013-06-14 10:03:53 +0530
+message:
+  The test case i_innodb.innodb_bug16417635 must run only for
+  innodb page size of 16k.  For other page sizes, the inspected
+  buffer pool pages will vary.  So including have_innodb_16k.inc
+  to this test case.
+------------------------------------------------------------
+revno: 5205
+committer: Praveenkumar Hulakund <praveenkumar.hulakund@oracle.com>
+branch nick: mysql_5_6
+timestamp: Thu 2013-06-13 18:36:30 +0530
+message:
+  Bug#16078943: ZERO DATE CAN BE INSERTED IN STRICT NO-ZERO MODE 
+                THROUGH A DEFAULT VALUE.
+  
+  Analysis:
+  -------------
+  The problem was that the default values for a table were
+  checked for consistency only at CREATE TABLE time. The
+  consistency checks very much depend on the sql_mode value.
+  The default values were not checked at the INSERT/UPDATE
+  time. Thus, if sql_mode became strict in the middle between
+  CREATE TABLE and INSERT/UPDATE, inconsistent data can be put
+  into the table.
+  
+  So here, when sql_mode='NO_ZERO_DATE,NO_ZERO_IN_DATE,
+  STRICT_ALL_TABLE'(strict mode) then creating table with
+  default "value 0" or default "value having 0 in date" for
+  field types DATE/DATETIME/TIMESTAMP" is not allowed. But when
+  sql_mode is "NO_ZERO_IN_DATE,NO_ZERO_DATE" or "" (non-strict mode),
+  tables can be created.
+  
+  If table with default "value 0" or default "value having 0 in
+  date" for field DATE/DATETIME/TIMESTAMP is created in non-strict
+  mode and tuple for the table is inserted with default for
+  DATE/DATETIME/TIMESTAMP fields in strict mode then no error or
+  warning is generated.
+  
+  While inserting/updating tuple(s), we are not validating the
+  default values. While creating the table the default value set 
+  might be correct but same values might not be correct while
+  inserting/updating the tuple (one of the reason is sql_mode).
+  
+  Fix:
+  -------------
+  Added a logic to verify the default values while inserting
+  or updating a tuple. 
+  
+  Currently the TIMESTAMP data type differs in nonstandard
+  ways from other data types. But this behavior can be
+  turned off using "explicit_defaults_for_timestamp" system
+  variable at server startup. With this patch, old behavior
+  of TIMESTAMP data type is not changed. But with 
+  "explicit_defaults_for_timestamp", logic is added to 
+  verify the default value while inserting or updating
+  a tuple.
+  
+  With this, behavior of insert or update with default values
+  for DATE/DATETIME/TIMESTAMP is as below,
+  
+  +---------------+------------+----------------+-------------+
+  |               |            |                |             |
+  |TYPE/sql_mode  | ""         |NO_ZERO_DATE/   |strict_mode  |
+  |        value  |            |NO_ZERO_IN_DATE |             |
+  |---------------+------------+----------------+-------------|
+  |DATE           | Success    | Warning        | Error       |
+  |---------------|------------|----------------|-------------|
+  |DATETIME       | Success    | Warning        | Error       |
+  |---------------|------------|----------------|-------------|
+  |TIMESTAMP      |            |                |             |
+  |+ explicit_-   |            |                |             |
+  |  defaults_-   |            |                |             |
+  |  for_-        | Success    | Success        | Success     |
+  |  timestamp    |            |                |             |
+  |  = false      |            |                |             |
+  |(for           |            |                |             |
+  | backward      |            |                |             |
+  | compatibility)|            |                |             |
+  |---------------|------------|----------------|-------------|
+  |TIMESTAMP      |            |                |             |
+  |+ explicit_-   |            |                |             |
+  |  defaults_-   | Success    | Warning        | Error       |
+  |  for_-        |            |                |             |
+  |  timestamp    |            |                |             |
+  |  = true       |            |                |             |
+  |               |            |                |             |
+  +-----------------------------------------------------------+
+  
+  
+  Summary of discussion on impact on Replication:
+  -----------------------------------------------
+  
+  *. Found following impact on replication if this issue is 
+     fixed,
+  
+     Older master (bug is there) --> Newer slave (bug is fixed)
+  
+     Let's assume sql_mode is propagated properly between the
+     master and slaves. I.e. at any point in time the master 
+     and slaves have the same sql_mode value.
+  
+     The following sequence is permitted on the master:
+       - sql_mode = ''
+       - CREATE TABLE t1 (f1 int,
+                          f2 DATE DEFAULT 0,
+                          f3 DATETIME DEFAULT 0,
+                          f4 TIMESTAMP DEFAULT 0);
+       - set sql_mode='NO_ZERO_DATE,NO_ZERO_IN_DATE,
+                       STRICT_ALL_TABLES';
+       - INSERT INTO t1(f1) VALUES (10);
+  
+     The result of this sequence on the master is a new record:
+        { 0, 0, 0, 0 }
+     (that is the bug, because of effective NO_ZERO_DATE &
+      NO_ZERO_IN_DATE).
+  
+     On the slave, the INSERT statement will fail (because the
+     bug is fixed on the slave), thus the replication will stop. 
+  
+  *. Approaches identified after discussing with Replication team,
+     Runtime team and support are,
+  
+    1. Introduce a switch to relax the sql_mode during an
+       upgrade on the slave. But:
+  
+       - This switch is effectively overriding the SQL_MODE from
+         the master, thence all sorts of different things can
+         go wrong.
+       - This switch is only necessary for upgrades, which have
+         a solid workarounds: using RBR or relaxing the SQL_MODE
+         on the master.
+       - Introducing another switch requires double testing and
+         is error prone, since users may use it for other cases
+         than upgrades and then we will get all sort of weird
+         bug reports...
+       - This approach does not scale in terms of development
+         and maintenance. The use case does not seem to be worth
+         it this kind of approach.
+  
+    2. Introduce another switch as in suggestion #1, that makes
+       the slave behave as the master just for the sole purpose
+       of a set of SQL_MODE combinations. Same problems as
+       suggestion #1.
+  
+    3. Document that during upgrades, the master needs to relax
+       the sql_mode or switch to RBR, but note the following
+       restrictions:
+  
+       - user needs to wait for the old binary logs to be consumed
+         before actually be able to upgrade the slaves (so that
+         there is no slave still replicating "old" binlogs after
+         it is upgraded)
+       - user needs to cope with side effects of relaxing the
+         sql_mode or use RBR during the upgrade period. 
+  
+  After considering the risk involved in the approach 1 and 2, its
+  decided to go with approach 3.
+  
+  Attached discussion mails in the bug report.
+------------------------------------------------------------
+revno: 5204 [merge]
+committer: Annamalai Gurusami <annamalai.gurusami@oracle.com>
+branch nick: mysql-5.6
+timestamp: Thu 2013-06-13 15:59:33 +0530
+message:
+  Merge from mysql-5.5 to mysql-5.6
+    ------------------------------------------------------------
+    revno: 2875.437.134
+    committer: Annamalai Gurusami <annamalai.gurusami@oracle.com>
+    branch nick: mysql-5.5
+    timestamp: Thu 2013-06-13 11:14:13 +0530
+    message:
+      Bug #16417635 INNODB FAILS TO MERGE UNDER-FILLED PAGES DEPENDING
+      ON DELETION ORDER
+      
+      Problem:
+      
+      When a InnoDB index page is under-filled, we will merge it with either
+      the left sibling node or the right sibling node.  But this checking is
+      incorrect.  When the left sibling node is available, even if merging
+      is not possible with left sibling node, we do not check for the 
+      possibility of merging with the right sibling node.  
+      
+      Solution:
+      
+      If left sibling node is available, and merging with left sibling node
+      is not possible, then check if merge with right sibling node is
+      possible.
+      
+      rb#2506 approved by jimmy & ima.
+------------------------------------------------------------
+revno: 5203
+committer: Jimmy Yang <jimmy.yang@oracle.com>
+branch nick: mysql-5.6
+timestamp: Thu 2013-06-13 17:40:13 +0800
+message:
+  Exclude test innodb_bug16072440.test from embedded platform, since
+  the server restart does not work well on the platform
+------------------------------------------------------------
+revno: 5202
+committer: Venkatesh Duggirala<venkatesh.duggirala@oracle.com>
+branch nick: mysql-5.6
+timestamp: Wed 2013-06-12 21:41:05 +0530
+message:
+  BUG#16904035-SHOW STATUS - EXCESSIVE LOCKING ON LOCK_ACTIVE_MI AND
+  ACTIVE_MI->RLI->DATA_LOCK
+  
+  Problem: Excessive locking on lock_active_mi and rli->data_lock
+  while executing any `show status like 'X'` command. 
+  
+  Analysis: SHOW_FUNCs for Slave_running, Slave_retried_transactions,
+  Slave_heartbeat_period, Slave_received_heartbeats,
+  Slave_last_heartbeat are acquiring lock_active_mi and rli->data_lock
+  to show their variable value. It is ok to show stale data while showing
+  the status variables i.e., even if they miss one update, it will
+  not cause any great trouble. 
+  
+  Fix: Remove the locks from the above mentioned SHOW_FUNC functions.
+------------------------------------------------------------
+revno: 5201
+committer: Jimmy Yang <jimmy.yang@oracle.com>
+branch nick: mysql-5.6
+timestamp: Wed 2013-06-12 18:35:04 +0800
+message:
+  Add a pre-emptive server restart to test innodb_bug16072440, to avoid
+  spill the warning of orphan fts aux table to other tests.
+------------------------------------------------------------
+revno: 5200 [merge]
+committer: Sivert Sorumgard <sivert.sorumgaard@oracle.com>
+branch nick: 5.6-14227431
+timestamp: Wed 2013-06-12 10:02:00 +0200
+message:
+  Manual merge from mysql-5.5 to mysql-5.6
+    ------------------------------------------------------------
+    revno: 2875.437.133
+    committer: Sivert Sorumgard <sivert.sorumgaard@oracle.com>
+    branch nick: 5.5-14227431
+    timestamp: Wed 2013-06-12 09:35:33 +0200
+    message:
+      Bug #14227431: CHARACTER SET MISMATCH WHEN ALTERING FOREIGN KEYS
+      CAN LEAD TO MISSING TABLES
+      
+      Overview
+      --------
+      If the FOREIGN_KEY_CHECKS system variable is set to 0, it is
+      possible to break a foreign key constraint by changing the type
+      or character set of the foreign key column, or by dropping the
+      foreign key index (without carrying out corresponding changes on
+      another table in the relationship).
+      
+      If we subsequently set FOREIGN_KEY_CHECKS to 1 and execute ALTER
+      TABLE involving the COPY algorithm on such a table, the following
+      happens:
+      
+      1) If ALTER TABLE does not contain a RENAME clause, the attempt 
+         to install the new version of the table instead of the old one
+         will fail due to the fact that the inconsistency will be 
+         detected. An attempt to revert the partially executed alter 
+         table operation by restoring the old table definition will 
+         fail as well due to FOREIGN_KEY_CHECKS == 1. As a result, the 
+         table being altered will be lost.
+      2) If ALTER TABLE contains the RENAME clause, the inconsistency 
+         will not be detected (most probably due to other bugs). But if
+         an attempt to install the new version of the table fails (for 
+         example, due to a failure when updating triggers associated 
+         with the table), reverting the partially executed alter table 
+         by restoring the old table definition will fail too. So the 
+         table being altered might be lost as well.
+      
+      
+      Suggested fix
+      -------------
+      The suggested fix is to temporarily unset the option bit
+      representing FOREIGN_KEY_CHECKS when the old table definition is
+      restored while reverting the partially executed operation.
+------------------------------------------------------------
+revno: 5199 [merge]
+committer: Saikumar V <saikumar.v@oracle.com>
+branch nick: mysql-5.6
+timestamp: Wed 2013-06-12 12:07:18 +0530
+message:
+  Null Merge
+  From mysql-5.5 to mysql-5.6
+    ------------------------------------------------------------
+    revno: 2875.437.132
+    committer: Saikumar V <saikumar.v@oracle.com>
+    branch nick: mysql-5.5
+    timestamp: Wed 2013-06-12 12:00:44 +0530
+    message:
+      Adding rqg grammars to internal folder
+------------------------------------------------------------
+revno: 5198
+committer: Saikumar V <saikumar.v@oracle.com>
+branch nick: mysql-5.6
+timestamp: Wed 2013-06-12 11:11:46 +0530
+message:
+  Updated rqg grammars files in internal folder.
+------------------------------------------------------------
+revno: 5197
+committer: Shaohua Wang <shaohua.wang@oracle.com>
+branch nick: mysql-5.6-bug16625973
+timestamp: Tue 2013-06-11 21:59:55 +0800
+message:
+  Fix innodb_fts.innodb_fts_result_cache_limit failure on daily trunk.
+  
+  Approved by Jimmy Yang.
+------------------------------------------------------------
+revno: 5196
+committer: Guilhem Bichot <guilhem.bichot@oracle.com>
+branch nick: 5.6
+timestamp: Tue 2013-06-11 13:40:24 +0200
+message:
+  Bug#16314835 "WITH ROLLUP" CAUSES: DUPLICATE ENTRY 'NULL' FOR KEY '<AUTO_KEY>'
+  Bad result in 5.1/5.5, strange error in 5.6
+  => disable ROLLUP+DISTINCT, with meaningful error.
+  DISTINCT is often useless with GROUP BY anyway.
+  Of the modified testcases, most are for internally-reported bugs.
+  ROLLUP+ORDER is already disabled.
+------------------------------------------------------------
+revno: 5195
+committer: Guilhem Bichot <guilhem.bichot@oracle.com>
+branch nick: 5.6
+timestamp: Tue 2013-06-11 13:37:20 +0200
+message:
+  Fix for
+  Bug#16739050 PREPARED STATEMENT: CRASH IN ITEM_REF::REAL_ITEM OR PURE
+  VIRTUAL FUNCTION CALL
+  and 2 duplicates:
+  don't reach to real items when creating prep_having. Details:
+  
+  First, let's review some bugs fixed in older 5.6 versions.
+  ==========================================================
+  
+  About the fix for 12603457 and 12603141:
+  WHERE condition is "WHERE field".
+  JOIN::conds is made, by change_item_tree(), to point to item_outer_ref
+  which points to item_field.
+  At fix_prepare_information() we do:
+    prep_where= JOIN::conds
+  When we rollback_item_tree_changes(), we restore conds, which does not
+  modify prep_where (only JOIN::conds was registered in the "list of
+  changes to roll back"...).
+  When next execution starts reinit_stmt_before_use() copies prep_where
+  into select_lex->where, which thus gets the now-destroyed
+  item_outer_ref, later this crashes.
+  Solution which was chosen: make reinit_stmt_before_use() copy
+  prep_where->real_item(), to reach to the field, avoiding the
+  now-destroyed item_outer_ref.
+  For uniformity, the same was done for prep_having.
+  
+  About the fix for 12582849: (cousin of above)
+  WHERE condition is OR.
+  One argument of OR is made to point to item_outer_ref which points to
+  item_field.
+  At JOIN:: optimize:
+    prep_where= copy of conds => makes a copy of OR (a new item_cond_or).
+  When we rollback_item_tree_changes(), we restore one pointer argument
+  of the original OR, which does not modify the pointer argument of the
+  copy of this OR (do not modify prep_where); the now-destroyed
+  item_outer_ref remains in prep_where. Then it crashes at next
+  execution.
+  Solution which was chosen: make the copy code (copy_andor_structure)
+  use real_item().
+  
+  About the fix for Bug #16163596:
+  regression caused by the fix for 12603457 and 12603141.
+  In sql_yacc, "HAVING a" leads to the creation of an Item_ref named
+  "a". In having->fix_fields(), we find that "a" is actually a field, so
+  we make the Item_ref's ref point to this field.
+  At next execution, reinit_stmt_before_use()  uses real_item() which
+  makes the HAVING be item_field, not Item_ref anymore. This Item_ref
+  should have staid, it's a permanent, parse-time item.
+  There should never be Item_field in HAVING, see how sql_yacc creates
+  Item_ref instead of Item_field if in HAVING.
+  Removing this item_ref confused ROLLUP.
+  Solution which was chosen: undo the HAVING part of the fix for
+  12603457 and 12603141.
+  
+  Now the new bugs.
+  =================
+  
+  16317817:
+  HAVING condition is OR.
+  We resolve GROUP BY:
+  - initially order->item points to order->item_ptr which contains (per
+  parser) Item_field.
+  - in find_order_in_list(), *order_item (i.e. order->item_ptr) is made
+  to point to item_outer_ref, this change done in fix_fields() goes
+  through register_item_tree_change().
+  - again in find_order_in_list(), we append this item to
+  ref_pointer_array, and make order->item point to this new cell of the
+  array.
+  One argument of OR in HAVING is item_ref (per parser).
+  We resolve HAVING: this argument of OR is made to reference
+  order->item (id est: the ref_pointer_array cell which references the
+  item of GROUP BY). Keep in mind that Item_ref is Item**, not Item*.
+  Then we rollback_item_tree_changes(), which effectively restores
+  order->item_ptr.
+  reinit_stmt_before_use() restores order -> item to point to order ->
+  item_ptr. So GROUP BY is fine.
+  But the item_ref in HAVING still references the cell of
+  ref_pointer_array which was not restored.
+  reinit_stmt_before_use()  makes a copy of HAVING, which uses
+  copy_andor_structure, which reaches to the real items
+  (per the fix for 12582849), but as HAVING is "item_ref to destroyed
+  item_outer_ref to item_field", this crashes.
+  If it would not reach to the real item, the copy would stop at the
+  item_ref, then the soon-coming name resolution would create a new
+  item_outer_ref and point the item_ref to it, all fine.
+  
+  16739050: similar to above
+  
+  16317685:
+  HAVING condition is OR.
+  In HAVING, one Item_ref is made to reference COUNT;
+  reinit_stmt_before_use(),  using copy_andor_structure() which uses
+  real_item(), changes HAVING to COUNT, then ROLLUP crashes.
+  
+  PROPOSED SOLUTION
+  =================
+  
+  Avoid using real_item() in copy_andor_structure() when copying HAVING,
+  because it's only causing problems.
+  Keep real_item() when copying WHERE, in 5.6. We cannot remove it,
+  because of the "second copy" done in JOIN::optimize():
+      sel->prep_where=
+  conds ? conds->copy_andor_structure(thd, true) : NULL;
+  which creates new AND/OR items which "argument pointers" will not be properly restored
+  (re-read 12582849 above), thus forcing us to reach to the real items.
+  In WL#7082 (5.7), the second copy will go away, so real_item() can be
+  removed (done in my prototype).
+------------------------------------------------------------
+revno: 5194
+committer: Jorgen Loland <jorgen.loland@oracle.com>
+branch nick: mysql-5.6
+timestamp: Tue 2013-06-11 14:26:57 +0200
+message:
+  BUG#14615536 Followup. 
+  
+  opt_range.cc:append_range_all_keyparts() is now needed in 
+  non-debug builds, so the function must be compiled in
+  unconditionally.
+------------------------------------------------------------
+revno: 5193
+committer: Jorgen Loland <jorgen.loland@oracle.com>
+branch nick: mysql-5.6
+timestamp: Tue 2013-06-11 12:18:33 +0200
+message:
+  Bug#14615536: OPTIMIZER TRACE PRINTS RANGES FOR 
+                NON-APPLICABLE KEYPARTS
+  
+  Before, the "ranges [...]" part of optimizer trace would include
+  ranges for keyparts that were not usable by range access. Two
+  such cases have been found:
+  
+  WHERE keypart1 < const AND keypart2 ... 
+  (or any other non-equality operator for keypart1)
+    => keypart2 is not applicable for range access because
+       the operator on keypart1 is not equality, but optimizer
+       tracing would print the range for keypart2 anyway
+  
+  WHERE keypart1 = const AND keypart3 ...
+    => keypart3 is not applicable for range access because
+       there are no predicates for keypart2, but optimizer
+       tracing would print the range for keypart3 anyway
+  
+  Both issues are fixed by this CS.
+------------------------------------------------------------
+revno: 5192
+committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
+branch nick: mysql_5.6
+timestamp: Tue 2013-06-11 08:50:33 +0200
+message:
+  Fixing the bug 16919882 - WRONG FSF ADDRESS IN LICENSES HEADERS
+------------------------------------------------------------
+revno: 5191 [merge]
+committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
+branch nick: mysql_5.6
+timestamp: Mon 2013-06-10 22:44:22 +0200
+message:
+  Null merging the changes from 5.5 related to bug 16919882 - WRONG FSF ADDRESS IN LICENSES HEADERS
+    ------------------------------------------------------------
+    revno: 2875.437.131
+    committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
+    branch nick: mysql-5.5
+    timestamp: Mon 2013-06-10 22:29:41 +0200
+    message:
+      Fixing the bug 16919882 - WRONG FSF ADDRESS IN LICENSES HEADERS
+------------------------------------------------------------
+revno: 5190 [merge]
+committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
+branch nick: mysql-5.6
+timestamp: Tue 2013-06-11 01:23:02 +0530
+message:
+  Upmerging the changes from 5.1 for the bug 16919882 - WRONG FSF ADDRESS IN LICENSES HEADERS
+    ------------------------------------------------------------
+    revno: 2875.437.130 [merge]
+    committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
+    branch nick: mysql-5.5
+    timestamp: Tue 2013-06-11 01:20:25 +0530
+    message:
+      Upmerging the changes from 5.1 for the bug 16919882 - WRONG FSF ADDRESS IN LICENSES HEADERS
+        ------------------------------------------------------------
+        revno: 2661.876.43
+        committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
+        branch nick: mysql-5.1
+        timestamp: Tue 2013-06-11 01:13:07 +0530
+        message:
+          Bug 16919882 - WRONG FSF ADDRESS IN LICENSES HEADERS
+------------------------------------------------------------
+revno: 5189
+committer: Shaohua Wang <shaohua.wang@oracle.com>
+branch nick: mysql-5.6-bug16625973
+timestamp: Sun 2013-06-09 16:40:57 +0800
+message:
+  BUG#16625973 - RED-BLACK TREE HOLDING THE FTS RESULTS COULD CONSUME TOO MUCH MEMORY 
+  
+  Analysis:
+  We deal with fts intermediate result and final result all in memory, 
+  so if the result is hunders of millions, fts query will consumes large
+  amount of memory, several GB. 300bytes for a matched doc in our experiment.
+  
+  Solution:
+  Due to the fts framework of optimizer & innodb, we can't find a easy way to
+  reduce the memory consumption. so we will create WL to address it in future.
+  
+  In the patch, we do the following two things:
+  1. Change "words" in fts_ranking_t from "ib_rbt_t" to array. this can save 
+  about 200 bytes for a matched doc.
+  2. Set a cap for the memory consumption. if the query uses as much memory 
+  as the cap, it will receive a error "fts query exceeds max allowed memory".
+  
+  rb://2387 approved by Jimmy Yang
+------------------------------------------------------------
+revno: 5188
+committer: Shaohua Wang <shaohua.wang@oracle.com>
+branch nick: mysql-5.6-bug16885178
+timestamp: Sun 2013-06-09 16:19:35 +0800
+message:
+  BUG#16885178 - INNODB FULLTEXT PHRASE SEARCH VALGRIND ERROR
+  
+  The root cause is that we copy 1 byte out of the boundary in 
+  as we can see from 'fts_utf8_string_dup', because type 'byte'
+  doesn't grantee its end is '0'.
+  
+  rb://2586 approved by Jimmy Yang.
+------------------------------------------------------------
+revno: 5187
+committer: Shaohua Wang <shaohua.wang@oracle.com>
+branch nick: mysql-5.6-bug12429565
+timestamp: Sun 2013-06-09 14:44:12 +0800
+message:
+  BUG#12429565 - FTS: INDEX IS MISSING FROM THE DATA DICTIONARY DURING TRUNCATE
+  
+  The solution is avoiding logging 'index missing' in 'dict_truncate_index_tree'
+  when the index is a fts index.
+  
+  rb://2581 approved by Jimmy Yang.
+------------------------------------------------------------
+revno: 5186
+committer: Nuno Carvalho <nuno.carvalho@oracle.com>
+branch nick: mysql-5.6
+timestamp: Sat 2013-06-08 09:26:59 +0100
+message:
+  BUG#16918216: RPL.RPL_ALTER_REPOSITORY TEST FAILING FOR 5.6
+  
+  rpl_alter_repository was failing sporadically because a previous test,
+  rpl_stm_mixed_mts_rec_crash_safe_small, didn't clean all configurations
+  changes during its execution, these changes were causing result content
+  mismatch on rpl_alter_repository.
+  
+  To ensure that all configurations are reverted, now we restart servers
+  after rpl_*_mts_*_crash_safe_* tests.
+------------------------------------------------------------
+revno: 5185 [merge]
+committer: Olav Sandstaa <olav.sandstaa@oracle.com>
+branch nick: 5.6-merge
+timestamp: Fri 2013-06-07 21:43:41 +0200
+message:
+  Merge from mysql-5.5 to mysql-5.6
+    ------------------------------------------------------------
+    revno: 2875.437.129
+    committer: Olav Sandstaa <olav.sandstaa@oracle.com>
+    branch nick: 5.5-fix
+    timestamp: Fri 2013-06-07 21:34:34 +0200
+    message:
+      Bug #16917425  -DBUILD_CONFIG=MYSQL_RELEASE -DWITH_DEBUG=ON FAILS 4 AND SKIPS 27 MTR TESTS
+      
+      Revert fix since it caused mtr tests to not run in pushbuild.
+------------------------------------------------------------
+revno: 5184 [merge]
+committer: sayantan dutta <sayantan.dutta@oracle.com>
+branch nick: mysql-5.6
+timestamp: Fri 2013-06-07 19:30:59 +0530
+message:
+  Bug 16917425 5.5=> 5.6
+    ------------------------------------------------------------
+    revno: 2875.437.128
+    committer: sayantan dutta <sayantan.dutta@oracle.com>
+    branch nick: mysql-5.5
+    timestamp: Fri 2013-06-07 19:29:56 +0530
+    message:
+      Bug #16917425  -DBUILD_CONFIG=MYSQL_RELEASE -DWITH_DEBUG=ON FAILS 4 AND SKIPS 27 MTR TESTS
+------------------------------------------------------------
+revno: 5183
+committer: Marc Alff <marc.alff@oracle.com>
+branch nick: mysql-5.6-push
+timestamp: Fri 2013-06-07 10:53:30 +0200
+message:
+  Warning cleanup
+------------------------------------------------------------
+revno: 5182 [merge]
+committer: Marc Alff <marc.alff@oracle.com>
+branch nick: mysql-5.6-push
+timestamp: Fri 2013-06-07 10:40:32 +0200
+message:
+  Merge
+    ------------------------------------------------------------
+    revno: 5178.1.2 [merge]
+    committer: Marc Alff <marc.alff@oracle.com>
+    branch nick: mysql-5.6-bug16576980
+    timestamp: Fri 2013-06-07 09:52:32 +0200
+    message:
+      Local merge
+    ------------------------------------------------------------
+    revno: 5178.1.1
+    committer: Marc Alff <marc.alff@oracle.com>
+    branch nick: mysql-5.6-bug16576980
+    timestamp: Thu 2013-06-06 12:02:35 +0200
+    message:
+      Bug#16576980 SESSION_CONNECT_ATTRS: SPORADIC PARTIAL RESULTS FOR BUSY CONNECTIONS
+      
+      Prior to this fix, some rows in table session_connect_attrs
+      would be sporadically missing, when the session executes a workload.
+      
+      The root cause is due to several factors.
+      
+      1)
+      Table session_connect_attrs ::make_row() relies on
+      PFS_thread::m_lock
+      to decide if the session and session attributes do exist of not.
+      
+      2)
+      PFS_thread::m_lock is also modified during a thread execution under load,
+      in particular for each statement with set_thread_command_v1()
+      and set_thread_start_time_v1()
+      
+      As a result, setting a statement command and start time causes spurious
+      failures in table session_connect_attrs.
+      
+      The fix is to be more strict about usage of atomic locks,
+      and in particular the purpose of each lock.
+      
+      3)
+      PFS_thread::m_lock is not only for thread creation / destruction.
+      
+      Any other use of this lock create similar spurious failures in every table
+      that scans threads, affecting every _by_thread, _by_account, _by_host,
+      and _global summary tables.
+      
+      4)
+      For long lived (session) based attributes, such as session_connect_attrs,
+      but also for PROCESSLIST_USER and PROCESSLIST_HOST, use a dedicated
+      PFS_thread::m_session_lock.
+      
+      5)
+      For short lived (statement) based attributes,
+      such as PROCESSLIST_INFO and PROCESSLIST_DB,
+      use a dedicated lock.
+      
+      This lock existed before, and has been renamed
+      to PFS_thread::m_stmt_lock, now also used for PROCESSLIST_DB.
+      
+      6)
+      For basic attributes like m_command or m_start_time,
+      using a PFS_lock is overkill, the data can be sanitized instead.
+      
+      This fix removed the usage of PFS_lock for command and start time,
+      which also is a performance improvement, reducing the overhead.
+      
+      Overall, with this fix, a session executing under load,
+      which puts stress on m_stmt_lock.
+      does not indirectly cause spurious failures in
+      session_connect_attrs (using m_session_lock),
+      or other tables only looking at threads (m_lock).
+------------------------------------------------------------
+revno: 5181 [merge]
+committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
+branch nick: mysql-5.6
+timestamp: Thu 2013-06-06 15:59:11 +0200
+message:
+  Null merging the changes of 5.1 branch
+    ------------------------------------------------------------
+    revno: 2875.437.127 [merge]
+    committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
+    branch nick: mysql-5.5
+    timestamp: Thu 2013-06-06 15:47:55 +0200
+    message:
+      Null merging the changes of 5.1 branch
+        ------------------------------------------------------------
+        revno: 2661.876.42 [merge]
+        author: murthy.narkedimilli@oracle.com
+        committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
+        branch nick: mysql-5.1
+        timestamp: Tue 2013-06-04 18:17:58 +0200
+        message:
+          Merge from mysql-5.1.70-release
+            ------------------------------------------------------------
+            revno: 2661.880.5
+            tags: mysql-5.1.70
+            committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
+            branch nick: mysql-5.1.70-release
+            timestamp: Mon 2013-05-13 15:26:11 +0200
+            message:
+              Merging the changes for Build failure issues from mysql-5.1
+            ------------------------------------------------------------
+            revno: 2661.880.4
+            committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
+            branch nick: mysql-5.1.70-release
+            timestamp: Mon 2013-05-13 15:22:49 +0200
+            message:
+              Merging the changes for build failures in windows.
+            ------------------------------------------------------------
+            revno: 2661.880.3
+            committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
+            branch nick: mysql-5.1.70-release
+            timestamp: Fri 2013-05-10 15:27:03 +0200
+            message:
+              Merging the changes which fixes the build issue for Windows Builds.
+              Description:
+               Fixing a build issue.  The function innobase_convert_to_system_charset()
+               is included only in the builtin InnoDB, and it is missed in InnoDB
+               plugin.  Adding this function in InnoDB plugin as well.
+            ------------------------------------------------------------
+            revno: 2661.880.2
+            committer: Balasubramanian Kandasamy <balasubramanian.kandasamy@oracle.com>
+            branch nick: mysql-5.1.70-release
+            timestamp: Tue 2013-05-07 09:14:51 +0200
+            message:
+              Updated spec file to ignore upgrade error message
+            ------------------------------------------------------------
+            revno: 2661.880.1
+            committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
+            branch nick: mysql-5.1.70-release
+            timestamp: Tue 2013-05-07 08:10:09 +0200
+            message:
+              Merging the changes from 5.1 branch to release branch.
+              Includes bug fixes for:
+              Bug #16722314 FOREIGN KEY ID MODIFIED DURING EXPORT
+              Bug #16754901 PARS_INFO_FREE NOT CALLED IN DICT_CREATE_ADD_FOREIGN_TO_DICTIONARY
+    ------------------------------------------------------------
+    revno: 2875.437.126 [merge]
+    author: ramesh.maddali@oracle.com
+    committer: Build Team <bteam@helheim>
+    branch nick: mysql-5.5
+    timestamp: Wed 2013-06-05 14:17:01 +0200
+    message:
+      Merge from mysql-5.5.32-release
+        ------------------------------------------------------------
+        revno: 2875.447.11
+        tags: mysql-5.5.32
+        committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
+        branch nick: mysql-5.5.32-release
+        timestamp: Thu 2013-05-16 17:33:32 +0200
+        message:
+          Fix for BUG# 16812255: Removing the --random-password option
+          which is supported only for MYSQL server versions 5.6 and above.
+        ------------------------------------------------------------
+        revno: 2875.447.10
+        committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
+        branch nick: mysql-5.5.32-release
+        timestamp: Thu 2013-05-16 10:24:26 +0200
+        message:
+          Changes to verify the solaris upgrade issue.
+        ------------------------------------------------------------
+        revno: 2875.447.9
+        committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
+        branch nick: mysql-5.5.32-release
+        timestamp: Wed 2013-05-15 16:29:31 +0200
+        message:
+          Fixing the RPM-ULN build issue by ignoring the postinstall_check.sh.
+        ------------------------------------------------------------
+        revno: 2875.447.8
+        committer: Murthy Narkedimilli <murthy.narkedimilli@oracle.com>
+        branch nick: mysql-5.5.32-release
+        timestamp: Wed 2013-05-15 15:37:20 +0200
+        message:
+          Bug 16812255 - 5.5.32 PKG INSTALLATION FAILED DURING MYSQL_INSTALL_DB EXECUTION
+        ------------------------------------------------------------
+        revno: 2875.447.7
+        committer: Balasubramanian Kandasamy <balasubramanian.kandasamy@oracle.com>
+        branch nick: mysql-5.5.32-release
+        timestamp: Mon 2013-05-13 10:21:09 +0200
+        message:
+          Updated copyright year information
+        ------------------------------------------------------------
+        revno: 2875.447.6
+        committer: Balasubramanian Kandasamy <balasubramanian.kandasamy@oracle.com>
+        branch nick: mysql-5.5.32-release
+        timestamp: Mon 2013-05-13 09:46:44 +0200
+        message:
+           Adding fix for Bug#16798868
+        ------------------------------------------------------------
+        revno: 2875.447.5
+        committer: Jon Olav Hauglid <jon.hauglid@oracle.com>
+        branch nick: mysql-5.5.32-release
+        timestamp: Wed 2013-05-08 12:08:20 +0200
+        message:
+          Bug#16779374: NEW ERROR MESSAGE ADDED TO 5.5 AFTER 5.6 GA - REUSING
+                        NUMBER ALREADY USED BY 5.6
+          
+          The problem was that the patch for Bug#13004581 added a new error
+          message to 5.5. This causes it to use an error number already used
+          in 5.6 by ER_CANNOT_LOAD_FROM_TABLE_V2. Which means that error
+          message number stability between GA releases is broken.
+          
+          This patch fixes the problem by removing the error message and
+          using ER_UNKNOWN_ERROR instead.
+        ------------------------------------------------------------
+        revno: 2875.447.4
+        committer: Balasubramanian Kandasamy <balasubramanian.kandasamy@oracle.com>
+        branch nick: mysql-5.5.32-release
+        timestamp: Tue 2013-05-07 14:36:46 +0200
+        message:
+          ULN-RPMs bug fix for BR16298542
+        ------------------------------------------------------------
+        revno: 2875.447.3
+        committer: Annamalai Gurusami <annamalai.gurusami@oracle.com>
+        branch nick: mysql-5.5.32-release
+        timestamp: Mon 2013-05-06 20:31:26 +0530
+        message:
+          Bug #16722314 FOREIGN KEY ID MODIFIED DURING EXPORT
+          Bug #16754901 PARS_INFO_FREE NOT CALLED IN DICT_CREATE_ADD_FOREIGN_TO_DICTIONARY
+          
+          Merging the fix from mysql-5.5 to mysql-5.5.32-release.
+        ------------------------------------------------------------
+        revno: 2875.447.2
+        committer: Jon Olav Hauglid <jon.hauglid@oracle.com>
+        branch nick: mysql-5.5.32-release
+        timestamp: Mon 2013-05-06 16:06:32 +0200
+        message:
+          Bug#16757869: INNODB: POSSIBLE REGRESSION IN 5.5.31, BUG#16004999
+          
+          The problem was that if UPDATE with subselect caused a
+          deadlock inside InnoDB, this deadlock was not properly
+          handled by the SQL layer. This meant that the SQL layer
+          would try to unlock the row after InnoDB had rolled
+          back the transaction. This caused an assertion inside
+          InnoDB.
+          
+          This patch fixes the problem by checking for errors
+          reported by SQL_SELECT::skip_record() and not calling
+          unlock_row() if any errors have been reported.
+            
+          This bug is similar to Bug#13586591, but for UPDATE
+          rather than DELETE. Similar issues in filesort/opt_range/
+          sql_select will be investigated and handled in the scope
+          of Bug#16767929
+        ------------------------------------------------------------
+        revno: 2875.447.1
+        committer: Balasubramanian Kandasamy <balasubramanian.kandasamy@oracle.com>
+        branch nick: mysql-5.5.32-release
+        timestamp: Mon 2013-05-06 15:19:37 +0200
+        message:
+          Updated spec file for Bug16488773
+------------------------------------------------------------
+revno: 5180
+committer: Jimmy Yang <jimmy.yang@oracle.com>
+branch nick: mysql-5.6
+timestamp: Thu 2013-06-06 10:47:20 +0800
+message:
+  Fix Bug #16801781 - FULLTEXT SEARCH USING WORDS WITH APOSTROPHE (') DOES
+  NOT WORK ON INNODB TABLES
+  
+  rb://2539 Approved by Sunny Bains
+------------------------------------------------------------
+revno: 5179
+committer: Jimmy Yang <jimmy.yang@oracle.com>
+branch nick: mysql-5.6
+timestamp: Thu 2013-06-06 09:58:44 +0800
+message:
+  Fix Bug #16765397 - FTS: STILL SPAMMING THE ERROR LOG BASED ON USER QUERIES
+  
+  rb://2523 approved by Marko
+------------------------------------------------------------
+revno: 5178 [merge]
+author: hery.ramilison@oracle.com
+committer: MySQL Build Team <mysql-build@oss.oracle.com>
+branch nick: mysql-5.6
+timestamp: Wed 2013-06-05 14:02:14 +0200
+message:
+  Merge from mysql-5.6.12-release
+    ------------------------------------------------------------
+    revno: 5077.1.8
+    tags: mysql-5.6.12
+    committer: Tor Didriksen <tor.didriksen@oracle.com>
+    branch nick: 5.6.12-release
+    timestamp: Tue 2013-05-21 17:07:01 +0200
+    message:
+      Backport of fix for:
+      Bug#69119 Bug#16760474 Wrong FOUND_ROWS() on MySQL 5.6.11

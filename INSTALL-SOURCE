@@ -513,11 +513,11 @@ Production Releases
    Windows examples will assume the name md5.exe.
 
    Linux and Microsoft Windows examples:
-shell> md5sum mysql-standard-5.6.13-linux-i686.tar.gz
-aaab65abbec64d5e907dcd41b8699945  mysql-standard-5.6.13-linux-i686.ta
+shell> md5sum mysql-standard-5.6.14-linux-i686.tar.gz
+aaab65abbec64d5e907dcd41b8699945  mysql-standard-5.6.14-linux-i686.ta
 r.gz
-shell> md5.exe mysql-installer-community-5.6.13.msi
-aaab65abbec64d5e907dcd41b8699945  mysql-installer-community-5.6.13.ms
+shell> md5.exe mysql-installer-community-5.6.14.msi
+aaab65abbec64d5e907dcd41b8699945  mysql-installer-community-5.6.14.ms
 i
 
    You should verify that the resulting checksum (the string of
@@ -627,8 +627,8 @@ shell> rpm --import mysql_pubkey.asc
 
    Table 2.1. MySQL Package and Signature Files for Source files
        File Type                      File Name
-   Distribution file mysql-standard-5.6.13-linux-i686.tar.gz
-   Signature file    mysql-standard-5.6.13-linux-i686.tar.gz.asc
+   Distribution file mysql-standard-5.6.14-linux-i686.tar.gz
+   Signature file    mysql-standard-5.6.14-linux-i686.tar.gz.asc
 
    Make sure that both files are stored in the same directory and
    then run the following command to verify the signature for the
@@ -637,7 +637,7 @@ shell> gpg --verify package_name.asc
 
    If the downloaded package is valid, you will see a "Good
    signature" similar to:
-shell> gpg --verify mysql-standard-5.6.13-linux-i686.tar.gz.asc
+shell> gpg --verify mysql-standard-5.6.14-linux-i686.tar.gz.asc
 gpg: Signature made Tue 01 Feb 2011 02:38:30 AM CST using DSA key ID
 5072E1F5
 gpg: Good signature from "MySQL Release Engineering <mysql-build@oss.
@@ -646,7 +646,7 @@ oracle.com>"
    The Good signature message indicates that the file signature is
    valid, when compared to the signature listed on our site. But you
    might also see warnings, like so:
-shell> gpg --verify mysql-standard-5.6.13-linux-i686.tar.gz.asc
+shell> gpg --verify mysql-standard-5.6.14-linux-i686.tar.gz.asc
 gpg: Signature made Wed 23 Jan 2013 02:25:45 AM PST using DSA key ID
 5072E1F5
 gpg: checking the trustdb
@@ -728,8 +728,8 @@ Primary key fingerprint: A4A9 4068 76FC BD3C 4567  70C8 8C71 8D3B 507
    Table 2.2. MySQL Package and Signature Files for MySQL Installer
    for Microsoft Windows
        File Type                    File Name
-   Distribution file mysql-installer-community-5.6.13.msi
-   Signature file    mysql-installer-community-5.6.13.msi.asc
+   Distribution file mysql-installer-community-5.6.14.msi
+   Signature file    mysql-installer-community-5.6.14.msi.asc
 
    Make sure that both files are stored in the same directory and
    then run the following command to verify the signature for the
@@ -765,8 +765,8 @@ Primary key fingerprint: A4A9 4068 76FC BD3C 4567  70C8 8C71 8D3B 507
 shell> rpm --checksig package_name.rpm
 
    Example:
-shell> rpm --checksig MySQL-server-5.6.13-0.glibc23.i386.rpm
-MySQL-server-5.6.13-0.glibc23.i386.rpm: md5 gpg OK
+shell> rpm --checksig MySQL-server-5.6.14-0.glibc23.i386.rpm
+MySQL-server-5.6.14-0.glibc23.i386.rpm: md5 gpg OK
 
    Note
 
@@ -845,7 +845,7 @@ pg-signature.html
 
    MySQL compressed tar file binary distributions have names of the
    form mysql-VERSION-OS.tar.gz, where VERSION is a number (for
-   example, 5.6.13), and OS indicates the type of operating system
+   example, 5.6.14), and OS indicates the type of operating system
    for which the distribution is intended (for example, pc-linux-i686
    or winx64).
 
@@ -914,11 +914,15 @@ shell> chgrp -R mysql .
 shell> scripts/mysql_install_db --user=mysql
 shell> chown -R root .
 shell> chown -R mysql data
-# Next command is optional
-shell> cp support-files/my-medium.cnf /etc/my.cnf
 shell> bin/mysqld_safe --user=mysql &
 # Next command is optional
 shell> cp support-files/mysql.server /etc/init.d/mysql.server
+
+   mysql_install_db creates a default option file named my.cnf in the
+   base installation directory. This file is created from a template
+   included in the distribution package named my-default.cnf. For
+   more information, see Section 5.1.2.2, "Using a Sample Default
+   Server Configuration File."
 
    A more detailed version of the preceding description for
    installing a binary distribution follows.
@@ -1011,7 +1015,7 @@ Perform Postinstallation Setup
    also run the MySQL server as a Windows service. By using a service
    you can monitor and control the operation of the server through
    the standard Windows service management tools. For more
-   information, see Section 2.3.4.8, "Starting MySQL as a Windows
+   information, see Section 2.3.5.7, "Starting MySQL as a Windows
    Service."
 
    Generally, you should install MySQL on Windows using an account
@@ -1067,7 +1071,7 @@ Perform Postinstallation Setup
        in the full Windows MSI Installer package, but does not
        include an installation program.
        For instructions on installing MySQL using the Zip file, see
-       Section 2.3.4, "Installing MySQL on Microsoft Windows Using a
+       Section 2.3.5, "Installing MySQL on Microsoft Windows Using a
        noinstall Zip Archive."
 
      * The source distribution contains all the code and support
@@ -1104,7 +1108,7 @@ Perform Postinstallation Setup
        temporary directory for MySQL temporary files and add this to
        the virus scanning exclusion list. To do this, add a
        configuration option for the tmpdir parameter to your my.ini
-       configuration file. For more information, see Section 2.3.4.2,
+       configuration file. For more information, see Section 2.3.5.2,
        "Creating an Option File."
 
 2.3.1. MySQL Installation Layout on Microsoft Windows
@@ -1150,8 +1154,8 @@ Perform Postinstallation Setup
    from when installing MySQL on Windows:
 
      * MySQL Installer: This package has a file name similar to
-       mysql-installer-community-5.6.13.0.msi or
-       mysql-installer-commercial-5.6.13.0.msi, and utilizes MSI's to
+       mysql-installer-community-5.6.14.0.msi or
+       mysql-installer-commercial-5.6.14.0.msi, and utilizes MSI's to
        automatically install MySQL server and other products. It will
        download and apply updates to itself, and for each of the
        installed products. It also configures the additional
@@ -1172,7 +1176,7 @@ Perform Postinstallation Setup
        Using MySQL Installer."
 
      * The Noinstall Archive: This package has a file name similar to
-       mysql-5.6.13-win32.zip or mysql-5.6.13-winx64.zip, and
+       mysql-5.6.14-win32.zip or mysql-5.6.14-winx64.zip, and
        contains all the files found in the Complete install package,
        with the exception of the GUI. This package does not include
        an automated installer, and must be manually installed and
@@ -1182,7 +1186,7 @@ Perform Postinstallation Setup
    you must follow. If you choose to use MySQL Installer, see Section
    2.3.3, "Installing MySQL on Microsoft Windows Using MySQL
    Installer." If you choose to install a Noinstall archive, see
-   Section 2.3.4, "Installing MySQL on Microsoft Windows Using a
+   Section 2.3.5, "Installing MySQL on Microsoft Windows Using a
    noinstall Zip Archive."
 
 2.3.3. Installing MySQL on Microsoft Windows Using MySQL Installer
@@ -1533,7 +1537,446 @@ C:\> MySQLInstallerConsole --help
        Requires: name, host, role, and the password or tokens. Tokens
        are separated by pipe ("|") characters.
 
-2.3.4. Installing MySQL on Microsoft Windows Using a noinstall Zip
+2.3.4. MySQL Notifier for Microsoft Windows
+
+   The MySQL Notifier for Microsoft Windows is a tool that allows you
+   to monitor and adjust the status of your local and remote MySQL
+   Server instances through an indicator that resides in the system
+   tray. The MySQL Notifier for Microsoft Windows also gives quick
+   access to several MySQL GUI tools (such as MySQL Workbench)
+   through its context menu.
+
+   The MySQL Notifier for Microsoft Windows is installed by MySQL
+   Installer, and (by default) will start-up when Microsoft Windows
+   is started.
+   Note
+
+   To install, download and execute the MySQL Installer
+   (http://dev.mysql.com/downloads/installer/), be sure the MySQL
+   Notifier for Microsoft Windows product is selected, then proceed
+   with the installation. See the MySQL Installer manual for
+   additional details.
+
+   For release notes detailing the changes in each release of MySQL
+   Notifier for Microsoft Windows, see the MySQL Notifier Release
+   Notes (http://dev.mysql.com/doc/relnotes/mysql-notifier/en/).
+
+   Visit the MySQL Notifier forum
+   (http://forums.mysql.com/list.php?173) for additional MySQL
+   Notifier for Microsoft Windows help and support.
+
+   Features include:
+
+     * Start, Stop, and Restart instances of the MySQL Server.
+
+     * Automatically detects (and adds) new MySQL Server services.
+       These are listed under Manage Monitored Items, and may also be
+       configured.
+
+     * The Tray icon changes, depending on the status. It's green if
+       all monitored MySQL Server instances are running, or red if at
+       least one service is stopped. The Update MySQL Notifier tray
+       icon based on service status option, which dictates this
+       behavior, is enabled by default for each service.
+
+     * Links to other applications like MySQL Workbench, MySQL
+       Installer, and the MySQL Utilities. For example, choosing
+       Configure Instance will load the MySQL Workbench Server
+       Administration window for that particular instance.
+
+     * If MySQL Workbench is also installed, then the Configure
+       Instance and SQL Editor options are available for local (but
+       not remote) MySQL instances.
+
+     * Monitoring of both local and remote MySQL instances.
+
+   Note
+
+   Remote monitoring is available since MySQL Notifier for Microsoft
+   Windows 1.1.0.
+
+   The MySQL Notifier for Microsoft Windows resides in the system
+   tray and provides visual status information for your MySQL Server
+   instances. A green icon is displayed at the top left corner of the
+   tray icon if the current MySQL Server is running, or a red icon if
+   the service is stopped.
+
+   The MySQL Notifier for Microsoft Windows automatically adds
+   discovered MySQL Services on the local machine, and each service
+   is saved and configurable. By default, the Automatically add new
+   services whose name contains option is enabled and set to mysql.
+   Related Notifications Options include being notified when new
+   services are either discovered or experience status changes, and
+   are also enabled by default. And uninstalling a service will also
+   remove the service from the MySQL Notifier for Microsoft Windows.
+   Note
+
+   The Automatically add new services whose name contains option
+   default changed from ".*mysqld.*" to "mysql" in Notifier 1.1.0.
+
+   Clicking the system tray icon will reveal several options, as seen
+   in the screenshots below:
+
+   The Service Instance menu is the main MySQL Notifier for Microsoft
+   Windows window, and allows you to Stop, Start, and Restart the
+   MySQL Server.
+
+   Figure 2.22. MySQL Notifier for Microsoft Windows Service Instance
+   menu
+   MySQL Notifier for Microsoft Windows Service Instance menu
+
+   The Actions menu includes several links to external applications
+   (if they are installed), and a a Refresh Status option to manually
+   refresh the status of all monitored services (in both local and
+   remote computers) and MySQL instances.
+   Note
+
+   The main menu will not show the Actions menu when there are no
+   services being monitored by MySQL Notifier for Microsoft Windows.
+   Note
+
+   The Refresh Status feature is available since MySQL Notifier for
+   Microsoft Windows 1.1.0.
+
+   Figure 2.23. MySQL Notifier for Microsoft Windows Actions menu
+   MySQL Notifier for Microsoft Windows Actions menu
+
+   The Actions, Options menu configures MySQL Notifier for Microsoft
+   Windows and includes options to:
+
+     * Use colorful status icons: Enables a colorful style of icons
+       for the tray of the MySQL Notifier for Microsoft Windows.
+
+     * Run at Windows Startup: Allows the application to be loaded
+       when Microsoft Windows starts.
+
+     * Automatically Check For Updates Every # Weeks: Checks for a
+       new version of MySQL Notifier for Microsoft Windows, and runs
+       this check every # weeks.
+
+     * Automatically add new services whose name contains: The text
+       used to filter services and add them automatically to the
+       monitored list of the local computer running MySQL Notifier,
+       and on remote computers already monitoring Windows services.
+       monitored services, and also filters the list of the Microsoft
+       Windows services for the Add New Service dialog.
+       Prior to version 1.1.0, this option was named "Automatically
+       add new services that match this pattern."
+
+     * Notify me when a service is automatically added: Will display
+       a balloon notification from the taskbar when a newly
+       discovered service is added to the monitored services list.
+
+     * Notify me when a service changes status: Will display a
+       balloon notification from the taskbar when a monitored service
+       changes its status.
+
+   Figure 2.24. MySQL Notifier for Microsoft Windows Options menu
+   MySQL Notifier for Microsoft Windows Options menu
+
+   The Actions, Manage Monitored Items menu allows you to configure
+   the monitored services and MySQL instances. First, with the
+   Services tab open:
+
+   Figure 2.25. MySQL Notifier for Microsoft Windows Manage Services
+   menu
+   MySQL Notifier for Microsoft Windows Manage Services menu
+
+   The Instances tab is similar:
+
+   Figure 2.26. MySQL Notifier for Microsoft Windows Manage Instances
+   menu
+   MySQL Notifier for Microsoft Windows Manage Instances menu
+
+   Adding a service or instance (after clicking Add in the Manage
+   Monitored Items window) allows you to select a running Microsoft
+   Windows service or instance connection, and configure MySQL
+   Notifier for Microsoft Windows to monitor it. Add a new service or
+   instance by clicking service name from the list, then OK to
+   accept. Multiple services and instances may be selected.
+
+   Figure 2.27. MySQL Notifier for Microsoft Windows Adding new
+   services
+   MySQL Notifier for Microsoft Windows Adding new services
+
+   And instances:
+
+   Figure 2.28. MySQL Notifier for Microsoft Windows Adding new
+   instances
+   MySQL Notifier for Microsoft Windows Adding new instances
+   Note
+
+   The Instances tab available since MySQL Notifier for Microsoft
+   Windows 1.1.0.
+
+2.3.4.1. Remote monitoring set up and installation instructions
+
+   The MySQL Notifier for Microsoft Windows uses Windows Management
+   Instrumentation (WMI) to manage and monitor services in remote
+   computers running Windows XP or later. This guide explains how it
+   works, and how to set up your system to monitor remote MySQL
+   instances.
+   Note
+
+   Remote monitoring is available since MySQL Notifier for Microsoft
+   Windows 1.1.0.
+
+   In order to configure WMI, it is important to understand that the
+   underlying Distributed Component Object Model (DCOM) architecture
+   is doing the WMI work. Specifically, MySQL Notifier for Microsoft
+   Windows is using asynchronous notification queries on remote
+   Microsoft Windows hosts as .NET events. These events send an
+   asynchronous callback to the computer running the MySQL Notifier
+   for Microsoft Windows so it knows when a service status has
+   changed on the remote computer. Asynchronous notifications offer
+   the best performance compared to semi-synchronous notifications or
+   synchronous notifications that use timers.
+
+   Asynchronous notifications requires the remote computer to send a
+   callback to the client computer (thus opening a reverse
+   connection), so the Windows Firewall and DCOM settings must be
+   properly configured for the communication to function properly.
+
+   Figure 2.29. MySQL Notifier for Microsoft Windows Distributed
+   Component Object Model (DCOM)
+   MySQL Notifier for Microsoft Windows Distributed Component Object
+   Model (DCOM)
+
+   Most of the common errors thrown by asynchronous WMI notifications
+   are related to Windows Firewall blocking the communication, or to
+   DCOM / WMI settings not being set up properly. For a list of
+   common errors with solutions, see Section 2.3.4.1, "."
+
+   The following steps are required to make WMI function. These steps
+   are divided between two machines. A single host computer that runs
+   MySQL Notifier for Microsoft Windows (Computer A), and multiple
+   remote machines that are being monitored (Computer B).
+
+Computer running MySQL Notifier for Microsoft Windows (Computer A)
+
+
+    1. Allow for remote administration by either editing the Group
+       Policy Editor, or using NETSH:
+       Using the Group Policy Editor:
+         a. Click Start, click Run, type GPEDIT.MSC, and then click
+            OK.
+         b. Under the Local Computer Policy heading, double-click
+            Computer Configuration.
+         c. Double-click Administrative Templates, then Network,
+            Network Connections, and then Windows Firewall.
+         d. If the computer is in the domain, then double-click
+            Domain Profile; otherwise, double-click Standard Profile.
+         e. Click Windows Firewall: Allow inbound remote
+            administration exception.
+         f. On the Action menu either select Edit, or double-click
+            the selection from the previous step.
+         g. Check the Enabled radio button, and then click OK.
+       Using the NETSH command:
+         a. Open a command prompt window with Administrative rights
+            (you can right-click the Command Prompt icon and click
+            Run as Administrator).
+         b. Execute the following command:
+NETSH firewall set service RemoteAdmin enable
+
+    2. Open the DCOM port TCP 135:
+         a. Open a command prompt window with Administrative rights
+            (you can right-click the Command Prompt icon and click
+            Run as Administrator) .
+         b. Execute the following command:
+NETSH firewall add portopening protocol=tcp port=135 name=DCOM_TCP135
+
+    3. Add the client application which contains the sink for the
+       callback (MySqlNotifier.exe) to the Windows Firewall
+       Exceptions List (use either the Windows Firewall configuration
+       or NETSH):
+       Using the Windows Firewall configuration:
+         a. In the Control Panel, double-click Windows Firewall.
+         b. In the Windows Firewall window's left panel, click Allow
+            a program or feature through Windows Firewall.
+         c. In the Allowed Programs window, click Change Settings.
+         d. If MySqlNotifier.exe is in the Allowed programs and
+            features list, make sure it is checked for the type of
+            networks the computer connects to (Private, Public or
+            both).
+         e. If MySqlNotifier.exe is not in the list, click Allow
+            another program....
+         f. In the Add a Program window, select the MySqlNotifier.exe
+            if it exists in the Programs list, otherwise click
+            Browse... and go to the directory where MySqlNotifier.exe
+            was installed to select it, then click Add.
+         g. Make sure MySqlNotifier.exe is checked for the type of
+            networks the computer connects to (Private, Public or
+            both).
+       Using the NETSH command:
+         a. Open a command prompt window with Administrative rights
+            (you can right-click the Command Prompt icon and click
+            Run as Administrator).
+         b. Execute the following command, where you change
+            "[YOUR_INSTALL_DIRECTORY]":
+NETSH firewall add allowedprogram program=[YOUR_INSTALL_DIRECTORY]\My
+SqlNotifier.exe name=MySqlNotifier
+
+    4. If Computer B is either a member of WORKGROUP or is in a
+       different domain that is untrusted by Computer A, then the
+       callback connection (Connection 2) is created as an Anonymous
+       connection. To grant Anonymous connections DCOM Remote Access
+       permissions:
+         a. Click Start, click Run, type DCOMCNFG, and then click OK.
+         b. In the Component Services dialog box, expand Component
+            Services, expand Computers, and then right-click My
+            Computer and click Properties.
+         c. In the My Computer Properties dialog box, click the COM
+            Security tab.
+         d. Under Access Permissions, click Edit Limits.
+         e. In the Access Permission dialog box, select ANONYMOUS
+            LOGON name in the Group or user names box. In the Allow
+            column under Permissions for User, select Remote Access,
+            and then click OK.
+
+Monitored Remote Computer (Computer B)
+
+   If the user account that is logged into the computer running the
+   MySQL Notifier for Microsoft Windows (Computer A) is a local
+   administrator on the remote computer (Computer B), such that the
+   same account is an administrator on Computer B, you can skip to
+   the "Allow for remote administration" step.
+
+   Setting DCOM security to allow a non-administrator user to access
+   a computer remotely:
+
+    1. Grant "DCOM remote launch" and activation permissions for a
+       user or group:
+         a. Click Start, click Run, type DCOMCNFG, and then click OK.
+         b. In the Component Services dialog box, expand Component
+            Services, expand Computers, and then right-click My
+            Computer and click Properties.
+         c. In the My Computer Properties dialog box, click the COM
+            Security tab.
+         d. Under Access Permissions, click Edit Limits.
+         e. In the Launch Permission dialog box, follow these steps
+            if your name or your group does not appear in the Groups
+            or user names list:
+              i. In the Launch Permission dialog box, click Add.
+             ii. In the Select Users, Computers, or Groups dialog
+                 box, add your name and the group in the "Enter the
+                 object names to select" box, and then click OK.
+         f. In the Launch Permission dialog box, select your user and
+            group in the Group or user names box. In the Allow column
+            under Permissions for User, select Remote Launch, select
+            Remote Activation, and then click OK.
+       Grant DCOM remote access permissions:
+         a. Click Start, click Run, type DCOMCNFG, and then click OK.
+         b. In the Component Services dialog box, expand Component
+            Services, expand Computers, and then right-click My
+            Computer and click Properties.
+         c. In the My Computer Properties dialog box, click the COM
+            Security tab.
+         d. Under Access Permissions, click Edit Limits.
+         e. In the Access Permission dialog box, select ANONYMOUS
+            LOGON name in the Group or user names box. In the Allow
+            column under Permissions for User, select Remote Access,
+            and then click OK.
+
+    2. Allowing non-administrator users access to a specific WMI
+       namespace:
+         a. In the Control Panel, double-click Administrative Tools.
+         b. In the Administrative Tools window, double-click Computer
+            Management.
+         c. In the Computer Management window, expand the Services
+            and Applications tree and double-click the WMI Control.
+         d. Right-click the WMI Control icon and select Properties.
+         e. In the WMI Control Properties window, click the Security
+            tab.
+         f. In the Security tab, select the namespace and click
+            Security.
+         g. Locate the appropriate account and check Remote Enable in
+            the Permissions list.
+
+    3. Allow for remote administration by either editing the Group
+       Policy Editor or using NETSH:
+       Using the Group Policy Editor:
+         a. Click Start, click Run, type GPEDIT.MSC, and then click
+            OK.
+         b. Under the Local Computer Policy heading, double-click
+            Computer Configuration.
+         c. Double-click Administrative Templates, then Network,
+            Network Connections, and then Windows Firewall.
+         d. If the computer is in the domain, then double-click
+            Domain Profile; otherwise, double-click Standard Profile.
+         e. Click Windows Firewall: Allow inbound remote
+            administration exception.
+         f. On the Action menu either select Edit, or double-click
+            the selection from the previous step.
+         g. Check the Enabled radio button, and then click OK.
+       Using the NETSH command:
+         a. Open a command prompt window with Administrative rights
+            (you can right-click the Command Prompt icon and click
+            Run as Administrator).
+         b. Execute the following command:
+NETSH firewall set service RemoteAdmin enable
+
+    4. Now, be sure the user you are logging in with uses the Name
+       value and not the Full Name value:
+         a. In the Control Panel, double-click Administrative Tools.
+         b. In the Administrative Tools window, double-click Computer
+            Management.
+         c. In the Computer Management window, expand the System
+            Tools then Local Users and Groups.
+         d. Click the Users node, and on the right side panel locate
+            your user and make sure it uses the Name value to
+            connect, and not the Full Name value.
+
+    5. If the remote computer is running on Windows XP Professional,
+       make sure that remote logins are not being forcefully changed
+       to the guest account user (also known as ForceGuest), which is
+       enabled by default on computers that are not attached to a
+       domain.
+         a. Click Start, click Run, type SECPOL.MSC, and then click
+            OK.
+         b. Under the Local Policies node, double-click Security
+            Options.
+         c. Select Network Access: Sharing and security model for
+            local accounts and save.
+
+Common Errors
+
+
+     * 0x80070005
+
+          + DCOM Security was not configured properly (see Computer
+            B, the Setting DCOM security... step).
+
+          + The remote computer (Computer B) is a member of WORKGROUP
+            or is in a domain that is untrusted by the client
+            computer (Computer A) (see Computer A, the Grant
+            Anonymous connections DCOM Remote Access permissions
+            step).
+
+     * 0x8007000E
+
+          + The remote computer (Computer B) is a member of WORKGROUP
+            or is in a domain that is untrusted by the client
+            computer (Computer A) (see Computer A, the Grant
+            Anonymous connections DCOM Remote Access permissions
+            step).
+
+     * 0x80041003
+
+          + Access to the remote WMI namespace was not configured
+            properly (see Computer B, the Allowing non-administrator
+            users access to a specific WMI namespace step).
+
+     * 0x800706BA
+
+          + The DCOM port is not open on the client computers
+            (Computer A) firewall. See the Open the DCOM port TCP 135
+            step for Computer A.
+
+          + The remote computer (Computer B) is inaccessible because
+            its network location is set to Public. Make sure you can
+            access it through the Windows Explorer.
+
+2.3.5. Installing MySQL on Microsoft Windows Using a noinstall Zip
 Archive
 
    Users who are installing from the noinstall package can use the
@@ -1552,12 +1995,12 @@ Archive
 
    This process is described in the sections that follow.
 
-2.3.4.1. Extracting the Install Archive
+2.3.5.1. Extracting the Install Archive
 
    To install MySQL manually, do the following:
 
     1. If you are upgrading from a previous version please refer to
-       Section 2.3.6, "Upgrading MySQL on Windows," before beginning
+       Section 2.3.7, "Upgrading MySQL on Windows," before beginning
        the upgrade process.
 
     2. Make sure that you are logged in as a user with administrator
@@ -1568,7 +2011,7 @@ Archive
        MySQL under C:\Program Files\MySQL. If you do not install
        MySQL at C:\mysql, you must specify the path to the install
        directory during startup or in an option file. See Section
-       2.3.4.2, "Creating an Option File."
+       2.3.5.2, "Creating an Option File."
 
     4. Extract the install archive to the chosen installation
        location using your preferred Zip archive tool. Some tools may
@@ -1577,7 +2020,7 @@ Archive
        contents of the subfolder into the chosen installation
        location.
 
-2.3.4.2. Creating an Option File
+2.3.5.2. Creating an Option File
 
    If you need to specify startup options when you run the server,
    you can indicate them on the command line or place them in an
@@ -1659,7 +2102,7 @@ datadir=E:\\mydata\\data
     2. Use a --datadir option to specify the new data directory
        location each time you start the server.
 
-2.3.4.3. Selecting a MySQL Server Type
+2.3.5.3. Selecting a MySQL Server Type
 
    The following table shows the available servers for Windows in
    MySQL 5.6.
@@ -1690,7 +2133,7 @@ datadir=E:\\mydata\\data
    explicitly because some users have experienced problems with
    shutting down the MySQL server when named pipes were used.
 
-2.3.4.4. Starting the Server for the First Time
+2.3.5.4. Starting the Server for the First Time
 
    This section gives a general overview of starting the MySQL
    server. The following sections provide more specific information
@@ -1720,7 +2163,7 @@ datadir=E:\\mydata\\data
    option.
 
    For information about which server binary to run, see Section
-   2.3.4.3, "Selecting a MySQL Server Type."
+   2.3.5.3, "Selecting a MySQL Server Type."
 
    Testing is best done from a command prompt in a console window (or
    "DOS window"). In this way you can have the server display status
@@ -1757,7 +2200,7 @@ InnoDB: foreign key constraint system tables created
    something like this, which indicates that the server is ready to
    service client connections:
 mysqld: ready for connections
-Version: '5.6.13'  socket: ''  port: 3306
+Version: '5.6.14'  socket: ''  port: 3306
 
    The server continues to write to the console any further
    diagnostic output it produces. You can open a new console window
@@ -1775,7 +2218,7 @@ Version: '5.6.13'  socket: ''  port: 3306
    passwords for them using the instructions in Section 2.10,
    "Postinstallation Setup and Testing."
 
-2.3.4.5. Starting MySQL from the Windows Command Line
+2.3.5.5. Starting MySQL from the Windows Command Line
 
    The MySQL server can be started manually from the command line.
    This can be done on any version of Windows.
@@ -1826,138 +2269,7 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysqladmin" -u root
    Use mysqld --verbose --help to display all the options that mysqld
    supports.
 
-2.3.4.6. MySQL Notifier for Microsoft Windows
-
-   The MySQL Notifier for Microsoft Windows is a tool that allows you
-   to monitor and adjust the status of your local MySQL Server
-   instances through an indicator that resides in the system tray.
-   The MySQL Notifier for Microsoft Windows also gives quick access
-   to several MySQL GUI tools (such as MySQL Workbench) through its
-   context menu.
-
-   The MySQL Notifier for Microsoft Windows is installed by MySQL
-   Installer, and (by default) will start-up when Microsoft Windows
-   is started.
-   Note
-
-   To install, download and execute the MySQL Installer
-   (http://dev.mysql.com/downloads/installer/), be sure the MySQL
-   Notifier for Microsoft Windows product is selected, then proceed
-   with the installation. See the MySQL Installer manual for
-   additional details.
-
-   For release notes detailing the changes in each release of MySQL
-   Notifier for Microsoft Windows, see MySQL Notifier Release Notes
-   (http://dev.mysql.com/doc/relnotes/mysql-notifier/en/).
-
-   Visit the MySQL Notifier forum
-   (http://forums.mysql.com/list.php?173) for additional MySQL
-   Notifier for Microsoft Windows help and support.
-
-   Features include:
-
-     * Start, Stop, and Restart instances of the MySQL Server.
-
-     * Automatically detects (and adds) new MySQL Server services.
-       These are listed under Manage Services, and may also be
-       configured.
-
-     * The Tray icon changes, depending on the status. It's green if
-       all monitored MySQL Server instances are running, or red if at
-       least one service is stopped.
-
-     * Links to other applications like MySQL Workbench, Windows
-       Installer, and the MySQL Utilities. For example, choosing
-       Configure Instance will load the MySQL Workbench Server
-       Administration window for that particular instance.
-
-     * If MySQL Workbench is also installed, then the Configure
-       Instance and SQL Editor options are available.
-
-   The MySQL Notifier for Microsoft Windows resides in the system
-   tray and provides visual status information for your MySQL Server
-   instances. A green icon is displayed at the top left corner of the
-   tray icon if the current MySQL Server is running, or a red icon if
-   the service is stopped.
-
-   The MySQL Notifier for Microsoft Windows automatically adds
-   discovered MySQL Services on the local machine, and each service
-   is saved and configurable. By default, the Automatically add new
-   services that match this pattern option is enabled and set to
-   .*mysqld.*. Related Notifications Options include being notified
-   when new services are either discovered or experience status
-   changes, and are also enabled by default. And uninstalling a
-   service will also remove the service from the MySQL Notifier for
-   Microsoft Windows.
-
-   Clicking the system tray icon will reveal several options, as seen
-   in the screenshots below:
-
-   The Service Instance menu is the main MySQL Notifier for Microsoft
-   Windows window, and allows you to Stop, Start, and Restart the
-   MySQL Server.
-
-   Figure 2.22. MySQL Notifier for Microsoft Windows Service Instance
-   menu
-   MySQL Notifier for Microsoft Windows Service Instance menu
-
-   The Actions menu actions include several links to external
-   applications (if they are installed).
-   Note
-
-   The main menu will not show the Actions menu when there are no
-   services being monitored by MySQL Notifier for Microsoft Windows.
-
-   Figure 2.23. MySQL Notifier for Microsoft Windows Actions menu
-   MySQL Notifier for Microsoft Windows Actions menu
-
-   The Actions, Options menu configures MySQL Notifier for Microsoft
-   Windows and includes options to:
-
-     * Use colorful status icons: Enables a colorful style of icons
-       for the tray of the MySQL Notifier for Microsoft Windows.
-
-     * Run at Windows Startup: Allows the application to be loaded
-       when Microsoft Windows starts.
-
-     * Automatically Check For Updates Every # Weeks: Checks for a
-       new version of MySQL Notifier for Microsoft Windows, and runs
-       this check every # weeks.
-
-     * Automatically add new services that match this pattern: A
-       custom regular expression that filters the monitored services,
-       and also filters the list of the Microsoft Windows services
-       for the Add New Service dialog.
-
-     * Notify me when a service is automatically added: Will display
-       a notification from the taskbar when a newly discovered
-       service is added to the monitored services list.
-
-     * Notify me when a service changes status: Will display a
-       notification from the taskbar when a monitored service changes
-       its status.
-
-   Figure 2.24. MySQL Notifier for Microsoft Windows Options menu
-   MySQL Notifier for Microsoft Windows Options menu
-
-   The Actions, Manage Services menu allows you to configure the
-   monitored services.
-
-   Figure 2.25. MySQL Notifier for Microsoft Windows Service Instance
-   menu
-   MySQL Notifier for Microsoft Windows Manage Services menu
-
-   Adding a service (after clicking Add in the Manage Services
-   window) allows you to select a running Microsoft Windows service,
-   and configure MySQL Notifier for Microsoft Windows to monitor it.
-   Add a new service by clicking service name from the list, then OK
-   to accept. Multiple services may be selected.
-
-   Figure 2.26. MySQL Notifier for Microsoft Windows Adding a new
-   services
-   MySQL Notifier for Microsoft Windows Adding new services
-
-2.3.4.7. Customizing the PATH for MySQL Tools
+2.3.5.6. Customizing the PATH for MySQL Tools
 
    To make it easier to invoke MySQL programs, you can add the path
    name of the MySQL bin directory to your Windows system PATH
@@ -1999,7 +2311,7 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysqladmin" -u root
    existing PATH value can leave you with a malfunctioning or even
    unusable system.
 
-2.3.4.8. Starting MySQL as a Windows Service
+2.3.5.7. Starting MySQL as a Windows Service
 
    On Windows, the recommended way to run MySQL is to install it as a
    Windows service, so that MySQL starts and stops automatically when
@@ -2176,14 +2488,14 @@ anual
 C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysqld" --remove
 
    If mysqld is not running as a service, you can start it from the
-   command line. For instructions, see Section 2.3.4.5, "Starting
+   command line. For instructions, see Section 2.3.5.5, "Starting
    MySQL from the Windows Command Line."
 
    If you encounter difficulties during installation. see Section
-   2.3.5, "Troubleshooting a Microsoft Windows MySQL Server
+   2.3.6, "Troubleshooting a Microsoft Windows MySQL Server
    Installation."
 
-2.3.4.9. Testing The MySQL Installation
+2.3.5.8. Testing The MySQL Installation
 
    You can test whether the MySQL server is working by executing any
    of the following commands:
@@ -2215,7 +2527,7 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysql" test
    For more information about mysqlshow, see Section 4.5.6,
    "mysqlshow --- Display Database, Table, and Column Information."
 
-2.3.5. Troubleshooting a Microsoft Windows MySQL Server Installation
+2.3.6. Troubleshooting a Microsoft Windows MySQL Server Installation
 
    When installing and running MySQL for the first time, you may
    encounter certain errors that prevent the MySQL server from
@@ -2238,7 +2550,7 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysql" test
    console messages displayed when the MySQL service is starting. Use
    the NET START MySQL command from the command line after installing
    mysqld as a service to see any error messages regarding the
-   starting of the MySQL server as a service. See Section 2.3.4.8,
+   starting of the MySQL server as a service. See Section 2.3.5.7,
    "Starting MySQL as a Windows Service."
 
    The following examples show other common error messages you might
@@ -2290,7 +2602,7 @@ datadir=D:\\MySQLdata
        If you change the datadir value in your MySQL configuration
        file, you must move the contents of the existing MySQL data
        directory before restarting the MySQL server.
-       See Section 2.3.4.2, "Creating an Option File."
+       See Section 2.3.5.2, "Creating an Option File."
 
      * If you reinstall or upgrade MySQL without first stopping and
        removing the existing MySQL service and install MySQL using
@@ -2313,7 +2625,7 @@ C:\> sc delete mysql
        http://www.microsoft.com/windows2000/techinfo/reskit/tools/exi
        sting/delsrv-o.asp and use the delsrv mysql syntax.
 
-2.3.6. Upgrading MySQL on Windows
+2.3.7. Upgrading MySQL on Windows
 
    This section lists some of the steps to take when upgrading MySQL
    on Windows.
@@ -2367,7 +2679,7 @@ C:\> C:\mysql\bin\mysqld --remove
 
     8. If you were running MySQL as a Windows service and you had to
        remove the service earlier in this procedure, reinstall the
-       service. (See Section 2.3.4.8, "Starting MySQL as a Windows
+       service. (See Section 2.3.5.7, "Starting MySQL as a Windows
        Service.")
 
     9. Restart the server. For example, use NET START MySQL if you
@@ -2377,10 +2689,10 @@ C:\> C:\mysql\bin\mysqld --remove
        tables if they have changed so that you can take advantage of
        any new capabilities. See Section 4.4.7, "mysql_upgrade ---
        Check and Upgrade MySQL Tables."
-   11. If you encounter errors, see Section 2.3.5, "Troubleshooting a
+   11. If you encounter errors, see Section 2.3.6, "Troubleshooting a
        Microsoft Windows MySQL Server Installation."
 
-2.3.7. Windows Postinstallation Procedures
+2.3.8. Windows Postinstallation Procedures
 
    GUI tools exist that perform most of the tasks described below,
    including:
@@ -2408,7 +2720,7 @@ C:\> C:\mysql\bin\mysqld --remove
    Before setting up passwords, you might want to try running some
    client programs to make sure that you can connect to the server
    and that it is operating properly. Make sure that the server is
-   running (see Section 2.3.4.4, "Starting the Server for the First
+   running (see Section 2.3.5.4, "Starting the Server for the First
    Time"), and then issue the following commands to verify that you
    can retrieve information from the server. You may need to specify
    directory different from C:\mysql\bin on the command line. If you
@@ -2497,7 +2809,7 @@ C:\> C:\mysql\bin\mysql -e "SELECT Host,Db,User FROM mysql.db"
 
    If you are running a version of Windows that supports services,
    you can set up the MySQL server to run automatically when Windows
-   starts. See Section 2.3.4.8, "Starting MySQL as a Windows
+   starts. See Section 2.3.5.7, "Starting MySQL as a Windows
    Service."
 
 2.4. Installing MySQL on Mac OS X
@@ -3611,15 +3923,15 @@ Error in accept: Protocol error
    To use this package, download the corresponding
    mysql-VERSION-solaris10-PLATFORM.pkg.gz file, then uncompress it.
    For example:
-shell> gunzip mysql-5.6.13-solaris10-x86_64.pkg.gz
+shell> gunzip mysql-5.6.14-solaris10-x86_64.pkg.gz
 
    To install a new package, use pkgadd and follow the onscreen
    prompts. You must have root privileges to perform this operation:
-shell> pkgadd -d mysql-5.6.13-solaris10-x86_64.pkg
+shell> pkgadd -d mysql-5.6.14-solaris10-x86_64.pkg
 
 The following packages are available:
   1  mysql     MySQL Community Server (GPL)
-               (i86pc) 5.6.13
+               (i86pc) 5.6.14
 
 Select package(s) you wish to process (or 'all' to process
 all packages). (default: all) [?,??,q]:
@@ -3657,7 +3969,7 @@ shell> ln /etc/init.d/mysql /etc/rc0.d/K02mysql
    The typical upgrade sequence is therefore:
 shell> mysqladmin shutdown
 shell> pkgrm mysql
-shell> pkgadd -d mysql-5.6.13-solaris10-x86_64.pkg
+shell> pkgadd -d mysql-5.6.14-solaris10-x86_64.pkg
 shell> mysqld_safe &
 shell> mysql_upgrade
 
@@ -3895,7 +4207,7 @@ Source Installation Methods
        Standard distributions are available as compressed tar files,
        Zip archives, or RPM packages. Distribution files have names
        of the form mysql-VERSION.tar.gz, mysql-VERSION.zip, or
-       mysql-VERSION.rpm, where VERSION is a number like 5.6.13. File
+       mysql-VERSION.rpm, where VERSION is a number like 5.6.14. File
        names for source distributions can be distinguished from those
        for precompiled binary distributions in that source
        distribution names are generic and include no platform name,
@@ -4067,11 +4379,15 @@ shell> chgrp -R mysql .
 shell> scripts/mysql_install_db --user=mysql
 shell> chown -R root .
 shell> chown -R mysql data
-# Next command is optional
-shell> cp support-files/my-medium.cnf /etc/my.cnf
 shell> bin/mysqld_safe --user=mysql &
 # Next command is optional
 shell> cp support-files/mysql.server /etc/init.d/mysql.server
+
+   mysql_install_db creates a default option file named my.cnf in the
+   base installation directory. This file is created from a template
+   included in the distribution package named my-default.cnf. For
+   more information, see Section 5.1.2.2, "Using a Sample Default
+   Server Configuration File."
 
    A more detailed version of the source-build specific instructions
    is shown following.
@@ -4261,7 +4577,7 @@ se
 shell> devenv MySQL.sln /build RelWithDebInfo /project package
 
    You can install the resulting .zip archive where you like. See
-   Section 2.3.4, "Installing MySQL on Microsoft Windows Using a
+   Section 2.3.5, "Installing MySQL on Microsoft Windows Using a
    noinstall Zip Archive."
 
 Perform Postinstallation Setup
@@ -4461,6 +4777,8 @@ shell> ccmake .
    engine. Should not be used for building binaries intended for
    production. OFF
    WITH_EXTRA_CHARSETS Which extra character sets to include all
+   WITH_INNODB_MEMCACHED Whether to generate memcached shared
+   libraries. OFF
    WITH_LIBEDIT Use bundled libedit library ON   5.6.12
    WITH_LIBWRAP Whether to include libwrap (TCP wrappers) support OFF
 
@@ -4668,8 +4986,8 @@ Storage Engine Options
    MySQL Cluster using the MySQL Cluster sources. It cannot be used
    to enable clustering support in other MySQL source trees or
    distributions. In MySQL Cluster NDB 7.3 source distributions, it
-   is enabled by default. See Section 17.2.1.3, "Building MySQL
-   Cluster from Source on Linux," and Section 17.2.2.2, "Compiling
+   is enabled by default. See Section 17.2.2.3, "Building MySQL
+   Cluster from Source on Linux," and Section 17.2.3.2, "Compiling
    and Installing MySQL Cluster from Source on Windows," for more
    information.
 
@@ -4824,6 +5142,10 @@ Feature Options
 
           + none: No extra character sets.
 
+     * -DWITH_INNODB_MEMCACHED=bool
+       Whether to generate memcached shared libraries
+       (libmemcached.so and innodb_engine.so).
+
      * -DWITH_LIBEDIT=bool
        Whether to use the libedit library bundled with the
        distribution.
@@ -4838,27 +5160,28 @@ Feature Options
        distribution. This option was removed in MySQL 5.6.5 because
        readline is no longer bundled.
 
-     * -DWITH_SSL=ssl_type
-       The type of SSL support to include, if any:
+     * -DWITH_SSL={ssl_type|path_name}
 
-          + no: No SSL support. This is the default before MySQL
-            5.6.6. As of 5.6.6, this is no longer a permitted value
-            and the default is bundled.
+     * The type of SSL support to include (if any) or the path name
+       to the OpenSSL installation to use.
 
-          + yes: Use the system SSL library if present, else the
-            library bundled with the distribution.
+          + ssl_type can be one of the following values:
+               o no: No SSL support. This is the default before MySQL
+                 5.6.6. As of 5.6.6, this is no longer a permitted
+                 value and the default is bundled.
+               o yes: Use the system SSL library if present, else the
+                 library bundled with the distribution.
+               o bundled: Use the SSL library bundled with the
+                 distribution. This is the default as of MySQL 5.6.6.
+               o system: Use the system SSL library.
 
-          + bundled: Use the SSL library bundled with the
-            distribution. This is the default as of MySQL 5.6.6.
-
-          + system: Use the system SSL library.
-
-          + path_name: As of MySQL 5.6.7, it is permitted to specify
-            the path name to the OpenSSL installation to use. This
-            can be useful instead of a value of system when CMake
-            detects an older or incorrect installed OpenSSL version.
-            (Another permitted way to do the same thing is to set the
-            CMAKE_PREFIX_PATH option to path_name.)
+          + path_name, permitted for MySQL 5.6.7 and after, is the
+            path name to the OpenSSL installation to use. Using this
+            can be preferable to using the ssl_type value of system,
+            for it can prevent CMake from detecting and using an
+            older or incorrect OpenSSL version installed on the
+            system. (Another permitted way to do the same thing is to
+            set the CMAKE_PREFIX_PATH option to path_name.)
        For information about using SSL support, see Section 6.3.9,
        "Using SSL for Secure Connections."
 
@@ -5312,10 +5635,10 @@ shell> bin/mysqladmin variables
        on your platform and version of MySQL, but should be similar
        to that shown here:
 shell> bin/mysqladmin version
-mysqladmin  Ver 14.12 Distrib 5.6.13, for pc-linux-gnu on i686
+mysqladmin  Ver 14.12 Distrib 5.6.14, for pc-linux-gnu on i686
 ...
 
-Server version          5.6.13
+Server version          5.6.14
 Protocol version        10
 Connection              Localhost via UNIX socket
 UNIX socket             /var/lib/mysql/mysql.sock
@@ -5571,7 +5894,7 @@ shell> bin/mysql mysql
      * Run the MySQL server as a Windows service. The service can be
        set to start the server automatically when Windows starts, or
        as a manual service that you start on request. For
-       instructions, see Section 2.3.4.8, "Starting MySQL as a
+       instructions, see Section 2.3.5.7, "Starting MySQL as a
        Windows Service."
 
      * Invoke mysqld_safe, which tries to determine the proper
@@ -5736,7 +6059,7 @@ basedir=/usr/local/mysql
 
    This section provides troubleshooting suggestions for problems
    starting the server on Unix. If you are using Windows, see Section
-   2.3.5, "Troubleshooting a Microsoft Windows MySQL Server
+   2.3.6, "Troubleshooting a Microsoft Windows MySQL Server
    Installation."
 
    If you have problems starting the server, here are some things to
@@ -6196,7 +6519,7 @@ mysql> DROP DATABASE test;
        storage engine. See Section 16.1.3.4, "GTID mode and
        mysql_upgrade."
 
-     * If you run MySQL Server on Windows, see Section 2.3.6,
+     * If you run MySQL Server on Windows, see Section 2.3.7,
        "Upgrading MySQL on Windows."
 
      * If you use replication, see Section 16.4.3, "Upgrading a
@@ -6352,7 +6675,7 @@ mysql> DROP DATABASE test;
        tables. For upgrade instructions, see Section 5.1.10,
        "Server-Side Help."
 
-     * If you run MySQL Server on Windows, see Section 2.3.6,
+     * If you run MySQL Server on Windows, see Section 2.3.7,
        "Upgrading MySQL on Windows."
 
      * If you use replication, see Section 16.4.3, "Upgrading a

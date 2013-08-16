@@ -34,7 +34,7 @@ ADD_DEFINITIONS(${SSL_DEFINES})
 MYSQL_ADD_EXECUTABLE(mysql completion_hash.cc mysql.cc readline.cc sql_string.cc)
 TARGET_LINK_LIBRARIES(mysql mysqlclient)
 IF(UNIX)
-  TARGET_LINK_LIBRARIES(mysql ${EDITLINE_LIBRARY})
+  TARGET_LINK_LIBRARIES(mysql ${READLINE_LIBRARY} ${CURSES_LIBRARY})
 ENDIF(UNIX)
 
 MYSQL_ADD_EXECUTABLE(mysqltest mysqltest.cc COMPONENT Test)

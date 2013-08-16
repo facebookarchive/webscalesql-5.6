@@ -97,7 +97,8 @@ extern "C" {
 #if defined(__WIN__)
 #include <conio.h>
 #else
-#include <readline.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 #define HAVE_READLINE
 #define USE_POPEN
 #endif
@@ -1102,11 +1103,6 @@ typedef struct _hist_entry {
 } HIST_ENTRY; 
 #endif
 
-extern "C" int add_history(const char *command); /* From readline directory */
-extern "C" int read_history(const char *command);
-extern "C" int write_history(const char *command);
-extern "C" HIST_ENTRY *history_get(int num);
-extern "C" int history_length;
 static int not_in_history(const char *line);
 static void initialize_readline (char *name);
 static void fix_history(String *final_command);

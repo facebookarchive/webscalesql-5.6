@@ -1,0 +1,5 @@
+{
+  "project_id" : "webscalesql",
+  "conduit_uri" : "https://reviews.facebook.net/",
+  "git.default-relative-commit" : "HEAD^"
+}

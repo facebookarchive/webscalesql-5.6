@@ -1,0 +1,9 @@
+{
+  "project_id" : "webscalesql",
+  "conduit_uri" : "https://reviews.facebook.net/api/",
+  "phutil_libraries" : {
+    "webscale-arcanist" : "arcanist/"
+   },
+  "unit_engine" : "WebScaleSQLUnitTestEngine",
+  "git.default-relative-commit" : "HEAD^"
+}

@@ -2,12 +2,12 @@
 .\"     Title: Options Common to MySQL Cluster Programs
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 07/10/2013
+.\"      Date: 09/09/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "OPTIONS COMMON TO MY" "1" "07/10/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "OPTIONS COMMON TO MY" "1" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -97,7 +97,7 @@ The options in the following table are common to all MySQL Cluster executables (
 .nr an-no-space-flag 1
 .nr an-break-flag 1
 .br
-.B Table\ \&17.29.\ \&Common MySQL Cluster Program Options and Variables: MySQL Cluster NDB 7.3
+.B Table\ \&17.30.\ \&Common MySQL Cluster Program Options and Variables: MySQL Cluster NDB 7.3
 .TS
 allbox tab(:);
 lB lB lB.
@@ -139,7 +139,7 @@ T{
 .PP
 -c
 T}:T{
-Set connectstring for connecting to ndb_mgmd\&. Syntax:
+Set connection string for connecting to ndb_mgmd\&. Syntax:
             [nodeid=<id>;][host=]<hostname>[:<port>]\&.
             Overrides entries specified in NDB_CONNECTSTRING or my\&.cnf\&.
 T}:T{
@@ -358,7 +358,7 @@ localhost:1186
 T}
 .TE
 .sp 1
-This option takes a MySQL Cluster connectstring that specifies the management server for the application to connect to, as shown here:
+This option takes a MySQL Cluster connection string that specifies the management server for the application to connect to, as shown here:
 .sp
 .if n \{\
 .RS 4
@@ -371,7 +371,7 @@ shell> \fBndbd \-\-ndb\-connectstring="nodeid=2;host=ndb_mgmd\&.mysql\&.com:1186
 .\}
 .sp
 For more information, see
-Section\ \&17.3.2.3, \(lqThe MySQL Cluster Connectstring\(rq\&.
+Section\ \&17.3.2.3, \(lqMySQL Cluster Connection Strings\(rq\&.
 .RE
 .sp
 .RS 4

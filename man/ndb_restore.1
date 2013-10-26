@@ -2,12 +2,12 @@
 .\"     Title: \fBndb_restore\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 07/10/2013
+.\"      Date: 09/09/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBNDB_RESTORE\FR" "1" "07/10/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBNDB_RESTORE\FR" "1" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -78,7 +78,7 @@ Options Common to MySQL Cluster Programs(1)\&.
 .nr an-no-space-flag 1
 .nr an-break-flag 1
 .br
-.B Table\ \&17.22.\ \&ndb_restore Options and Variables: MySQL Cluster NDB 7.3
+.B Table\ \&17.23.\ \&ndb_restore Options and Variables: MySQL Cluster NDB 7.3
 .TS
 allbox tab(:);
 lB lB lB.
@@ -137,7 +137,7 @@ T{
 .PP
 -c
 T}:T{
-Same as connectstring
+Alias for \-\-connectstring\&.
 T}:T{
 .PP
 All MySQL 5\&.6 based releases
@@ -567,10 +567,10 @@ ndb_restore [\-c \fIconnectstring\fR] \-n \fInode_id\fR [\-m] \-b \fIbackup_id\f
 .\" restore_connect option (ndb_restore)
 The
 \fB\-c\fR
-option is used to specify a connectstring which tells
+option is used to specify a connection string which tells
 ndb_restore
 where to locate the cluster management server\&. (See
-Section\ \&17.3.2.3, \(lqThe MySQL Cluster Connectstring\(rq, for information on connectstrings\&.) If this option is not used, then
+Section\ \&17.3.2.3, \(lqMySQL Cluster Connection Strings\(rq, for information on connection strings\&.) If this option is not used, then
 \fBndb_restore\fR
 attempts to connect to a management server on
 localhost:1186\&. This utility acts as a cluster API node, and so requires a free connection

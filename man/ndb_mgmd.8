@@ -2,12 +2,12 @@
 .\"     Title: \fBndb_mgmd\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 07/10/2013
+.\"      Date: 09/09/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBNDB_MGMD\FR" "8" "07/10/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBNDB_MGMD\FR" "8" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -1113,7 +1113,7 @@ option to specify the node ID of this
 \fBndb_mgmd\fR
 process\&.
 .sp
-You can then start each of the cluster\*(Aqs data nodes in the usual way\&. If you wish to start and use the second management server in addition to the first management server at a later time without restarting the data nodes, you must start each data node with a connectstring that references both management servers, like this:
+You can then start each of the cluster\*(Aqs data nodes in the usual way\&. If you wish to start and use the second management server in addition to the first management server at a later time without restarting the data nodes, you must start each data node with a connection string that references both management servers, like this:
 .sp
 .if n \{\
 .RS 4
@@ -1125,10 +1125,10 @@ shell> \fBndbd \-c 192\&.168\&.0\&.150,192\&.168\&.0\&.151\fR
 .RE
 .\}
 .sp
-The same is true with regard to the connectstring used with any
+The same is true with regard to the connection string used with any
 \fBmysqld\fR
 processes that you wish to start as MySQL Cluster SQL nodes connected to this cluster\&. See
-Section\ \&17.3.2.3, \(lqThe MySQL Cluster Connectstring\(rq, for more information\&.
+Section\ \&17.3.2.3, \(lqMySQL Cluster Connection Strings\(rq, for more information\&.
 .sp
 When used with
 \fBndb_mgmd\fR, this option affects the behavior of the management node with regard to other management nodes only\&. Do not confuse it with the
@@ -1159,10 +1159,10 @@ management server, its configuration must match that of the management server th
 .RE
 .RE
 .PP
-It is not strictly necessary to specify a connectstring when starting the management server\&. However, if you are using more than one management server, a connectstring should be provided and each node in the cluster should specify its node ID explicitly\&.
+It is not strictly necessary to specify a connection string when starting the management server\&. However, if you are using more than one management server, a connection string should be provided and each node in the cluster should specify its node ID explicitly\&.
 .PP
 See
-Section\ \&17.3.2.3, \(lqThe MySQL Cluster Connectstring\(rq, for information about using connectstrings\&.
+Section\ \&17.3.2.3, \(lqMySQL Cluster Connection Strings\(rq, for information about using connection strings\&.
 \fBndb_mgmd\fR(8), describes other options for
 \fBndb_mgmd\fR\&.
 .PP

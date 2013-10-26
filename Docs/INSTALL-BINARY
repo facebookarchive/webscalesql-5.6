@@ -17,7 +17,7 @@
 
    MySQL compressed tar file binary distributions have names of the
    form mysql-VERSION-OS.tar.gz, where VERSION is a number (for
-   example, 5.6.14), and OS indicates the type of operating system
+   example, 5.6.15), and OS indicates the type of operating system
    for which the distribution is intended (for example, pc-linux-i686
    or winx64).
 
@@ -105,8 +105,8 @@ shell> cp support-files/mysql.server /etc/init.d/mysql.server
    the sudo (Linux) or pfexec (OpenSolaris) command.
 
    The procedure does not set up any passwords for MySQL accounts.
-   After following the procedure, proceed to Section 2.10,
-   "Postinstallation Setup and Testing."
+   After following the procedure, proceed to Section 2.10.2,
+   "Securing the Initial MySQL Accounts."
 
 Create a mysql User and Group
 
@@ -165,14 +165,14 @@ Perform Postinstallation Setup
 
    The remainder of the installation process involves setting up the
    configuration file, creating the core databases, and starting the
-   MySQL server. For instructions, see Section 2.10,
-   "Postinstallation Setup and Testing."
+   MySQL server. For next steps, see Section 2.10, "Postinstallation
+   Setup and Testing."
    Note
 
    The accounts that are listed in the MySQL grant tables initially
    have no passwords. After starting the server, you should set up
-   passwords for them using the instructions in Section 2.10,
-   "Postinstallation Setup and Testing."
+   passwords for them using the instructions in Section 2.10.2,
+   "Securing the Initial MySQL Accounts."
 
    Copyright (c) 1997, 2013, Oracle and/or its affiliates. All rights
    reserved. Legal Notices
@@ -329,8 +329,8 @@ Perform Postinstallation Setup
    from when installing MySQL on Windows:
 
      * MySQL Installer: This package has a file name similar to
-       mysql-installer-community-5.6.14.0.msi or
-       mysql-installer-commercial-5.6.14.0.msi, and utilizes MSI's to
+       mysql-installer-community-5.6.15.0.msi or
+       mysql-installer-commercial-5.6.15.0.msi, and utilizes MSI's to
        automatically install MySQL server and other products. It will
        download and apply updates to itself, and for each of the
        installed products. It also configures the additional
@@ -341,17 +341,17 @@ Perform Postinstallation Setup
        Microsoft Windows, MySQL for Excel, and the MySQL Server with
        its components.
        MySQL Installer will run on all Windows platforms that are
-       supported by MySQL
-       (http://www.mysql.com/support/supportedplatforms/database.html
-       ). Note: because MySQL is not a native component of Windows
-       and depends on .NET, it will not work on minimal installation
+       supported by MySQL (see
+       http://www.mysql.com/support/supportedplatforms/database.html)
+       . Note: because MySQL is not a native component of Windows and
+       depends on .NET, it will not work on minimal installation
        options like the "Server Core" version of Windows Server 2008.
        For instructions on installing MySQL using MySQL Installer,
        see Section 2.3.3, "Installing MySQL on Microsoft Windows
        Using MySQL Installer."
 
      * The Noinstall Archive: This package has a file name similar to
-       mysql-5.6.14-win32.zip or mysql-5.6.14-winx64.zip, and
+       mysql-5.6.15-win32.zip or mysql-5.6.15-winx64.zip, and
        contains all the files found in the Complete install package,
        with the exception of the GUI. This package does not include
        an automated installer, and must be manually installed and
@@ -714,11 +714,11 @@ C:\> MySQLInstallerConsole --help
 
 2.3.4. MySQL Notifier for Microsoft Windows
 
-   The MySQL Notifier for Microsoft Windows is a tool that allows you
-   to monitor and adjust the status of your local and remote MySQL
-   Server instances through an indicator that resides in the system
-   tray. The MySQL Notifier for Microsoft Windows also gives quick
-   access to several MySQL GUI tools (such as MySQL Workbench)
+   The MySQL Notifier for Microsoft Windows is a tool that enables
+   you to monitor and adjust the status of your local and remote
+   MySQL Server instances through an indicator that resides in the
+   system tray. The MySQL Notifier for Microsoft Windows also gives
+   quick access to several MySQL GUI tools (such as MySQL Workbench)
    through its context menu.
 
    The MySQL Notifier for Microsoft Windows is installed by MySQL
@@ -793,7 +793,7 @@ C:\> MySQLInstallerConsole --help
    in the screenshots below:
 
    The Service Instance menu is the main MySQL Notifier for Microsoft
-   Windows window, and allows you to Stop, Start, and Restart the
+   Windows window, and enables you to Stop, Start, and Restart the
    MySQL Server.
 
    Figure 2.22. MySQL Notifier for Microsoft Windows Service Instance
@@ -849,7 +849,7 @@ C:\> MySQLInstallerConsole --help
    Figure 2.24. MySQL Notifier for Microsoft Windows Options menu
    MySQL Notifier for Microsoft Windows Options menu
 
-   The Actions, Manage Monitored Items menu allows you to configure
+   The Actions, Manage Monitored Items menu enables you to configure
    the monitored services and MySQL instances. First, with the
    Services tab open:
 
@@ -864,7 +864,7 @@ C:\> MySQLInstallerConsole --help
    MySQL Notifier for Microsoft Windows Manage Instances menu
 
    Adding a service or instance (after clicking Add in the Manage
-   Monitored Items window) allows you to select a running Microsoft
+   Monitored Items window) enables you to select a running Microsoft
    Windows service or instance connection, and configure MySQL
    Notifier for Microsoft Windows to monitor it. Add a new service or
    instance by clicking service name from the list, then OK to
@@ -1375,7 +1375,7 @@ InnoDB: foreign key constraint system tables created
    something like this, which indicates that the server is ready to
    service client connections:
 mysqld: ready for connections
-Version: '5.6.14'  socket: ''  port: 3306
+Version: '5.6.15'  socket: ''  port: 3306
 
    The server continues to write to the console any further
    diagnostic output it produces. You can open a new console window
@@ -1390,8 +1390,8 @@ Version: '5.6.14'  socket: ''  port: 3306
 
    The accounts that are listed in the MySQL grant tables initially
    have no passwords. After starting the server, you should set up
-   passwords for them using the instructions in Section 2.10,
-   "Postinstallation Setup and Testing."
+   passwords for them using the instructions in Section 2.10.2,
+   "Securing the Initial MySQL Accounts."
 
 2.3.5.5. Starting MySQL from the Windows Command Line
 
@@ -1438,8 +1438,7 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysqladmin" -u root
    The last option is to start mysqld with the --standalone and
    --debug options. In this case, mysqld writes a log file
    C:\mysqld.trace that should contain the reason why mysqld doesn't
-   start. See MySQL Internals: Porting to Other Systems
-   (http://dev.mysql.com/doc/internals/en/porting.html).
+   start. See Section 23.4.3, "The DBUG Package."
 
    Use mysqld --verbose --help to display all the options that mysqld
    supports.
@@ -1505,6 +1504,8 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysqladmin" -u root
    Windows 2000, XP, Vista, and Server 2003). To avoid conflicts, it
    is advisable to close the Services utility while performing server
    installation or removal operations from the command line.
+
+Installing the service
 
    Before installing MySQL as a Windows service, you should first
    stop the current server if it is running by using the following
@@ -1626,9 +1627,16 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysqld"
    because the --defaults-file option is present, the server reads
    options from the [mysqld] option group, and only from the named
    file.
+   Note
+
+   On Windows, if the server is started with the --defaults-file and
+   --install options, --install must be first. Otherwise, mysqld.exe
+   will attempt to start the MySQL server.
 
    You can also specify options as Start parameters in the Windows
    Services utility before you start the MySQL service.
+
+Starting the service
 
    Once a MySQL server has been installed as a service, Windows
    starts the service automatically whenever Windows starts. The
@@ -1656,6 +1664,8 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysqld"
    --install-manual option rather than the --install option:
 C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysqld" --install-m
 anual
+
+Removing the service
 
    To remove a server that is installed as a service, first stop it
    if it is running by executing NET STOP MySQL. Then use the

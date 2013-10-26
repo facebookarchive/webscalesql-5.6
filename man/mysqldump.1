@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqldump\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 07/10/2013
+.\"      Date: 09/09/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLDUMP\FR" "1" "07/10/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLDUMP\FR" "1" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -99,7 +99,7 @@ InnoDB
 backups with minimal disruption; it can also back up tables from
 MyISAM
 and other storage engines; and it provides a number of convenient options to accommodate different backup scenarios\&. See
-\m[blue]\fBMySQL Enterprise Backup User\*(Aqs Guide (Version 3\&.8\&.2)\fR\m[]\&\s-2\u[1]\d\s+2\&.
+\m[blue]\fBMySQL Enterprise Backup User\*(Aqs Guide (Version 3\&.9\&.0)\fR\m[]\&\s-2\u[1]\d\s+2\&.
 .RE
 .sp
 .RS 4
@@ -417,7 +417,7 @@ syntax:
 .\}
 max_allowed_packet
 .sp
-The maximum size of the buffer for client/server communication\&. The maximum is 1GB\&.
+The maximum size of the buffer for client/server communication\&. The default is 24MB, the maximum is 1GB\&.
 .RE
 .sp
 .RS 4
@@ -1051,7 +1051,7 @@ CHANGE MASTER TO
 statement in a slave dump produced with the
 \fB\-\-dump\-slave\fR
 option, add
-MASTER_PORT
+MASTER_HOST
 and
 MASTER_PORT
 options for the host name and TCP/IP port number of the slave\*(Aqs master\&.
@@ -1998,9 +1998,9 @@ together with
 .\" flush-privileges option: mysqldump
 \fB\-\-flush\-privileges\fR
 .sp
-Send a
+Add a
 FLUSH PRIVILEGES
-statement to the server after dumping the
+statement to the dump output after dumping the
 mysql
 database\&. This option should be used any time the dump contains the
 mysql
@@ -2411,9 +2411,9 @@ You should have received a copy of the GNU General Public License along with the
 .sp
 .SH "NOTES"
 .IP " 1." 4
-MySQL Enterprise Backup User's Guide (Version 3.8.2)
+MySQL Enterprise Backup User's Guide (Version 3.9.0)
 .RS 4
-\%http://dev.mysql.com/doc/mysql-enterprise-backup/3.8/en/index.html
+\%http://dev.mysql.com/doc/mysql-enterprise-backup/3.9/en/index.html
 .RE
 .SH "SEE ALSO"
 For more information, please refer to the MySQL Reference Manual,

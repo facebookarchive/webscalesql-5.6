@@ -2,12 +2,12 @@
 .\"     Title: \fBmysql\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 07/10/2013
+.\"      Date: 09/09/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQL\FR" "1" "07/10/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQL\FR" "1" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -525,7 +525,7 @@ the section called \(lqMYSQL COMMANDS\(rq\&.
 Enable the
 mysql_clear_password
 cleartext authentication plugin\&. (See
-Section\ \&6.3.7.5, \(lqThe Cleartext Client-Side Authentication Plugin\(rq\&.) This option was added in MySQL 5\&.6\&.7\&.
+Section\ \&6.3.7.7, \(lqThe Cleartext Client-Side Authentication Plugin\(rq\&.) This option was added in MySQL 5\&.6\&.7\&.
 .RE
 .sp
 .RS 4
@@ -1115,9 +1115,24 @@ the section called \(lqMYSQL TIPS\(rq, for more information about this option\&.
 .\" secure-auth option: mysql
 \fB\-\-secure\-auth\fR
 .sp
-Do not send passwords to the server in old (pre\-4\&.1\&.1) format\&. This prevents connections except for servers that use the newer password format\&. As of MySQL 5\&.6\&.7, this option is enabled by default; use
+Do not send passwords to the server in old (pre\-4\&.1) format\&. This prevents connections except for servers that use the newer password format\&. As of MySQL 5\&.6\&.7, this option is enabled by default; use
 \fB\-\-skip\-secure\-auth\fR
 to disable it\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+Passwords that use the pre\-4\&.1 hashing method are less secure than passwords that use the native password hashing method and should be avoided\&. Pre\-4\&.1 passwords are deprecated and support for them will be removed in a future MySQL release\&.
+.sp .5v
+.RE
 .RE
 .sp
 .RS 4
@@ -1141,7 +1156,7 @@ The server sends the public key to the client as needed, so it is not necessary 
 For additional discussion regarding use of the
 sha256_password
 plugin, including how to get the RSA public key, see
-Section\ \&6.3.7.2, \(lqThe SHA-256 Authentication Plugin\(rq\&.
+Section\ \&6.3.7.4, \(lqThe SHA-256 Authentication Plugin\(rq\&.
 .sp
 This option is available only if MySQL was built using OpenSSL\&. It was added in MySQL 5\&.6\&.6 under the name
 \fB\-\-server\-public\-key\fR
@@ -1498,7 +1513,7 @@ The number of seconds before connection timeout\&. (Default value is
 .\" max_allowed_packet variable
 max_allowed_packet
 .sp
-The maximum packet length to send to or receive from the server\&. (Default value is 16MB\&.)
+The maximum size of the buffer for client/server communication\&. The default is 16MB, the maximum is 1GB\&.
 .RE
 .sp
 .RS 4

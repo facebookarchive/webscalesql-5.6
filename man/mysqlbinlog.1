@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqlbinlog\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 07/10/2013
+.\"      Date: 09/09/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLBINLOG\FR" "1" "07/10/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLBINLOG\FR" "1" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -1987,21 +1987,21 @@ statements\&. Omitting extraneous lines, the output for the row events produced 
 shell> \fBmysqlbinlog \fR\fB\fIlog_file\fR\fR
 \&.\&.\&.
 # at 218
-#080828 15:03:08 server id 1  end_log_pos 258 	Write_rows: table id 17 flags: STMT_END_F
+#080828 15:03:08 server id 1  end_log_pos 258   Write_rows: table id 17 flags: STMT_END_F
 BINLOG \*(Aq
 fAS3SBMBAAAALAAAANoAAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
 fAS3SBcBAAAAKAAAAAIBAAAQABEAAAAAAAEAA//8AQAAAAVhcHBsZQ==
 \*(Aq/*!*/;
 \&.\&.\&.
 # at 302
-#080828 15:03:08 server id 1  end_log_pos 356 	Update_rows: table id 17 flags: STMT_END_F
+#080828 15:03:08 server id 1  end_log_pos 356   Update_rows: table id 17 flags: STMT_END_F
 BINLOG \*(Aq
 fAS3SBMBAAAALAAAAC4BAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
 fAS3SBgBAAAANgAAAGQBAAAQABEAAAAAAAEAA////AEAAAAFYXBwbGX4AQAAAARwZWFyIbIP
 \*(Aq/*!*/;
 \&.\&.\&.
 # at 400
-#080828 15:03:08 server id 1  end_log_pos 442 	Delete_rows: table id 17 flags: STMT_END_F
+#080828 15:03:08 server id 1  end_log_pos 442   Delete_rows: table id 17 flags: STMT_END_F
 BINLOG \*(Aq
 fAS3SBMBAAAALAAAAJABAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
 fAS3SBkBAAAAKgAAALoBAAAQABEAAAAAAAEAA//4AQAAAARwZWFyIbIP
@@ -2029,7 +2029,7 @@ option\&. The output will contain lines beginning with
 shell> \fBmysqlbinlog \-v \fR\fB\fIlog_file\fR\fR
 \&.\&.\&.
 # at 218
-#080828 15:03:08 server id 1  end_log_pos 258 	Write_rows: table id 17 flags: STMT_END_F
+#080828 15:03:08 server id 1  end_log_pos 258   Write_rows: table id 17 flags: STMT_END_F
 BINLOG \*(Aq
 fAS3SBMBAAAALAAAANoAAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
 fAS3SBcBAAAAKAAAAAIBAAAQABEAAAAAAAEAA//8AQAAAAVhcHBsZQ==
@@ -2041,7 +2041,7 @@ fAS3SBcBAAAAKAAAAAIBAAAQABEAAAAAAAEAA//8AQAAAAVhcHBsZQ==
 ###   @3=NULL
 \&.\&.\&.
 # at 302
-#080828 15:03:08 server id 1  end_log_pos 356 	Update_rows: table id 17 flags: STMT_END_F
+#080828 15:03:08 server id 1  end_log_pos 356   Update_rows: table id 17 flags: STMT_END_F
 BINLOG \*(Aq
 fAS3SBMBAAAALAAAAC4BAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
 fAS3SBgBAAAANgAAAGQBAAAQABEAAAAAAAEAA////AEAAAAFYXBwbGX4AQAAAARwZWFyIbIP
@@ -2057,7 +2057,7 @@ fAS3SBgBAAAANgAAAGQBAAAQABEAAAAAAAEAA////AEAAAAFYXBwbGX4AQAAAARwZWFyIbIP
 ###   @3=\*(Aq2009:01:01\*(Aq
 \&.\&.\&.
 # at 400
-#080828 15:03:08 server id 1  end_log_pos 442 	Delete_rows: table id 17 flags: STMT_END_F
+#080828 15:03:08 server id 1  end_log_pos 442   Delete_rows: table id 17 flags: STMT_END_F
 BINLOG \*(Aq
 fAS3SBMBAAAALAAAAJABAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
 fAS3SBkBAAAAKgAAALoBAAAQABEAAAAAAAEAA//4AQAAAARwZWFyIbIP
@@ -2085,7 +2085,7 @@ twice to also display data types and some metadata for each column\&. The output
 shell> \fBmysqlbinlog \-vv \fR\fB\fIlog_file\fR\fR
 \&.\&.\&.
 # at 218
-#080828 15:03:08 server id 1  end_log_pos 258 	Write_rows: table id 17 flags: STMT_END_F
+#080828 15:03:08 server id 1  end_log_pos 258   Write_rows: table id 17 flags: STMT_END_F
 BINLOG \*(Aq
 fAS3SBMBAAAALAAAANoAAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
 fAS3SBcBAAAAKAAAAAIBAAAQABEAAAAAAAEAA//8AQAAAAVhcHBsZQ==
@@ -2097,7 +2097,7 @@ fAS3SBcBAAAAKAAAAAIBAAAQABEAAAAAAAEAA//8AQAAAAVhcHBsZQ==
 ###   @3=NULL /* VARSTRING(20) meta=0 nullable=1 is_null=1 */
 \&.\&.\&.
 # at 302
-#080828 15:03:08 server id 1  end_log_pos 356 	Update_rows: table id 17 flags: STMT_END_F
+#080828 15:03:08 server id 1  end_log_pos 356   Update_rows: table id 17 flags: STMT_END_F
 BINLOG \*(Aq
 fAS3SBMBAAAALAAAAC4BAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
 fAS3SBgBAAAANgAAAGQBAAAQABEAAAAAAAEAA////AEAAAAFYXBwbGX4AQAAAARwZWFyIbIP
@@ -2113,7 +2113,7 @@ fAS3SBgBAAAANgAAAGQBAAAQABEAAAAAAAEAA////AEAAAAFYXBwbGX4AQAAAARwZWFyIbIP
 ###   @3=\*(Aq2009:01:01\*(Aq /* DATE meta=0 nullable=1 is_null=0 */
 \&.\&.\&.
 # at 400
-#080828 15:03:08 server id 1  end_log_pos 442 	Delete_rows: table id 17 flags: STMT_END_F
+#080828 15:03:08 server id 1  end_log_pos 442   Delete_rows: table id 17 flags: STMT_END_F
 BINLOG \*(Aq
 fAS3SBMBAAAALAAAAJABAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
 fAS3SBkBAAAAKgAAALoBAAAQABEAAAAAAAEAA//4AQAAAARwZWFyIbIP
@@ -2149,7 +2149,7 @@ provides a convenient way to see row events only as SQL statements:
 shell> \fBmysqlbinlog \-v \-\-base64\-output=DECODE\-ROWS \fR\fB\fIlog_file\fR\fR
 \&.\&.\&.
 # at 218
-#080828 15:03:08 server id 1  end_log_pos 258 	Write_rows: table id 17 flags: STMT_END_F
+#080828 15:03:08 server id 1  end_log_pos 258   Write_rows: table id 17 flags: STMT_END_F
 ### INSERT INTO test\&.t
 ### SET
 ###   @1=1
@@ -2157,7 +2157,7 @@ shell> \fBmysqlbinlog \-v \-\-base64\-output=DECODE\-ROWS \fR\fB\fIlog_file\fR\f
 ###   @3=NULL
 \&.\&.\&.
 # at 302
-#080828 15:03:08 server id 1  end_log_pos 356 	Update_rows: table id 17 flags: STMT_END_F
+#080828 15:03:08 server id 1  end_log_pos 356   Update_rows: table id 17 flags: STMT_END_F
 ### UPDATE test\&.t
 ### WHERE
 ###   @1=1
@@ -2169,7 +2169,7 @@ shell> \fBmysqlbinlog \-v \-\-base64\-output=DECODE\-ROWS \fR\fB\fIlog_file\fR\f
 ###   @3=\*(Aq2009:01:01\*(Aq
 \&.\&.\&.
 # at 400
-#080828 15:03:08 server id 1  end_log_pos 442 	Delete_rows: table id 17 flags: STMT_END_F
+#080828 15:03:08 server id 1  end_log_pos 442   Delete_rows: table id 17 flags: STMT_END_F
 ### DELETE FROM test\&.t
 ### WHERE
 ###   @1=1

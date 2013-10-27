@@ -20,12 +20,6 @@ MACRO(SET_MYSQL_MAINTAINER_GNU_C_OPTIONS)
   SET(MY_MAINTAINER_WARNINGS
       "-Wall -Wextra -Wunused -Wwrite-strings -Wno-strict-aliasing  -Werror")
 
-  CHECK_C_COMPILER_FLAG("-Wdeclaration-after-statement"
-                        HAVE_DECLARATION_AFTER_STATEMENT)
-  IF(HAVE_DECLARATION_AFTER_STATEMENT)
-    SET(MY_MAINTAINER_DECLARATION_AFTER_STATEMENT
-        "-Wdeclaration-after-statement")
-  ENDIF()
   SET(MY_MAINTAINER_C_WARNINGS
       "${MY_MAINTAINER_WARNINGS} ${MY_MAINTAINER_DECLARATION_AFTER_STATEMENT}"
       CACHE STRING "C warning options used in maintainer builds.")
@@ -37,12 +31,6 @@ MACRO(SET_MYSQL_MAINTAINER_GNU_C_OPTIONS_NO_WERROR)
   SET(MY_MAINTAINER_WARNINGS
       "-Wall -Wextra -Wunused -Wwrite-strings -Wno-strict-aliasing")
 
-  CHECK_C_COMPILER_FLAG("-Wdeclaration-after-statement"
-                        HAVE_DECLARATION_AFTER_STATEMENT)
-  IF(HAVE_DECLARATION_AFTER_STATEMENT)
-    SET(MY_MAINTAINER_DECLARATION_AFTER_STATEMENT
-        "-Wdeclaration-after-statement")
-  ENDIF()
   SET(MY_MAINTAINER_C_WARNINGS
       "${MY_MAINTAINER_WARNINGS} ${MY_MAINTAINER_DECLARATION_AFTER_STATEMENT}"
       CACHE STRING "C warning options used in maintainer builds.")

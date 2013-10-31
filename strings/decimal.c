@@ -261,7 +261,9 @@ static dec1 *remove_leading_zeroes(const decimal_t *from, int *intg_result)
   }
   if (intg > 0)
   {
-    for (i= (intg - 1) % DIG_PER_DEC1; *buf0 < powers10[i--]; intg--) ;
+    for (i= (intg - 1) % DIG_PER_DEC1; *buf0 < powers10[i--] && i >= 0; intg--)
+    {
+    }
     DBUG_ASSERT(intg > 0);
   }
   else
@@ -297,7 +299,7 @@ int decimal_actual_fraction(decimal_t *from)
   if (frac > 0)
   {
     for (i= DIG_PER_DEC1 - ((frac - 1) % DIG_PER_DEC1);
-         *buf0 % powers10[i++] == 0;
+         *buf0 % powers10[i++] == 0 && i <= DIG_PER_DEC1;
          frac--) ;
   }
   return frac;
@@ -484,7 +486,9 @@ static void digits_bounds(decimal_t *from, int *start_result, int *end_result)
     start= (int) ((buf_beg - from->buf) * DIG_PER_DEC1);
   }
   if (buf_beg < end)
-    for (; *buf_beg < powers10[i--]; start++) ;
+    for (; *buf_beg < powers10[i--] && i >= 0; start++)
+    {
+    }
   *start_result= start; /* index of first decimal digit (from 0) */
 
   /* find non-zero digit at the end */
@@ -502,7 +506,7 @@ static void digits_bounds(decimal_t *from, int *start_result, int *end_result)
     stop= (int) ((buf_end - from->buf + 1) * DIG_PER_DEC1);
     i= 1;
   }
-  for (; *buf_end % powers10[i++] == 0; stop--) ;
+  for (; *buf_end % powers10[i++] == 0 && i <= DIG_PER_DEC1; stop--) ;
   *end_result= stop; /* index of position after last decimal digit (from 0) */
 }
 
@@ -2233,7 +2237,9 @@ static int do_div_mod(const decimal_t *from1, const decimal_t *from2,
   }
   if (prec2 <= 0) /* short-circuit everything: from2 == 0 */
     return E_DEC_DIV_ZERO;
-  for (i= (prec2 - 1) % DIG_PER_DEC1; *buf2 < powers10[i--]; prec2--) ;
+  for (i= (prec2 - 1) % DIG_PER_DEC1; *buf2 < powers10[i--] && i >= 0; prec2--)
+  {
+  }
   DBUG_ASSERT(prec2 > 0);
 
   i=((prec1-1) % DIG_PER_DEC1)+1;
@@ -2248,7 +2254,7 @@ static int do_div_mod(const decimal_t *from1, const decimal_t *from2,
     decimal_make_zero(to);
     return E_DEC_OK;
   }
-  for (i=(prec1-1) % DIG_PER_DEC1; *buf1 < powers10[i--]; prec1--) ;
+  for (i=(prec1-1) % DIG_PER_DEC1; *buf1 < powers10[i--] && i >= 0; prec1--) ;
   DBUG_ASSERT(prec1 > 0);
 
   /* let's fix scale_incr, taking into account frac1,frac2 increase */

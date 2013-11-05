@@ -463,6 +463,12 @@ Production Releases
    can also find information there about becoming a MySQL mirror site
    and how to report a bad or out-of-date mirror.
 
+   For RPM-based Linux platforms that use Yum as their package
+   management system, MySQL can be installed using the MySQL Yum
+   repository (http://dev.mysql.com/downloads/repo/). See Section
+   2.5.1, "Installing MySQL on Linux Using the MySQL Yum Repository"
+   for details.
+
    To obtain the latest development source, see Section 2.9.3,
    "Installing MySQL Using a Development Source Tree."
 
@@ -511,11 +517,11 @@ Production Releases
    Windows examples will assume the name md5.exe.
 
    Linux and Microsoft Windows examples:
-shell> md5sum mysql-standard-5.6.15-linux-i686.tar.gz
-aaab65abbec64d5e907dcd41b8699945  mysql-standard-5.6.15-linux-i686.ta
+shell> md5sum mysql-standard-5.6.16-linux-i686.tar.gz
+aaab65abbec64d5e907dcd41b8699945  mysql-standard-5.6.16-linux-i686.ta
 r.gz
-shell> md5.exe mysql-installer-community-5.6.15.msi
-aaab65abbec64d5e907dcd41b8699945  mysql-installer-community-5.6.15.ms
+shell> md5.exe mysql-installer-community-5.6.16.msi
+aaab65abbec64d5e907dcd41b8699945  mysql-installer-community-5.6.16.ms
 i
 
    You should verify that the resulting checksum (the string of
@@ -625,8 +631,8 @@ shell> rpm --import mysql_pubkey.asc
 
    Table 2.1. MySQL Package and Signature Files for Source files
        File Type                      File Name
-   Distribution file mysql-standard-5.6.15-linux-i686.tar.gz
-   Signature file    mysql-standard-5.6.15-linux-i686.tar.gz.asc
+   Distribution file mysql-standard-5.6.16-linux-i686.tar.gz
+   Signature file    mysql-standard-5.6.16-linux-i686.tar.gz.asc
 
    Make sure that both files are stored in the same directory and
    then run the following command to verify the signature for the
@@ -635,7 +641,7 @@ shell> gpg --verify package_name.asc
 
    If the downloaded package is valid, you will see a "Good
    signature" similar to:
-shell> gpg --verify mysql-standard-5.6.15-linux-i686.tar.gz.asc
+shell> gpg --verify mysql-standard-5.6.16-linux-i686.tar.gz.asc
 gpg: Signature made Tue 01 Feb 2011 02:38:30 AM CST using DSA key ID
 5072E1F5
 gpg: Good signature from "MySQL Release Engineering <mysql-build@oss.
@@ -644,7 +650,7 @@ oracle.com>"
    The Good signature message indicates that the file signature is
    valid, when compared to the signature listed on our site. But you
    might also see warnings, like so:
-shell> gpg --verify mysql-standard-5.6.15-linux-i686.tar.gz.asc
+shell> gpg --verify mysql-standard-5.6.16-linux-i686.tar.gz.asc
 gpg: Signature made Wed 23 Jan 2013 02:25:45 AM PST using DSA key ID
 5072E1F5
 gpg: checking the trustdb
@@ -726,8 +732,8 @@ Primary key fingerprint: A4A9 4068 76FC BD3C 4567  70C8 8C71 8D3B 507
    Table 2.2. MySQL Package and Signature Files for MySQL Installer
    for Microsoft Windows
        File Type                    File Name
-   Distribution file mysql-installer-community-5.6.15.msi
-   Signature file    mysql-installer-community-5.6.15.msi.asc
+   Distribution file mysql-installer-community-5.6.16.msi
+   Signature file    mysql-installer-community-5.6.16.msi.asc
 
    Make sure that both files are stored in the same directory and
    then run the following command to verify the signature for the
@@ -763,8 +769,8 @@ Primary key fingerprint: A4A9 4068 76FC BD3C 4567  70C8 8C71 8D3B 507
 shell> rpm --checksig package_name.rpm
 
    Example:
-shell> rpm --checksig MySQL-server-5.6.15-0.glibc23.i386.rpm
-MySQL-server-5.6.15-0.glibc23.i386.rpm: md5 gpg OK
+shell> rpm --checksig MySQL-server-5.6.16-0.glibc23.i386.rpm
+MySQL-server-5.6.16-0.glibc23.i386.rpm: md5 gpg OK
 
    Note
 
@@ -807,7 +813,7 @@ pg-signature.html
      * Section 2.2, "MySQL Installation Layout for Generic Unix/Linux
        Binary Package"
 
-     * Section 2.5.1, "MySQL Installation Layout for Linux RPM
+     * Section 2.5.3, "MySQL Installation Layout for Linux RPM
        Packages"
 
      * Section 2.4.2, "MySQL Installation Layout on Mac OS X"
@@ -843,7 +849,7 @@ pg-signature.html
 
    MySQL compressed tar file binary distributions have names of the
    form mysql-VERSION-OS.tar.gz, where VERSION is a number (for
-   example, 5.6.15), and OS indicates the type of operating system
+   example, 5.6.16), and OS indicates the type of operating system
    for which the distribution is intended (for example, pc-linux-i686
    or winx64).
 
@@ -1144,7 +1150,7 @@ Perform Postinstallation Setup
    named data under the installation directory. After an installation
    has been performed using this package, the template data directory
    can be copied to set up additional MySQL instances. See Section
-   5.6, "Running Multiple MySQL Instances on One Machine."
+   5.3, "Running Multiple MySQL Instances on One Machine."
 
 2.3.2. Choosing An Installation Package
 
@@ -1152,8 +1158,8 @@ Perform Postinstallation Setup
    from when installing MySQL on Windows:
 
      * MySQL Installer: This package has a file name similar to
-       mysql-installer-community-5.6.15.0.msi or
-       mysql-installer-commercial-5.6.15.0.msi, and utilizes MSI's to
+       mysql-installer-community-5.6.16.0.msi or
+       mysql-installer-commercial-5.6.16.0.msi, and utilizes MSI's to
        automatically install MySQL server and other products. It will
        download and apply updates to itself, and for each of the
        installed products. It also configures the additional
@@ -1174,7 +1180,7 @@ Perform Postinstallation Setup
        Using MySQL Installer."
 
      * The Noinstall Archive: This package has a file name similar to
-       mysql-5.6.15-win32.zip or mysql-5.6.15-winx64.zip, and
+       mysql-5.6.16-win32.zip or mysql-5.6.16-winx64.zip, and
        contains all the files found in the Complete install package,
        with the exception of the GUI. This package does not include
        an automated installer, and must be manually installed and
@@ -2198,7 +2204,7 @@ InnoDB: foreign key constraint system tables created
    something like this, which indicates that the server is ready to
    service client connections:
 mysqld: ready for connections
-Version: '5.6.15'  socket: ''  port: 3306
+Version: '5.6.16'  socket: ''  port: 3306
 
    The server continues to write to the console any further
    diagnostic output it produces. You can open a new console window
@@ -3228,9 +3234,8 @@ Additional Resources
 2.5. Installing MySQL on Linux
 
    Linux supports a number of different solutions for installing
-   MySQL. The recommended method is to use one of the distributions
-   from Oracle. If you choose this method, there are several options
-   available:
+   MySQL. We recommend that you use one of the distributions from
+   Oracle, for which several methods for installation are available:
 
      * Installing from a generic binary package in .tar.gz format.
        See Section 2.2, "Installing MySQL on Unix/Linux Using Generic
@@ -3240,24 +3245,28 @@ Additional Resources
        detailed instructions, see Section 2.9, "Installing MySQL from
        Source."
 
+     * Installing with Yum using the MySQL Yum repository
+       (http://dev.mysql.com/downloads/repo/). For detailed
+       instructions, see Section 2.5.1, "Installing MySQL on Linux
+       Using the MySQL Yum Repository."
+
      * Installing using a precompiled RPM package. For more
-       information, see Section 2.5.1, "Installing MySQL on Linux
+       information, see Section 2.5.3, "Installing MySQL on Linux
        Using RPM Packages."
 
      * Installing using a precompiled Debian package. For more
-       information, see Section 2.5.2, "Installing MySQL on Linux
+       information, see Section 2.5.4, "Installing MySQL on Linux
        Using Debian Packages."
 
-   As an alternative, you can use the native package manager within
-   your Linux distribution to automatically download and install
-   MySQL for you. Native package installations can take of the
-   download and dependencies required to run MySQL, but the MySQL
-   version will often be some versions behind the currently available
-   release. You will also normally be unable to install development
-   releases, as these are not usually made available in the native
-   repository. For more information on using the native package
-   installers, see Section 2.5.3, "Installing MySQL on Linux Using
-   Native Package Managers."
+   As an alternative, you can use the package manager on your system
+   to automatically download and install MySQL with packages from the
+   native software repositories of your Linux distribution. These
+   native package are often several versions behind the currently
+   available release. You will also normally be unable to install
+   development milestone releases (DMRs), as these are not usually
+   made available in the native repositories. For more information on
+   using the native package installers, see Section 2.5.5,
+   "Installing MySQL on Linux Using Native Package Managers."
    Note
 
    For many Linux installations, you will want to set up MySQL to be
@@ -3270,7 +3279,318 @@ Additional Resources
    for automatic MySQL startup and shutdown. See Section 2.10.1.2,
    "Starting and Stopping MySQL Automatically."
 
-2.5.1. Installing MySQL on Linux Using RPM Packages
+2.5.1. Installing MySQL on Linux Using the MySQL Yum Repository
+
+   MySQL provides a Yum-style software repository for the following
+   Linux platforms:
+
+     * EL6-based platforms (for example, Red Hat Enterprise Linux 6,
+       Oracle Linux 6, and CentOS 6)
+
+     * Fedora 18 and 19
+
+   Currently, the MySQL Yum repository
+   (http://dev.mysql.com/downloads/repo/) for the above-mentioned
+   platforms provides RPM packages for installing the MySQL server,
+   client, shared client libraries, tools, MySQL Workbench, and
+   Connector/ODBC.
+
+   MySQL does not currently provide software repositories for other
+   Linux platforms (Debian-based systems, openSUSE, and so on). Refer
+   to Section 2.5, "Installing MySQL on Linux" for instructions on
+   how to install MySQL on those platforms.
+
+   The following sections explain how to use the MySQL Yum repository
+   to install the latest GA version of MySQL. To install an older
+   version or a development milestone release (DMR), use one of the
+   other methods described in Section 2.5, "Installing MySQL on
+   Linux."
+   Note
+
+   The MySQL Yum repository service is now in development release. We
+   encourage you to try it and provide us with feedback. Please
+   report any bugs or inconsistencies you observe to our Bugs
+   Database (http://bugs.mysql.com).
+
+Before You Start
+
+   As a popular, open-source software, MySQL, in its original or
+   re-packaged form, is widely installed on many systems from various
+   sources, including different software download sites, software
+   repositories, and so on. The following instructions assume that no
+   versions of MySQL (whether distributed by Oracle or other parties)
+   have already been installed on your system; if that is not the
+   case, see Section 2.11.1.1, "Upgrading MySQL with the MySQL Yum
+   Repository" or Section 2.5.2, "Replacing a Third-Party
+   Distribution of MySQL Using the MySQL Yum Repository."
+
+Steps for Installing MySQL
+
+   Follow the steps below to install MySQL with the MySQL Yum
+   repository:
+   Note
+
+   Most of the commands below must be executed as root, and the
+   commands use sudo to accomplish that. If you are logged in as
+   root, you can omit sudo from the commands.
+
+
+    1. Adding the MySQL Yum Repository
+       First, add the MySQL Yum repository to your system's
+       repository list. This is a one-time operation, which can be
+       performed by installing an RPM provided by MySQL (for an
+       alternate method to add the MySQL Yum repository, see Section
+       2.5.1, ""). Follow these steps:
+         a. Go to the Download MySQL Yum Repository
+            (http://dev.mysql.com/downloads/repo) page
+            (http://dev.mysql.com/downloads/repo) in the MySQL
+            Developer Zone (http://dev.mysql.com/).
+         b. Select and download the RPM file for your platform.
+         c. Install the downloaded RPM file with the following
+            command, replacing platform-and-version-specific with the
+            name of the downloaded RPM file:
+shell> sudo yum localinstall platform-and-version-specific.rpm
+            For an EL6-based system, the command is in the form of:
+shell> sudo yum localinstall mysql-community-release-el6-{version-num
+ber}.noarch.rpm
+            For Fedora 18:
+shell> sudo yum localinstall mysql-community-release-fc18-{version-nu
+mber}.noarch.rpm
+            For Fedora 19:
+shell> sudo yum localinstall mysql-community-release-fc19-{version-nu
+mber}.noarch.rpm
+            The installation command adds the MySQL Yum repository to
+            your system's repository list as well as downloading the
+            GnuPG keys to check the integrity of the software
+            packages. See Section 2.1.4.2, "Signature Checking Using
+            GnuPG" for details on GnuPG key checking.
+            You can check that the MySQL Yum repository has been
+            successfully added by the following command:
+shell> sudo yum repolist enabled | grep "mysql-community"
+            As a result, you should see "MySQL Community Server"
+            (with the repository ID "mysql-community") listed in the
+            output; for example:
+mysql-community/19/x86_64         MySQL Community Server
+         15
+       Note
+       Once the MySQL Yum repository is enabled on your system, any
+       system-wide update by the yum update command will upgrade
+       MySQL packages on your system (including native third-party
+       packages) to the latest GA versions from MySQL; see Section
+       2.11.1.1, "Upgrading MySQL with the MySQL Yum Repository" and,
+       for a discussion on some possible effects of that on your
+       system, see Section 2.11.1.1, "."
+
+    2. Installing MySQL with Yum
+       Install MySQL by the following command:
+shell> sudo yum install mysql-server
+       This installs the package for MySQL server
+       (mysql-community-server) and also packages for the components
+       required to run the server, including packages for the client
+       (mysql-community-client), the common error messages and
+       character sets for client and server (mysql-community-common),
+       and the shared client libraries (mysql-community-libs).
+
+    3. Starting and Stopping the MySQL Server
+       Start the MySQL server with the following command:
+shell> sudo service mysql start
+       This is a sample output of the above command:
+shell>  Starting MySQL.. SUCCESS!
+       You can check the status of the MySQL server with the
+       following command:
+shell> sudo service mysql status
+       This is a sample output of the above command:
+shell>  SUCCESS! MySQL running (7535)
+       Stop the MySQL server with the following command:
+shell> sudo service mysql stop
+
+    4. Securing the MySQL Installation
+       Always run the program mysql_secure_installation to secure
+       your MySQL installation:
+shell> mysql_secure_installation
+       mysql_secure_installation allows you to perform important
+       operations like setting root password, removing anonymous
+       users, and so on. The program is safe and easy to use. It is
+       important to remember the root password you set though. See
+       Section 4.4.5, "mysql_secure_installation --- Improve MySQL
+       Installation Security" for details.
+
+   For more information on the postinstallation procedures, see
+   Section 2.10, "Postinstallation Setup and Testing."
+
+Installing Additional MySQL Products and Components with Yum
+
+   You can use Yum to install and manage individual components of
+   MySQL. You can use the following command to list the packages for
+   all the MySQL components available for your platform from the
+   MySQL Yum repository:
+shell> sudo yum --disablerepo=\* --enablerepo=mysql-community list av
+ailable
+
+   Install any packages of your choice with the following command,
+   replacing package-name with name of the package:
+shell> sudo yum install package-name
+
+   For example, to install MySQL Workbench:
+shell> sudo yum install mysql-workbench-community
+
+   To install the shared client libraries:
+shell> sudo yum install mysql-community-libs
+
+Updating MySQL with Yum
+
+   Besides installation, you can also perform updates for MySQL
+   products and components using the MySQL Yum repository. See
+   Section 2.11.1.1, "Upgrading MySQL with the MySQL Yum Repository"
+   for details.
+
+Adding the MySQL Yum Repository Manually
+
+   Instead of making use of the RPM files provided by MySQL to set up
+   the MySQL Yum repository, you can also add the MySQL Yum
+   repository manually. Under /etc/yum.repos.d in your file system,
+   create a file named mysql-community.repo, and fill into it the
+   following contents for the MySQL Yum Repository:
+[mysql-community]
+name=MySQL Community Server
+baseurl=Repository URL specific to your platform
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-mysql
+
+   The baseurl is the repository's URL, which differs for different
+   platforms. For EL6-based platforms, this is how the file should
+   look, with the correct baseurl:
+[mysql-community]
+name=MySQL Community Server
+baseurl=http://repo.mysql.com/yum/mysql-community/el/6/$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-mysql
+
+   For Fedora 18 and 19, the baseurl should be specified as:
+baseurl=http://repo.mysql.com/yum/mysql-community/fc/$releasever/$bas
+earch/
+
+   In this configuration, GnuPG key checking, for authenticating the
+   downloaded software packages, is enabled by gpgcheck=1. See
+   instructions for obtaining the GnuPG key in Section 2.1.4.2,
+   "Signature Checking Using GnuPG." Save the GnuGP key in a file
+   named /etc/pki/rpm-gpg/RPM-GPG-KEY-mysql (create the
+   /etc/pki/rpm-gpg/ folder first if it does not exist).
+
+2.5.2. Replacing a Third-Party Distribution of MySQL Using the MySQL
+Yum Repository
+
+   Different distributions of MySQL are distributed by different
+   parties through their own software repositories or download sites.
+   You can replace a third-party distribution of MySQL using the
+   MySQL Yum repository in a few steps.
+
+    1. Backing Up Your Database
+       To avoid loss of data, always back up your database before
+       trying to replace your MySQL installation using the MySQL Yum
+       repository. See Chapter 7, "Backup and Recovery" on how to
+       back up your database.
+
+    2. Stopping Yum from Receiving MySQL Packages from Third-Party,
+       Non-Native Repositories
+       Before you can use the MySQL Yum repository for installing (or
+       updating) MySQL, you must stop your system from receiving
+       MySQL packages from any third-party, non-native Yum
+       repositories.
+       One way to check whether Yum is now receiving third-party
+       MySQL distributions from other repositories is to use the
+       following command:
+shell> yum list installed mysql\*
+       This is a sample output for the command:
+mysql.i686              5.1.69-1.el6_4      @updates
+mysql-libs.i686         5.1.69-1.el6_4      @updates
+mysql-server.i686       5.1.69-1.el6_4      @updates
+       The output shows the names of the packages of the third-party
+       MySQL distribution that are installed and, on the right-hand
+       side, the repository (which is named updates, a native
+       repository for the Linux distribution) from which they were
+       installed.
+       However, sometimes the names of the packages of the
+       third-party distribution might not contain the string "mysql"
+       in it. It might be useful to search also with this command:
+shell> yum --disablerepo=\* provides mysql\*
+       The following is a sample output of the command:
+MariaDB-compat-10.0.4-1.i686 ...
+...
+Repo        : installed
+Matched from:
+Other       : mysql-libs
+
+
+
+MariaDB-server-10.0.4-1.i686 ...
+...
+Repo        : installed
+Matched from:
+Other       : mysql-server
+       From the result we can see the names of some of the packages
+       for the installed third-party distribution of MySQL
+       (MariaDB-server and MariaDB-compat). To try to get an
+       exhaustive list of packages installed for this third-party
+       distribution of MySQL, it might be helpful to search for
+       installed packages of similar names with, for example, the
+       following command:
+shell> yum list installed mariadb\*
+       This is a sample output for the command:
+MariaDB-common.i686                      10.0.4-1
+   @mariadb
+MariaDB-compat.i686                      10.0.4-1
+   @mariadb
+MariaDB-server.i686                      10.0.4-1
+   @mariadb
+       From the command output, we can identify all the installed
+       packages (MariaDB-common, MariaDB-compat, and MariaDB-server)
+       and the third-party Yum repository from which they were
+       installed (named mariadb).
+       The next step is to stop Yum from receiving packages from the
+       third-party Yum repository:
+shell> sudo yum-config-manager --disable mariadb
+       Note
+       For platforms like Fedora 19 that install MySQL from the
+       native repositories, this step is usually not required, unless
+       you have explicitly added a third-party Yum repository for
+       MySQL packages.
+
+    3. Adding the MySQL Yum Repository
+       Once the third-party Yum repository has been disabled, add the
+       MySQL Yum repository to your system's repository list by
+       following the instructions given in Section 2.5.1, "."
+
+    4. Uninstalling the Third-Party MySQL Distribution and Installing
+       MySQL with the MySQL Yum Repository
+       The installed third-party MySQL distribution must first be
+       uninstalled before you can use the MySQL Yum repository to
+       install MySQL, or the installation process will give an error.
+       Assuming that, as in the example above, the third-part MySQL
+       packages you have found are named MariaDB-common,
+       MariaDB-compat, and MariaDB-server, uninstall them with the
+       following command:
+shell> sudo yum remove MariaDB-common MariaDB-compat MariaDB-server
+       Note
+       If your third-party MySQL distribution was not installed by
+       Yum or by an RPM installer, you will not be able to detect and
+       then uninstall it by Yum. If you are not sure what to do in
+       that case, consult a system administrator or the original
+       third-party distributor.
+       Then, install MySQL from the MySQL Yum repository with the
+       following command:
+shell> sudo yum install mysql-server
+       The MySQL server and other components required to run the
+       server, including the client, the shared client libraries, and
+       the common error messages and character sets for client and
+       server, are now installed from the MySQL Yum repository. To
+       install more components for MySQL, see Section 2.5.1, "."
+       Follow the postinstallation procedures explained in Section
+       2.10, "Postinstallation Setup and Testing."
+
+2.5.3. Installing MySQL on Linux Using RPM Packages
 
    Note
 
@@ -3278,10 +3598,13 @@ Additional Resources
    instructions at the end of this section.
 
    The recommended way to install MySQL on RPM-based Linux
-   distributions is by using the RPM packages. The RPMs that we
-   provide to the community should work on all versions of Linux that
-   support RPM packages and use glibc 2.3. To obtain RPM packages,
-   see Section 2.1.3, "How to Get MySQL."
+   distributions that use glibc is by using the RPM packages provided
+   by MySQL. There are two methods for doing so: for EL6-based
+   platforms and Fedora 18 and 19, this can be done using the MySQL
+   Yum repository (see Section 2.5.1, "Installing MySQL on Linux
+   Using the MySQL Yum Repository" for details); for other platforms,
+   we provide various RPM packages that work for different platforms,
+   and this section explains how these packages work.
 
    For non-RPM Linux distributions, you can install MySQL using a
    .tar.gz package. See Section 2.2, "Installing MySQL on Unix/Linux
@@ -3552,7 +3875,7 @@ shell> rpm -ivh MySQL-server-NEWVERSION.glibc23.i386.rpm
 shell> yum remove MySQL-server-OLDVERSION.glibc23.i386.rpm
 shell> yum install MySQL-server-NEWVERSION.glibc23.i386.rpm
 
-2.5.2. Installing MySQL on Linux Using Debian Packages
+2.5.4. Installing MySQL on Linux Using Debian Packages
 
    Oracle provides Debian packages for installation on Debian or
    Debian-like Linux systems. To obtain a package, see Section 2.1.3,
@@ -3587,24 +3910,30 @@ shell> dpkg -i mysql-MVER-DVER-CPU.deb
    already present on your system:
 shell> apt-get install libaio1
 
-2.5.3. Installing MySQL on Linux Using Native Package Managers
+2.5.5. Installing MySQL on Linux Using Native Package Managers
 
-   Many Linux distributions include a version of the MySQL server,
-   client tools, and development components into the standard package
-   management system built into distributions such as Fedora, Debian,
-   Ubuntu, and Gentoo. This section provides basic instructions for
-   installing MySQL using these systems.
+   Many Linux distributions such as Fedora, Debian, Ubuntu, and
+   Gentoo include a version of the MySQL server, client tools, and
+   development components in their standard package management
+   system. This section provides basic instructions for installing
+   MySQL using those package management systems.
    Important
 
-   Native package installations can take care of the download and
-   dependencies required to run MySQL, but the MySQL version will
-   often be some way behind the currently available release. You will
-   also normally be unable to install development releases, as these
-   are not usually made available in the native repository.
+   Native package are often several versions behind the currently
+   available release. You will also normally be unable to install
+   development milestone releases (DMRs), as these are not usually
+   made available in the native repositories. Before proceeding, we
+   recommend that you check out the other installation options
+   described in Section 2.5, "Installing MySQL on Linux."
 
    Distribution specific instructions are shown below:
 
      * Red Hat Linux, Fedora, CentOS
+       Note
+       For EL6-based Linux platforms and Fedora 18 and 19, you can
+       install MySQL using the MySQL Yum repository. See Section
+       2.5.1, "Installing MySQL on Linux Using the MySQL Yum
+       Repository" for details.
        For Red Hat and similar distributions, the MySQL distribution
        is divided into a number of separate packages, mysql for the
        client tools, mysql-server for the server and associated
@@ -3931,15 +4260,15 @@ Error in accept: Protocol error
    To use this package, download the corresponding
    mysql-VERSION-solaris10-PLATFORM.pkg.gz file, then uncompress it.
    For example:
-shell> gunzip mysql-5.6.15-solaris10-x86_64.pkg.gz
+shell> gunzip mysql-5.6.16-solaris10-x86_64.pkg.gz
 
    To install a new package, use pkgadd and follow the onscreen
    prompts. You must have root privileges to perform this operation:
-shell> pkgadd -d mysql-5.6.15-solaris10-x86_64.pkg
+shell> pkgadd -d mysql-5.6.16-solaris10-x86_64.pkg
 
 The following packages are available:
   1  mysql     MySQL Community Server (GPL)
-               (i86pc) 5.6.15
+               (i86pc) 5.6.16
 
 Select package(s) you wish to process (or 'all' to process
 all packages). (default: all) [?,??,q]:
@@ -3977,7 +4306,7 @@ shell> ln /etc/init.d/mysql /etc/rc0.d/K02mysql
    The typical upgrade sequence is therefore:
 shell> mysqladmin shutdown
 shell> pkgrm mysql
-shell> pkgadd -d mysql-5.6.15-solaris10-x86_64.pkg
+shell> pkgadd -d mysql-5.6.16-solaris10-x86_64.pkg
 shell> mysqld_safe &
 shell> mysql_upgrade
 
@@ -4215,7 +4544,7 @@ Source Installation Methods
        Standard distributions are available as compressed tar files,
        Zip archives, or RPM packages. Distribution files have names
        of the form mysql-VERSION.tar.gz, mysql-VERSION.zip, or
-       mysql-VERSION.rpm, where VERSION is a number like 5.6.15. File
+       mysql-VERSION.rpm, where VERSION is a number like 5.6.16. File
        names for source distributions can be distinguished from those
        for precompiled binary distributions in that source
        distribution names are generic and include no platform name,
@@ -4359,7 +4688,7 @@ Source Installation System Requirements
 shell> rpmbuild --rebuild --clean MySQL-VERSION.src.rpm
 
    The result is one or more binary RPM packages that you install as
-   indicated in Section 2.5.1, "Installing MySQL on Linux Using RPM
+   indicated in Section 2.5.3, "Installing MySQL on Linux Using RPM
    Packages."
 
    The sequence for installation from a compressed tar file or Zip
@@ -4687,7 +5016,7 @@ shell> bzr log
    MYSQL_UNIX_ADDR options different from those used by your
    production server. For additional information about preventing
    multiple servers from interfering with each other, see Section
-   5.6, "Running Multiple MySQL Instances on One Machine."
+   5.3, "Running Multiple MySQL Instances on One Machine."
 
    Play hard with your new installation. For example, try to make new
    features crash. Start by running make test. See Section 23.1.2,
@@ -4765,6 +5094,7 @@ shell> ccmake .
    ODBC_LIB_DIR ODBC library directory
    OPTIMIZER_TRACE Whether to support optimizer tracing 5.6.3
    SYSCONFDIR Option file directory
+   WITH_ASAN Enable address sanitizer OFF 5.6.15
    WITH_BUNDLED_LIBEVENT Use bundled libevent when building
    ndbmemcache ON
    WITH_BUNDLED_MEMCACHED Use bundled memcached when building
@@ -4948,19 +5278,6 @@ shell> cmake . -DINSTALL_LAYOUT=SVR4 -DMYSQL_DATADIR=/var/mysql/data
        This value can be set at server startup with the --datadir
        option.
 
-     * -DOPTIMIZER_TRACE=bool
-       Whether to support optimizer tracing. See MySQL Internals:
-       Tracing the Optimizer
-       (http://dev.mysql.com/doc/internals/en/optimizer-tracing.html)
-       . This option was added in MySQL 5.6.3.
-
-     * -DSYSCONFDIR=dir_name
-       The default my.cnf option file directory.
-       This location cannot be set at server startup, but you can
-       start the server with a given option file using the
-       --defaults-file=file_name option, where file_name is the full
-       path name to the file.
-
      * -DODBC_INCLUDES=dir_name
        The location of the ODBC includes directory, and may be used
        while configuring Connector/ODBC.
@@ -4968,6 +5285,13 @@ shell> cmake . -DINSTALL_LAYOUT=SVR4 -DMYSQL_DATADIR=/var/mysql/data
      * -DODBC_LIB_DIR=dir_name
        The location of the ODBC library directory, and may be used
        while configuring Connector/ODBC.
+
+     * -DSYSCONFDIR=dir_name
+       The default my.cnf option file directory.
+       This location cannot be set at server startup, but you can
+       start the server with a given option file using the
+       --defaults-file=file_name option, where file_name is the full
+       path name to the file.
 
 Storage Engine Options
 
@@ -5066,7 +5390,7 @@ Feature Options
 
      * -DENABLE_DTRACE=bool
        Whether to include support for DTrace probes. For information
-       about DTrace, wee Section 5.7, "Tracing mysqld Using DTrace"
+       about DTrace, wee Section 5.4, "Tracing mysqld Using DTrace"
 
      * -DENABLE_GCOV=bool
        Whether to include gcov support (Linux only).
@@ -5115,6 +5439,17 @@ Feature Options
        default is /tmp/mysql.sock.
        This value can be set at server startup with the --socket
        option.
+
+     * -DOPTIMIZER_TRACE=bool
+       Whether to support optimizer tracing. See MySQL Internals:
+       Tracing the Optimizer
+       (http://dev.mysql.com/doc/internals/en/optimizer-tracing.html)
+       . This option was added in MySQL 5.6.3.
+
+     * -DWITH_ASAN=bool
+       Whether to enable address sanitization, for compilers that
+       support it. The default is off. This option was added in MySQL
+       5.6.15.
 
      * -DWITH_DEBUG=bool
        Whether to include debugging support.
@@ -5203,6 +5538,9 @@ Feature Options
        For information about using SSL support, see Section 6.3.9,
        "Using SSL for Secure Connections."
 
+     * -DWITH_UNIXODBC=1
+       Enables unixODBC support, for Connector/ODBC.
+
      * -DWITH_ZLIB=zlib_type
        Some features require that the server be built with
        compression library support, such as the COMPRESS() and
@@ -5213,9 +5551,6 @@ Feature Options
             distribution.
 
           + system: Use the system zlib library. This is the default.
-
-     * -DWITH_UNIXODBC=1
-       Enables unixODBC support, for Connector/ODBC.
 
      * -DWITHOUT_SERVER=bool
        Whether to build without the MySQL server. The default is OFF,
@@ -5428,16 +5763,16 @@ ATCH
 
 2.10. Postinstallation Setup and Testing
 
-   This section discusses post-installation items for Unix systems.
-   If you are using Windows, see Section 2.3.8, "Windows
+   This section discusses post-installation items for Unix-like
+   systems. If you are using Windows, see Section 2.3.8, "Windows
    Postinstallation Procedures."
 
    After installing MySQL, there are some items that you should
    address. For example:
 
      * You should initialize the data directory and create the MySQL
-       grant tables, as describe in Section 2.10.1, "Unix
-       Postinstallation Procedures."
+       grant tables, as describe in Section 2.10.1, "Postinstallation
+       Procedures for Unix-like Systems."
 
      * An important security concern is that the initial accounts in
        the grant tables have no passwords. You should assign
@@ -5457,18 +5792,19 @@ ATCH
        account management in Section 6.2, "The MySQL Access Privilege
        System," and Section 6.3, "MySQL User Account Management."
 
-2.10.1. Unix Postinstallation Procedures
+2.10.1. Postinstallation Procedures for Unix-like Systems
 
-   After installing MySQL on Unix, you must initialize the grant
-   tables, start the server, and make sure that the server works
-   satisfactorily. You may also wish to arrange for the server to be
-   started and stopped automatically when your system starts and
-   stops. You should also assign passwords to the accounts in the
+   After installing MySQL on a Unix-like system, you must initialize
+   the grant tables, start the server, and make sure that the server
+   works satisfactorily. You may also wish to arrange for the server
+   to be started and stopped automatically when your system starts
+   and stops. You should also assign passwords to the accounts in the
    grant tables.
 
-   On Unix, the grant tables are set up by the mysql_install_db
-   program. For some installation methods, this program is run for
-   you automatically if an existing database cannot be found.
+   On a Unix-like system, the grant tables are set up by the
+   mysql_install_db program. For some installation methods, this
+   program is run for you automatically if an existing database
+   cannot be found.
 
      * If you install MySQL on Linux using RPM distributions, the
        server RPM runs mysql_install_db.
@@ -5509,9 +5845,10 @@ ATCH
        installation, represented here by BASEDIR:
 shell> cd BASEDIR
        BASEDIR is the installation directory for your MySQL instance.
-       It is likely to be something like /usr/local/mysql or
-       /usr/local. The following steps assume that you have changed
-       location to this directory.
+       It is likely to be something like /usr/local/mysql,
+       /usr/local, or /usr/bin (for installation wtih MySQL Yum
+       repository, or other means). The following steps assume that
+       you have changed location to this directory.
        You will find several files and subdirectories in the BASEDIR
        directory. The most important for installation purposes are
        the bin and scripts subdirectories:
@@ -5662,10 +5999,10 @@ shell> bin/mysqladmin variables
        on your platform and version of MySQL, but should be similar
        to that shown here:
 shell> bin/mysqladmin version
-mysqladmin  Ver 14.12 Distrib 5.6.15, for pc-linux-gnu on i686
+mysqladmin  Ver 14.12 Distrib 5.6.16, for pc-linux-gnu on i686
 ...
 
-Server version          5.6.15
+Server version          5.6.16
 Protocol version        10
 Connection              Localhost via UNIX socket
 UNIX socket             /var/lib/mysql/mysql.sock
@@ -5846,7 +6183,7 @@ Can't start server: Bind on TCP/IP port:
 Address already in use
 Can't start server: Bind on unix socket...
        For instructions on setting up multiple servers, see Section
-       5.6, "Running Multiple MySQL Instances on One Machine."
+       5.3, "Running Multiple MySQL Instances on One Machine."
 
      * You do not have write access to the /tmp directory
        If you do not have write access to create temporary files or a
@@ -5979,7 +6316,7 @@ shell> mysql.server stop
    If you use the Linux server RPM package
    (MySQL-server-VERSION.rpm), or a native Linux package
    installation, the mysql.server script may be installed in the
-   /etc/init.d directory with the name mysql. See Section 2.5.1,
+   /etc/init.d directory with the name mysql. See Section 2.5.3,
    "Installing MySQL on Linux Using RPM Packages," for more
    information on the Linux RPM packages.
 
@@ -6079,9 +6416,9 @@ basedir=/usr/local/mysql
 2.10.1.3. Starting and Troubleshooting the MySQL Server
 
    This section provides troubleshooting suggestions for problems
-   starting the server on Unix. If you are using Windows, see Section
-   2.3.6, "Troubleshooting a Microsoft Windows MySQL Server
-   Installation."
+   starting the server on a Unix-like system. If you are using
+   Windows, see Section 2.3.6, "Troubleshooting a Microsoft Windows
+   MySQL Server Installation."
 
    If you have problems starting the server, here are some things to
    try:
@@ -6089,12 +6426,12 @@ basedir=/usr/local/mysql
      * Check the error log to see why the server does not start. Log
        files are located in the data directory (typically C:\Program
        Files\MySQL\MySQL Server 5.6\data on Windows,
-       /usr/local/mysql/data for a Unix binary distribution, and
-       /usr/local/var for a Unix source distribution). Look in the
-       data directory for files with names of the form host_name.err
-       and host_name.log, where host_name is the name of your server
-       host. Then examine the last few lines of these files. On Unix,
-       use tail to display them:
+       /usr/local/mysql/data for a Unix/Linux binary distribution,
+       and /usr/local/var for a Unix/Linux source distribution). Look
+       in the data directory for files with names of the form
+       host_name.err and host_name.log, where host_name is the name
+       of your server host. Then examine the last few lines of these
+       files. Use tail to display them:
 shell> tail host_name.err
 shell> tail host_name.log
 
@@ -6104,8 +6441,8 @@ shell> tail host_name.log
        to use storage engines that support transactional tables
        (InnoDB, NDB), be sure that you have them configured the way
        you want before starting the server. If you are using InnoDB
-       tables, see Section 14.2.1.2, "Configuring InnoDB" for
-       guidelines and Section 14.2.6, "InnoDB Startup Options and
+       tables, see Section 14.2.4, "InnoDB Configuration" for
+       guidelines and Section 14.2.14, "InnoDB Startup Options and
        System Variables" for option syntax.
        Although storage engines use default values for options that
        you omit, Oracle recommends that you review the available
@@ -6156,7 +6493,7 @@ shell> mysqladmin -h host_name variables
        directories so that the server has the right to use them. You
        can also start the server as root, but this raises security
        issues and should be avoided.
-       On Unix, change location into the data directory and check the
+       Change location into the data directory and check the
        ownership of the data directory and its contents to make sure
        the server has access. For example, if the data directory is
        /usr/local/mysql/var, use this command:
@@ -6185,7 +6522,7 @@ Can't start server: Bind on unix socket...
        running. If so, shut down the server before starting mysqld
        again. (If another server is running, and you really want to
        run multiple servers, you can find information about how to do
-       so in Section 5.6, "Running Multiple MySQL Instances on One
+       so in Section 5.3, "Running Multiple MySQL Instances on One
        Machine.")
        If no other server is running, execute the command telnet
        your_host_name tcp_ip_port_number. (The default MySQL port
@@ -6218,7 +6555,8 @@ Can't start server: Bind on unix socket...
      * On Unix, the mysql_install_db program populates the grant
        tables. Some installation methods run this program for you.
        Others require that you execute it manually. For details, see
-       Section 2.10.1, "Unix Postinstallation Procedures."
+       Section 2.10.1, "Postinstallation Procedures for Unix-like
+       Systems."
 
    The mysql.user grant table defines the initial MySQL user accounts
    and their access privileges:
@@ -6509,7 +6847,7 @@ mysql> DROP DATABASE test;
        mysql database that contains the grant tables. See Section
        7.2, "Database Backup Methods."
 
-     * Read all the notes in Section 2.11.1.1, "Upgrading from MySQL
+     * Read all the notes in Section 2.11.1.2, "Upgrading from MySQL
        5.5 to 5.6." These notes enable you to identify upgrade issues
        that apply to your current MySQL installation. Some
        incompatibilities discussed in that section require your
@@ -6519,7 +6857,7 @@ mysql> DROP DATABASE test;
      * Read the Release Notes
        (http://dev.mysql.com/doc/relnotes/mysql/5.6/en/) as well,
        which provide information about features that are new in MySQL
-       5.6 or differ from from those found in earlier MySQL releases.
+       5.6 or differ from those found in earlier MySQL releases.
 
      * After upgrading to a new version of MySQL, run mysql_upgrade
        (see Section 4.4.7, "mysql_upgrade --- Check and Upgrade MySQL
@@ -6571,6 +6909,12 @@ mysql> DROP DATABASE test;
        describing how the server interprets references to different
        kinds of functions.
 
+   For EL6-based Linux platforms (for example, Red Hat Enterprise
+   Linux 6, Oracle Linux 6, and CentOS 6), you can perform an
+   in-place upgrade of MySQL and its components to the latest GA
+   releases with the MySQL Yum repository. See Section 2.11.1.1,
+   "Upgrading MySQL with the MySQL Yum Repository."
+
    For upgrades between versions of a MySQL release series that has
    reached General Availability status, you can move the MySQL format
    files and data files between different versions on systems with
@@ -6620,7 +6964,92 @@ mysql> DROP DATABASE test;
    applies to other MySQL interfaces as well, such as PHP mysql
    extensions and the Python MySQLdb module.
 
-2.11.1.1. Upgrading from MySQL 5.5 to 5.6
+2.11.1.1. Upgrading MySQL with the MySQL Yum Repository
+
+   For EL6-based Linux platforms (for example, Red Hat Enterprise
+   Linux 6, Oracle Linux 6, and CentOS 6) and Fedora 18 and 19, you
+   can upgrade MySQL and its components to the latest GA releases
+   with the MySQL Yum repository.
+   Note
+
+   Before you perform any upgrade actions, please pay attention to
+   the following:
+
+     * If your version of MySQL is more than one series older than
+       the latest GA series (for example, assuming the current GA
+       release series is 5.6 and you have 5.1.x installed right now),
+       do NOT use the following instructions to update MySQL, and do
+       NOT enable the MySQL Yum repository on your system until you
+       have upgraded MySQL by other means (see Section 2.11.1,
+       "Upgrading MySQL") to at least the last GA series before the
+       latest one.
+
+     * Before performing any update to MySQL, follow carefully the
+       instructions in Section 2.11.1, "Upgrading MySQL." Among other
+       instructions discussed there, it is especially important to
+       back up your database before the update.
+
+     * If your MySQL installation is a third-party distribution,
+       follow the instructions in Section 2.5.2, "Replacing a
+       Third-Party Distribution of MySQL Using the MySQL Yum
+       Repository" for upgrading the installation.
+
+   The Yum update performs an in-place update for MySQL (that is,
+   replaces the old version of the software and then runs the new
+   version off the old version's data files). Assuming that you
+   already have the MySQL Yum repository on your system's repository
+   list (see Section 2.5.1, "" for details), you can update MySQL and
+   its components by the following command:
+shell> sudo yum update mysql-server
+
+   Alternatively, you can update MySQL and its components by telling
+   Yum to update everything on your system (this might take
+   considerably more time):
+shell> sudo yum update
+
+   The MySQL server always restarts after an update by Yum. Once the
+   server restarts, you should run mysql_upgrade to check and
+   possibly resolve any incompatibilities between the old data and
+   the upgraded software. mysql_upgrade also performs other
+   functions; see Section 4.4.7, "mysql_upgrade --- Check and Upgrade
+   MySQL Tables" for details.
+
+   Although we recommend that you update all the MySQL components at
+   the same time, you can also update only a specific component. You
+   can use the following command to list all the installed packages
+   for the MySQL components, which can all be updated with the MySQL
+   Yum repository:
+shell> sudo yum list installed | grep "^mysql"
+
+   After identifying the package name of the component of your
+   choice, update the package with the following command, replacing
+   package-name with the name of the package:
+shell> sudo yum update package-name
+
+Upgrading to the Shared Client Libraries of MySQL 5.6
+
+   After updating to the latest GA version of MySQL using the Yum
+   repository, applications compiled with older versions of the
+   shared client libraries should continue to work.
+
+   If you recompile applications and dynamically link them with the
+   updated libraries: As typical with new versions of shared
+   libraries where there are differences or additions in symbol
+   versioning between the newer and older libraries (in this case,
+   between the newer, standard MySQL 5.6 shared client libraries and
+   some older---prior or variant---versions of the shared libraries
+   shipped natively by the EL6-based platforms, Fedora 18, and Fedora
+   19, or from some other sources), any applications compiled using
+   the updated, newer shared libraries will require those updated
+   libraries on systems where the applications are deployed. And, as
+   expected, if those libraries are not in place, the applications
+   requiring the shared libraries will fail. So, be sure to deploy
+   the packages for the shared libraries from MySQL on those systems.
+   You can do this by adding the MySQL Yum repository to the systems
+   (see Section 2.5.1, "") and install the latest shared libraries
+   using the instructions given in Section 2.5.1, "."
+
+2.11.1.2. Upgrading from MySQL 5.5 to 5.6
 
    Note
 
@@ -6864,7 +7293,7 @@ CREATE TABLE t1 (a INT)
        5.6.4 differs from storage required for tables created in
        5.6.4 and later. This is due to a change in 5.6.4 that permits
        these temporal types to have a fractional part. After
-       upgrading from MySQL 5.5 to to MySQL 5.6.4 or a later, it is
+       upgrading from MySQL 5.5 to MySQL 5.6.4 or later, it is
        recommended that you also upgrade from MySQL 5.5 to MySQL 5.6
        TIME, DATETIME, and TIMESTAMP types. ALTER TABLE currently
        allows the creation of tables containing temporal columns in
@@ -6969,7 +7398,7 @@ SQL Changes
        stored program local variables (for example with a SET
        var_name = DEFAULT statement). This was not previously
        supported, or documented as permitted, but is flagged as an
-       incompatible change in case existing code inadvertantly used
+       incompatible change in case existing code inadvertently used
        this construct. It remains permissible to assign DEFAULT to
        system variables, as before, but assigning DEFAULT to
        parameters or local variables now results in a syntax error.
@@ -7227,7 +7656,7 @@ Index Incompatibilities
 
    In MySQL 5.6.3, the length limit for index prefix keys is
    increased from 767 bytes to 3072 bytes, for InnoDB tables using
-   ROW_FORMAT=DYNAMIC or ROW_FORMAT=COMPRESSED. See Section 14.2.7,
+   ROW_FORMAT=DYNAMIC or ROW_FORMAT=COMPRESSED. See Section 14.2.7.7,
    "Limits on InnoDB Tables" for details. This change is also
    backported to MySQL 5.5.14. If you downgrade from one of these
    releases or higher, to an earlier release with a lower length

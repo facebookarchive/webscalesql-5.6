@@ -1287,7 +1287,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 965 "/export/home/pb2/build/sb_0-10188203-1378798362.68/mysql-5.6.14-release-export-5685011_gpl/sql/sql_yacc.yy"
+#line 965 "/export/home/pb2/build/sb_0-10831757-1384711043.21/mysql-5.6.15-release-export-5999629_gpl/sql/sql_yacc.yy"
 
   int  num;
   ulong ulong_num;
@@ -1348,7 +1348,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 1352 "/export/home/pb2/build/sb_0-10188203-1378798362.68/dist_GPL/sql/sql_yacc.h"
+#line 1352 "/export/home/pb2/build/sb_0-10831757-1384711043.21/dist_GPL/sql/sql_yacc.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

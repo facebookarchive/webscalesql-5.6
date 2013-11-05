@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: \fBmysqlcheck\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 09/09/2013
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 11/15/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLCHECK\FR" "1" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLCHECK\FR" "1" "11/15/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -217,9 +217,7 @@ Section\ \&4.2.3.4, \(lqCommand-Line Options that Affect Option-File Handling\(r
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: help option
-.\" help option: mysqlcheck
-\fB\-\-help\fR,
+.\" mysqlcheck: help option.\" help option: mysqlcheck\fB\-\-help\fR,
 \fB\-?\fR
 .sp
 Display a help message and exit\&.
@@ -233,9 +231,7 @@ Display a help message and exit\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: all-databases option
-.\" all-databases option: mysqlcheck
-\fB\-\-all\-databases\fR,
+.\" mysqlcheck: all-databases option.\" all-databases option: mysqlcheck\fB\-\-all\-databases\fR,
 \fB\-A\fR
 .sp
 Check all tables in all databases\&. This is the same as using the
@@ -251,9 +247,7 @@ option and naming all the databases on the command line\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: all-in-1 option
-.\" all-in-1 option: mysqlcheck
-\fB\-\-all\-in\-1\fR,
+.\" mysqlcheck: all-in-1 option.\" all-in-1 option: mysqlcheck\fB\-\-all\-in\-1\fR,
 \fB\-1\fR
 .sp
 Instead of issuing a statement for each table, execute a single statement for each database that names all the tables from that database to be processed\&.
@@ -267,9 +261,7 @@ Instead of issuing a statement for each table, execute a single statement for ea
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: analyze option
-.\" analyze option: mysqlcheck
-\fB\-\-analyze\fR,
+.\" mysqlcheck: analyze option.\" analyze option: mysqlcheck\fB\-\-analyze\fR,
 \fB\-a\fR
 .sp
 Analyze the tables\&.
@@ -283,9 +275,7 @@ Analyze the tables\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: auto-repair option
-.\" auto-repair option: mysqlcheck
-\fB\-\-auto\-repair\fR
+.\" mysqlcheck: auto-repair option.\" auto-repair option: mysqlcheck\fB\-\-auto\-repair\fR
 .sp
 If a checked table is corrupted, automatically fix it\&. Any necessary repairs are done after all tables have been checked\&.
 .RE
@@ -298,9 +288,7 @@ If a checked table is corrupted, automatically fix it\&. Any necessary repairs a
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: bind-address option
-.\" bind-address option: mysqlcheck
-\fB\-\-bind\-address=\fR\fB\fIip_address\fR\fR
+.\" mysqlcheck: bind-address option.\" bind-address option: mysqlcheck\fB\-\-bind\-address=\fR\fB\fIip_address\fR\fR
 .sp
 On a computer having multiple network interfaces, this option can be used to select which interface is employed when connecting to the MySQL server\&.
 .sp
@@ -315,9 +303,7 @@ This option is supported beginning with MySQL 5\&.6\&.1\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: character-sets-dir option
-.\" character-sets-dir option: mysqlcheck
-\fB\-\-character\-sets\-dir=\fR\fB\fIpath\fR\fR
+.\" mysqlcheck: character-sets-dir option.\" character-sets-dir option: mysqlcheck\fB\-\-character\-sets\-dir=\fR\fB\fIpath\fR\fR
 .sp
 The directory where character sets are installed\&. See
 Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&.
@@ -331,9 +317,7 @@ Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: check option
-.\" check option: mysqlcheck
-\fB\-\-check\fR,
+.\" mysqlcheck: check option.\" check option: mysqlcheck\fB\-\-check\fR,
 \fB\-c\fR
 .sp
 Check the tables for errors\&. This is the default operation\&.
@@ -347,9 +331,7 @@ Check the tables for errors\&. This is the default operation\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: check-only-changed option
-.\" check-only-changed option: mysqlcheck
-\fB\-\-check\-only\-changed\fR,
+.\" mysqlcheck: check-only-changed option.\" check-only-changed option: mysqlcheck\fB\-\-check\-only\-changed\fR,
 \fB\-C\fR
 .sp
 Check only tables that have changed since the last check or that have not been closed properly\&.
@@ -363,9 +345,7 @@ Check only tables that have changed since the last check or that have not been c
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: check-upgrade option
-.\" check-upgrade option: mysqlcheck
-\fB\-\-check\-upgrade\fR,
+.\" mysqlcheck: check-upgrade option.\" check-upgrade option: mysqlcheck\fB\-\-check\-upgrade\fR,
 \fB\-g\fR
 .sp
 Invoke
@@ -387,9 +367,7 @@ options\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: compress option
-.\" compress option: mysqlcheck
-\fB\-\-compress\fR
+.\" mysqlcheck: compress option.\" compress option: mysqlcheck\fB\-\-compress\fR
 .sp
 Compress all information sent between the client and the server if both support compression\&.
 .RE
@@ -402,9 +380,7 @@ Compress all information sent between the client and the server if both support 
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: databases option
-.\" databases option: mysqlcheck
-\fB\-\-databases\fR,
+.\" mysqlcheck: databases option.\" databases option: mysqlcheck\fB\-\-databases\fR,
 \fB\-B\fR
 .sp
 Process all tables in the named databases\&. Normally,
@@ -420,9 +396,7 @@ treats the first name argument on the command line as a database name and follow
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: debug option
-.\" debug option: mysqlcheck
-\fB\-\-debug[=\fR\fB\fIdebug_options\fR\fR\fB]\fR,
+.\" mysqlcheck: debug option.\" debug option: mysqlcheck\fB\-\-debug[=\fR\fB\fIdebug_options\fR\fR\fB]\fR,
 \fB\-# [\fR\fB\fIdebug_options\fR\fR\fB]\fR
 .sp
 Write a debugging log\&. A typical
@@ -440,9 +414,7 @@ string is
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: debug-check option
-.\" debug-check option: mysqlcheck
-\fB\-\-debug\-check\fR
+.\" mysqlcheck: debug-check option.\" debug-check option: mysqlcheck\fB\-\-debug\-check\fR
 .sp
 Print some debugging information when the program exits\&.
 .RE
@@ -455,9 +427,7 @@ Print some debugging information when the program exits\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: debug-info option
-.\" debug-info option: mysqlcheck
-\fB\-\-debug\-info\fR
+.\" mysqlcheck: debug-info option.\" debug-info option: mysqlcheck\fB\-\-debug\-info\fR
 .sp
 Print debugging information and memory and CPU usage statistics when the program exits\&.
 .RE
@@ -470,9 +440,7 @@ Print debugging information and memory and CPU usage statistics when the program
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: default-character-set option
-.\" default-character-set option: mysqlcheck
-\fB\-\-default\-character\-set=\fR\fB\fIcharset_name\fR\fR
+.\" mysqlcheck: default-character-set option.\" default-character-set option: mysqlcheck\fB\-\-default\-character\-set=\fR\fB\fIcharset_name\fR\fR
 .sp
 Use
 \fIcharset_name\fR
@@ -488,9 +456,7 @@ Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: extended option
-.\" extended option: mysqlcheck
-\fB\-\-extended\fR,
+.\" mysqlcheck: extended option.\" extended option: mysqlcheck\fB\-\-extended\fR,
 \fB\-e\fR
 .sp
 If you are using this option to check tables, it ensures that they are 100% consistent but takes a long time\&.
@@ -506,9 +472,7 @@ If you are using this option to repair tables, it runs an extended repair that m
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: default-auth option
-.\" default-auth option: mysqlcheck
-\fB\-\-default\-auth=\fR\fB\fIplugin\fR\fR
+.\" mysqlcheck: default-auth option.\" default-auth option: mysqlcheck\fB\-\-default\-auth=\fR\fB\fIplugin\fR\fR
 .sp
 The client\-side authentication plugin to use\&. See
 Section\ \&6.3.7, \(lqPluggable Authentication\(rq\&.
@@ -524,9 +488,7 @@ This option was added in MySQL 5\&.6\&.2\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: fast option
-.\" fast option: mysqlcheck
-\fB\-\-fast\fR,
+.\" mysqlcheck: fast option.\" fast option: mysqlcheck\fB\-\-fast\fR,
 \fB\-F\fR
 .sp
 Check only tables that have not been closed properly\&.
@@ -540,9 +502,7 @@ Check only tables that have not been closed properly\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: fix-db-names option
-.\" fix-db-names option: mysqlcheck
-\fB\-\-fix\-db\-names\fR
+.\" mysqlcheck: fix-db-names option.\" fix-db-names option: mysqlcheck\fB\-\-fix\-db\-names\fR
 .sp
 Convert database names to 5\&.1 format\&. Only database names that contain special characters are affected\&.
 .RE
@@ -555,9 +515,7 @@ Convert database names to 5\&.1 format\&. Only database names that contain speci
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: fix-table-names option
-.\" fix-table-names option: mysqlcheck
-\fB\-\-fix\-table\-names\fR
+.\" mysqlcheck: fix-table-names option.\" fix-table-names option: mysqlcheck\fB\-\-fix\-table\-names\fR
 .sp
 Convert table names to 5\&.1 format\&. Only table names that contain special characters are affected\&. This option also applies to views\&.
 .RE
@@ -570,9 +528,7 @@ Convert table names to 5\&.1 format\&. Only table names that contain special cha
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: force option
-.\" force option: mysqlcheck
-\fB\-\-force\fR,
+.\" mysqlcheck: force option.\" force option: mysqlcheck\fB\-\-force\fR,
 \fB\-f\fR
 .sp
 Continue even if an SQL error occurs\&.
@@ -586,9 +542,7 @@ Continue even if an SQL error occurs\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: host option
-.\" host option: mysqlcheck
-\fB\-\-host=\fR\fB\fIhost_name\fR\fR,
+.\" mysqlcheck: host option.\" host option: mysqlcheck\fB\-\-host=\fR\fB\fIhost_name\fR\fR,
 \fB\-h \fR\fB\fIhost_name\fR\fR
 .sp
 Connect to the MySQL server on the given host\&.
@@ -602,9 +556,7 @@ Connect to the MySQL server on the given host\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: medium-check option
-.\" medium-check option: mysqlcheck
-\fB\-\-medium\-check\fR,
+.\" mysqlcheck: medium-check option.\" medium-check option: mysqlcheck\fB\-\-medium\-check\fR,
 \fB\-m\fR
 .sp
 Do a check that is faster than an
@@ -620,9 +572,7 @@ operation\&. This finds only 99\&.99% of all errors, which should be good enough
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: optimize option
-.\" optimize option: mysqlcheck
-\fB\-\-optimize\fR,
+.\" mysqlcheck: optimize option.\" optimize option: mysqlcheck\fB\-\-optimize\fR,
 \fB\-o\fR
 .sp
 Optimize the tables\&.
@@ -636,9 +586,7 @@ Optimize the tables\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: password option
-.\" password option: mysqlcheck
-\fB\-\-password[=\fR\fB\fIpassword\fR\fR\fB]\fR,
+.\" mysqlcheck: password option.\" password option: mysqlcheck\fB\-\-password[=\fR\fB\fIpassword\fR\fR\fB]\fR,
 \fB\-p[\fR\fB\fIpassword\fR\fR\fB]\fR
 .sp
 The password to use when connecting to the server\&. If you use the short option form (\fB\-p\fR), you
@@ -665,9 +613,7 @@ Section\ \&6.1.2.1, \(lqEnd-User Guidelines for Password Security\(rq\&. You can
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: pipe option
-.\" pipe option: mysql
-\fB\-\-pipe\fR,
+.\" mysqlcheck: pipe option.\" pipe option: mysql\fB\-\-pipe\fR,
 \fB\-W\fR
 .sp
 On Windows, connect to the server using a named pipe\&. This option applies only if the server supports named\-pipe connections\&.
@@ -681,9 +627,7 @@ On Windows, connect to the server using a named pipe\&. This option applies only
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: plugin-dir option
-.\" plugin-dir option: mysqlcheck
-\fB\-\-plugin\-dir=\fR\fB\fIpath\fR\fR
+.\" mysqlcheck: plugin-dir option.\" plugin-dir option: mysqlcheck\fB\-\-plugin\-dir=\fR\fB\fIpath\fR\fR
 .sp
 The directory in which to look for plugins\&. It may be necessary to specify this option if the
 \fB\-\-default\-auth\fR
@@ -703,9 +647,7 @@ This option was added in MySQL 5\&.6\&.2\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: port option
-.\" port option: mysqlcheck
-\fB\-\-port=\fR\fB\fIport_num\fR\fR,
+.\" mysqlcheck: port option.\" port option: mysqlcheck\fB\-\-port=\fR\fB\fIport_num\fR\fR,
 \fB\-P \fR\fB\fIport_num\fR\fR
 .sp
 The TCP/IP port number to use for the connection\&.
@@ -719,9 +661,7 @@ The TCP/IP port number to use for the connection\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: protocol option
-.\" protocol option: mysqlcheck
-\fB\-\-protocol={TCP|SOCKET|PIPE|MEMORY}\fR
+.\" mysqlcheck: protocol option.\" protocol option: mysqlcheck\fB\-\-protocol={TCP|SOCKET|PIPE|MEMORY}\fR
 .sp
 The connection protocol to use for connecting to the server\&. It is useful when the other connection parameters normally would cause a protocol to be used other than the one you want\&. For details on the permissible values, see
 Section\ \&4.2.2, \(lqConnecting to the MySQL Server\(rq\&.
@@ -735,9 +675,7 @@ Section\ \&4.2.2, \(lqConnecting to the MySQL Server\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: quick option
-.\" quick option: mysqlcheck
-\fB\-\-quick\fR,
+.\" mysqlcheck: quick option.\" quick option: mysqlcheck\fB\-\-quick\fR,
 \fB\-q\fR
 .sp
 If you are using this option to check tables, it prevents the check from scanning the rows to check for incorrect links\&. This is the fastest check method\&.
@@ -753,9 +691,7 @@ If you are using this option to repair tables, it tries to repair only the index
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: repair option
-.\" repair option: mysqlcheck
-\fB\-\-repair\fR,
+.\" mysqlcheck: repair option.\" repair option: mysqlcheck\fB\-\-repair\fR,
 \fB\-r\fR
 .sp
 Perform a repair that can fix almost anything except unique keys that are not unique\&.
@@ -769,9 +705,7 @@ Perform a repair that can fix almost anything except unique keys that are not un
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: silent option
-.\" silent option: mysqlcheck
-\fB\-\-silent\fR,
+.\" mysqlcheck: silent option.\" silent option: mysqlcheck\fB\-\-silent\fR,
 \fB\-s\fR
 .sp
 Silent mode\&. Print only error messages\&.
@@ -785,9 +719,7 @@ Silent mode\&. Print only error messages\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: skip-database option
-.\" skip-database option: mysqlcheck
-\fB\-\-skip\-database=\fR\fB\fIdb_name\fR\fR
+.\" mysqlcheck: skip-database option.\" skip-database option: mysqlcheck\fB\-\-skip\-database=\fR\fB\fIdb_name\fR\fR
 .sp
 Do not include the named database (case sensitive) in the operations performed by
 \fBmysqlcheck\fR\&. This option was added in MySQL 5\&.6\&.11\&.
@@ -801,9 +733,7 @@ Do not include the named database (case sensitive) in the operations performed b
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: socket option
-.\" socket option: mysqlcheck
-\fB\-\-socket=\fR\fB\fIpath\fR\fR,
+.\" mysqlcheck: socket option.\" socket option: mysqlcheck\fB\-\-socket=\fR\fB\fIpath\fR\fR,
 \fB\-S \fR\fB\fIpath\fR\fR
 .sp
 For connections to
@@ -818,9 +748,7 @@ localhost, the Unix socket file to use, or, on Windows, the name of the named pi
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: SSL options
-.\" SSL options: mysqlcheck
-\fB\-\-ssl*\fR
+.\" mysqlcheck: SSL options.\" SSL options: mysqlcheck\fB\-\-ssl*\fR
 .sp
 Options that begin with
 \fB\-\-ssl\fR
@@ -836,9 +764,7 @@ Section\ \&6.3.9.4, \(lqSSL Command Options\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: tables option
-.\" tables option: mysqlcheck
-\fB\-\-tables\fR
+.\" mysqlcheck: tables option.\" tables option: mysqlcheck\fB\-\-tables\fR
 .sp
 Override the
 \fB\-\-databases\fR
@@ -855,9 +781,7 @@ option\&. All name arguments following the option are regarded as table names\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: use-frm option
-.\" use-frm option: mysqlcheck
-\fB\-\-use\-frm\fR
+.\" mysqlcheck: use-frm option.\" use-frm option: mysqlcheck\fB\-\-use\-frm\fR
 .sp
 For repair operations on
 MyISAM
@@ -876,9 +800,7 @@ header is corrupted\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: user option
-.\" user option: mysqlcheck
-\fB\-\-user=\fR\fB\fIuser_name\fR\fR,
+.\" mysqlcheck: user option.\" user option: mysqlcheck\fB\-\-user=\fR\fB\fIuser_name\fR\fR,
 \fB\-u \fR\fB\fIuser_name\fR\fR
 .sp
 The MySQL user name to use when connecting to the server\&.
@@ -892,9 +814,7 @@ The MySQL user name to use when connecting to the server\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: verbose option
-.\" verbose option: mysqlcheck
-\fB\-\-verbose\fR,
+.\" mysqlcheck: verbose option.\" verbose option: mysqlcheck\fB\-\-verbose\fR,
 \fB\-v\fR
 .sp
 Verbose mode\&. Print information about the various stages of program operation\&.
@@ -908,9 +828,7 @@ Verbose mode\&. Print information about the various stages of program operation\
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: version option
-.\" version option: mysqlcheck
-\fB\-\-version\fR,
+.\" mysqlcheck: version option.\" version option: mysqlcheck\fB\-\-version\fR,
 \fB\-V\fR
 .sp
 Display version information and exit\&.
@@ -924,9 +842,7 @@ Display version information and exit\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlcheck: write-binlog option
-.\" write-binlog option: mysqlcheck
-\fB\-\-write\-binlog\fR
+.\" mysqlcheck: write-binlog option.\" write-binlog option: mysqlcheck\fB\-\-write\-binlog\fR
 .sp
 This option is enabled by default, so that
 ANALYZE TABLE,

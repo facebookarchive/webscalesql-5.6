@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: \fBndb_mgmd\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 09/09/2013
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 11/15/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBNDB_MGMD\FR" "8" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBNDB_MGMD\FR" "8" "11/15/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -99,7 +99,9 @@ All MySQL 5\&.6 based releases
 T}
 T{
 .PP
---configdir=directory
+--configdir=directory,
+.PP
+--config-dir=directory
 T}:T{
 Specify the cluster management server\*(Aqs configuration cache directory
 T}:T{
@@ -216,9 +218,9 @@ All MySQL 5\&.6 based releases
 T}
 T{
 .PP
---config-cache=value
+--config-cache[=TRUE|FALSE]
 T}:T{
-Enable the management server configuration cache; ON by default\&.
+Enable the management server configuration cache; TRUE by default\&.
 T}:T{
 .PP
 All MySQL 5\&.6 based releases
@@ -256,8 +258,7 @@ T}
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" bind-address option (ndb_mgmd)
-\fB\-\-bind\-address=\fR\fB\fIhost\fR\fR\fB[:\fR\fB\fIport\fR\fR\fB]\fR
+.\" bind-address option (ndb_mgmd)\fB\-\-bind\-address=\fR\fB\fIhost\fR\fR\fB[:\fR\fB\fIport\fR\fR\fB]\fR
 .TS
 allbox tab(:);
 l l s s
@@ -302,8 +303,7 @@ is not specified, the management client attempts to use port 1186\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" no-nodeid-checks option (ndb_mgmd)
-\fB\-\-no\-nodeid\-checks\fR
+.\" no-nodeid-checks option (ndb_mgmd)\fB\-\-no\-nodeid\-checks\fR
 .TS
 allbox tab(:);
 l l s s
@@ -343,10 +343,10 @@ Do not perform any checks of node IDs\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" configdir option (ndb_mgmd)
-\fB\-\-configdir=\fR\fB\fIpath\fR\fR
+.\" configdir option (ndb_mgmd)\fB\-\-configdir=\fR\fB\fIpath\fR\fR
 .TS
 allbox tab(:);
+l l s s
 l l s s
 l l s s
 ^ l l s
@@ -355,6 +355,11 @@ T{
 \fBCommand\-Line Format\fR
 T}:T{
 \-\-configdir=directory
+T}
+T{
+\ \&
+T}:T{
+\-\-config\-dir=directory
 T}
 T{
 \ \&
@@ -386,7 +391,35 @@ is an alias for this option\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" config-cache option (ndb_mgmd)
+.\" config-cache option (ndb_mgmd)\fB\-\-config\-cache\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-config\-cache[=TRUE|FALSE]
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values\fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+TRUE
+T}
+.TE
+.sp 1
 This option, whose default value is
 1
 (or
@@ -511,10 +544,7 @@ is used\&. (Bug #13428853)
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" config-file option (ndb_mgmd)
-.\" -f option (ndb_mgmd)
-.\" -c option (ndb_mgmd) (OBSOLETE)
-\fB\-\-config\-file=\fR\fB\fIfilename\fR\fR,
+.\" config-file option (ndb_mgmd).\" -f option (ndb_mgmd).\" -c option (ndb_mgmd) (OBSOLETE)\fB\-\-config\-file=\fR\fB\fIfilename\fR\fR,
 \fB\-f \fR\fB\fIfilename\fR\fR
 .TS
 allbox tab(:);
@@ -599,9 +629,7 @@ caused removal of the configuration cache even if the file was not found\&. This
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_mgmd: mycnf option
-.\" mycnf option: ndb_mgmd
-\fB\-\-mycnf\fR
+.\" ndb_mgmd: mycnf option.\" mycnf option: ndb_mgmd\fB\-\-mycnf\fR
 .TS
 allbox tab(:);
 l l s s
@@ -643,9 +671,7 @@ file\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" daemon option (ndb_mgmd)
-.\" -d option (ndb_mgmd)
-\fB\-\-daemon\fR,
+.\" daemon option (ndb_mgmd).\" -d option (ndb_mgmd)\fB\-\-daemon\fR,
 \fB\-d\fR
 .TS
 allbox tab(:);
@@ -698,8 +724,7 @@ on Windows platforms\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" interactive option (ndb_mgmd)
-\fB\-\-interactive\fR
+.\" interactive option (ndb_mgmd)\fB\-\-interactive\fR
 .TS
 allbox tab(:);
 l l s s
@@ -743,8 +768,7 @@ client session is started as soon as the management server is running\&. This op
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" initial option (ndb_mgmd)
-\fB\-\-initial\fR
+.\" initial option (ndb_mgmd)\fB\-\-initial\fR
 .TS
 allbox tab(:);
 l l s s
@@ -812,8 +836,7 @@ option caused removal of the configuration cache even if the file was not found\
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" log-name option (ndb_mgmd)
-\fB\-\-log\-name=\fR\fB\fIname\fR\fR
+.\" log-name option (ndb_mgmd)\fB\-\-log\-name=\fR\fB\fIname\fR\fR
 .TS
 allbox tab(:);
 l l s s
@@ -853,8 +876,7 @@ Provides a name to be used for this node in the cluster log\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" nodaemon option (ndb_mgmd)
-\fB\-\-nodaemon\fR
+.\" nodaemon option (ndb_mgmd)\fB\-\-nodaemon\fR
 .TS
 allbox tab(:);
 l l s s
@@ -900,9 +922,7 @@ on Windows is to run in the foreground, making this option unnecessary on Window
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" print-full-config option (ndb_mgmd)
-.\" -P option (ndb_mgmd)
-\fB\-\-print\-full\-config\fR,
+.\" print-full-config option (ndb_mgmd).\" -P option (ndb_mgmd)\fB\-\-print\-full\-config\fR,
 \fB\-P\fR
 .TS
 allbox tab(:);
@@ -953,8 +973,7 @@ process prints information about the cluster setup including an extensive list o
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" reload option (ndb_mgmd)
-\fB\-\-reload\fR
+.\" reload option (ndb_mgmd)\fB\-\-reload\fR
 .TS
 allbox tab(:);
 l l s s
@@ -1014,8 +1033,7 @@ Section\ \&17.5.5, \(lqPerforming a Rolling Restart of a MySQL Cluster\(rq, for 
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" nowait-nodes option (ndb_mgmd)
-\fB\-\-nowait\-nodes\fR
+.\" nowait-nodes option (ndb_mgmd)\fB\-\-nowait\-nodes\fR
 .TS
 allbox tab(:);
 l l s s
@@ -1184,10 +1202,7 @@ is the unique node identifier\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" MySQL Cluster: configuration
-.\" configuring MySQL Cluster
-.\" config.ini (MySQL Cluster)
-config\&.ini
+.\" MySQL Cluster: configuration.\" configuring MySQL Cluster.\" config.ini (MySQL Cluster)config\&.ini
 is the configuration file for the cluster as a whole\&. This file is created by the user and read by the management server\&.
 Section\ \&17.3, \(lqConfiguration of MySQL Cluster NDB 7.3\(rq, discusses how to set up this file\&.
 .RE
@@ -1247,8 +1262,7 @@ is the process ID file used when running the management server as a daemon\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" install option (ndb_mgmd)
-\fB\-\-install[=\fR\fB\fIname\fR\fR\fB]\fR
+.\" install option (ndb_mgmd)\fB\-\-install[=\fR\fB\fIname\fR\fR\fB]\fR
 .TS
 allbox tab(:);
 l l s s
@@ -1310,8 +1324,7 @@ option has no effect on non\-Windows platforms\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" remove option (ndb_mgmd)
-\fB\-\-remove[=\fR\fB\fIname\fR\fR\fB]\fR
+.\" remove option (ndb_mgmd)\fB\-\-remove[=\fR\fB\fIname\fR\fR\fB]\fR
 .TS
 allbox tab(:);
 l l s s

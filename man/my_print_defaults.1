@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: \fBmy_print_defaults\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 09/09/2013
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 11/15/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMY_PRINT_DEFAULTS" "1" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMY_PRINT_DEFAULTS" "1" "11/15/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -72,9 +72,7 @@ supports the following options\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" my_print_defaults: help option
-.\" help option: my_print_defaults
-\fB\-\-help\fR,
+.\" my_print_defaults: help option.\" help option: my_print_defaults\fB\-\-help\fR,
 \fB\-?\fR
 .sp
 Display a help message and exit\&.
@@ -88,12 +86,8 @@ Display a help message and exit\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" my_print_defaults: config-file option
-.\" config-file option: my_print_defaults
-\fB\-\-config\-file=\fR\fB\fIfile_name\fR\fR,
-.\" my_print_defaults: defaults-file option
-.\" defaults-file option: my_print_defaults
-\fB\-\-defaults\-file=\fR\fB\fIfile_name\fR\fR,
+.\" my_print_defaults: config-file option.\" config-file option: my_print_defaults\fB\-\-config\-file=\fR\fB\fIfile_name\fR\fR,
+.\" my_print_defaults: defaults-file option.\" defaults-file option: my_print_defaults\fB\-\-defaults\-file=\fR\fB\fIfile_name\fR\fR,
 \fB\-c \fR\fB\fIfile_name\fR\fR
 .sp
 Read only the given option file\&.
@@ -107,9 +101,7 @@ Read only the given option file\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" my_print_defaults: debug option
-.\" debug option: my_print_defaults
-\fB\-\-debug=\fR\fB\fIdebug_options\fR\fR,
+.\" my_print_defaults: debug option.\" debug option: my_print_defaults\fB\-\-debug=\fR\fB\fIdebug_options\fR\fR,
 \fB\-# \fR\fB\fIdebug_options\fR\fR
 .sp
 Write a debugging log\&. A typical
@@ -127,12 +119,8 @@ string is
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" my_print_defaults: defaults-extra-file option
-.\" defaults-extra-file option: my_print_defaults
-\fB\-\-defaults\-extra\-file=\fR\fB\fIfile_name\fR\fR,
-.\" my_print_defaults: extra-file option
-.\" extra-file option: my_print_defaults
-\fB\-\-extra\-file=\fR\fB\fIfile_name\fR\fR,
+.\" my_print_defaults: defaults-extra-file option.\" defaults-extra-file option: my_print_defaults\fB\-\-defaults\-extra\-file=\fR\fB\fIfile_name\fR\fR,
+.\" my_print_defaults: extra-file option.\" extra-file option: my_print_defaults\fB\-\-extra\-file=\fR\fB\fIfile_name\fR\fR,
 \fB\-e \fR\fB\fIfile_name\fR\fR
 .sp
 Read this option file after the global option file but (on Unix) before the user option file\&.
@@ -146,9 +134,7 @@ Read this option file after the global option file but (on Unix) before the user
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" my_print_defaults: defaults-group-suffix option
-.\" defaults-group-suffix option: my_print_defaults
-\fB\-\-defaults\-group\-suffix=\fR\fB\fIsuffix\fR\fR,
+.\" my_print_defaults: defaults-group-suffix option.\" defaults-group-suffix option: my_print_defaults\fB\-\-defaults\-group\-suffix=\fR\fB\fIsuffix\fR\fR,
 \fB\-g \fR\fB\fIsuffix\fR\fR
 .sp
 In addition to the groups named on the command line, read groups that have the given suffix\&.
@@ -162,8 +148,7 @@ In addition to the groups named on the command line, read groups that have the g
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" login-path option
-\fB\-\-login\-path=\fR\fB\fIname\fR\fR,
+.\" login-path option\fB\-\-login\-path=\fR\fB\fIname\fR\fR,
 \fB\-l \fR\fB\fIname\fR\fR
 .sp
 Read options from the named login path in the
@@ -180,9 +165,7 @@ login file\&. See
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" my_print_defaults: no-defaults option
-.\" no-defaults option: my_print_defaults
-\fB\-\-no\-defaults\fR,
+.\" my_print_defaults: no-defaults option.\" no-defaults option: my_print_defaults\fB\-\-no\-defaults\fR,
 \fB\-n\fR
 .sp
 Return an empty string\&.
@@ -196,9 +179,7 @@ Return an empty string\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" my_print_defaults: verbose option
-.\" verbose option: my_print_defaults
-\fB\-\-verbose\fR,
+.\" my_print_defaults: verbose option.\" verbose option: my_print_defaults\fB\-\-verbose\fR,
 \fB\-v\fR
 .sp
 Verbose mode\&. Print more information about what the program does\&.
@@ -212,9 +193,7 @@ Verbose mode\&. Print more information about what the program does\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" my_print_defaults: version option
-.\" version option: my_print_defaults
-\fB\-\-version\fR,
+.\" my_print_defaults: version option.\" version option: my_print_defaults\fB\-\-version\fR,
 \fB\-V\fR
 .sp
 Display version information and exit\&.

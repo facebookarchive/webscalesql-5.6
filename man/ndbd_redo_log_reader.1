@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: \fBndbd_redo_log_reader\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 09/09/2013
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 11/15/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBNDBD_REDO_LOG_REA" "1" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBNDBD_REDO_LOG_REA" "1" "11/15/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -68,6 +68,7 @@ Added / Removed
 T}
 .T&
 l l l
+l l l
 l l l.
 T{
 .PP
@@ -86,6 +87,15 @@ Do not check records for errors
 T}:T{
 .PP
 All MySQL 5\&.6 based releases
+T}
+T{
+.PP
+--help
+T}:T{
+Print usage information
+T}:T{
+.PP
+ADDED: NDB 7\&.3\&.4
 T}
 .TE
 .sp 1
@@ -186,6 +196,35 @@ T}
 .TE
 .sp 1
 \fB\-nocheck\fR: Do not check the log file for errors\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.TS
+allbox tab(:);
+l l s s
+l l s s.
+T{
+\fBIntroduced\fR
+T}:T{
+5\&.6\&.14\-ndb\-7\&.3\&.4
+T}
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-help
+T}
+.TE
+.sp 1
+\fB\-\-help\fR: Print usage information\&.
+.sp
+Added in MySQL Cluster NDB 7\&.3\&.4\&. (Bug #11749591, Bug #36805)
 .RE
 .PP
 Like

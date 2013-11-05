@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: \fBmysql-stress-test.pl\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 09/06/2013
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 11/13/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL
 .\"  Language: English
 .\"
-.TH "\FBMYSQL\-STRESS\-TE" "1" "09/06/2013" "MySQL" "MySQL Database System"
+.TH "\FBMYSQL\-STRESS\-TE" "1" "11/13/2013" "MySQL" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -67,9 +67,7 @@ supports the following options:
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: help option
-.\" help option: mysql-stress-test.pl
-\fB\-\-help\fR
+.\" mysql-stress-test.pl: help option.\" help option: mysql-stress-test.pl\fB\-\-help\fR
 .sp
 Display a help message and exit\&.
 .RE
@@ -82,9 +80,7 @@ Display a help message and exit\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: abort-on-error option
-.\" abort-on-error option: mysql-stress-test.pl
-\fB\-\-abort\-on\-error=\fR\fB\fIN\fR\fR
+.\" mysql-stress-test.pl: abort-on-error option.\" abort-on-error option: mysql-stress-test.pl\fB\-\-abort\-on\-error=\fR\fB\fIN\fR\fR
 .sp
 Causes the program to abort if an error with severity less than or equal to N was encountered\&. Set to 1 to abort on any error\&.
 .RE
@@ -97,9 +93,7 @@ Causes the program to abort if an error with severity less than or equal to N wa
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: check-tests-file option
-.\" check-tests-file option: mysql-stress-test.pl
-\fB\-\-check\-tests\-file\fR
+.\" mysql-stress-test.pl: check-tests-file option.\" check-tests-file option: mysql-stress-test.pl\fB\-\-check\-tests\-file\fR
 .sp
 Periodically check the file that lists the tests to be run\&. If it has been modified, reread the file\&. This can be useful if you update the list of tests to be run during a stress test\&.
 .RE
@@ -112,9 +106,7 @@ Periodically check the file that lists the tests to be run\&. If it has been mod
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: cleanup option
-.\" cleanup option: mysql-stress-test.pl
-\fB\-\-cleanup\fR
+.\" mysql-stress-test.pl: cleanup option.\" cleanup option: mysql-stress-test.pl\fB\-\-cleanup\fR
 .sp
 Force cleanup of the working directory\&.
 .RE
@@ -127,9 +119,7 @@ Force cleanup of the working directory\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: log-error-details option
-.\" log-error-details option: mysql-stress-test.pl
-\fB\-\-log\-error\-details\fR
+.\" mysql-stress-test.pl: log-error-details option.\" log-error-details option: mysql-stress-test.pl\fB\-\-log\-error\-details\fR
 .sp
 Log error details in the global error log file\&.
 .RE
@@ -142,9 +132,7 @@ Log error details in the global error log file\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: loop-count option
-.\" loop-count option: mysql-stress-test.pl
-\fB\-\-loop\-count=\fR\fB\fIN\fR\fR
+.\" mysql-stress-test.pl: loop-count option.\" loop-count option: mysql-stress-test.pl\fB\-\-loop\-count=\fR\fB\fIN\fR\fR
 .sp
 In sequential test mode, the number of loops to execute before exiting\&.
 .RE
@@ -157,9 +145,7 @@ In sequential test mode, the number of loops to execute before exiting\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: mysqltest option
-.\" mysqltest option: mysql-stress-test.pl
-\fB\-\-mysqltest=\fR\fB\fIpath\fR\fR
+.\" mysql-stress-test.pl: mysqltest option.\" mysqltest option: mysql-stress-test.pl\fB\-\-mysqltest=\fR\fB\fIpath\fR\fR
 .sp
 The path name to the
 \fBmysqltest\fR
@@ -174,9 +160,7 @@ program\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: server-database option
-.\" server-database option: mysql-stress-test.pl
-\fB\-\-server\-database=\fR\fB\fIdb_name\fR\fR
+.\" mysql-stress-test.pl: server-database option.\" server-database option: mysql-stress-test.pl\fB\-\-server\-database=\fR\fB\fIdb_name\fR\fR
 .sp
 The database to use for the tests\&. The default is
 test\&.
@@ -190,9 +174,7 @@ test\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: server-host option
-.\" server-host option: mysql-stress-test.pl
-\fB\-\-server\-host=\fR\fB\fIhost_name\fR\fR
+.\" mysql-stress-test.pl: server-host option.\" server-host option: mysql-stress-test.pl\fB\-\-server\-host=\fR\fB\fIhost_name\fR\fR
 .sp
 The host name of the local host to use for making a TCP/IP connection to the local server\&. By default, the connection is made to
 localhost
@@ -207,9 +189,7 @@ using a Unix socket file\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: server-logs-dir option
-.\" server-logs-dir option: mysql-stress-test.pl
-\fB\-\-server\-logs\-dir=\fR\fB\fIpath\fR\fR
+.\" mysql-stress-test.pl: server-logs-dir option.\" server-logs-dir option: mysql-stress-test.pl\fB\-\-server\-logs\-dir=\fR\fB\fIpath\fR\fR
 .sp
 This option is required\&.
 \fIpath\fR
@@ -224,9 +204,7 @@ is the directory where all client session logs will be stored\&. Usually this is
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: server-password option
-.\" server-password option: mysql-stress-test.pl
-\fB\-\-server\-password=\fR\fB\fIpassword\fR\fR
+.\" mysql-stress-test.pl: server-password option.\" server-password option: mysql-stress-test.pl\fB\-\-server\-password=\fR\fB\fIpassword\fR\fR
 .sp
 The password to use when connecting to the server\&.
 .RE
@@ -239,9 +217,7 @@ The password to use when connecting to the server\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: server-port option
-.\" server-port option: mysql-stress-test.pl
-\fB\-\-server\-port=\fR\fB\fIport_num\fR\fR
+.\" mysql-stress-test.pl: server-port option.\" server-port option: mysql-stress-test.pl\fB\-\-server\-port=\fR\fB\fIport_num\fR\fR
 .sp
 The TCP/IP port number to use for connecting to the server\&. The default is 3306\&.
 .RE
@@ -254,9 +230,7 @@ The TCP/IP port number to use for connecting to the server\&. The default is 330
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: server-socket option
-.\" server-socket option: mysql-stress-test.pl
-\fB\-\-server\-socket=\fR\fB\fIfile_name\fR\fR
+.\" mysql-stress-test.pl: server-socket option.\" server-socket option: mysql-stress-test.pl\fB\-\-server\-socket=\fR\fB\fIfile_name\fR\fR
 .sp
 For connections to
 localhost, the Unix socket file to use, or, on Windows, the name of the named pipe to use\&. The default if
@@ -271,9 +245,7 @@ localhost, the Unix socket file to use, or, on Windows, the name of the named pi
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: server-user option
-.\" server-user option: mysql-stress-test.pl
-\fB\-\-server\-user=\fR\fB\fIuser_name\fR\fR
+.\" mysql-stress-test.pl: server-user option.\" server-user option: mysql-stress-test.pl\fB\-\-server\-user=\fR\fB\fIuser_name\fR\fR
 .sp
 The MySQL user name to use when connecting to the server\&. The default is
 root\&.
@@ -287,9 +259,7 @@ root\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: sleep-time option
-.\" sleep-time option: mysql-stress-test.pl
-\fB\-\-sleep\-time=\fR\fB\fIN\fR\fR
+.\" mysql-stress-test.pl: sleep-time option.\" sleep-time option: mysql-stress-test.pl\fB\-\-sleep\-time=\fR\fB\fIN\fR\fR
 .sp
 The delay in seconds between test executions\&.
 .RE
@@ -302,9 +272,7 @@ The delay in seconds between test executions\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: stress-basedir option
-.\" stress-basedir option: mysql-stress-test.pl
-\fB\-\-stress\-basedir=\fR\fB\fIpath\fR\fR
+.\" mysql-stress-test.pl: stress-basedir option.\" stress-basedir option: mysql-stress-test.pl\fB\-\-stress\-basedir=\fR\fB\fIpath\fR\fR
 .sp
 This option is required\&.
 \fIpath\fR
@@ -319,9 +287,7 @@ is the working directory for the test run\&. It is used as the temporary locatio
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: stress-datadir option
-.\" stress-datadir option: mysql-stress-test.pl
-\fB\-\-stress\-datadir=\fR\fB\fIpath\fR\fR
+.\" mysql-stress-test.pl: stress-datadir option.\" stress-datadir option: mysql-stress-test.pl\fB\-\-stress\-datadir=\fR\fB\fIpath\fR\fR
 .sp
 The directory of data files to be used during testing\&. The default location is the
 data
@@ -338,9 +304,7 @@ option\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: stress-init-file option
-.\" stress-init-file option: mysql-stress-test.pl
-\fB\-\-stress\-init\-file[=\fR\fB\fIpath\fR\fR\fB]\fR
+.\" mysql-stress-test.pl: stress-init-file option.\" stress-init-file option: mysql-stress-test.pl\fB\-\-stress\-init\-file[=\fR\fB\fIpath\fR\fR\fB]\fR
 .sp
 \fIfile_name\fR
 is the location of the file that contains the list of tests to be run once to initialize the database for the testing\&. If missing, the default file is
@@ -356,9 +320,7 @@ in the test suite directory\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: stress-mode option
-.\" stress-mode option: mysql-stress-test.pl
-\fB\-\-stress\-mode=\fR\fB\fImode\fR\fR
+.\" mysql-stress-test.pl: stress-mode option.\" stress-mode option: mysql-stress-test.pl\fB\-\-stress\-mode=\fR\fB\fImode\fR\fR
 .sp
 This option indicates the test order in stress\-test mode\&. The
 \fImode\fR
@@ -378,9 +340,7 @@ random\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: stress-suite-basedir option
-.\" stress-suite-basedir option: mysql-stress-test.pl
-\fB\-\-stress\-suite\-basedir=\fR\fB\fIpath\fR\fR
+.\" mysql-stress-test.pl: stress-suite-basedir option.\" stress-suite-basedir option: mysql-stress-test.pl\fB\-\-stress\-suite\-basedir=\fR\fB\fIpath\fR\fR
 .sp
 This option is required\&.
 \fIpath\fR
@@ -403,9 +363,7 @@ option\&.)
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: stress-tests-file option
-.\" stress-tests-file option: mysql-stress-test.pl
-\fB\-\-stress\-tests\-file[=\fR\fB\fIfile_name\fR\fR\fB]\fR
+.\" mysql-stress-test.pl: stress-tests-file option.\" stress-tests-file option: mysql-stress-test.pl\fB\-\-stress\-tests\-file[=\fR\fB\fIfile_name\fR\fR\fB]\fR
 .sp
 Use this option to run the stress tests\&.
 \fIfile_name\fR
@@ -425,9 +383,7 @@ in the stress suite directory\&. (See
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: suite option
-.\" suite option: mysql-stress-test.pl
-\fB\-\-suite=\fR\fB\fIsuite_name\fR\fR
+.\" mysql-stress-test.pl: suite option.\" suite option: mysql-stress-test.pl\fB\-\-suite=\fR\fB\fIsuite_name\fR\fR
 .sp
 Run the named test suite\&. The default name is
 main
@@ -444,9 +400,7 @@ directory)\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: test-count option
-.\" test-count option: mysql-stress-test.pl
-\fB\-\-test\-count=\fR\fB\fIN\fR\fR
+.\" mysql-stress-test.pl: test-count option.\" test-count option: mysql-stress-test.pl\fB\-\-test\-count=\fR\fB\fIN\fR\fR
 .sp
 The number of tests to execute before exiting\&.
 .RE
@@ -459,9 +413,7 @@ The number of tests to execute before exiting\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: test-duration option
-.\" test-duration option: mysql-stress-test.pl
-\fB\-\-test\-duration=\fR\fB\fIN\fR\fR
+.\" mysql-stress-test.pl: test-duration option.\" test-duration option: mysql-stress-test.pl\fB\-\-test\-duration=\fR\fB\fIN\fR\fR
 .sp
 The duration of stress testing in seconds\&.
 .RE
@@ -474,9 +426,7 @@ The duration of stress testing in seconds\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: threads option
-.\" threads option: mysql-stress-test.pl
-\fB\-\-threads=\fR\fB\fIN\fR\fR
+.\" mysql-stress-test.pl: threads option.\" threads option: mysql-stress-test.pl\fB\-\-threads=\fR\fB\fIN\fR\fR
 .sp
 The number of threads\&. The default is 1\&.
 .RE
@@ -489,9 +439,7 @@ The number of threads\&. The default is 1\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql-stress-test.pl: verbose option
-.\" verbose option: mysql-stress-test.pl
-\fB\-\-verbose\fR
+.\" mysql-stress-test.pl: verbose option.\" verbose option: mysql-stress-test.pl\fB\-\-verbose\fR
 .sp
 Verbose mode\&. Print more information about what the program does\&.
 .RE

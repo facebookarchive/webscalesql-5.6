@@ -17,7 +17,7 @@
 
    MySQL compressed tar file binary distributions have names of the
    form mysql-VERSION-OS.tar.gz, where VERSION is a number (for
-   example, 5.6.15), and OS indicates the type of operating system
+   example, 5.6.16), and OS indicates the type of operating system
    for which the distribution is intended (for example, pc-linux-i686
    or winx64).
 
@@ -321,7 +321,7 @@ Perform Postinstallation Setup
    named data under the installation directory. After an installation
    has been performed using this package, the template data directory
    can be copied to set up additional MySQL instances. See Section
-   5.6, "Running Multiple MySQL Instances on One Machine."
+   5.3, "Running Multiple MySQL Instances on One Machine."
 
 2.3.2. Choosing An Installation Package
 
@@ -329,8 +329,8 @@ Perform Postinstallation Setup
    from when installing MySQL on Windows:
 
      * MySQL Installer: This package has a file name similar to
-       mysql-installer-community-5.6.15.0.msi or
-       mysql-installer-commercial-5.6.15.0.msi, and utilizes MSI's to
+       mysql-installer-community-5.6.16.0.msi or
+       mysql-installer-commercial-5.6.16.0.msi, and utilizes MSI's to
        automatically install MySQL server and other products. It will
        download and apply updates to itself, and for each of the
        installed products. It also configures the additional
@@ -351,7 +351,7 @@ Perform Postinstallation Setup
        Using MySQL Installer."
 
      * The Noinstall Archive: This package has a file name similar to
-       mysql-5.6.15-win32.zip or mysql-5.6.15-winx64.zip, and
+       mysql-5.6.16-win32.zip or mysql-5.6.16-winx64.zip, and
        contains all the files found in the Complete install package,
        with the exception of the GUI. This package does not include
        an automated installer, and must be manually installed and
@@ -1375,7 +1375,7 @@ InnoDB: foreign key constraint system tables created
    something like this, which indicates that the server is ready to
    service client connections:
 mysqld: ready for connections
-Version: '5.6.15'  socket: ''  port: 3306
+Version: '5.6.16'  socket: ''  port: 3306
 
    The server continues to write to the console any further
    diagnostic output it produces. You can open a new console window

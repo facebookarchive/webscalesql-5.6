@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: \fBmysqlimport\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 09/09/2013
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 11/15/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLIMPORT\FR" "1" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLIMPORT\FR" "1" "11/15/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -91,9 +91,7 @@ Section\ \&4.2.3.4, \(lqCommand-Line Options that Affect Option-File Handling\(r
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: help option
-.\" help option: mysqlimport
-\fB\-\-help\fR,
+.\" mysqlimport: help option.\" help option: mysqlimport\fB\-\-help\fR,
 \fB\-?\fR
 .sp
 Display a help message and exit\&.
@@ -107,9 +105,7 @@ Display a help message and exit\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: bind-address option
-.\" bind-address option: mysqlimport
-\fB\-\-bind\-address=\fR\fB\fIip_address\fR\fR
+.\" mysqlimport: bind-address option.\" bind-address option: mysqlimport\fB\-\-bind\-address=\fR\fB\fIip_address\fR\fR
 .sp
 On a computer having multiple network interfaces, this option can be used to select which interface is employed when connecting to the MySQL server\&.
 .sp
@@ -124,9 +120,7 @@ This option is supported beginning with MySQL 5\&.6\&.1\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: character-sets-dir option
-.\" character-sets-dir option: mysqlimport
-\fB\-\-character\-sets\-dir=\fR\fB\fIpath\fR\fR
+.\" mysqlimport: character-sets-dir option.\" character-sets-dir option: mysqlimport\fB\-\-character\-sets\-dir=\fR\fB\fIpath\fR\fR
 .sp
 The directory where character sets are installed\&. See
 Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&.
@@ -140,9 +134,7 @@ Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: columns option
-.\" columns option: mysqlimport
-\fB\-\-columns=\fR\fB\fIcolumn_list\fR\fR,
+.\" mysqlimport: columns option.\" columns option: mysqlimport\fB\-\-columns=\fR\fB\fIcolumn_list\fR\fR,
 \fB\-c \fR\fB\fIcolumn_list\fR\fR
 .sp
 This option takes a comma\-separated list of column names as its value\&. The order of the column names indicates how to match data file columns with table columns\&.
@@ -156,9 +148,7 @@ This option takes a comma\-separated list of column names as its value\&. The or
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: compress option
-.\" compress option: mysqlimport
-\fB\-\-compress\fR,
+.\" mysqlimport: compress option.\" compress option: mysqlimport\fB\-\-compress\fR,
 \fB\-C\fR
 .sp
 Compress all information sent between the client and the server if both support compression\&.
@@ -172,9 +162,7 @@ Compress all information sent between the client and the server if both support 
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: debug option
-.\" debug option: mysqlimport
-\fB\-\-debug[=\fR\fB\fIdebug_options\fR\fR\fB]\fR,
+.\" mysqlimport: debug option.\" debug option: mysqlimport\fB\-\-debug[=\fR\fB\fIdebug_options\fR\fR\fB]\fR,
 \fB\-# [\fR\fB\fIdebug_options\fR\fR\fB]\fR
 .sp
 Write a debugging log\&. A typical
@@ -192,9 +180,7 @@ string is
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: debug-check option
-.\" debug-check option: mysqlimport
-\fB\-\-debug\-check\fR
+.\" mysqlimport: debug-check option.\" debug-check option: mysqlimport\fB\-\-debug\-check\fR
 .sp
 Print some debugging information when the program exits\&.
 .RE
@@ -207,9 +193,7 @@ Print some debugging information when the program exits\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: debug-info option
-.\" debug-info option: mysqlimport
-\fB\-\-debug\-info\fR
+.\" mysqlimport: debug-info option.\" debug-info option: mysqlimport\fB\-\-debug\-info\fR
 .sp
 Print debugging information and memory and CPU usage statistics when the program exits\&.
 .RE
@@ -222,9 +206,7 @@ Print debugging information and memory and CPU usage statistics when the program
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: default-character-set option
-.\" default-character-set option: mysqlimport
-\fB\-\-default\-character\-set=\fR\fB\fIcharset_name\fR\fR
+.\" mysqlimport: default-character-set option.\" default-character-set option: mysqlimport\fB\-\-default\-character\-set=\fR\fB\fIcharset_name\fR\fR
 .sp
 Use
 \fIcharset_name\fR
@@ -240,9 +222,7 @@ Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: default-auth option
-.\" default-auth option: mysqlimport
-\fB\-\-default\-auth=\fR\fB\fIplugin\fR\fR
+.\" mysqlimport: default-auth option.\" default-auth option: mysqlimport\fB\-\-default\-auth=\fR\fB\fIplugin\fR\fR
 .sp
 The client\-side authentication plugin to use\&. See
 Section\ \&6.3.7, \(lqPluggable Authentication\(rq\&.
@@ -258,9 +238,7 @@ This option was added in MySQL 5\&.6\&.2\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: delete option
-.\" delete option: mysqlimport
-\fB\-\-delete\fR,
+.\" mysqlimport: delete option.\" delete option: mysqlimport\fB\-\-delete\fR,
 \fB\-D\fR
 .sp
 Empty the table before importing the text file\&.
@@ -274,18 +252,10 @@ Empty the table before importing the text file\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: fields-terminated-by option
-.\" fields-terminated-by option: mysqldump
-\fB\-\-fields\-terminated\-by=\&.\&.\&.\fR,
-.\" mysqldump: fields-enclosed-by option
-.\" fields-enclosed-by option: mysqldump
-\fB\-\-fields\-enclosed\-by=\&.\&.\&.\fR,
-.\" mysqldump: fields-optionally-enclosed-by option
-.\" fields-optionally-enclosed-by option: mysqldump
-\fB\-\-fields\-optionally\-enclosed\-by=\&.\&.\&.\fR,
-.\" mysqldump: fields-escaped-by option
-.\" fields-escaped-by option: mysqldump
-\fB\-\-fields\-escaped\-by=\&.\&.\&.\fR
+.\" mysqldump: fields-terminated-by option.\" fields-terminated-by option: mysqldump\fB\-\-fields\-terminated\-by=\&.\&.\&.\fR,
+.\" mysqldump: fields-enclosed-by option.\" fields-enclosed-by option: mysqldump\fB\-\-fields\-enclosed\-by=\&.\&.\&.\fR,
+.\" mysqldump: fields-optionally-enclosed-by option.\" fields-optionally-enclosed-by option: mysqldump\fB\-\-fields\-optionally\-enclosed\-by=\&.\&.\&.\fR,
+.\" mysqldump: fields-escaped-by option.\" fields-escaped-by option: mysqldump\fB\-\-fields\-escaped\-by=\&.\&.\&.\fR
 .sp
 These options have the same meaning as the corresponding clauses for
 LOAD DATA INFILE\&. See
@@ -300,9 +270,7 @@ Section\ \&13.2.6, \(lqLOAD DATA INFILE Syntax\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: force option
-.\" force option: mysqlimport
-\fB\-\-force\fR,
+.\" mysqlimport: force option.\" force option: mysqlimport\fB\-\-force\fR,
 \fB\-f\fR
 .sp
 Ignore errors\&. For example, if a table for a text file does not exist, continue processing any remaining files\&. Without
@@ -319,9 +287,7 @@ exits if a table does not exist\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: host option
-.\" host option: mysqlimport
-\fB\-\-host=\fR\fB\fIhost_name\fR\fR,
+.\" mysqlimport: host option.\" host option: mysqlimport\fB\-\-host=\fR\fB\fIhost_name\fR\fR,
 \fB\-h \fR\fB\fIhost_name\fR\fR
 .sp
 Import data to the MySQL server on the given host\&. The default host is
@@ -336,9 +302,7 @@ localhost\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: ignore option
-.\" ignore option: mysqlimport
-\fB\-\-ignore\fR,
+.\" mysqlimport: ignore option.\" ignore option: mysqlimport\fB\-\-ignore\fR,
 \fB\-i\fR
 .sp
 See the description for the
@@ -354,9 +318,7 @@ option\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: ignore-lines option
-.\" ignore-lines option: mysqlimport
-\fB\-\-ignore\-lines=\fR\fB\fIN\fR\fR
+.\" mysqlimport: ignore-lines option.\" ignore-lines option: mysqlimport\fB\-\-ignore\-lines=\fR\fB\fIN\fR\fR
 .sp
 Ignore the first
 \fIN\fR
@@ -371,9 +333,7 @@ lines of the data file\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: lines-terminated-by option
-.\" lines-terminated-by option: mysqldump
-\fB\-\-lines\-terminated\-by=\&.\&.\&.\fR
+.\" mysqldump: lines-terminated-by option.\" lines-terminated-by option: mysqldump\fB\-\-lines\-terminated\-by=\&.\&.\&.\fR
 .sp
 This option has the same meaning as the corresponding clause for
 LOAD DATA INFILE\&. For example, to import Windows files that have lines terminated with carriage return/linefeed pairs, use
@@ -389,9 +349,7 @@ Section\ \&13.2.6, \(lqLOAD DATA INFILE Syntax\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: local option
-.\" local option: mysqlimport
-\fB\-\-local\fR,
+.\" mysqlimport: local option.\" local option: mysqlimport\fB\-\-local\fR,
 \fB\-L\fR
 .sp
 Read input files locally from the client host\&.
@@ -405,9 +363,7 @@ Read input files locally from the client host\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: lock-tables option
-.\" lock-tables option: mysqlimport
-\fB\-\-lock\-tables\fR,
+.\" mysqlimport: lock-tables option.\" lock-tables option: mysqlimport\fB\-\-lock\-tables\fR,
 \fB\-l\fR
 .sp
 Lock
@@ -423,9 +379,7 @@ tables for writing before processing any text files\&. This ensures that all tab
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: low-priority option
-.\" low-priority option: mysqlimport
-\fB\-\-low\-priority\fR
+.\" mysqlimport: low-priority option.\" low-priority option: mysqlimport\fB\-\-low\-priority\fR
 .sp
 Use
 LOW_PRIORITY
@@ -443,9 +397,7 @@ MERGE)\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: password option
-.\" password option: mysqlimport
-\fB\-\-password[=\fR\fB\fIpassword\fR\fR\fB]\fR,
+.\" mysqlimport: password option.\" password option: mysqlimport\fB\-\-password[=\fR\fB\fIpassword\fR\fR\fB]\fR,
 \fB\-p[\fR\fB\fIpassword\fR\fR\fB]\fR
 .sp
 The password to use when connecting to the server\&. If you use the short option form (\fB\-p\fR), you
@@ -472,9 +424,7 @@ Section\ \&6.1.2.1, \(lqEnd-User Guidelines for Password Security\(rq\&. You can
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: pipe option
-.\" pipe option: mysqlimport
-\fB\-\-pipe\fR,
+.\" mysqlimport: pipe option.\" pipe option: mysqlimport\fB\-\-pipe\fR,
 \fB\-W\fR
 .sp
 On Windows, connect to the server using a named pipe\&. This option applies only if the server supports named\-pipe connections\&.
@@ -488,9 +438,7 @@ On Windows, connect to the server using a named pipe\&. This option applies only
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: plugin-dir option
-.\" plugin-dir option: mysqlimport
-\fB\-\-plugin\-dir=\fR\fB\fIpath\fR\fR
+.\" mysqlimport: plugin-dir option.\" plugin-dir option: mysqlimport\fB\-\-plugin\-dir=\fR\fB\fIpath\fR\fR
 .sp
 The directory in which to look for plugins\&. It may be necessary to specify this option if the
 \fB\-\-default\-auth\fR
@@ -510,9 +458,7 @@ This option was added in MySQL 5\&.6\&.2\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: port option
-.\" port option: mysqlimport
-\fB\-\-port=\fR\fB\fIport_num\fR\fR,
+.\" mysqlimport: port option.\" port option: mysqlimport\fB\-\-port=\fR\fB\fIport_num\fR\fR,
 \fB\-P \fR\fB\fIport_num\fR\fR
 .sp
 The TCP/IP port number to use for the connection\&.
@@ -526,9 +472,7 @@ The TCP/IP port number to use for the connection\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: protocol option
-.\" protocol option: mysqlimport
-\fB\-\-protocol={TCP|SOCKET|PIPE|MEMORY}\fR
+.\" mysqlimport: protocol option.\" protocol option: mysqlimport\fB\-\-protocol={TCP|SOCKET|PIPE|MEMORY}\fR
 .sp
 The connection protocol to use for connecting to the server\&. It is useful when the other connection parameters normally would cause a protocol to be used other than the one you want\&. For details on the permissible values, see
 Section\ \&4.2.2, \(lqConnecting to the MySQL Server\(rq\&.
@@ -542,9 +486,7 @@ Section\ \&4.2.2, \(lqConnecting to the MySQL Server\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: replace option
-.\" replace option: mysqlimport
-\fB\-\-replace\fR,
+.\" mysqlimport: replace option.\" replace option: mysqlimport\fB\-\-replace\fR,
 \fB\-r\fR
 .sp
 The
@@ -564,9 +506,7 @@ options control handling of input rows that duplicate existing rows on unique ke
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: silent option
-.\" silent option: mysqlimport
-\fB\-\-silent\fR,
+.\" mysqlimport: silent option.\" silent option: mysqlimport\fB\-\-silent\fR,
 \fB\-s\fR
 .sp
 Silent mode\&. Produce output only when errors occur\&.
@@ -580,9 +520,7 @@ Silent mode\&. Produce output only when errors occur\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: socket option
-.\" socket option: mysqlimport
-\fB\-\-socket=\fR\fB\fIpath\fR\fR,
+.\" mysqlimport: socket option.\" socket option: mysqlimport\fB\-\-socket=\fR\fB\fIpath\fR\fR,
 \fB\-S \fR\fB\fIpath\fR\fR
 .sp
 For connections to
@@ -597,9 +535,7 @@ localhost, the Unix socket file to use, or, on Windows, the name of the named pi
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: SSL options
-.\" SSL options: mysqlimport
-\fB\-\-ssl*\fR
+.\" mysqlimport: SSL options.\" SSL options: mysqlimport\fB\-\-ssl*\fR
 .sp
 Options that begin with
 \fB\-\-ssl\fR
@@ -615,9 +551,7 @@ Section\ \&6.3.9.4, \(lqSSL Command Options\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: user option
-.\" user option: mysqlimport
-\fB\-\-user=\fR\fB\fIuser_name\fR\fR,
+.\" mysqlimport: user option.\" user option: mysqlimport\fB\-\-user=\fR\fB\fIuser_name\fR\fR,
 \fB\-u \fR\fB\fIuser_name\fR\fR
 .sp
 The MySQL user name to use when connecting to the server\&.
@@ -631,9 +565,7 @@ The MySQL user name to use when connecting to the server\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: use-threads option
-.\" use-threads option: mysqlimport
-\fB\-\-use\-threads=\fR\fB\fIN\fR\fR
+.\" mysqlimport: use-threads option.\" use-threads option: mysqlimport\fB\-\-use\-threads=\fR\fB\fIN\fR\fR
 .sp
 Load files in parallel using
 \fIN\fR
@@ -648,9 +580,7 @@ threads\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: verbose option
-.\" verbose option: mysqlimport
-\fB\-\-verbose\fR,
+.\" mysqlimport: verbose option.\" verbose option: mysqlimport\fB\-\-verbose\fR,
 \fB\-v\fR
 .sp
 Verbose mode\&. Print more information about what the program does\&.
@@ -664,9 +594,7 @@ Verbose mode\&. Print more information about what the program does\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlimport: version option
-.\" version option: mysqlimport
-\fB\-\-version\fR,
+.\" mysqlimport: version option.\" version option: mysqlimport\fB\-\-version\fR,
 \fB\-V\fR
 .sp
 Display version information and exit\&.

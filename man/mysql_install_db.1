@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: \fBmysql_install_db\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 09/09/2013
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 11/15/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQL_INSTALL_DB\" "1" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQL_INSTALL_DB\" "1" "11/15/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -147,8 +147,7 @@ to point to the system temporary directory (usually
 After
 \fBmysql_install_db\fR
 sets up the
-InnoDB
-system tablespace, changes to some of tablespace characteristics require setting up a whole new
+InnoDBsystem tablespace, changes to some of tablespace characteristics require setting up a whole new
 instance\&. This includes the file name of the first file in the system tablespace and the number of undo logs\&. If you do not want to use the default values, make sure that the settings for the
 innodb_data_file_path
 and
@@ -182,9 +181,7 @@ Section\ \&4.2.3.4, \(lqCommand-Line Options that Affect Option-File Handling\(r
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_install_db: basedir option
-.\" basedir option: mysql_install_db
-\fB\-\-basedir=\fR\fB\fIpath\fR\fR
+.\" mysql_install_db: basedir option.\" basedir option: mysql_install_db\fB\-\-basedir=\fR\fB\fIpath\fR\fR
 .sp
 The path to the MySQL installation directory\&.
 .RE
@@ -197,11 +194,7 @@ The path to the MySQL installation directory\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_install_db: datadir option
-.\" datadir option: mysql_install_db
-.\" mysql_install_db: ldata option
-.\" ldata option: mysql_install_db
-\fB\-\-datadir=\fR\fB\fIpath\fR\fR,
+.\" mysql_install_db: datadir option.\" datadir option: mysql_install_db.\" mysql_install_db: ldata option.\" ldata option: mysql_install_db\fB\-\-datadir=\fR\fB\fIpath\fR\fR,
 \fB\-\-ldata=\fR\fB\fIpath\fR\fR
 .sp
 The path to the MySQL data directory\&. Beginning with MySQL 5\&.6\&.8,
@@ -217,9 +210,7 @@ is more strict about the option value\&. Only the last component of the path nam
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_install_db: force option
-.\" force option: mysql_install_db
-\fB\-\-force\fR
+.\" mysql_install_db: force option.\" force option: mysql_install_db\fB\-\-force\fR
 .sp
 Cause
 \fBmysql_install_db\fR
@@ -234,9 +225,7 @@ to run even if DNS does not work\&. Grant table entries that normally use host n
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_install_db: random-passwords option
-.\" random-passwords option: mysql_install_db
-\fB\-\-random\-passwords\fR
+.\" mysql_install_db: random-passwords option.\" random-passwords option: mysql_install_db\fB\-\-random\-passwords\fR
 .sp
 On Unix platforms, this option provides for more secure MySQL installation\&. Invoking
 \fBmysql_install_db\fR
@@ -349,9 +338,7 @@ This option was added in MySQL 5\&.6\&.8\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_install_db: rpm option
-.\" rpm option: mysql_install_db
-\fB\-\-rpm\fR
+.\" mysql_install_db: rpm option.\" rpm option: mysql_install_db\fB\-\-rpm\fR
 .sp
 For internal use\&. This option is used during the MySQL installation process for install operations performed using RPM packages\&.
 .RE
@@ -364,9 +351,7 @@ For internal use\&. This option is used during the MySQL installation process fo
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_install_db: skip-name-resolve option
-.\" skip-name-resolve option: mysql_install_db
-\fB\-\-skip\-name\-resolve\fR
+.\" mysql_install_db: skip-name-resolve option.\" skip-name-resolve option: mysql_install_db\fB\-\-skip\-name\-resolve\fR
 .sp
 Use IP addresses rather than host names when creating grant table entries\&. This option can be useful if your DNS does not work\&.
 .RE
@@ -379,9 +364,7 @@ Use IP addresses rather than host names when creating grant table entries\&. Thi
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_install_db: srcdir option
-.\" srcdir option: mysql_install_db
-\fB\-\-srcdir=\fR\fB\fIpath\fR\fR
+.\" mysql_install_db: srcdir option.\" srcdir option: mysql_install_db\fB\-\-srcdir=\fR\fB\fIpath\fR\fR
 .sp
 For internal use\&. This option specifies the directory under which
 \fBmysql_install_db\fR
@@ -396,9 +379,7 @@ looks for support files such as the error message file and the file for populati
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_install_db: user option
-.\" user option: mysql_install_db
-\fB\-\-user=\fR\fB\fIuser_name\fR\fR
+.\" mysql_install_db: user option.\" user option: mysql_install_db\fB\-\-user=\fR\fB\fIuser_name\fR\fR
 .sp
 The system (login) user name to use for running
 \fBmysqld\fR\&. Files and directories created by
@@ -418,9 +399,7 @@ runs using your current login name and files and directories that it creates wil
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_install_db: verbose option
-.\" verbose option: mysql_install_db
-\fB\-\-verbose\fR
+.\" mysql_install_db: verbose option.\" verbose option: mysql_install_db\fB\-\-verbose\fR
 .sp
 Verbose mode\&. Print more information about what the program does\&.
 .RE
@@ -433,9 +412,7 @@ Verbose mode\&. Print more information about what the program does\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_install_db: windows option
-.\" windows option: mysql_install_db
-\fB\-\-windows\fR
+.\" mysql_install_db: windows option.\" windows option: mysql_install_db\fB\-\-windows\fR
 .sp
 For internal use\&. This option is used for creating Windows distributions\&.
 .RE

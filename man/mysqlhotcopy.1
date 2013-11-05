@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: \fBmysqlhotcopy\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 09/09/2013
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 11/15/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLHOTCOPY\FR" "1" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLHOTCOPY\FR" "1" "11/15/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -124,9 +124,7 @@ Section\ \&4.2.3.3, \(lqUsing Option Files\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: help option
-.\" help option: mysqlhotcopy
-\fB\-\-help\fR,
+.\" mysqlhotcopy: help option.\" help option: mysqlhotcopy\fB\-\-help\fR,
 \fB\-?\fR
 .sp
 Display a help message and exit\&.
@@ -140,9 +138,7 @@ Display a help message and exit\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: addtodest option
-.\" addtodest option: mysqlhotcopy
-\fB\-\-addtodest\fR
+.\" mysqlhotcopy: addtodest option.\" addtodest option: mysqlhotcopy\fB\-\-addtodest\fR
 .sp
 Do not rename target directory (if it exists); merely add files to it\&.
 .RE
@@ -155,9 +151,7 @@ Do not rename target directory (if it exists); merely add files to it\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: allowold option
-.\" allowold option: mysqlhotcopy
-\fB\-\-allowold\fR
+.\" mysqlhotcopy: allowold option.\" allowold option: mysqlhotcopy\fB\-\-allowold\fR
 .sp
 Do not abort if a target exists; rename it by adding an
 _old
@@ -172,9 +166,7 @@ suffix\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: checkpoint option
-.\" checkpoint option: mysqlhotcopy
-\fB\-\-checkpoint=\fR\fB\fIdb_name\fR\fR\fB\&.\fR\fB\fItbl_name\fR\fR
+.\" mysqlhotcopy: checkpoint option.\" checkpoint option: mysqlhotcopy\fB\-\-checkpoint=\fR\fB\fIdb_name\fR\fR\fB\&.\fR\fB\fItbl_name\fR\fR
 .sp
 Insert checkpoint entries into the specified database
 \fIdb_name\fR
@@ -190,9 +182,7 @@ and table
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: chroot option
-.\" chroot option: mysqlhotcopy
-\fB\-\-chroot=\fR\fB\fIpath\fR\fR
+.\" mysqlhotcopy: chroot option.\" chroot option: mysqlhotcopy\fB\-\-chroot=\fR\fB\fIpath\fR\fR
 .sp
 Base directory of the
 \fBchroot\fR
@@ -214,9 +204,7 @@ option given to
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: debug option
-.\" debug option: mysqlhotcopy
-\fB\-\-debug\fR
+.\" mysqlhotcopy: debug option.\" debug option: mysqlhotcopy\fB\-\-debug\fR
 .sp
 Enable debug output\&.
 .RE
@@ -229,9 +217,7 @@ Enable debug output\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: dryrun option
-.\" dryrun option: mysqlhotcopy
-\fB\-\-dryrun\fR,
+.\" mysqlhotcopy: dryrun option.\" dryrun option: mysqlhotcopy\fB\-\-dryrun\fR,
 \fB\-n\fR
 .sp
 Report actions without performing them\&.
@@ -245,9 +231,7 @@ Report actions without performing them\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: flushlog option
-.\" flushlog option: mysqlhotcopy
-\fB\-\-flushlog\fR
+.\" mysqlhotcopy: flushlog option.\" flushlog option: mysqlhotcopy\fB\-\-flushlog\fR
 .sp
 Flush logs after all tables are locked\&.
 .RE
@@ -260,9 +244,7 @@ Flush logs after all tables are locked\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: host option
-.\" host option: mysqlhotcopy
-\fB\-\-host=\fR\fB\fIhost_name\fR\fR,
+.\" mysqlhotcopy: host option.\" host option: mysqlhotcopy\fB\-\-host=\fR\fB\fIhost_name\fR\fR,
 \fB\-h \fR\fB\fIhost_name\fR\fR
 .sp
 The host name of the local host to use for making a TCP/IP connection to the local server\&. By default, the connection is made to
@@ -278,9 +260,7 @@ using a Unix socket file\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: keepold option
-.\" keepold option: mysqlhotcopy
-\fB\-\-keepold\fR
+.\" mysqlhotcopy: keepold option.\" keepold option: mysqlhotcopy\fB\-\-keepold\fR
 .sp
 Do not delete previous (renamed) target when done\&.
 .RE
@@ -293,9 +273,7 @@ Do not delete previous (renamed) target when done\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: method option
-.\" method option: mysqlhotcopy
-\fB\-\-method=\fR\fB\fIcommand\fR\fR
+.\" mysqlhotcopy: method option.\" method option: mysqlhotcopy\fB\-\-method=\fR\fB\fIcommand\fR\fR
 .sp
 The method for copying files (cp
 or
@@ -311,9 +289,7 @@ cp\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: noindices option
-.\" noindices option: mysqlhotcopy
-\fB\-\-noindices\fR
+.\" mysqlhotcopy: noindices option.\" noindices option: mysqlhotcopy\fB\-\-noindices\fR
 .sp
 Do not include full index files for
 MyISAM
@@ -329,9 +305,7 @@ tables in the backup\&. This makes the backup smaller and faster\&. The indexes 
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: password option
-.\" password option: mysqlhotcopy
-\fB\-\-password=\fR\fB\fIpassword\fR\fR,
+.\" mysqlhotcopy: password option.\" password option: mysqlhotcopy\fB\-\-password=\fR\fB\fIpassword\fR\fR,
 \fB\-p\fR\fB\fIpassword\fR\fR
 .sp
 The password to use when connecting to the server\&. The password value is not optional for this option, unlike for other MySQL programs\&.
@@ -348,9 +322,7 @@ Section\ \&6.1.2.1, \(lqEnd-User Guidelines for Password Security\(rq\&. You can
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: port option
-.\" port option: mysqlhotcopy
-\fB\-\-port=\fR\fB\fIport_num\fR\fR,
+.\" mysqlhotcopy: port option.\" port option: mysqlhotcopy\fB\-\-port=\fR\fB\fIport_num\fR\fR,
 \fB\-P \fR\fB\fIport_num\fR\fR
 .sp
 The TCP/IP port number to use when connecting to the local server\&.
@@ -364,9 +336,7 @@ The TCP/IP port number to use when connecting to the local server\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: old_server option
-.\" old_server option: mysqlhotcopy
-\fB\-\-old_server\fR
+.\" mysqlhotcopy: old_server option.\" old_server option: mysqlhotcopy\fB\-\-old_server\fR
 .sp
 In MySQL 5\&.6,
 \fBmysqlhotcopy\fR
@@ -385,9 +355,7 @@ option if the server is older than 5\&.5\&.3, which is when that statement was i
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: quiet option
-.\" quiet option: mysqlhotcopy
-\fB\-\-quiet\fR,
+.\" mysqlhotcopy: quiet option.\" quiet option: mysqlhotcopy\fB\-\-quiet\fR,
 \fB\-q\fR
 .sp
 Be silent except for errors\&.
@@ -401,9 +369,7 @@ Be silent except for errors\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: record_log_pos option
-.\" record_log_pos option: mysqlhotcopy
-\fB\-\-record_log_pos=\fR\fB\fIdb_name\fR\fR\fB\&.\fR\fB\fItbl_name\fR\fR
+.\" mysqlhotcopy: record_log_pos option.\" record_log_pos option: mysqlhotcopy\fB\-\-record_log_pos=\fR\fB\fIdb_name\fR\fR\fB\&.\fR\fB\fItbl_name\fR\fR
 .sp
 Record master and slave status in the specified database
 \fIdb_name\fR
@@ -419,9 +385,7 @@ and table
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: regexp option
-.\" regexp option: mysqlhotcopy
-\fB\-\-regexp=\fR\fB\fIexpr\fR\fR
+.\" mysqlhotcopy: regexp option.\" regexp option: mysqlhotcopy\fB\-\-regexp=\fR\fB\fIexpr\fR\fR
 .sp
 Copy all databases with names that match the given regular expression\&.
 .RE
@@ -434,9 +398,7 @@ Copy all databases with names that match the given regular expression\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: resetmaster option
-.\" resetmaster option: mysqlhotcopy
-\fB\-\-resetmaster\fR
+.\" mysqlhotcopy: resetmaster option.\" resetmaster option: mysqlhotcopy\fB\-\-resetmaster\fR
 .sp
 Reset the binary log after locking all the tables\&.
 .RE
@@ -449,9 +411,7 @@ Reset the binary log after locking all the tables\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: resetslave option
-.\" resetslave option: mysqlhotcopy
-\fB\-\-resetslave\fR
+.\" mysqlhotcopy: resetslave option.\" resetslave option: mysqlhotcopy\fB\-\-resetslave\fR
 .sp
 Reset the master info repository file or table after locking all the tables\&.
 .RE
@@ -464,9 +424,7 @@ Reset the master info repository file or table after locking all the tables\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: socket option
-.\" socket option: mysqlhotcopy
-\fB\-\-socket=\fR\fB\fIpath\fR\fR,
+.\" mysqlhotcopy: socket option.\" socket option: mysqlhotcopy\fB\-\-socket=\fR\fB\fIpath\fR\fR,
 \fB\-S \fR\fB\fIpath\fR\fR
 .sp
 The Unix socket file to use for connections to
@@ -481,9 +439,7 @@ localhost\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: suffix option
-.\" suffix option: mysqlhotcopy
-\fB\-\-suffix=\fR\fB\fIstr\fR\fR
+.\" mysqlhotcopy: suffix option.\" suffix option: mysqlhotcopy\fB\-\-suffix=\fR\fB\fIstr\fR\fR
 .sp
 The suffix to use for names of copied databases\&.
 .RE
@@ -496,9 +452,7 @@ The suffix to use for names of copied databases\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: tmpdir option
-.\" tmpdir option: mysqlhotcopy
-\fB\-\-tmpdir=\fR\fB\fIpath\fR\fR
+.\" mysqlhotcopy: tmpdir option.\" tmpdir option: mysqlhotcopy\fB\-\-tmpdir=\fR\fB\fIpath\fR\fR
 .sp
 The temporary directory\&. The default is
 /tmp\&.
@@ -512,9 +466,7 @@ The temporary directory\&. The default is
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlhotcopy: user option
-.\" user option: mysqlhotcopy
-\fB\-\-user=\fR\fB\fIuser_name\fR\fR,
+.\" mysqlhotcopy: user option.\" user option: mysqlhotcopy\fB\-\-user=\fR\fB\fIuser_name\fR\fR,
 \fB\-u \fR\fB\fIuser_name\fR\fR
 .sp
 The MySQL user name to use when connecting to the server\&.

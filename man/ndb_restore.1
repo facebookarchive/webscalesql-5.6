@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: \fBndb_restore\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 09/09/2013
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 11/15/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBNDB_RESTORE\FR" "1" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBNDB_RESTORE\FR" "1" "11/15/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -166,7 +166,9 @@ All MySQL 5\&.6 based releases
 T}
 T{
 .PP
---restore_data
+--restore_data,
+.PP
+-r
 T}:T{
 Restore table data and logs into NDB Cluster using the NDB API
 T}:T{
@@ -557,8 +559,8 @@ Typical options for this utility are shown here:
 .RS 4
 .\}
 .nf
-ndb_restore [\-c \fIconnectstring\fR] \-n \fInode_id\fR [\-m] \-b \fIbackup_id\fR \e
-    \-r \-\-backup_path=\fI/path/to/backup/files\fR
+ndb_restore [\-c \fIconnection_string\fR] \-n \fInode_id\fR \-b \fIbackup_id\fR \e
+      [\-m] \-r \-\-backup_path=\fI/path/to/backup/files\fR
 .fi
 .if n \{\
 .RE
@@ -608,8 +610,7 @@ shell> \fBndb_mgm \-e "SHOW"\fR
 .RE
 .\}
 .PP
-.\" restore_nodeid option (ndb_restore)
-\fB\-n\fR
+.\" restore_nodeid option (ndb_restore)\fB\-n\fR
 is used to specify the node ID of the data node on which the backups were taken\&.
 .PP
 The first time you run the
@@ -692,10 +693,7 @@ Different default values
 Different distribution key settings
 .RE
 .PP
-.\" attribute promotion: ndb_restore
-.\" ndb_restore: attribute promotion
-.\" promote-attributes option (ndb_restore)
-\fBndb_restore\fR
+.\" attribute promotion: ndb_restore.\" ndb_restore: attribute promotion.\" promote-attributes option (ndb_restore)\fBndb_restore\fR
 supports limited
 attribute promotion
 in much the same way that it is supported by MySQL replication; that is, data backed up from a column of a given type can generally be restored to a column using a
@@ -748,9 +746,7 @@ option (short form
 \fB\-A\fR) when restoring the table data\&. Attribute promotion does not occur if this option is not used; instead, the restore operation fails with an error\&.
 .RE
 .PP
-.\" ndb_restore: lossy-conversions option
-.\" lossy-conversions option (ndb_restore)
-\fB\-\-lossy\-conversions\fR,
+.\" ndb_restore: lossy-conversions option.\" lossy-conversions option (ndb_restore)\fB\-\-lossy\-conversions\fR,
 \fB\-L\fR
 .TS
 allbox tab(:);
@@ -864,8 +860,7 @@ When restoring cluster backups, you must be sure to restore all data nodes from 
 .sp .5v
 .RE
 .PP
-.\" restore_epoch option (ndb_restore)
-\fB\-\-restore_epoch\fR
+.\" restore_epoch option (ndb_restore)\fB\-\-restore_epoch\fR
 (short form:
 \fB\-e\fR) adds (or restores) epoch information to the cluster replication status table\&. This is useful for starting replication on a MySQL Cluster replication slave\&. When this option is used, the row in the
 mysql\&.ndb_apply_status
@@ -876,8 +871,7 @@ id
 column is updated if it already exists; such a row is inserted if it does not already exist\&. (See
 Section\ \&17.6.9, \(lqMySQL Cluster Backups With MySQL Cluster Replication\(rq\&.)
 .PP
-.\" restore_data option (ndb_restore)
-\fB\-\-restore_data\fR
+.\" restore_data option (ndb_restore)\fB\-\-restore_data\fR
 .PP
 This option causes
 \fBndb_restore\fR
@@ -885,8 +879,7 @@ to output
 NDB
 table data and logs\&.
 .PP
-.\" restore_meta option (ndb_restore)
-\fB\-\-restore_meta\fR
+.\" restore_meta option (ndb_restore)\fB\-\-restore_meta\fR
 .PP
 This option causes
 \fBndb_restore\fR
@@ -894,9 +887,7 @@ to print
 NDB
 table metadata\&. Generally, you need only use this option when restoring the first data node of a cluster; additional data nodes can obtain the metadata from the first one\&.
 .PP
-.\" restore-privilege-tables option (ndb_restore)
-.\" ndb_restore: restore-privilege-tables option
-\fB\-\-restore\-privilege\-tables\fR
+.\" restore-privilege-tables option (ndb_restore).\" ndb_restore: restore-privilege-tables option\fB\-\-restore\-privilege\-tables\fR
 .PP
 \fBndb_restore\fR
 does not by default restore distributed MySQL privilege tables\&. This option causes
@@ -908,9 +899,7 @@ NDB
 before the backup was taken\&. For more information, see
 Section\ \&17.5.14, \(lqDistributed MySQL Privileges for MySQL Cluster\(rq\&.
 .PP
-.\" backup_path option (ndb_restore)
-.\" ndb_restore: backup_path option
-\fB\-\-backup_path\fR
+.\" backup_path option (ndb_restore).\" ndb_restore: backup_path option\fB\-\-backup_path\fR
 .PP
 The path to the backup directory is required; this is supplied to
 \fBndb_restore\fR
@@ -970,9 +959,7 @@ file available for each concurrent
 \fBndb_restore\fR
 process\&. However, the data files must always be applied before the logs\&.
 .PP
-.\" no-upgrade option (ndb_restore)
-.\" ndb_restore: no-upgrade option
-\fB\-\-no\-upgrade\fR
+.\" no-upgrade option (ndb_restore).\" ndb_restore: no-upgrade option\fB\-\-no\-upgrade\fR
 .PP
 When using
 \fBndb_restore\fR
@@ -984,9 +971,7 @@ option (short form:
 \fB\-u\fR) when running
 \fBndb_restore\fR\&.
 .PP
-.\" print_data option (ndb_restore)
-.\" ndb_restore: print_data option
-\fB\-\-print_data\fR
+.\" print_data option (ndb_restore).\" ndb_restore: print_data option\fB\-\-print_data\fR
 .PP
 The
 \fB\-\-print_data\fR
@@ -1015,9 +1000,7 @@ stdout, or to a file\&. These are similar to some of the options used with
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_restore: tab option
-.\" tab option (ndb_restore)
-\fB\-\-tab\fR,
+.\" ndb_restore: tab option.\" tab option (ndb_restore)\fB\-\-tab\fR,
 \fB\-T\fR
 .TS
 allbox tab(:);
@@ -1051,9 +1034,7 @@ for the current directory\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_restore: fields-enclosed-by option
-.\" fields-enclosed-by option (ndb_restore)
-\fB\-\-fields\-enclosed\-by=\fR\fB\fIstring\fR\fR
+.\" ndb_restore: fields-enclosed-by option.\" fields-enclosed-by option (ndb_restore)\fB\-\-fields\-enclosed\-by=\fR\fB\fIstring\fR\fR
 .TS
 allbox tab(:);
 l l s s
@@ -1092,9 +1073,7 @@ Each column values are enclosed by the string passed to this option (regardless 
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_restore: fields-optionally-enclosed-by option
-.\" fields-optionally-enclosed-by option (ndb_restore)
-\fB\-\-fields\-optionally\-enclosed\-by=\fR\fB\fIstring\fR\fR
+.\" ndb_restore: fields-optionally-enclosed-by option.\" fields-optionally-enclosed-by option (ndb_restore)\fB\-\-fields\-optionally\-enclosed\-by=\fR\fB\fIstring\fR\fR
 .TS
 allbox tab(:);
 l l s s
@@ -1138,9 +1117,7 @@ ENUM)\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_restore: fields-terminated-by option
-.\" fields-terminated-by option (ndb_restore)
-\fB\-\-fields\-terminated\-by=\fR\fB\fIstring\fR\fR
+.\" ndb_restore: fields-terminated-by option.\" fields-terminated-by option (ndb_restore)\fB\-\-fields\-terminated\-by=\fR\fB\fIstring\fR\fR
 .TS
 allbox tab(:);
 l l s s
@@ -1180,9 +1157,7 @@ The string passed to this option is used to separate column values\&. The defaul
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_restore: hex option
-.\" hex option (ndb_restore)
-\fB\-\-hex\fR
+.\" ndb_restore: hex option.\" hex option (ndb_restore)\fB\-\-hex\fR
 .TS
 allbox tab(:);
 l l s s.
@@ -1204,9 +1179,7 @@ If this option is used, all binary values are output in hexadecimal format\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_restore: fields-terminated-by option
-.\" fields-terminated-by option (ndb_restore)
-\fB\-\-fields\-terminated\-by=\fR\fB\fIstring\fR\fR
+.\" ndb_restore: fields-terminated-by option.\" fields-terminated-by option (ndb_restore)\fB\-\-fields\-terminated\-by=\fR\fB\fIstring\fR\fR
 .TS
 allbox tab(:);
 l l s s
@@ -1246,9 +1219,7 @@ This option specifies the string used to end each line of output\&. The default 
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_restore: append option
-.\" append option (ndb_restore)
-\fB\-\-append\fR
+.\" ndb_restore: append option.\" append option (ndb_restore)\fB\-\-append\fR
 .TS
 allbox tab(:);
 l l s s.
@@ -1284,18 +1255,14 @@ option includes the table\*(Aqs hidden primary key\&.
 .sp .5v
 .RE
 .PP
-.\" ndb_restore: print_meta option
-.\" print_meta option (ndb_restore)
-\fB\-\-print_meta\fR
+.\" ndb_restore: print_meta option.\" print_meta option (ndb_restore)\fB\-\-print_meta\fR
 .PP
 This option causes
 \fBndb_restore\fR
 to print all metadata to
 stdout\&.
 .PP
-.\" ndb_restore: print_log option
-.\" print_log option (ndb_restore)
-\fB\-\-print_log\fR
+.\" ndb_restore: print_log option.\" print_log option (ndb_restore)\fB\-\-print_log\fR
 .PP
 The
 \fB\-\-print_log\fR
@@ -1304,9 +1271,7 @@ option causes
 to output its log to
 stdout\&.
 .PP
-.\" ndb_restore: print option
-.\" print option (ndb_restore)
-\fB\-\-print\fR
+.\" ndb_restore: print option.\" print option (ndb_restore)\fB\-\-print\fR
 .PP
 Causes
 \fBndb_restore\fR
@@ -1340,9 +1305,7 @@ makes no attempt to restore data or metadata to a MySQL Cluster\&.
 .sp .5v
 .RE
 .PP
-.\" ndb_restore: dont_ignore_systab_0 option
-.\" dont_ignore_systab_0 option (ndb_restore)
-\fB\-\-dont_ignore_systab_0\fR
+.\" ndb_restore: dont_ignore_systab_0 option.\" dont_ignore_systab_0 option (ndb_restore)\fB\-\-dont_ignore_systab_0\fR
 .PP
 Normally, when restoring table data and metadata,
 \fBndb_restore\fR
@@ -1353,25 +1316,19 @@ system table that is present in the backup\&.
 causes the system table to be restored\&.
 \fIThis option is intended for experimental and development use only, and is not recommended in a production environment\fR\&.
 .PP
-.\" ndb_restore: ndb-nodegroup-map option
-.\" ndb-nodegroup-map option (ndb_restore)
-\fB\-\-ndb\-nodegroup\-map\fR,
+.\" ndb_restore: ndb-nodegroup-map option.\" ndb-nodegroup-map option (ndb_restore)\fB\-\-ndb\-nodegroup\-map\fR,
 \fB\-z\fR
 .PP
 This option can be used to restore a backup taken from one node group to a different node group\&. Its argument is a list of the form
 \fIsource_node_group\fR, \fItarget_node_group\fR\&.
 .PP
-.\" ndb_restore: no-binlog option
-.\" no-binlog option (ndb_restore)
-\fB\-\-no\-binlog\fR
+.\" ndb_restore: no-binlog option.\" no-binlog option (ndb_restore)\fB\-\-no\-binlog\fR
 .PP
 This option prevents any connected SQL nodes from writing data restored by
 \fBndb_restore\fR
 to their binary logs\&.
 .PP
-.\" ndb_restore: no-restore-disk-objects option
-.\" no-restore-disk-objects option (ndb_restore)
-\fB\-\-no\-restore\-disk\-objects\fR,
+.\" ndb_restore: no-restore-disk-objects option.\" no-restore-disk-objects option (ndb_restore)\fB\-\-no\-restore\-disk\-objects\fR,
 \fB\-d\fR
 .PP
 This option stops
@@ -1379,26 +1336,20 @@ This option stops
 from restoring any MySQL Cluster Disk Data objects, such as tablespaces and log file groups; see
 Section\ \&17.5.12, \(lqMySQL Cluster Disk Data Tables\(rq, for more information about these\&.
 .PP
-.\" ndb_restore: parallelism option
-.\" parallelism option (ndb_restore)
-\fB\-\-parallelism=#\fR,
+.\" ndb_restore: parallelism option.\" parallelism option (ndb_restore)\fB\-\-parallelism=#\fR,
 \fB\-p\fR
 .PP
 Determines the maximum number of parallel transactions that
 \fBndb_restore\fR
 tries to use\&. By default, this is 128; the minimum is 1, and the maximum is 1024\&.
 .PP
-.\" ndb_restore: progress-frequency option
-.\" progress-frequency option (ndb_restore)
-\fB\-\-progress\-frequency=\fR\fB\fIN\fR\fR
+.\" ndb_restore: progress-frequency option.\" progress-frequency option (ndb_restore)\fB\-\-progress\-frequency=\fR\fB\fIN\fR\fR
 .PP
 Print a status report each
 \fIN\fR
 seconds while the backup is in progress\&. 0 (the default) causes no status reports to be printed\&. The maximum is 65535\&.
 .PP
-.\" ndb_restore: verbose option
-.\" verbose option (ndb_restore)
-\fB\-\-verbose=#\fR
+.\" ndb_restore: verbose option.\" verbose option (ndb_restore)\fB\-\-verbose=#\fR
 .PP
 Sets the level for the verbosity of the output\&. The minimum is 0; the maximum is 255\&. The default value is 1\&.
 .PP
@@ -1438,9 +1389,7 @@ All tables from one or more databases
 One or more tables from a single database
 .RE
 .PP
-.\" ndb_restore: include-databases option
-.\" include-databases option (ndb_restore)
-\fB\-\-include\-databases=\fR\fB\fIdb_name\fR\fR\fB[,\fR\fB\fIdb_name\fR\fR\fB][,\&.\&.\&.]\fR
+.\" ndb_restore: include-databases option.\" include-databases option (ndb_restore)\fB\-\-include\-databases=\fR\fB\fIdb_name\fR\fR\fB[,\fR\fB\fIdb_name\fR\fR\fB][,\&.\&.\&.]\fR
 .TS
 allbox tab(:);
 l l s s
@@ -1469,9 +1418,7 @@ T}
 .TE
 .sp 1
 .PP
-.\" ndb_restore: include-tables option
-.\" include-tables option (ndb_restore)
-\fB\-\-include\-tables=\fR\fB\fIdb_name\&.tbl_name\fR\fR\fB[,\fR\fB\fIdb_name\&.tbl_name\fR\fR\fB][,\&.\&.\&.]\fR
+.\" ndb_restore: include-tables option.\" include-tables option (ndb_restore)\fB\-\-include\-tables=\fR\fB\fIdb_name\&.tbl_name\fR\fR\fB[,\fR\fB\fIdb_name\&.tbl_name\fR\fR\fB][,\&.\&.\&.]\fR
 .TS
 allbox tab(:);
 l l s s
@@ -1595,9 +1542,7 @@ shell> \fBndb_restore [\&.\&.\&.] \-\-include\-databases=db1,db2 \-\-include\-ta
 .PP
 (Again we have omitted other, possibly required, options in the example just shown\&.)
 .PP
-.\" ndb_restore: exclude-databases option
-.\" exclude-databases option (ndb_restore)
-\fB\-\-exclude\-databases=\fR\fB\fIdb_name\fR\fR\fB[,\fR\fB\fIdb_name\fR\fR\fB][,\&.\&.\&.]\fR
+.\" ndb_restore: exclude-databases option.\" exclude-databases option (ndb_restore)\fB\-\-exclude\-databases=\fR\fB\fIdb_name\fR\fR\fB[,\fR\fB\fIdb_name\fR\fR\fB][,\&.\&.\&.]\fR
 .TS
 allbox tab(:);
 l l s s
@@ -1626,9 +1571,7 @@ T}
 .TE
 .sp 1
 .PP
-.\" ndb_restore: exclude-tables option
-.\" exclude-tables option (ndb_restore)
-\fB\-\-exclude\-tables=\fR\fB\fIdb_name\&.tbl_name\fR\fR\fB[,\fR\fB\fIdb_name\&.tbl_name\fR\fR\fB][,\&.\&.\&.]\fR
+.\" ndb_restore: exclude-tables option.\" exclude-tables option (ndb_restore)\fB\-\-exclude\-tables=\fR\fB\fIdb_name\&.tbl_name\fR\fR\fB[,\fR\fB\fIdb_name\&.tbl_name\fR\fR\fB][,\&.\&.\&.]\fR
 .TS
 allbox tab(:);
 l l s s
@@ -1847,9 +1790,7 @@ db1:
 .RE
 .\}
 .PP
-.\" ndb_restore: exclude-missing-columns option
-.\" exclude-missing-columns option (ndb_restore)
-\fB\-\-exclude\-missing\-columns\fR
+.\" ndb_restore: exclude-missing-columns option.\" exclude-missing-columns option (ndb_restore)\fB\-\-exclude\-missing\-columns\fR
 .TS
 allbox tab(:);
 l l s s.
@@ -1867,9 +1808,7 @@ option\&. When this option is used,
 \fBndb_restore\fR
 ignores any columns missing from tables being restored as compared to the versions of those tables found in the backup\&. This option applies to all tables being restored\&. If you wish to apply this option only to selected tables or databases, you can use it in combination with one or more of the options described in the previous paragraph to do so, then restore data to the remaining tables using a complementary set of these options\&.
 .PP
-.\" ndb_restore: disable-indexes option
-.\" disable-indexes option (ndb_restore)
-\fB\-\-disable\-indexes\fR
+.\" ndb_restore: disable-indexes option.\" disable-indexes option (ndb_restore)\fB\-\-disable\-indexes\fR
 .TS
 allbox tab(:);
 l l s s.
@@ -1884,9 +1823,7 @@ T}
 Disable restoration of indexes during restoration of the data from a native NDB backup\&. Afterwards, you can restore indexes for all tables at once with multi\-threaded building of indexes using
 \fB\-\-rebuild\-indexes\fR, which should be faster than rebuilding indexes concurrently for very large tables\&.
 .PP
-.\" ndb_restore: rebuild-indexes option
-.\" rebuild-indexes option (ndb_restore)
-\fB\-\-rebuild\-indexes\fR
+.\" ndb_restore: rebuild-indexes option.\" rebuild-indexes option (ndb_restore)\fB\-\-rebuild\-indexes\fR
 .TS
 allbox tab(:);
 l l s s.
@@ -1904,9 +1841,7 @@ to cause multi\-threaded rebuilding of the ordered indexes while restoring a nat
 NDB
 backup\&.
 .PP
-.\" ndb_restore: skip-broken-objects option
-.\" skip-broken-objects option (ndb_restore)
-\fB\-\-skip\-broken\-objects\fR
+.\" ndb_restore: skip-broken-objects option.\" skip-broken-objects option (ndb_restore)\fB\-\-skip\-broken\-objects\fR
 .TS
 allbox tab(:);
 l l s s.
@@ -1926,9 +1861,7 @@ backup, and to continue restoring any remaining tables (that are not also corrup
 \fB\-\-skip\-broken\-objects\fR
 option works only in the case of missing blob parts tables\&.
 .PP
-.\" ndb_restore: skip-unknown-objects option
-.\" skip-unknown-objects option (ndb_restore)
-\fB\-\-skip\-unknown\-objects\fR
+.\" ndb_restore: skip-unknown-objects option.\" skip-unknown-objects option (ndb_restore)\fB\-\-skip\-unknown\-objects\fR
 .TS
 allbox tab(:);
 l l s s.
@@ -1946,9 +1879,7 @@ to ignore any schema objects it does not recognize while reading a native
 NDB
 backup\&. This can be used for restoring a backup made from a cluster running MySQL Cluster NDB 7\&.3 to a cluster running MySQL Cluster NDB 7\&.2\&.
 .PP
-.\" ndb_restore: rewrite-database option
-.\" rewrite-database option (ndb_restore)
-\fB\-\-rewrite\-database=\fR\fB\fIold_dbname\fR\fR\fB,\fR\fB\fInew_dbname\fR\fR
+.\" ndb_restore: rewrite-database option.\" rewrite-database option (ndb_restore)\fB\-\-rewrite\-database=\fR\fB\fIold_dbname\fR\fR\fB,\fR\fB\fInew_dbname\fR\fR
 .TS
 allbox tab(:);
 l l s s

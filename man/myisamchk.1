@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: \fBmyisamchk\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 09/09/2013
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 11/15/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYISAMCHK\FR" "1" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYISAMCHK\FR" "1" "11/15/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -268,9 +268,7 @@ The options described in this section can be used for any type of table maintena
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: help option
-.\" help option: myisamchk
-\fB\-\-help\fR,
+.\" myisamchk: help option.\" help option: myisamchk\fB\-\-help\fR,
 \fB\-?\fR
 .sp
 Display a help message and exit\&. Options are grouped by type of operation\&.
@@ -284,9 +282,7 @@ Display a help message and exit\&. Options are grouped by type of operation\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: HELP option
-.\" HELP option: myisamchk
-\fB\-\-HELP\fR,
+.\" myisamchk: HELP option.\" HELP option: myisamchk\fB\-\-HELP\fR,
 \fB\-H\fR
 .sp
 Display a help message and exit\&. Options are presented in a single list\&.
@@ -300,9 +296,7 @@ Display a help message and exit\&. Options are presented in a single list\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: debug option
-.\" debug option: myisamchk
-\fB\-\-debug=\fR\fB\fIdebug_options\fR\fR,
+.\" myisamchk: debug option.\" debug option: myisamchk\fB\-\-debug=\fR\fB\fIdebug_options\fR\fR,
 \fB\-# \fR\fB\fIdebug_options\fR\fR
 .sp
 Write a debugging log\&. A typical
@@ -320,9 +314,7 @@ string is
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: silent option
-.\" silent option: myisamchk
-\fB\-\-silent\fR,
+.\" myisamchk: silent option.\" silent option: myisamchk\fB\-\-silent\fR,
 \fB\-s\fR
 .sp
 Silent mode\&. Write output only when errors occur\&. You can use
@@ -340,9 +332,7 @@ very silent\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: verbose option
-.\" verbose option: myisamchk
-\fB\-\-verbose\fR,
+.\" myisamchk: verbose option.\" verbose option: myisamchk\fB\-\-verbose\fR,
 \fB\-v\fR
 .sp
 Verbose mode\&. Print more information about what the program does\&. This can be used with
@@ -362,9 +352,7 @@ multiple times (\fB\-vv\fR,
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: version option
-.\" version option: myisamchk
-\fB\-\-version\fR,
+.\" myisamchk: version option.\" version option: myisamchk\fB\-\-version\fR,
 \fB\-V\fR
 .sp
 Display version information and exit\&.
@@ -378,9 +366,7 @@ Display version information and exit\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: wait option
-.\" wait option: myisamchk
-\fB\-\-wait\fR,
+.\" myisamchk: wait option.\" wait option: myisamchk\fB\-\-wait\fR,
 \fB\-w\fR
 .sp
 Instead of terminating with an error if the table is locked, wait until the table is unlocked before continuing\&. If you are running
@@ -652,9 +638,7 @@ supports the following options for table checking operations:
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: check option
-.\" check option: myisamchk
-\fB\-\-check\fR,
+.\" myisamchk: check option.\" check option: myisamchk\fB\-\-check\fR,
 \fB\-c\fR
 .sp
 Check the table for errors\&. This is the default operation if you specify no option that selects an operation type explicitly\&.
@@ -668,9 +652,7 @@ Check the table for errors\&. This is the default operation if you specify no op
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: check-only-changed option
-.\" check-only-changed option: myisamchk
-\fB\-\-check\-only\-changed\fR,
+.\" myisamchk: check-only-changed option.\" check-only-changed option: myisamchk\fB\-\-check\-only\-changed\fR,
 \fB\-C\fR
 .sp
 Check only tables that have changed since the last check\&.
@@ -684,9 +666,7 @@ Check only tables that have changed since the last check\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: extend-check option
-.\" extend-check option: myisamchk
-\fB\-\-extend\-check\fR,
+.\" myisamchk: extend-check option.\" extend-check option: myisamchk\fB\-\-extend\-check\fR,
 \fB\-e\fR
 .sp
 Check the table very thoroughly\&. This is quite slow if the table has many indexes\&. This option should only be used in extreme cases\&. Normally,
@@ -715,9 +695,7 @@ the section called \(lqOBTAINING TABLE INFORMATION WITH MYISAMCHK\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: fast option
-.\" fast option: myisamchk
-\fB\-\-fast\fR,
+.\" myisamchk: fast option.\" fast option: myisamchk\fB\-\-fast\fR,
 \fB\-F\fR
 .sp
 Check only tables that haven\*(Aqt been closed properly\&.
@@ -731,9 +709,7 @@ Check only tables that haven\*(Aqt been closed properly\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: force option
-.\" force option: myisamchk
-\fB\-\-force\fR,
+.\" myisamchk: force option.\" force option: myisamchk\fB\-\-force\fR,
 \fB\-f\fR
 .sp
 Do a repair operation automatically if
@@ -753,9 +729,7 @@ option\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: information option
-.\" information option: myisamchk
-\fB\-\-information\fR,
+.\" myisamchk: information option.\" information option: myisamchk\fB\-\-information\fR,
 \fB\-i\fR
 .sp
 Print informational statistics about the table that is checked\&.
@@ -769,9 +743,7 @@ Print informational statistics about the table that is checked\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: medium-check option
-.\" medium-check option: myisamchk
-\fB\-\-medium\-check\fR,
+.\" myisamchk: medium-check option.\" medium-check option: myisamchk\fB\-\-medium\-check\fR,
 \fB\-m\fR
 .sp
 Do a check that is faster than an
@@ -787,9 +759,7 @@ operation\&. This finds only 99\&.99% of all errors, which should be good enough
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: read-only option
-.\" read-only option: myisamchk
-\fB\-\-read\-only\fR,
+.\" myisamchk: read-only option.\" read-only option: myisamchk\fB\-\-read\-only\fR,
 \fB\-T\fR
 .sp
 Do not mark the table as checked\&. This is useful if you use
@@ -807,9 +777,7 @@ when run with external locking disabled\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: update-state option
-.\" update-state option: myisamchk
-\fB\-\-update\-state\fR,
+.\" myisamchk: update-state option.\" update-state option: myisamchk\fB\-\-update\-state\fR,
 \fB\-U\fR
 .sp
 Store information in the
@@ -839,9 +807,7 @@ is given):
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: backup option
-.\" backup option: myisamchk
-\fB\-\-backup\fR,
+.\" myisamchk: backup option.\" backup option: myisamchk\fB\-\-backup\fR,
 \fB\-B\fR
 .sp
 Make a backup of the
@@ -858,9 +824,7 @@ file as
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: character-sets-dir option
-.\" character-sets-dir option: myisamchk
-\fB\-\-character\-sets\-dir=\fR\fB\fIpath\fR\fR
+.\" myisamchk: character-sets-dir option.\" character-sets-dir option: myisamchk\fB\-\-character\-sets\-dir=\fR\fB\fIpath\fR\fR
 .sp
 The directory where character sets are installed\&. See
 Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&.
@@ -874,9 +838,7 @@ Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: correct-checksum option
-.\" correct-checksum option: myisamchk
-\fB\-\-correct\-checksum\fR
+.\" myisamchk: correct-checksum option.\" correct-checksum option: myisamchk\fB\-\-correct\-checksum\fR
 .sp
 Correct the checksum information for the table\&.
 .RE
@@ -889,9 +851,7 @@ Correct the checksum information for the table\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: data-file-length option
-.\" data-file-length option: myisamchk
-\fB\-\-data\-file\-length=\fR\fB\fIlen\fR\fR,
+.\" myisamchk: data-file-length option.\" data-file-length option: myisamchk\fB\-\-data\-file\-length=\fR\fB\fIlen\fR\fR,
 \fB\-D \fR\fB\fIlen\fR\fR
 .sp
 The maximum length of the data file (when re\-creating data file when it is
@@ -906,9 +866,7 @@ The maximum length of the data file (when re\-creating data file when it is
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: extend-check option
-.\" extend-check option: myisamchk
-\fB\-\-extend\-check\fR,
+.\" myisamchk: extend-check option.\" extend-check option: myisamchk\fB\-\-extend\-check\fR,
 \fB\-e\fR
 .sp
 Do a repair that tries to recover every possible row from the data file\&. Normally, this also finds a lot of garbage rows\&. Do not use this option unless you are desperate\&.
@@ -927,9 +885,7 @@ the section called \(lqOBTAINING TABLE INFORMATION WITH MYISAMCHK\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: force option
-.\" force option: myisamchk
-\fB\-\-force\fR,
+.\" myisamchk: force option.\" force option: myisamchk\fB\-\-force\fR,
 \fB\-f\fR
 .sp
 Overwrite old intermediate files (files with names like
@@ -944,9 +900,7 @@ Overwrite old intermediate files (files with names like
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: keys-used option
-.\" keys-used option: myisamchk
-\fB\-\-keys\-used=\fR\fB\fIval\fR\fR,
+.\" myisamchk: keys-used option.\" keys-used option: myisamchk\fB\-\-keys\-used=\fR\fB\fIval\fR\fR,
 \fB\-k \fR\fB\fIval\fR\fR
 .sp
 For
@@ -962,9 +916,7 @@ For
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: no-symlinks option
-.\" no-symlinks option: myisamchk
-\fB\-\-no\-symlinks\fR,
+.\" myisamchk: no-symlinks option.\" no-symlinks option: myisamchk\fB\-\-no\-symlinks\fR,
 \fB\-l\fR
 .sp
 Do not follow symbolic links\&. Normally
@@ -980,9 +932,7 @@ repairs the table that a symlink points to\&. This option does not exist as of M
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: max-record-length option
-.\" max-record-length option: myisamchk
-\fB\-\-max\-record\-length=\fR\fB\fIlen\fR\fR
+.\" myisamchk: max-record-length option.\" max-record-length option: myisamchk\fB\-\-max\-record\-length=\fR\fB\fIlen\fR\fR
 .sp
 Skip rows larger than the given length if
 \fBmyisamchk\fR
@@ -997,9 +947,7 @@ cannot allocate memory to hold them\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: parallel-recover option
-.\" parallel-recover option: myisamchk
-\fB\-\-parallel\-recover\fR,
+.\" myisamchk: parallel-recover option.\" parallel-recover option: myisamchk\fB\-\-parallel\-recover\fR,
 \fB\-p\fR
 .sp
 Use the same technique as
@@ -1017,9 +965,7 @@ and
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: quick option
-.\" quick option: myisamchk
-\fB\-\-quick\fR,
+.\" myisamchk: quick option.\" quick option: myisamchk\fB\-\-quick\fR,
 \fB\-q\fR
 .sp
 Achieve a faster repair by modifying only the index file, not the data file\&. You can specify this option twice to force
@@ -1035,9 +981,7 @@ to modify the original data file in case of duplicate keys\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: recover option
-.\" recover option: myisamchk
-\fB\-\-recover\fR,
+.\" myisamchk: recover option.\" recover option: myisamchk\fB\-\-recover\fR,
 \fB\-r\fR
 .sp
 Do a repair that can fix almost any problem except unique keys that are not unique (which is an extremely unlikely error with
@@ -1063,9 +1007,7 @@ myisam_sort_buffer_size\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: safe-recover option
-.\" safe-recover option: myisamchk
-\fB\-\-safe\-recover\fR,
+.\" myisamchk: safe-recover option.\" safe-recover option: myisamchk\fB\-\-safe\-recover\fR,
 \fB\-o\fR
 .sp
 Do a repair using an old recovery method that reads through all rows in order and updates all index trees based on the rows found\&. This is an order of magnitude slower than
@@ -1091,9 +1033,7 @@ key_buffer_size\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: set-character-set option
-.\" set-character-set option: myisamchk
-\fB\-\-set\-character\-set=\fR\fB\fIname\fR\fR
+.\" myisamchk: set-character-set option.\" set-character-set option: myisamchk\fB\-\-set\-character\-set=\fR\fB\fIname\fR\fR
 .sp
 Change the character set used by the table indexes\&. This option was replaced by
 \fB\-\-set\-collation\fR
@@ -1108,9 +1048,7 @@ in MySQL 5\&.0\&.3\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: set-collation option
-.\" set-collation option: myisamchk
-\fB\-\-set\-collation=\fR\fB\fIname\fR\fR
+.\" myisamchk: set-collation option.\" set-collation option: myisamchk\fB\-\-set\-collation=\fR\fB\fIname\fR\fR
 .sp
 Specify the collation to use for sorting table indexes\&. The character set name is implied by the first part of the collation name\&.
 .RE
@@ -1123,9 +1061,7 @@ Specify the collation to use for sorting table indexes\&. The character set name
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: sort-recover option
-.\" sort-recover option: myisamchk
-\fB\-\-sort\-recover\fR,
+.\" myisamchk: sort-recover option.\" sort-recover option: myisamchk\fB\-\-sort\-recover\fR,
 \fB\-n\fR
 .sp
 Force
@@ -1141,9 +1077,7 @@ to use sorting to resolve the keys even if the temporary files would be very lar
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: tmpdir option
-.\" tmpdir option: myisamchk
-\fB\-\-tmpdir=\fR\fB\fIpath\fR\fR,
+.\" myisamchk: tmpdir option.\" tmpdir option: myisamchk\fB\-\-tmpdir=\fR\fB\fIpath\fR\fR,
 \fB\-t \fR\fB\fIpath\fR\fR
 .sp
 The path of the directory to be used for storing temporary files\&. If this is not set,
@@ -1163,9 +1097,7 @@ can be set to a list of directory paths that are used successively in round\-rob
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: unpack option
-.\" unpack option: myisamchk
-\fB\-\-unpack\fR,
+.\" myisamchk: unpack option.\" unpack option: myisamchk\fB\-\-unpack\fR,
 \fB\-u\fR
 .sp
 Unpack a table that was packed with
@@ -1184,9 +1116,7 @@ supports the following options for actions other than table checks and repairs:
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: analyze option
-.\" analyze option: myisamchk
-\fB\-\-analyze\fR,
+.\" myisamchk: analyze option.\" analyze option: myisamchk\fB\-\-analyze\fR,
 \fB\-a\fR
 .sp
 Analyze the distribution of key values\&. This improves join performance by enabling the join optimizer to better choose the order in which to join the tables and which indexes it should use\&. To obtain information about the key distribution, use a
@@ -1204,9 +1134,7 @@ statement\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: block-search option
-.\" block-search option: myisamchk
-\fB\-\-block\-search=\fR\fB\fIoffset\fR\fR,
+.\" myisamchk: block-search option.\" block-search option: myisamchk\fB\-\-block\-search=\fR\fB\fIoffset\fR\fR,
 \fB\-b \fR\fB\fIoffset\fR\fR
 .sp
 Find the record that a block at the given offset belongs to\&.
@@ -1220,9 +1148,7 @@ Find the record that a block at the given offset belongs to\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: description option
-.\" description option: myisamchk
-\fB\-\-description\fR,
+.\" myisamchk: description option.\" description option: myisamchk\fB\-\-description\fR,
 \fB\-d\fR
 .sp
 Print some descriptive information about the table\&. Specifying the
@@ -1239,9 +1165,7 @@ the section called \(lqOBTAINING TABLE INFORMATION WITH MYISAMCHK\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: set-auto-increment[ option
-.\" set-auto-increment[ option: myisamchk
-\fB\-\-set\-auto\-increment[=\fR\fB\fIvalue\fR\fR\fB]\fR,
+.\" myisamchk: set-auto-increment[ option.\" set-auto-increment[ option: myisamchk\fB\-\-set\-auto\-increment[=\fR\fB\fIvalue\fR\fR\fB]\fR,
 \fB\-A[\fR\fB\fIvalue\fR\fR\fB]\fR
 .sp
 Force
@@ -1263,9 +1187,7 @@ numbers for new records begin with the largest value currently in the table, plu
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: sort-index option
-.\" sort-index option: myisamchk
-\fB\-\-sort\-index\fR,
+.\" myisamchk: sort-index option.\" sort-index option: myisamchk\fB\-\-sort\-index\fR,
 \fB\-S\fR
 .sp
 Sort the index tree blocks in high\-low order\&. This optimizes seeks and makes table scans that use indexes faster\&.
@@ -1279,9 +1201,7 @@ Sort the index tree blocks in high\-low order\&. This optimizes seeks and makes 
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisamchk: sort-records option
-.\" sort-records option: myisamchk
-\fB\-\-sort\-records=\fR\fB\fIN\fR\fR,
+.\" myisamchk: sort-records option.\" sort-records option: myisamchk\fB\-\-sort\-records=\fR\fB\fIN\fR\fR,
 \fB\-R \fR\fB\fIN\fR\fR
 .sp
 Sort records according to a particular index\&. This makes your data much more localized and may speed up range\-based
@@ -2100,7 +2020,8 @@ Key:  2:  Keyblocks used:  99%  Packed:   97%  Max levels:  3
 \- check data record references index: 3
 Key:  3:  Keyblocks used:  98%  Packed:  \-14%  Max levels:  3
 Total:    Keyblocks used:  98%  Packed:   89%
-\- check records and index references\fI*** LOTS OF ROW NUMBERS DELETED ***\fR
+\- check records and index references
+\fI*** LOTS OF ROW NUMBERS DELETED ***\fR
 Records:            306688  M\&.recordlength:       25  Packed:            83%
 Recordspace used:       97% Empty space:           2% Blocks/Record:   1\&.00
 Record blocks:      306688  Delete blocks:         0

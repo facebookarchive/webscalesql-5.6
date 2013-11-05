@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: \fBndb_config\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 09/09/2013
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 11/15/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBNDB_CONFIG\FR" "1" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBNDB_CONFIG\FR" "1" "11/15/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -257,9 +257,7 @@ T}
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_config: usage option
-.\" usage option: ndb_config
-\fB\-\-usage\fR,
+.\" ndb_config: usage option.\" usage option: ndb_config\fB\-\-usage\fR,
 \fB\-\-help\fR, or
 \fB\-?\fR
 .TS
@@ -297,9 +295,7 @@ to print a list of available options, and then exit\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_config: config_from_node option
-.\" config_from_node option: ndb_config
-\fB\-\-config_from_node=#\fR
+.\" ndb_config: config_from_node option.\" config_from_node option: ndb_config\fB\-\-config_from_node=#\fR
 .TS
 allbox tab(:);
 l l s s
@@ -349,9 +345,7 @@ fails with an error\&. (To obtain configuration data from the management node in
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_config: version option
-.\" version option: ndb_config
-\fB\-\-version\fR,
+.\" ndb_config: version option.\" version option: ndb_config\fB\-\-version\fR,
 \fB\-V\fR
 .TS
 allbox tab(:);
@@ -382,9 +376,7 @@ to print a version information string, and then exit\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_config: ndb-connectstring option
-.\" ndb-connectstring option: ndb_config
-\fB\-\-ndb\-connectstring=\fR\fB\fIconnect_string\fR\fR,
+.\" ndb_config: ndb-connectstring option.\" ndb-connectstring option: ndb_config\fB\-\-ndb\-connectstring=\fR\fB\fIconnect_string\fR\fR,
 \fB\-c \fR\fB\fIconnect_string\fR\fR
 .TS
 allbox tab(:);
@@ -439,9 +431,7 @@ localhost:1186\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_config: config-file option
-.\" config-file option: ndb_config
-\fB\-\-config\-file=\fR\fB\fIpath\-to\-file\fR\fR
+.\" ndb_config: config-file option.\" config-file option: ndb_config\fB\-\-config\-file=\fR\fB\fIpath\-to\-file\fR\fR
 .TS
 allbox tab(:);
 l l s s
@@ -482,9 +472,7 @@ is invoked, then an absolute path must be used\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_config: mycnf option
-.\" mycnf option: ndb_config
-\fB\-\-mycnf\fR
+.\" ndb_config: mycnf option.\" mycnf option: ndb_config\fB\-\-mycnf\fR
 .TS
 allbox tab(:);
 l l s s
@@ -526,11 +514,8 @@ file\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_config: query option
-.\" query option: ndb_config
-\fB\-\-query=\fR\fB\fIquery\-options\fR\fR,
-\fB\-q\fR
-\fIquery\-options\fR
+.\" ndb_config: query option.\" query option: ndb_config\fB\-\-query=\fR\fB\fIquery\-options\fR\fR,
+\fB\-q\fR\fIquery\-options\fR
 .TS
 allbox tab(:);
 l l s s
@@ -573,9 +558,7 @@ mysqld, or
 ndb_mgmd), and any configuration parameters whose values are to be obtained\&.
 .sp
 For example,
-.\" ndb_config: query option
-.\" query option: ndb_config
-\fB\-\-query=id,type,indexmemory,datamemory\fR
+.\" ndb_config: query option.\" query option: ndb_config\fB\-\-query=id,type,indexmemory,datamemory\fR
 returns the node ID, node type,
 DataMemory, and
 IndexMemory
@@ -605,9 +588,7 @@ If a given parameter is not applicable to a certain type of node, than an empty 
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_config: host option
-.\" host option: ndb_config
-\fB\-\-host=\fR\fB\fIhostname\fR\fR
+.\" ndb_config: host option.\" host option: ndb_config\fB\-\-host=\fR\fB\fIhostname\fR\fR
 .TS
 allbox tab(:);
 l l s s
@@ -676,13 +657,9 @@ in the same fashion\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_config: id option
-.\" id option: ndb_config
-\fB\-\-id=\fR\fB\fInode_id\fR\fR
+.\" ndb_config: id option.\" id option: ndb_config\fB\-\-id=\fR\fB\fInode_id\fR\fR
 .sp
-.\" ndb_config: nodeid option
-.\" nodeid option: ndb_config
-\fB\-\-nodeid=\fR\fB\fInode_id\fR\fR
+.\" ndb_config: nodeid option.\" nodeid option: ndb_config\fB\-\-nodeid=\fR\fB\fInode_id\fR\fR
 .TS
 allbox tab(:);
 l l s s
@@ -724,9 +701,7 @@ is the preferred form\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_config: nodes option
-.\" nodes option: ndb_config
-\fB\-\-nodes\fR
+.\" ndb_config: nodes option.\" nodes option: ndb_config\fB\-\-nodes\fR
 .TS
 allbox tab(:);
 l l s s
@@ -773,9 +748,7 @@ or
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_config: connections option
-.\" connections option: ndb_config
-\fB\-\-connections\fR
+.\" ndb_config: connections option.\" connections option: ndb_config\fB\-\-connections\fR
 .TS
 allbox tab(:);
 l l s s
@@ -822,9 +795,7 @@ or
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_config: system option
-.\" system option: ndb_config
-\fB\-\-system\fR
+.\" ndb_config: system option.\" system option: ndb_config\fB\-\-system\fR
 .TS
 allbox tab(:);
 l l s s
@@ -874,9 +845,7 @@ options\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_config: type option
-.\" type option: ndb_config
-\fB\-\-type=\fR\fB\fInode_type\fR\fR
+.\" ndb_config: type option.\" type option: ndb_config\fB\-\-type=\fR\fB\fInode_type\fR\fR
 .TS
 allbox tab(:);
 l l s s
@@ -933,11 +902,8 @@ ndb_mgmd) are returned\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_config: fields option
-.\" fields option: ndb_config
-\fB\-\-fields=\fR\fB\fIdelimiter\fR\fR,
-\fB\-f\fR
-\fIdelimiter\fR
+.\" ndb_config: fields option.\" fields option: ndb_config\fB\-\-fields=\fR\fB\fIdelimiter\fR\fR,
+\fB\-f\fR\fIdelimiter\fR
 .TS
 allbox tab(:);
 l l s s
@@ -1005,11 +971,8 @@ for the linefeed character), then it must be quoted\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_config: rows option
-.\" rows option: ndb_config
-\fB\-\-rows=\fR\fB\fIseparator\fR\fR,
-\fB\-r\fR
-\fIseparator\fR
+.\" ndb_config: rows option.\" rows option: ndb_config\fB\-\-rows=\fR\fB\fIseparator\fR\fR,
+\fB\-r\fR\fIseparator\fR
 .TS
 allbox tab(:);
 l l s s
@@ -1075,9 +1038,7 @@ for the linefeed character), then it must be quoted\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_config: configinfo option
-.\" configinfo option: ndb_config
-\fB\-\-configinfo\fR
+.\" ndb_config: configinfo option.\" configinfo option: ndb_config\fB\-\-configinfo\fR
 .sp
 The
 \fB\-\-configinfo\fR
@@ -1185,10 +1146,7 @@ Default: 0 (Min: 0, Max: 4294967039)
 .RE
 .\}
 .sp
-.\" ndb_config: xml option
-.\" xml option: ndb_config
-\fB\-\-configinfo\fR
-\fB\-\-xml\fR
+.\" ndb_config: xml option.\" xml option: ndb_config\fB\-\-configinfo\fR\fB\-\-xml\fR
 .TS
 allbox tab(:);
 l l s s
@@ -1218,8 +1176,7 @@ T}
 .TE
 .sp 1
 You can obtain the output of
-\fBndb_config\fR
-\fB\-\-configinfo\fR
+\fBndb_config\fR\fB\-\-configinfo\fR
 as XML by adding the
 \fB\-\-xml\fR
 option\&. A portion of the resulting output is shown in this example:
@@ -1229,7 +1186,7 @@ option\&. A portion of the resulting output is shown in this example:
 .\}
 .nf
 shell> \fBndb_config \-\-configinfo \-\-xml\fR
-<configvariables protocolversion="1" ndbversionstring="5\&.6\&.13\-ndb\-7\&.3\&.3"
+<configvariables protocolversion="1" ndbversionstring="5\&.6\&.14\-ndb\-7\&.3\&.4"
                     ndbversion="458758" ndbversionmajor="7" ndbversionminor="0"
                     ndbversionbuild="6">
   <section name="SYSTEM">
@@ -1269,9 +1226,7 @@ shell> \fBndb_config \-\-configinfo \-\-xml\fR
 .ps -1
 .br
 Normally, the XML output produced by
-\fBndb_config\fR
-\fB\-\-configinfo\fR
-\fB\-\-xml\fR
+\fBndb_config\fR\fB\-\-configinfo\fR\fB\-\-xml\fR
 is formatted using one line per element; we have added extra whitespace in the previous example, as well as the next one, for reasons of legibility\&. This should not make any difference to applications using this output, since most XML processors either ignore nonessential whitespace as a matter of course, or can be instructed to do so\&.
 .sp .5v
 .RE

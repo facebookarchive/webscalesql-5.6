@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: \fBmysql.server\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 09/09/2013
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 11/15/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQL\&.SERVER\FR" "1" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQL\&.SERVER\FR" "1" "11/15/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -49,7 +49,7 @@ script will be installed in the
 /etc/init\&.d
 directory with the name
 mysql\&. You need not install it manually\&. See
-Section\ \&2.5.1, \(lqInstalling MySQL on Linux Using RPM Packages\(rq, for more information on the Linux RPM packages\&.
+Section\ \&2.5.3, \(lqInstalling MySQL on Linux Using RPM Packages\(rq, for more information on the Linux RPM packages\&.
 .PP
 Some vendors provide RPM packages that install a startup script under a different name such as
 \fBmysqld\fR\&.
@@ -81,9 +81,7 @@ supports the following options\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql.server: basedir option
-.\" basedir option: mysql.server
-\fB\-\-basedir=\fR\fB\fIpath\fR\fR
+.\" mysql.server: basedir option.\" basedir option: mysql.server\fB\-\-basedir=\fR\fB\fIpath\fR\fR
 .sp
 The path to the MySQL installation directory\&.
 .RE
@@ -96,9 +94,7 @@ The path to the MySQL installation directory\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql.server: datadir option
-.\" datadir option: mysql.server
-\fB\-\-datadir=\fR\fB\fIpath\fR\fR
+.\" mysql.server: datadir option.\" datadir option: mysql.server\fB\-\-datadir=\fR\fB\fIpath\fR\fR
 .sp
 The path to the MySQL data directory\&.
 .RE
@@ -111,9 +107,7 @@ The path to the MySQL data directory\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql.server: pid-file option
-.\" pid-file option: mysql.server
-\fB\-\-pid\-file=\fR\fB\fIfile_name\fR\fR
+.\" mysql.server: pid-file option.\" pid-file option: mysql.server\fB\-\-pid\-file=\fR\fB\fIfile_name\fR\fR
 .sp
 The path name of the file in which the server should write its process ID\&.
 .RE
@@ -126,9 +120,7 @@ The path name of the file in which the server should write its process ID\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql.server: service-startup-timeout option
-.\" service-startup-timeout option: mysql.server
-\fB\-\-service\-startup\-timeout=\fR\fB\fIfile_name\fR\fR
+.\" mysql.server: service-startup-timeout option.\" service-startup-timeout option: mysql.server\fB\-\-service\-startup\-timeout=\fR\fB\fIfile_name\fR\fR
 .sp
 How long in seconds to wait for confirmation of server startup\&. If the server does not start within this time,
 \fBmysql\&.server\fR
@@ -143,9 +135,7 @@ exits with an error\&. The default value is 900\&. A value of 0 means not to wai
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql.server: use-mysqld_safe option
-.\" use-mysqld_safe option: mysql.server
-\fB\-\-use\-mysqld_safe\fR
+.\" mysql.server: use-mysqld_safe option.\" use-mysqld_safe option: mysql.server\fB\-\-use\-mysqld_safe\fR
 .sp
 Use
 \fBmysqld_safe\fR
@@ -160,9 +150,7 @@ to start the server\&. This is the default\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql.server: user option
-.\" user option: mysql.server
-\fB\-\-user=\fR\fB\fIuser_name\fR\fR
+.\" mysql.server: user option.\" user option: mysql.server\fB\-\-user=\fR\fB\fIuser_name\fR\fR
 .sp
 The login user name to use for running
 \fBmysqld\fR\&.

@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: \fBndb_index_stat\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 09/09/2013
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 11/15/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBNDB_INDEX_STAT\FR" "1" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBNDB_INDEX_STAT\FR" "1" "11/15/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -297,9 +297,7 @@ ndb_index_stat system options\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" database option (ndb_index_stat)
-.\" -d option (ndb_index_stat)
-\fB\-\-database=\fR\fB\fIname\fR\fR,
+.\" database option (ndb_index_stat).\" -d option (ndb_index_stat)\fB\-\-database=\fR\fB\fIname\fR\fR,
 \fB\-d \fR\fB\fIname\fR\fR
 .TS
 allbox tab(:);
@@ -352,8 +350,7 @@ The name of the database that contains the table being queried\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" delete option (ndb_index_stat)
-\fB\-\-delete\fR
+.\" delete option (ndb_index_stat)\fB\-\-delete\fR
 .TS
 allbox tab(:);
 l l s s
@@ -399,8 +396,7 @@ Delete the index statistics for the given table, stopping any auto\-update that 
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" update option (ndb_index_stat)
-\fB\-\-update\fR
+.\" update option (ndb_index_stat)\fB\-\-update\fR
 .TS
 allbox tab(:);
 l l s s
@@ -446,8 +442,7 @@ Update the index statistics for the given table, and restart any auto\-update th
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" dump option (ndb_index_stat)
-\fB\-\-dump\fR
+.\" dump option (ndb_index_stat)\fB\-\-dump\fR
 .TS
 allbox tab(:);
 l l s s
@@ -493,8 +488,7 @@ Dump the contents of the query cache\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" query option (ndb_index_stat)
-\fB\-\-query=\fR\fB\fI#\fR\fR
+.\" query option (ndb_index_stat)\fB\-\-query=\fR\fB\fI#\fR\fR
 .TS
 allbox tab(:);
 l l s s
@@ -543,8 +537,7 @@ ndb_index_stat statistics options\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" sys-drop option (ndb_index_stat)
-\fB\-\-sys\-drop\fR
+.\" sys-drop option (ndb_index_stat)\fB\-\-sys\-drop\fR
 .TS
 allbox tab(:);
 l l s s
@@ -591,8 +584,7 @@ Drop all statistics tables and events in the NDB kernel\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" sys-create option (ndb_index_stat)
-\fB\-\-sys\-create\fR
+.\" sys-create option (ndb_index_stat)\fB\-\-sys\-create\fR
 .TS
 allbox tab(:);
 l l s s
@@ -638,8 +630,7 @@ Create all statistics tables and events in the NDB kernel\&. This works only if 
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" sys-create-if-not-exist option (ndb_index_stat)
-\fBsys\-create\-if\-not\-exist\fR
+.\" sys-create-if-not-exist option (ndb_index_stat)\fBsys\-create\-if\-not\-exist\fR
 .TS
 allbox tab(:);
 l l s s
@@ -685,8 +676,7 @@ Create any NDB system statistics tables or events (or both) that do not already 
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" sys-create-if-not-valid option (ndb_index_stat)
-\fB\-\-sys\-create\-if\-not\-valid\fR
+.\" sys-create-if-not-valid option (ndb_index_stat)\fB\-\-sys\-create\-if\-not\-valid\fR
 .TS
 allbox tab(:);
 l l s s
@@ -732,8 +722,7 @@ Create any NDB system statistics tables or events that do not already exist, aft
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" sys-check option (ndb_index_stat)
-\fB\-\-sys\-check\fR
+.\" sys-check option (ndb_index_stat)\fB\-\-sys\-check\fR
 .TS
 allbox tab(:);
 l l s s
@@ -779,8 +768,7 @@ Verify that all required system statistics tables and events exist in the NDB ke
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" sys-skip-tables option (ndb_index_stat)
-\fB\-\-sys\-skip\-tables\fR
+.\" sys-skip-tables option (ndb_index_stat)\fB\-\-sys\-skip\-tables\fR
 .TS
 allbox tab(:);
 l l s s
@@ -828,8 +816,7 @@ options to any statistics tables\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" sys-skip-events option (ndb_index_stat)
-\fB\-\-sys\-skip\-events\fR
+.\" sys-skip-events option (ndb_index_stat)\fB\-\-sys\-skip\-events\fR
 .TS
 allbox tab(:);
 l l s s
@@ -877,8 +864,7 @@ options to any events\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" verbose option (ndb_index_stat)
-\fB\-\-verbose\fR
+.\" verbose option (ndb_index_stat)\fB\-\-verbose\fR
 .TS
 allbox tab(:);
 l l s s
@@ -930,8 +916,7 @@ Turn on verbose output\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" loops option (ndb_index_stat)
-\fB\-\-loops=\fR\fB\fI#\fR\fR
+.\" loops option (ndb_index_stat)\fB\-\-loops=\fR\fB\fI#\fR\fR
 .TS
 allbox tab(:);
 l l s s

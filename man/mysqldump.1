@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: \fBmysqldump\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 09/09/2013
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 11/15/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLDUMP\FR" "1" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLDUMP\FR" "1" "11/15/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -99,7 +99,7 @@ InnoDB
 backups with minimal disruption; it can also back up tables from
 MyISAM
 and other storage engines; and it provides a number of convenient options to accommodate different backup scenarios\&. See
-\m[blue]\fBMySQL Enterprise Backup User\*(Aqs Guide (Version 3\&.9\&.0)\fR\m[]\&\s-2\u[1]\d\s+2\&.
+Section\ \&24.2, \(lqMySQL Enterprise Backup\(rq\&.
 .RE
 .sp
 .RS 4
@@ -197,9 +197,7 @@ command logs into a MySQL server to extract information\&. The following options
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: bind-address option
-.\" bind-address option: mysqldump
-\fB\-\-bind\-address=\fR\fB\fIip_address\fR\fR
+.\" mysqldump: bind-address option.\" bind-address option: mysqldump\fB\-\-bind\-address=\fR\fB\fIip_address\fR\fR
 .sp
 On a computer having multiple network interfaces, this option can be used to select which interface is employed when connecting to the MySQL server\&.
 .sp
@@ -214,9 +212,7 @@ This option is supported beginning with MySQL 5\&.6\&.1\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: compress option
-.\" compress option: mysqldump
-\fB\-\-compress\fR,
+.\" mysqldump: compress option.\" compress option: mysqldump\fB\-\-compress\fR,
 \fB\-C\fR
 .sp
 Compress all information sent between the client and the server if both support compression\&.
@@ -230,9 +226,7 @@ Compress all information sent between the client and the server if both support 
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: default-auth option
-.\" default-auth option: mysqldump
-\fB\-\-default\-auth=\fR\fB\fIplugin\fR\fR
+.\" mysqldump: default-auth option.\" default-auth option: mysqldump\fB\-\-default\-auth=\fR\fB\fIplugin\fR\fR
 .sp
 The client\-side authentication plugin to use\&. See
 Section\ \&6.3.7, \(lqPluggable Authentication\(rq\&.
@@ -246,9 +240,7 @@ Section\ \&6.3.7, \(lqPluggable Authentication\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: host option
-.\" host option: mysqldump
-\fB\-\-host=\fR\fB\fIhost_name\fR\fR,
+.\" mysqldump: host option.\" host option: mysqldump\fB\-\-host=\fR\fB\fIhost_name\fR\fR,
 \fB\-h \fR\fB\fIhost_name\fR\fR
 .sp
 Dump data from the MySQL server on the given host\&. The default host is
@@ -263,9 +255,7 @@ localhost\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: password option
-.\" password option: mysqldump
-\fB\-\-password[=\fR\fB\fIpassword\fR\fR\fB]\fR,
+.\" mysqldump: password option.\" password option: mysqldump\fB\-\-password[=\fR\fB\fIpassword\fR\fR\fB]\fR,
 \fB\-p[\fR\fB\fIpassword\fR\fR\fB]\fR
 .sp
 The password to use when connecting to the server\&. If you use the short option form (\fB\-p\fR), you
@@ -292,9 +282,7 @@ Section\ \&6.1.2.1, \(lqEnd-User Guidelines for Password Security\(rq\&. You can
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: pipe option
-.\" pipe option: mysqldump
-\fB\-\-pipe\fR,
+.\" mysqldump: pipe option.\" pipe option: mysqldump\fB\-\-pipe\fR,
 \fB\-W\fR
 .sp
 On Windows, connect to the server using a named pipe\&. This option applies only if the server supports named\-pipe connections\&.
@@ -308,9 +296,7 @@ On Windows, connect to the server using a named pipe\&. This option applies only
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: plugin-dir option
-.\" plugin-dir option: mysqldump
-\fB\-\-plugin\-dir=\fR\fB\fIpath\fR\fR
+.\" mysqldump: plugin-dir option.\" plugin-dir option: mysqldump\fB\-\-plugin\-dir=\fR\fB\fIpath\fR\fR
 .sp
 The directory in which to look for plugins\&. It may be necessary to specify this option if the
 \fB\-\-default\-auth\fR
@@ -328,9 +314,7 @@ Section\ \&6.3.7, \(lqPluggable Authentication\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: port option
-.\" port option: mysqldump
-\fB\-\-port=\fR\fB\fIport_num\fR\fR,
+.\" mysqldump: port option.\" port option: mysqldump\fB\-\-port=\fR\fB\fIport_num\fR\fR,
 \fB\-P \fR\fB\fIport_num\fR\fR
 .sp
 The TCP/IP port number to use for the connection\&.
@@ -344,9 +328,7 @@ The TCP/IP port number to use for the connection\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: protocol option
-.\" protocol option: mysqldump
-\fB\-\-protocol={TCP|SOCKET|PIPE|MEMORY}\fR
+.\" mysqldump: protocol option.\" protocol option: mysqldump\fB\-\-protocol={TCP|SOCKET|PIPE|MEMORY}\fR
 .sp
 The connection protocol to use for connecting to the server\&. It is useful when the other connection parameters normally would cause a protocol to be used other than the one you want\&. For details on the permissible values, see
 Section\ \&4.2.2, \(lqConnecting to the MySQL Server\(rq\&.
@@ -360,9 +342,7 @@ Section\ \&4.2.2, \(lqConnecting to the MySQL Server\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: socket option
-.\" socket option: mysqldump
-\fB\-\-socket=\fR\fB\fIpath\fR\fR,
+.\" mysqldump: socket option.\" socket option: mysqldump\fB\-\-socket=\fR\fB\fIpath\fR\fR,
 \fB\-S \fR\fB\fIpath\fR\fR
 .sp
 For connections to
@@ -377,9 +357,7 @@ localhost, the Unix socket file to use, or, on Windows, the name of the named pi
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: SSL options
-.\" SSL options: mysqldump
-\fB\-\-ssl*\fR
+.\" mysqldump: SSL options.\" SSL options: mysqldump\fB\-\-ssl*\fR
 .sp
 Options that begin with
 \fB\-\-ssl\fR
@@ -395,9 +373,7 @@ Section\ \&6.3.9.4, \(lqSSL Command Options\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: user option
-.\" user option: mysqldump
-\fB\-\-user=\fR\fB\fIuser_name\fR\fR,
+.\" mysqldump: user option.\" user option: mysqldump\fB\-\-user=\fR\fB\fIuser_name\fR\fR,
 \fB\-u \fR\fB\fIuser_name\fR\fR
 .sp
 The MySQL user name to use when connecting to the server\&.
@@ -458,9 +434,7 @@ include setting up an entire new MySQL instance (including database tables), and
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: add-drop-database option
-.\" add-drop-database option: mysqldump
-\fB\-\-add\-drop\-database\fR
+.\" mysqldump: add-drop-database option.\" add-drop-database option: mysqldump\fB\-\-add\-drop\-database\fR
 .sp
 Add a
 DROP DATABASE
@@ -483,9 +457,7 @@ statements are written unless one of those options is specified\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: add-drop-table option
-.\" add-drop-table option: mysqldump
-\fB\-\-add\-drop\-table\fR
+.\" mysqldump: add-drop-table option.\" add-drop-table option: mysqldump\fB\-\-add\-drop\-table\fR
 .sp
 Add a
 DROP TABLE
@@ -502,9 +474,7 @@ statement\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: add-drop-trigger option
-.\" add-drop-trigger option: mysqldump
-\fB\-\-add\-drop\-trigger\fR
+.\" mysqldump: add-drop-trigger option.\" add-drop-trigger option: mysqldump\fB\-\-add\-drop\-trigger\fR
 .sp
 Add a
 DROP TRIGGER
@@ -521,9 +491,7 @@ statement\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: all-tablespaces option
-.\" all-tablespaces option: mysqldump
-\fB\-\-all\-tablespaces\fR,
+.\" mysqldump: all-tablespaces option.\" all-tablespaces option: mysqldump\fB\-\-all\-tablespaces\fR,
 \fB\-Y\fR
 .sp
 Adds to a table dump all SQL statements needed to create any tablespaces used by an
@@ -540,9 +508,7 @@ table\&. This information is not otherwise included in the output from
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: no-create-db option
-.\" no-create-db option: mysqldump
-\fB\-\-no\-create\-db\fR,
+.\" mysqldump: no-create-db option.\" no-create-db option: mysqldump\fB\-\-no\-create\-db\fR,
 \fB\-n\fR
 .sp
 This option suppresses the
@@ -562,9 +528,7 @@ option is given\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: no-create-info option
-.\" no-create-info option: mysqldump
-\fB\-\-no\-create\-info\fR,
+.\" mysqldump: no-create-info option.\" no-create-info option: mysqldump\fB\-\-no\-create\-info\fR,
 \fB\-t\fR
 .sp
 Do not write
@@ -601,9 +565,7 @@ option for this purpose\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: no-tablespaces option
-.\" no-tablespaces option: mysqldump
-\fB\-\-no\-tablespaces\fR,
+.\" mysqldump: no-tablespaces option.\" no-tablespaces option: mysqldump\fB\-\-no\-tablespaces\fR,
 \fB\-y\fR
 .sp
 This option suppresses all
@@ -622,9 +584,7 @@ statements in the output of
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: replace option
-.\" replace option: mysqldump
-\fB\-\-replace\fR
+.\" mysqldump: replace option.\" replace option: mysqldump\fB\-\-replace\fR
 .sp
 Write
 REPLACE
@@ -644,9 +604,7 @@ The following options print debugging information, encode debugging information 
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: allow-keywords option
-.\" allow-keywords option: mysqldump
-\fB\-\-allow\-keywords\fR
+.\" mysqldump: allow-keywords option.\" allow-keywords option: mysqldump\fB\-\-allow\-keywords\fR
 .sp
 Permit creation of column names that are keywords\&. This works by prefixing each column name with the table name\&.
 .RE
@@ -659,9 +617,7 @@ Permit creation of column names that are keywords\&. This works by prefixing eac
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: comments option
-.\" comments option: mysqldump
-\fB\-\-comments\fR,
+.\" mysqldump: comments option.\" comments option: mysqldump\fB\-\-comments\fR,
 \fB\-i\fR
 .sp
 Write additional information in the dump file such as program version, server version, and host\&. This option is enabled by default\&. To suppress this additional information, use
@@ -676,9 +632,7 @@ Write additional information in the dump file such as program version, server ve
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: debug option
-.\" debug option: mysqldump
-\fB\-\-debug[=\fR\fB\fIdebug_options\fR\fR\fB]\fR,
+.\" mysqldump: debug option.\" debug option: mysqldump\fB\-\-debug[=\fR\fB\fIdebug_options\fR\fR\fB]\fR,
 \fB\-# [\fR\fB\fIdebug_options\fR\fR\fB]\fR
 .sp
 Write a debugging log\&. A typical
@@ -696,9 +650,7 @@ string is
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: debug-check option
-.\" debug-check option: mysqldump
-\fB\-\-debug\-check\fR
+.\" mysqldump: debug-check option.\" debug-check option: mysqldump\fB\-\-debug\-check\fR
 .sp
 Print some debugging information when the program exits\&.
 .RE
@@ -711,9 +663,7 @@ Print some debugging information when the program exits\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: debug-info option
-.\" debug-info option: mysqldump
-\fB\-\-debug\-info\fR
+.\" mysqldump: debug-info option.\" debug-info option: mysqldump\fB\-\-debug\-info\fR
 .sp
 Print debugging information and memory and CPU usage statistics when the program exits\&.
 .RE
@@ -726,9 +676,7 @@ Print debugging information and memory and CPU usage statistics when the program
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: dump-date option
-.\" dump-date option: mysqldump
-\fB\-\-dump\-date\fR
+.\" mysqldump: dump-date option.\" dump-date option: mysqldump\fB\-\-dump\-date\fR
 .sp
 If the
 \fB\-\-comments\fR
@@ -765,9 +713,7 @@ suppresses date printing\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: force option
-.\" force option: mysqldump
-\fB\-\-force\fR,
+.\" mysqldump: force option.\" force option: mysqldump\fB\-\-force\fR,
 \fB\-f\fR
 .sp
 Continue even if an SQL error occurs during a table dump\&.
@@ -791,9 +737,7 @@ prints the error message, but it also writes an SQL comment containing the view 
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: log-error option
-.\" log-error option: mysqldump
-\fB\-\-log\-error=\fR\fB\fIfile_name\fR\fR
+.\" mysqldump: log-error option.\" log-error option: mysqldump\fB\-\-log\-error=\fR\fB\fIfile_name\fR\fR
 .sp
 Log warnings and errors by appending them to the named file\&. The default is to do no logging\&.
 .RE
@@ -806,9 +750,7 @@ Log warnings and errors by appending them to the named file\&. The default is to
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: skip-comments option
-.\" skip-comments option: mysqldump
-\fB\-\-skip\-comments\fR
+.\" mysqldump: skip-comments option.\" skip-comments option: mysqldump\fB\-\-skip\-comments\fR
 .sp
 See the description for the
 \fB\-\-comments\fR
@@ -823,9 +765,7 @@ option\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: verbose option
-.\" verbose option: mysqldump
-\fB\-\-verbose\fR,
+.\" mysqldump: verbose option.\" verbose option: mysqldump\fB\-\-verbose\fR,
 \fB\-v\fR
 .sp
 Verbose mode\&. Print more information about what the program does\&.
@@ -844,9 +784,7 @@ command itself\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: help option
-.\" help option: mysqldump
-\fB\-\-help\fR,
+.\" mysqldump: help option.\" help option: mysqldump\fB\-\-help\fR,
 \fB\-?\fR
 .sp
 Display a help message and exit\&.
@@ -860,9 +798,7 @@ Display a help message and exit\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: version option
-.\" version option: mysqldump
-\fB\-\-version\fR,
+.\" mysqldump: version option.\" version option: mysqldump\fB\-\-version\fR,
 \fB\-V\fR
 .sp
 Display version information and exit\&.
@@ -881,9 +817,7 @@ command represents character data with national language settings\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: character-sets-dir option
-.\" character-sets-dir option: mysqldump
-\fB\-\-character\-sets\-dir=\fR\fB\fIpath\fR\fR
+.\" mysqldump: character-sets-dir option.\" character-sets-dir option: mysqldump\fB\-\-character\-sets\-dir=\fR\fB\fIpath\fR\fR
 .sp
 The directory where character sets are installed\&. See
 Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&.
@@ -897,9 +831,7 @@ Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: default-character-set option
-.\" default-character-set option: mysqldump
-\fB\-\-default\-character\-set=\fR\fB\fIcharset_name\fR\fR
+.\" mysqldump: default-character-set option.\" default-character-set option: mysqldump\fB\-\-default\-character\-set=\fR\fB\fIcharset_name\fR\fR
 .sp
 Use
 \fIcharset_name\fR
@@ -919,9 +851,7 @@ latin1\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: no-set-names option
-.\" no-set-names option: mysqldump
-\fB\-\-no\-set\-names\fR,
+.\" mysqldump: no-set-names option.\" no-set-names option: mysqldump\fB\-\-no\-set\-names\fR,
 \fB\-N\fR
 .sp
 Turns off the
@@ -938,9 +868,7 @@ setting, the same as specifying
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: set-charset option
-.\" set-charset option: mysqldump
-\fB\-\-set\-charset\fR
+.\" mysqldump: set-charset option.\" set-charset option: mysqldump\fB\-\-set\-charset\fR
 .sp
 Add
 SET NAMES \fIdefault_character_set\fR
@@ -963,9 +891,7 @@ command is frequently used to create an empty instance, or an instance including
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: apply-slave-statements option
-.\" apply-slave-statements option: mysqldump
-\fB\-\-apply\-slave\-statements\fR
+.\" mysqldump: apply-slave-statements option.\" apply-slave-statements option: mysqldump\fB\-\-apply\-slave\-statements\fR
 .sp
 For a slave dump produced with the
 \fB\-\-dump\-slave\fR
@@ -986,9 +912,7 @@ statement at the end of the output\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: delete-master-logs option
-.\" delete-master-logs option: mysqldump
-\fB\-\-delete\-master\-logs\fR
+.\" mysqldump: delete-master-logs option.\" delete-master-logs option: mysqldump\fB\-\-delete\-master\-logs\fR
 .sp
 On a master replication server, delete the binary logs by sending a
 PURGE BINARY LOGS
@@ -1004,21 +928,26 @@ statement to the server after performing the dump operation\&. This option autom
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: dump-slave option
-.\" dump-slave option: mysqldump
-\fB\-\-dump\-slave[=\fR\fB\fIvalue\fR\fR\fB]\fR
+.\" mysqldump: dump-slave option.\" dump-slave option: mysqldump\fB\-\-dump\-slave[=\fR\fB\fIvalue\fR\fR\fB]\fR
 .sp
 This option is similar to
 \fB\-\-master\-data\fR
 except that it is used to dump a replication slave server to produce a dump file that can be used to set up another server as a slave that has the same master as the dumped server\&. It causes the dump output to include a
 CHANGE MASTER TO
-statement that indicates the binary log coordinates (file name and position) of the dumped slave\*(Aqs master (rather than the coordinates of the dumped server, as is done by the
+statement that indicates the binary log coordinates (file name and position) of the dumped slave\*(Aqs master\&. These are the master server coordinates from which the slave should start replicating\&.
+.sp
+\fB\-\-dump\-slave\fR
+causes the coordinates from the master to be used rather than those of the dumped server, as is done by the
 \fB\-\-master\-data\fR
-option)\&. These are the master server coordinates from which the slave should start replicating\&.
+option\&. In addition, specfiying this option causes the
+\fB\-\-master\-data\fR
+option to be overridden, if used, and effectively ignored\&.
 .sp
 The option value is handled the same way as for
 \fB\-\-master\-data\fR
-and has the same effect as
+(setting no value or 1 causes a
+CHANGE MASTER TO
+statement to be written to the dump, setting 2 causes the statement to be written but encased in SQL comments) and has the same effect as
 \fB\-\-master\-data\fR
 in terms of enabling or disabling other options and in how locking is handled\&.
 .sp
@@ -1042,9 +971,7 @@ options can also be used\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: include-master-host-port option
-.\" include-master-host-port option: mysqldump
-\fB\-\-include\-master\-host\-port\fR
+.\" mysqldump: include-master-host-port option.\" include-master-host-port option: mysqldump\fB\-\-include\-master\-host\-port\fR
 .sp
 For the
 CHANGE MASTER TO
@@ -1065,9 +992,7 @@ options for the host name and TCP/IP port number of the slave\*(Aqs master\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: master-data option
-.\" master-data option: mysqldump
-\fB\-\-master\-data[=\fR\fB\fIvalue\fR\fR\fB]\fR
+.\" mysqldump: master-data option.\" master-data option: mysqldump\fB\-\-master\-data[=\fR\fB\fIvalue\fR\fR\fB]\fR
 .sp
 Use this option to dump a master replication server to produce a dump file that can be used to set up another server as a slave of the master\&. It causes the dump output to include a
 CHANGE MASTER TO
@@ -1092,7 +1017,9 @@ also is specified, in which case, a global read lock is acquired only for a shor
 .sp
 It is also possible to set up a slave by dumping an existing slave of the master, using the
 \fB\-\-dump\-slave\fR
-option\&.
+option, which overrides
+\fB\-\-master\-data\fR
+and causes it to be ignored if both options are used\&.
 .sp
 Prior to MySQL 5\&.6\&.4, this option was required for dumping the replication log tables (see
 Section\ \&16.2.2, \(lqReplication Relay and Status Logs\(rq)\&.
@@ -1106,9 +1033,7 @@ Section\ \&16.2.2, \(lqReplication Relay and Status Logs\(rq)\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: set-gtid-purged option
-.\" set-gtid-purged option: mysqldump
-\fB\-\-set\-gtid\-purged=\fR\fB\fIvalue\fR\fR
+.\" mysqldump: set-gtid-purged option.\" set-gtid-purged option: mysqldump\fB\-\-set\-gtid\-purged=\fR\fB\fIvalue\fR\fR
 .sp
 This option enables control over global transaction ID (GTID) information written to the dump file, by indicating whether to add a
 SET @@global\&.gtid_purged
@@ -1161,9 +1086,7 @@ The following options specify how to represent the entire dump file or certain k
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: compact option
-.\" compact option: mysqldump
-\fB\-\-compact\fR
+.\" mysqldump: compact option.\" compact option: mysqldump\fB\-\-compact\fR
 .sp
 Produce more compact output\&. This option enables the
 \fB\-\-skip\-add\-drop\-table\fR,
@@ -1182,9 +1105,7 @@ options\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: compatible option
-.\" compatible option: mysqldump
-\fB\-\-compatible=\fR\fB\fIname\fR\fR
+.\" mysqldump: compatible option.\" compatible option: mysqldump\fB\-\-compatible=\fR\fB\fIname\fR\fR
 .sp
 Produce output that is more compatible with other database systems or with older MySQL servers\&. The value of
 \fIname\fR
@@ -1217,9 +1138,7 @@ does not map data types to Oracle types or use Oracle comment syntax\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: complete-insert option
-.\" complete-insert option: mysqldump
-\fB\-\-complete\-insert\fR,
+.\" mysqldump: complete-insert option.\" complete-insert option: mysqldump\fB\-\-complete\-insert\fR,
 \fB\-c\fR
 .sp
 Use complete
@@ -1235,9 +1154,7 @@ statements that include column names\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: create-options option
-.\" create-options option: mysqldump
-\fB\-\-create\-options\fR
+.\" mysqldump: create-options option.\" create-options option: mysqldump\fB\-\-create\-options\fR
 .sp
 Include all MySQL\-specific table options in the
 CREATE TABLE
@@ -1252,18 +1169,10 @@ statements\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: fields-terminated-by option
-.\" fields-terminated-by option: mysqldump
-\fB\-\-fields\-terminated\-by=\&.\&.\&.\fR,
-.\" mysqldump: fields-enclosed-by option
-.\" fields-enclosed-by option: mysqldump
-\fB\-\-fields\-enclosed\-by=\&.\&.\&.\fR,
-.\" mysqldump: fields-optionally-enclosed-by option
-.\" fields-optionally-enclosed-by option: mysqldump
-\fB\-\-fields\-optionally\-enclosed\-by=\&.\&.\&.\fR,
-.\" mysqldump: fields-escaped-by option
-.\" fields-escaped-by option: mysqldump
-\fB\-\-fields\-escaped\-by=\&.\&.\&.\fR
+.\" mysqldump: fields-terminated-by option.\" fields-terminated-by option: mysqldump\fB\-\-fields\-terminated\-by=\&.\&.\&.\fR,
+.\" mysqldump: fields-enclosed-by option.\" fields-enclosed-by option: mysqldump\fB\-\-fields\-enclosed\-by=\&.\&.\&.\fR,
+.\" mysqldump: fields-optionally-enclosed-by option.\" fields-optionally-enclosed-by option: mysqldump\fB\-\-fields\-optionally\-enclosed\-by=\&.\&.\&.\fR,
+.\" mysqldump: fields-escaped-by option.\" fields-escaped-by option: mysqldump\fB\-\-fields\-escaped\-by=\&.\&.\&.\fR
 .sp
 These options are used with the
 \fB\-\-tab\fR
@@ -1282,9 +1191,7 @@ Section\ \&13.2.6, \(lqLOAD DATA INFILE Syntax\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: hex-blob option
-.\" hex-blob option: mysqldump
-\fB\-\-hex\-blob\fR
+.\" mysqldump: hex-blob option.\" hex-blob option: mysqldump\fB\-\-hex\-blob\fR
 .sp
 Dump binary columns using hexadecimal notation (for example,
 \*(Aqabc\*(Aq
@@ -1305,9 +1212,7 @@ BIT\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: lines-terminated-by option
-.\" lines-terminated-by option: mysqldump
-\fB\-\-lines\-terminated\-by=\&.\&.\&.\fR
+.\" mysqldump: lines-terminated-by option.\" lines-terminated-by option: mysqldump\fB\-\-lines\-terminated\-by=\&.\&.\&.\fR
 .sp
 This option is used with the
 \fB\-\-tab\fR
@@ -1326,9 +1231,7 @@ Section\ \&13.2.6, \(lqLOAD DATA INFILE Syntax\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: quote-names option
-.\" quote-names option: mysqldump
-\fB\-\-quote\-names\fR,
+.\" mysqldump: quote-names option.\" quote-names option: mysqldump\fB\-\-quote\-names\fR,
 \fB\-Q\fR
 .sp
 Quote identifiers (such as database, table, and column names) within
@@ -1352,9 +1255,7 @@ that may enable
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: result-file option
-.\" result-file option: mysqldump
-\fB\-\-result\-file=\fR\fB\fIfile_name\fR\fR,
+.\" mysqldump: result-file option.\" result-file option: mysqldump\fB\-\-result\-file=\fR\fB\fIfile_name\fR\fR,
 \fB\-r \fR\fB\fIfile_name\fR\fR
 .sp
 Direct output to a given file\&. This option should be used on Windows to prevent newline
@@ -1372,9 +1273,7 @@ carriage return/newline sequences\&. The result file is created and its previous
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: tab option
-.\" tab option: mysqldump
-\fB\-\-tab=\fR\fB\fIpath\fR\fR,
+.\" mysqldump: tab option.\" tab option: mysqldump\fB\-\-tab=\fR\fB\fIpath\fR\fR,
 \fB\-T \fR\fB\fIpath\fR\fR
 .sp
 Produce tab\-separated text\-format data files\&. For each dumped table,
@@ -1428,9 +1327,7 @@ option\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: tz-utc option
-.\" tz-utc option: mysqldump
-\fB\-\-tz\-utc\fR
+.\" mysqldump: tz-utc option.\" tz-utc option: mysqldump\fB\-\-tz\-utc\fR
 .sp
 This option enables
 TIMESTAMP
@@ -1456,9 +1353,7 @@ is enabled by default\&. To disable it, use
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: xml option
-.\" xml option: mysqldump
-\fB\-\-xml\fR,
+.\" mysqldump: xml option.\" xml option: mysqldump\fB\-\-xml\fR,
 \fB\-X\fR
 .sp
 Write dump output as well\-formed XML\&.
@@ -1573,9 +1468,7 @@ clause\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: all-databases option
-.\" all-databases option: mysqldump
-\fB\-\-all\-databases\fR,
+.\" mysqldump: all-databases option.\" all-databases option: mysqldump\fB\-\-all\-databases\fR,
 \fB\-A\fR
 .sp
 Dump all tables in all databases\&. This is the same as using the
@@ -1598,9 +1491,7 @@ Section\ \&16.2.2, \(lqReplication Relay and Status Logs\(rq) were not included 
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: databases option
-.\" databases option: mysqldump
-\fB\-\-databases\fR,
+.\" mysqldump: databases option.\" databases option: mysqldump\fB\-\-databases\fR,
 \fB\-B\fR
 .sp
 Dump several databases\&. Normally,
@@ -1620,9 +1511,7 @@ statements are included in the output before each new database\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: events option
-.\" events option: mysqldump
-\fB\-\-events\fR,
+.\" mysqldump: events option.\" events option: mysqldump\fB\-\-events\fR,
 \fB\-E\fR
 .sp
 Include Event Scheduler events for the dumped databases in the output\&.
@@ -1636,9 +1525,7 @@ Include Event Scheduler events for the dumped databases in the output\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: ignore-table option
-.\" ignore-table option: mysqldump
-\fB\-\-ignore\-table=\fR\fB\fIdb_name\&.tbl_name\fR\fR
+.\" mysqldump: ignore-table option.\" ignore-table option: mysqldump\fB\-\-ignore\-table=\fR\fB\fIdb_name\&.tbl_name\fR\fR
 .sp
 Do not dump the given table, which must be specified using both the database and table names\&. To ignore multiple tables, use this option multiple times\&. This option also can be used to ignore views\&.
 .RE
@@ -1651,9 +1538,7 @@ Do not dump the given table, which must be specified using both the database and
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: no-data option
-.\" no-data option: mysqldump
-\fB\-\-no\-data\fR,
+.\" mysqldump: no-data option.\" no-data option: mysqldump\fB\-\-no\-data\fR,
 \fB\-d\fR
 .sp
 Do not write any table row information (that is, do not dump table contents)\&. This is useful if you want to dump only the
@@ -1669,9 +1554,7 @@ statement for the table (for example, to create an empty copy of the table by lo
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: routines option
-.\" routines option: mysqldump
-\fB\-\-routines\fR,
+.\" mysqldump: routines option.\" routines option: mysqldump\fB\-\-routines\fR,
 \fB\-R\fR
 .sp
 Include stored routines (procedures and functions) for the dumped databases in the output\&. Use of this option requires the
@@ -1706,9 +1589,7 @@ option\&. (Bug #11760384, Bug #52792)
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: tables option
-.\" tables option: mysqldump
-\fB\-\-tables\fR
+.\" mysqldump: tables option.\" tables option: mysqldump\fB\-\-tables\fR
 .sp
 Override the
 \fB\-\-databases\fR
@@ -1727,9 +1608,7 @@ regards all name arguments following the option as table names\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: triggers option
-.\" triggers option: mysqldump
-\fB\-\-triggers\fR
+.\" mysqldump: triggers option.\" triggers option: mysqldump\fB\-\-triggers\fR
 .sp
 Include triggers for each dumped table in the output\&. This option is enabled by default; disable it with
 \fB\-\-skip\-triggers\fR\&.
@@ -1743,9 +1622,7 @@ Include triggers for each dumped table in the output\&. This option is enabled b
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: where option
-.\" where option: mysqldump
-\fB\-\-where=\*(Aq\fR\fB\fIwhere_condition\fR\fR\fB\*(Aq\fR,
+.\" mysqldump: where option.\" where option: mysqldump\fB\-\-where=\*(Aq\fR\fB\fIwhere_condition\fR\fR\fB\*(Aq\fR,
 \fB\-w \*(Aq\fR\fB\fIwhere_condition\fR\fR\fB\*(Aq\fR
 .sp
 Dump only rows selected by the given
@@ -1771,7 +1648,7 @@ Examples:
 The following options are the most relevant for the performance particularly of the restore operations\&. For large data sets, restore operation (processing the
 INSERT
 statements in the dump file) is the most time\-consuming part\&. When it is urgent to restore data quickly, plan and test the performance of this stage in advance\&. For restore times measured in hours, you might prefer an alternative backup and restore solution, such as
-\m[blue]\fBMySQL Enterprise Backup\fR\m[]\&\s-2\u[1]\d\s+2
+MySQL Enterprise Backup
 for
 InnoDB\-only and mixed\-use databases, or
 \fBmysqlhotcopy\fR
@@ -1789,9 +1666,7 @@ transactional options, primarily for the dump operation\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: delayed-insert option
-.\" delayed-insert option: mysqldump
-\fB\-\-delayed\-insert\fR
+.\" mysqldump: delayed-insert option.\" delayed-insert option: mysqldump\fB\-\-delayed\-insert\fR
 .sp
 For those nontransactional tables that support the
 INSERT DELAYED
@@ -1812,9 +1687,7 @@ inserts are deprecated, so this option will be removed in a future release\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: disable-keys option
-.\" disable-keys option: mysqldump
-\fB\-\-disable\-keys\fR,
+.\" mysqldump: disable-keys option.\" disable-keys option: mysqldump\fB\-\-disable\-keys\fR,
 \fB\-K\fR
 .sp
 For each table, surround the
@@ -1836,9 +1709,7 @@ tables\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: extended-insert option
-.\" extended-insert option: mysqldump
-\fB\-\-extended\-insert\fR,
+.\" mysqldump: extended-insert option.\" extended-insert option: mysqldump\fB\-\-extended\-insert\fR,
 \fB\-e\fR
 .sp
 Use multiple\-row
@@ -1856,9 +1727,7 @@ lists\&. This results in a smaller dump file and speeds up inserts when the file
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: insert-ignore option
-.\" insert-ignore option: mysqldump
-\fB\-\-insert\-ignore\fR
+.\" mysqldump: insert-ignore option.\" insert-ignore option: mysqldump\fB\-\-insert\-ignore\fR
 .sp
 Write
 INSERT IGNORE
@@ -1875,19 +1744,10 @@ statements\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: opt option
-.\" opt option: mysqldump
-\fB\-\-opt\fR
+.\" mysqldump: opt option.\" opt option: mysqldump\fB\-\-opt\fR
 .sp
 This option, enabled by default, is shorthand for the combination of
-\fB\-\-add\-drop\-table\fR
-\fB\-\-add\-locks\fR
-\fB\-\-create\-options\fR
-\fB\-\-disable\-keys\fR
-\fB\-\-extended\-insert\fR
-\fB\-\-lock\-tables\fR
-\fB\-\-quick\fR
-\fB\-\-set\-charset\fR\&. It gives a fast dump operation and produces a dump file that can be reloaded into a MySQL server quickly\&.
+\fB\-\-add\-drop\-table\fR\fB\-\-add\-locks\fR\fB\-\-create\-options\fR\fB\-\-disable\-keys\fR\fB\-\-extended\-insert\fR\fB\-\-lock\-tables\fR\fB\-\-quick\fR\fB\-\-set\-charset\fR\&. It gives a fast dump operation and produces a dump file that can be reloaded into a MySQL server quickly\&.
 .sp
 Because the
 \fB\-\-opt\fR
@@ -1907,9 +1767,7 @@ for information about selectively enabling or disabling a subset of the options 
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: quick option
-.\" quick option: mysqldump
-\fB\-\-quick\fR,
+.\" mysqldump: quick option.\" quick option: mysqldump\fB\-\-quick\fR,
 \fB\-q\fR
 .sp
 This option is useful for dumping large tables\&. It forces
@@ -1925,9 +1783,7 @@ to retrieve rows for a table from the server a row at a time rather than retriev
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: skip-opt option
-.\" skip-opt option: mysqldump
-\fB\-\-skip\-opt\fR
+.\" mysqldump: skip-opt option.\" skip-opt option: mysqldump\fB\-\-skip\-opt\fR
 .sp
 See the description for the
 \fB\-\-opt\fR
@@ -1945,9 +1801,7 @@ The following options trade off the performance of the dump operation, against t
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: add-locks option
-.\" add-locks option: mysqldump
-\fB\-\-add\-locks\fR
+.\" mysqldump: add-locks option.\" add-locks option: mysqldump\fB\-\-add\-locks\fR
 .sp
 Surround each table dump with
 LOCK TABLES
@@ -1965,9 +1819,7 @@ Section\ \&8.2.2.1, \(lqSpeed of INSERT Statements\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: flush-logs option
-.\" flush-logs option: mysqldump
-\fB\-\-flush\-logs\fR,
+.\" mysqldump: flush-logs option.\" flush-logs option: mysqldump\fB\-\-flush\-logs\fR,
 \fB\-F\fR
 .sp
 Flush the MySQL server log files before starting the dump\&. This option requires the
@@ -1994,9 +1846,7 @@ together with
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: flush-privileges option
-.\" flush-privileges option: mysqldump
-\fB\-\-flush\-privileges\fR
+.\" mysqldump: flush-privileges option.\" flush-privileges option: mysqldump\fB\-\-flush\-privileges\fR
 .sp
 Add a
 FLUSH PRIVILEGES
@@ -2017,9 +1867,7 @@ database for proper restoration\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: lock-all-tables option
-.\" lock-all-tables option: mysqldump
-\fB\-\-lock\-all\-tables\fR,
+.\" mysqldump: lock-all-tables option.\" lock-all-tables option: mysqldump\fB\-\-lock\-all\-tables\fR,
 \fB\-x\fR
 .sp
 Lock all tables across all databases\&. This is achieved by acquiring a global read lock for the duration of the whole dump\&. This option automatically turns off
@@ -2036,9 +1884,7 @@ and
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: lock-tables option
-.\" lock-tables option: mysqldump
-\fB\-\-lock\-tables\fR,
+.\" mysqldump: lock-tables option.\" lock-tables option: mysqldump\fB\-\-lock\-tables\fR,
 \fB\-l\fR
 .sp
 For each dumped database, lock all tables to be dumped before dumping them\&. The tables are locked with
@@ -2071,9 +1917,7 @@ at the end of the option list\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: no-autocommit option
-.\" no-autocommit option: mysqldump
-\fB\-\-no\-autocommit\fR
+.\" mysqldump: no-autocommit option.\" no-autocommit option: mysqldump\fB\-\-no\-autocommit\fR
 .sp
 Enclose the
 INSERT
@@ -2092,9 +1936,7 @@ statements\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: order-by-primary option
-.\" order-by-primary option: mysqldump
-\fB\-\-order\-by\-primary\fR
+.\" mysqldump: order-by-primary option.\" order-by-primary option: mysqldump\fB\-\-order\-by\-primary\fR
 .sp
 Dump each table\*(Aqs rows sorted by its primary key, or by its first unique index, if such an index exists\&. This is useful when dumping a
 MyISAM
@@ -2111,9 +1953,7 @@ table, but makes the dump operation take considerably longer\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqldump: single-transaction option
-.\" single-transaction option: mysqldump
-\fB\-\-single\-transaction\fR
+.\" mysqldump: single-transaction option.\" single-transaction option: mysqldump\fB\-\-single\-transaction\fR
 .sp
 This option sets the transaction isolation mode to
 REPEATABLE READ
@@ -2143,7 +1983,8 @@ causes any pending transactions to be committed implicitly\&.
 To dump large tables, combine the
 \fB\-\-single\-transaction\fR
 option with the
-\fB\-\-quick\fR\&.
+\fB\-\-quick\fR
+option\&.
 .RE
         Option Groups
 .sp
@@ -2180,9 +2021,7 @@ form\&.
 .RE
 .PP
 When you selectively enable or disable the effect of a group option, order is important because options are processed first to last\&. For example,
-\fB\-\-disable\-keys\fR
-\fB\-\-lock\-tables\fR
-\fB\-\-skip\-opt\fR
+\fB\-\-disable\-keys\fR\fB\-\-lock\-tables\fR\fB\-\-skip\-opt\fR
 would not have the intended effect; it is the same as
 \fB\-\-skip\-opt\fR
 by itself\&.
@@ -2337,11 +2176,8 @@ To select the effect of
 except for some features, use the
 \fB\-\-skip\fR
 option for each feature\&. To disable extended inserts and memory buffering, use
-\fB\-\-opt\fR
-\fB\-\-skip\-extended\-insert\fR
-\fB\-\-skip\-quick\fR\&. (Actually,
-\fB\-\-skip\-extended\-insert\fR
-\fB\-\-skip\-quick\fR
+\fB\-\-opt\fR\fB\-\-skip\-extended\-insert\fR\fB\-\-skip\-quick\fR\&. (Actually,
+\fB\-\-skip\-extended\-insert\fR\fB\-\-skip\-quick\fR
 is sufficient because
 \fB\-\-opt\fR
 is on by default\&.)
@@ -2358,9 +2194,7 @@ is on by default\&.)
 To reverse
 \fB\-\-opt\fR
 for all features except index disabling and table locking, use
-\fB\-\-skip\-opt\fR
-\fB\-\-disable\-keys\fR
-\fB\-\-lock\-tables\fR\&.
+\fB\-\-skip\-opt\fR\fB\-\-disable\-keys\fR\fB\-\-lock\-tables\fR\&.
 .RE
         Restrictions
       .\" mysqldump: views
@@ -2409,12 +2243,6 @@ This documentation is distributed in the hope that it will be useful, but WITHOU
 .PP
 You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
 .sp
-.SH "NOTES"
-.IP " 1." 4
-MySQL Enterprise Backup User's Guide (Version 3.9.0)
-.RS 4
-\%http://dev.mysql.com/doc/mysql-enterprise-backup/3.9/en/index.html
-.RE
 .SH "SEE ALSO"
 For more information, please refer to the MySQL Reference Manual,
 which may already be installed locally and which is also available

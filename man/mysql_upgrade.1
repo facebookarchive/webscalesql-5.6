@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: \fBmysql_upgrade\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
-.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
-.\"      Date: 09/09/2013
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 11/15/2013
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQL_UPGRADE\FR" "1" "09/09/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQL_UPGRADE\FR" "1" "11/15/2013" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -193,11 +193,39 @@ If you install MySQL from RPM packages on Linux, you must install the server and
 \fBmysql_upgrade\fR
 is included in the server RPM but requires the client RPM because the latter includes
 \fBmysqlcheck\fR\&. (See
-Section\ \&2.5.1, \(lqInstalling MySQL on Linux Using RPM Packages\(rq\&.)
+Section\ \&2.5.3, \(lqInstalling MySQL on Linux Using RPM Packages\(rq\&.)
 .PP
 \fBmysql_upgrade\fR
 does not upgrade the contents of the help tables\&. For upgrade instructions, see
 Section\ \&5.1.10, \(lqServer-Side Help\(rq\&.
+.PP
+\fBmysql_upgrade\fR
+runs by default as the MySQL
+root
+user\&. If the
+root
+password is expired when you run
+\fBmysql_upgrade\fR, you will see a message that your password is expired and that
+\fBmysql_upgrade\fR
+failed as a result\&. To correct this, reset the
+root
+password to unexpire it and run
+\fBmysql_upgrade\fR
+again:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysql \-u root \-p\fR
+Enter password: \fB****\fR  <\- enter root password here
+mysql> \fBSET PASSWORD = PASSWORD(\*(Aqroot\-password\*(Aq);\fR
+mysql> \fBquit\fR
+shell> \fBmysql_upgrade\fR
+.fi
+.if n \{\
+.RE
+.\}
 .PP
 \fBmysql_upgrade\fR
 supports the following options, which can be specified on the command line or in the
@@ -220,9 +248,7 @@ Section\ \&4.2.3.4, \(lqCommand-Line Options that Affect Option-File Handling\(r
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_upgrade: help option
-.\" help option: mysql_upgrade
-\fB\-\-help\fR
+.\" mysql_upgrade: help option.\" help option: mysql_upgrade\fB\-\-help\fR
 .sp
 Display a short help message and exit\&.
 .RE
@@ -235,9 +261,7 @@ Display a short help message and exit\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_upgrade: basedir option
-.\" basedir option: mysql_upgrade
-\fB\-\-basedir=\fR\fB\fIpath\fR\fR
+.\" mysql_upgrade: basedir option.\" basedir option: mysql_upgrade\fB\-\-basedir=\fR\fB\fIpath\fR\fR
 .sp
 The path to the MySQL installation directory\&. This option is accepted for backward compatibility but ignored\&. It is removed in MySQL 5\&.7\&.
 .RE
@@ -250,9 +274,7 @@ The path to the MySQL installation directory\&. This option is accepted for back
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_upgrade: datadir option
-.\" datadir option: mysql_upgrade
-\fB\-\-datadir=\fR\fB\fIpath\fR\fR
+.\" mysql_upgrade: datadir option.\" datadir option: mysql_upgrade\fB\-\-datadir=\fR\fB\fIpath\fR\fR
 .sp
 The path to the data directory\&. This option is accepted for backward compatibility but ignored\&. It is removed in MySQL 5\&.7\&.
 .RE
@@ -265,9 +287,7 @@ The path to the data directory\&. This option is accepted for backward compatibi
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_upgrade: debug-check option
-.\" debug-check option: mysql_upgrade
-\fB\-\-debug\-check\fR
+.\" mysql_upgrade: debug-check option.\" debug-check option: mysql_upgrade\fB\-\-debug\-check\fR
 .sp
 Print some debugging information when the program exits\&.
 .RE
@@ -280,9 +300,7 @@ Print some debugging information when the program exits\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_upgrade: debug-info option
-.\" debug-info option: mysql_upgrade
-\fB\-\-debug\-info\fR,
+.\" mysql_upgrade: debug-info option.\" debug-info option: mysql_upgrade\fB\-\-debug\-info\fR,
 \fB\-T\fR
 .sp
 Print debugging information and memory and CPU usage statistics when the program exits\&.
@@ -296,9 +314,7 @@ Print debugging information and memory and CPU usage statistics when the program
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_upgrade: default-auth option
-.\" default-auth option: mysql_upgrade
-\fB\-\-default\-auth=\fR\fB\fIplugin\fR\fR
+.\" mysql_upgrade: default-auth option.\" default-auth option: mysql_upgrade\fB\-\-default\-auth=\fR\fB\fIplugin\fR\fR
 .sp
 The client\-side authentication plugin to use\&. See
 Section\ \&6.3.7, \(lqPluggable Authentication\(rq\&.
@@ -314,9 +330,7 @@ This option was added in MySQL 5\&.6\&.2\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_upgrade: force option
-.\" force option: mysql_upgrade
-\fB\-\-force\fR
+.\" mysql_upgrade: force option.\" force option: mysql_upgrade\fB\-\-force\fR
 .sp
 Ignore the
 mysql_upgrade_info
@@ -335,9 +349,7 @@ has already been executed for the current version of MySQL\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_upgrade: plugin-dir option
-.\" plugin-dir option: mysql_upgrade
-\fB\-\-plugin\-dir=\fR\fB\fIpath\fR\fR
+.\" mysql_upgrade: plugin-dir option.\" plugin-dir option: mysql_upgrade\fB\-\-plugin\-dir=\fR\fB\fIpath\fR\fR
 .sp
 The directory in which to look for plugins\&. It may be necessary to specify this option if the
 \fB\-\-default\-auth\fR
@@ -357,9 +369,7 @@ This option was added in MySQL 5\&.6\&.2\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_upgrade: tmpdir option
-.\" tmpdir option: mysql_upgrade
-\fB\-\-tmpdir=\fR\fB\fIpath\fR\fR,
+.\" mysql_upgrade: tmpdir option.\" tmpdir option: mysql_upgrade\fB\-\-tmpdir=\fR\fB\fIpath\fR\fR,
 \fB\-t \fR\fB\fIpath\fR\fR
 .sp
 The path name of the directory to use for creating temporary files\&.
@@ -373,9 +383,7 @@ The path name of the directory to use for creating temporary files\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_upgrade: upgrade-system-tables option
-.\" upgrade-system-tables option: mysql_upgrade
-\fB\-\-upgrade\-system\-tables\fR,
+.\" mysql_upgrade: upgrade-system-tables option.\" upgrade-system-tables option: mysql_upgrade\fB\-\-upgrade\-system\-tables\fR,
 \fB\-s\fR
 .sp
 Upgrade only the system tables, do not upgrade data\&.
@@ -389,9 +397,7 @@ Upgrade only the system tables, do not upgrade data\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_upgrade: user option
-.\" user option: mysql_upgrade
-\fB\-\-user=\fR\fB\fIuser_name\fR\fR,
+.\" mysql_upgrade: user option.\" user option: mysql_upgrade\fB\-\-user=\fR\fB\fIuser_name\fR\fR,
 \fB\-u \fR\fB\fIuser_name\fR\fR
 .sp
 The MySQL user name to use when connecting to the server\&. The default user name is
@@ -406,9 +412,7 @@ root\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_upgrade: verbose option
-.\" verbose option: mysql_upgrade
-\fB\-\-verbose\fR
+.\" mysql_upgrade: verbose option.\" verbose option: mysql_upgrade\fB\-\-verbose\fR
 .sp
 Verbose mode\&. Print more information about what the program does\&.
 .RE
@@ -421,9 +425,7 @@ Verbose mode\&. Print more information about what the program does\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_upgrade: version-check option
-.\" version-check option: mysql_upgrade
-\fB\-\-version\-check\fR,
+.\" mysql_upgrade: version-check option.\" version-check option: mysql_upgrade\fB\-\-version\-check\fR,
 \fB\-k\fR
 .sp
 Check the version of the server to which
@@ -444,9 +446,7 @@ exits\&. This option is enabled by default; to disable the check, use
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysql_upgrade: write-binlog option
-.\" write-binlog option: mysql_upgrade
-\fB\-\-write\-binlog\fR
+.\" mysql_upgrade: write-binlog option.\" write-binlog option: mysql_upgrade\fB\-\-write\-binlog\fR
 .sp
 Cause binary logging to be enabled while
 \fBmysql_upgrade\fR

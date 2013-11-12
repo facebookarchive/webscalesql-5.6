@@ -34,8 +34,6 @@ ENDIF()
 IF(UNIX)
   SET(WITH_EXTRA_CHARSETS all CACHE STRING "")
 
-  OPTION(WITH_PIC "" ON) # Why?
-
   IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     IF(NOT IGNORE_AIO_CHECK)
       # Ensure aio is available on Linux (required by InnoDB)

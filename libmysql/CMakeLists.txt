@@ -167,7 +167,10 @@ ADD_CONVENIENCE_LIBRARY(clientlib ${CLIENT_SOURCES})
 DTRACE_INSTRUMENT(clientlib)
 ADD_DEPENDENCIES(clientlib GenError)
 
-SET(LIBS clientlib dbug strings vio mysys mysys_ssl ${ZLIB_LIBRARY} ${SSL_LIBRARIES} ${LIBDL})
+# Don't merge zlib, ssl, etc when building static libraries.
+SET(STATIC_MERGE_LIBS clientlib dbug strings vio mysys mysys_ssl ${LIBDL})
+
+SET(LIBS ${STATIC_MERGE_LIBS} ${ZLIB_LIBRARY} ${SSL_LIBRARIES})
 
 #
 # On Windows platform client library includes the client-side 
@@ -180,7 +183,8 @@ IF(WIN32)
 ENDIF()
 
 # Merge several convenience libraries into one big mysqlclient
-MERGE_LIBRARIES(mysqlclient STATIC ${LIBS} COMPONENT Development)
+MERGE_LIBRARIES(mysqlclient STATIC ${STATIC_MERGE_LIBS} COMPONENT Development)
+TARGET_LINK_LIBRARIES(mysqlclient ${ZLIB_LIBRARY} ${SSL_LIBRARIES})
 
 # Visual Studio users need debug  static library for debug projects
 INSTALL_DEBUG_SYMBOLS(clientlib)

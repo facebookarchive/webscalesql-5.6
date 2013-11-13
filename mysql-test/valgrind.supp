@@ -1040,8 +1040,7 @@
    Memcheck:Leak
    fun:malloc
    fun:CRYPTO_malloc
-   fun:sk_new
-   fun:load_builtin_compressions
+   ...
    fun:SSL_COMP_get_compression_methods
    fun:SSL_library_init
 }
@@ -1098,4 +1097,17 @@
    ...
    fun:mi_arena.*
    fun:malloc_info
+}
+
+{
+   stupid sendmsg bug: http://sourceware.org/bugzilla/show_bug.cgi?id=14687
+   Memcheck:Param
+   sendmsg(mmsg[0].msg_hdr)
+   fun:sendmmsg
+   fun:__libc_res_nsend
+   fun:__libc_res_nquery
+   fun:__libc_res_nsearch
+   fun:_nss_dns_gethostbyname4_r
+   fun:gaih_inet
+   fun:getaddrinfo
 }

@@ -1,0 +1,46 @@
+drop database if exists BaR;
+drop database if exists Bar;
+#
+# Ensure lower_case_table_names is off (0).
+#
+show global variables like "lower_case_table_names";
+Variable_name	Value
+lower_case_table_names	0
+#
+# Create two databases, using two different character sets,
+# with names that would be the same, if case-sensitivity fails.
+#
+create database BaR collate ascii_bin;
+create database Bar collate utf8_unicode_ci;
+show databases;
+Database
+information_schema
+BaR
+Bar
+mtr
+mysql
+performance_schema
+test
+#
+# Ensure this table is created with ascii_bin
+#
+use BaR;
+create table f(i int);
+show create table f;
+Table	Create Table
+f	CREATE TABLE `f` (
+  `i` int(11) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=ascii COLLATE=ascii_bin
+#
+# Ensure this table is created with utf8_unicode_ci
+#
+use Bar;
+create table f(i int);
+show create table f;
+Table	Create Table
+f	CREATE TABLE `f` (
+  `i` int(11) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+use test;
+drop database BaR;
+drop database Bar;

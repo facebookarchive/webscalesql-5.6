@@ -1,0 +1,35 @@
+--disable_warnings
+drop database if exists BaR;
+drop database if exists Bar;
+--enable_warnings
+
+--echo #
+--echo # Ensure lower_case_table_names is off (0).
+--echo #
+show global variables like "lower_case_table_names";
+
+--echo #
+--echo # Create two databases, using two different character sets,
+--echo # with names that would be the same, if case-sensitivity fails.
+--echo #
+create database BaR collate ascii_bin;
+create database Bar collate utf8_unicode_ci;
+show databases;
+
+--echo #
+--echo # Ensure this table is created with ascii_bin
+--echo #
+use BaR;
+create table f(i int);
+show create table f;
+
+--echo #
+--echo # Ensure this table is created with utf8_unicode_ci
+--echo #
+use Bar;
+create table f(i int);
+show create table f;
+
+use test;
+drop database BaR;
+drop database Bar;

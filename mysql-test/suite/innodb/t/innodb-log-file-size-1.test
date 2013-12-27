@@ -11,6 +11,9 @@
 ######################################################################
 
 
+# This test is hard-coded to test the limits of 16k pages
+--source include/have_innodb_16k.inc
+
 # Not supported in embedded
 --source include/not_embedded.inc
 

@@ -36,11 +36,11 @@ TABLE	information_schema	%	NO	NO
 TABLE	master	foo	YES	YES
 TABLE	mysql	%	NO	NO
 TABLE	performance_schema	%	NO	NO
-select digest, digest_text, count_star
+select digest_text, count_star
 from performance_schema.events_statements_summary_by_digest
 where digest_text like "%in_%_digest%";
-digest	digest_text	count_star
-8d588d616712c7d8dfabf22ce262662b	SELECT ? AS in_master_digest 	1
+digest_text	count_star
+SELECT ? AS in_master_digest 	1
 insert into test.marker values (2);
 **** On Slave ****
 select * from test.marker;
@@ -63,11 +63,11 @@ TABLE	information_schema	%	NO	NO
 TABLE	mysql	%	NO	NO
 TABLE	performance_schema	%	NO	NO
 TABLE	slave	foo	YES	YES
-select digest, digest_text, count_star
+select digest_text, count_star
 from performance_schema.events_statements_summary_by_digest
 where digest_text like "%in_%_digest%";
-digest	digest_text	count_star
-02e25175edc3b2834b9b41d58f5a8a6a	SELECT ? AS in_slave_digest 	1
+digest_text	count_star
+SELECT ? AS in_slave_digest 	1
 **** On Master ****
 delete from performance_schema.setup_objects
 where object_schema='master';

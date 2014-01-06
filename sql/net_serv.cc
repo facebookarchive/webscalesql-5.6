@@ -434,6 +434,10 @@ static my_bool
 net_write_buff(NET *net, const uchar *packet, ulong len)
 {
   ulong left_length;
+  if (!net->write_pos)
+  {
+    return 1;
+  }
   if (net->compress && net->max_packet > MAX_PACKET_LENGTH)
     left_length= (ulong) (MAX_PACKET_LENGTH - (net->write_pos - net->buff));
   else

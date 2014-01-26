@@ -1111,8 +1111,8 @@ bool Log_event::write_header(IO_CACHE* file, ulong event_data_length)
   }
 
   now= (ulong) get_time();                              // Query start time
-  if (DBUG_EVALUATE_IF("inc_event_time_by_1_hour",1,0)  &&
-      DBUG_EVALUATE_IF("dec_event_time_by_1_hour",1,0))
+  if (DBUG_EVALUATE_IF("inc_event_time_by_1_hour", true, false)  &&
+      DBUG_EVALUATE_IF("dec_event_time_by_1_hour", true, false))
   {
     /** 
        This assertion guarantees that these debug flags are not

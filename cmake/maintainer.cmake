@@ -18,7 +18,7 @@ INCLUDE(CheckCCompilerFlag)
 # Setup GCC (GNU C compiler) warning options.
 MACRO(SET_MYSQL_MAINTAINER_GNU_C_OPTIONS)
   SET(MY_MAINTAINER_WARNINGS
-      "-Wall -Wextra -Wunused -Wwrite-strings -Wno-strict-aliasing  -Werror")
+      "-Wall -Wextra -Wunused -Wwrite-strings -Wno-strict-aliasing  -Werror -DFORCE_INIT_OF_VARS")
 
   SET(MY_MAINTAINER_C_WARNINGS
       "${MY_MAINTAINER_WARNINGS} ${MY_MAINTAINER_DECLARATION_AFTER_STATEMENT}"

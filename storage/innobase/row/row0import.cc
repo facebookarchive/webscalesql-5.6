@@ -3783,7 +3783,7 @@ row_import_for_mysql(
 	}
 
 	table->ibd_file_missing = false;
-	table->flags2 &= ~DICT_TF2_DISCARDED;
+	table->flags2 = table->flags2 & ~DICT_TF2_DISCARDED;
 
 	if (autoinc != 0) {
 		char	table_name[MAX_FULL_NAME_LEN + 1];

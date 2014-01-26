@@ -294,8 +294,6 @@ uint32 wt_wait_stats[WT_WAIT_STATS+1];
 uint32 wt_cycle_stats[2][WT_CYCLE_STATS+1];
 uint32 wt_success_stats;
 
-static my_atomic_rwlock_t cycle_stats_lock, wait_stats_lock, success_stats_lock;
-
 #ifdef SAFE_STATISTICS
 #define incr(VAR, LOCK)                           \
   do {                                            \

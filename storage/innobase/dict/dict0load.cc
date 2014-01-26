@@ -2194,7 +2194,7 @@ dict_save_data_dir_path(
 		/* This does not change SYS_DATAFILES or SYS_TABLES
 		or FSP_FLAGS on the header page of the tablespace,
 		but it makes dict_table_t consistent */
-		table->flags &= ~DICT_TF_MASK_DATA_DIR;
+		table->flags = table->flags & ~DICT_TF_MASK_DATA_DIR;
 	}
 	mem_free(default_filepath);
 }

@@ -972,7 +972,7 @@ static bool pack_fields(File file, List<Create_field> &create_fields,
           for (uint j = 0; j < field->interval->type_lengths[i]; j++)
             occ[(unsigned int) (val[j])]= 1;
 
-        if (!occ[(unsigned char)NAMES_SEP_CHAR])
+        if (!occ[(unsigned int)NAMES_SEP_CHAR & 0xFF])
           sep= (unsigned char) NAMES_SEP_CHAR;
         else if (!occ[(unsigned int)','])
           sep= ',';

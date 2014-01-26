@@ -5171,7 +5171,7 @@ bool MYSQL_BIN_LOG::write_event(Log_event *event_info)
       Write the event.
     */
     if (cache_data->write_event(thd, event_info) ||
-        DBUG_EVALUATE_IF("injecting_fault_writing", 1, 0))
+        DBUG_EVALUATE_IF("injecting_fault_writing", true, false))
       goto err;
 
     /*

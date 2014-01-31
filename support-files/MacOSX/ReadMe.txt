@@ -404,5 +404,5 @@ Additional Resources
        Alternatively, you can ignore the bundled MySQL server and
        install MySQL from the package or tarball installation.
 
-   Copyright (c) 1997, 2013, Oracle and/or its affiliates. All rights
+   Copyright (c) 1997, 2014, Oracle and/or its affiliates. All rights
    reserved. Legal Notices

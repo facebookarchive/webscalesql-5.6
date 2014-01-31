@@ -2,12 +2,12 @@
 .\"     Title: \fBinnochecksum\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 11/15/2013
+.\"      Date: 01/14/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBINNOCHECKSUM\FR" "1" "11/15/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBINNOCHECKSUM\FR" "1" "01/14/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -42,7 +42,11 @@ files\&. This tool reads an
 InnoDB
 tablespace file, calculates the checksum for each page, compares the calculated checksum to the stored checksum, and reports mismatches, which indicate damaged pages\&. It was originally developed to speed up verifying the integrity of tablespace files after power outages but can also be used after file copies\&. Because checksum mismatches will cause
 InnoDB
-to deliberately shut down a running server, it can be preferable to use this tool rather than waiting for a server in production usage to encounter the damaged pages\&.
+to deliberately shut down a running server, it can be preferable to use this tool rather than waiting for a server in production usage to encounter the damaged pages\&. As of MySQL 5\&.6\&.16,
+\fBinnochecksum\fR
+supports files greater than 2GB in size\&. Previously,
+\fBinnochecksum\fR
+only supported files up to 2GB in size\&.
 .PP
 \fBinnochecksum\fR
 cannot be used on tablespace files that the server already has open\&. For such files, you should use
@@ -150,7 +154,7 @@ Verbose mode; print a progress indicator every five seconds\&.
 .SH "COPYRIGHT"
 .br
 .PP
-Copyright \(co 1997, 2013, Oracle and/or its affiliates. All rights reserved.
+Copyright \(co 1997, 2014, Oracle and/or its affiliates. All rights reserved.
 .PP
 This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
 .PP

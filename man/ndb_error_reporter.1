@@ -2,12 +2,12 @@
 .\"     Title: \fBndb_error_reporter\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 11/15/2013
+.\"      Date: 01/14/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBNDB_ERROR_REPORTE" "1" "11/15/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBNDB_ERROR_REPORTE" "1" "01/14/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -49,7 +49,8 @@ Options Common to MySQL Cluster Programs(1)\&.
 did not support the
 \fB\-\-help\fR
 option prior to MySQL Cluster NDB 7\&.3\&.3 (Bug #11756666, Bug #48606)\&. The
-\fB\-\-connection\-timeout\fR\fB\-\-dry\-scp\fR, and
+\fB\-\-connection\-timeout\fR
+\fB\-\-dry\-scp\fR, and
 \fB\-\-skip\-nodegroup\fR
 options were also added in this release (Bug #16602002)\&.
 .sp
@@ -132,7 +133,8 @@ ndb_error_report_\fIYYYYMMDDHHMMSS\fR\&.tar\&.bz2, where
 \fIYYYYMMDDHHMMSS\fR
 is a datetime string\&.
 .PP
-.\" ndb_error_reporter: options\fBndb_error_reporter\fR
+.\" ndb_error_reporter: options
+\fBndb_error_reporter\fR
 also accepts the options listed here:
 .sp
 .RS 4
@@ -143,7 +145,8 @@ also accepts the options listed here:
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" connection-timeout option (ndb_error_reporter)\fB\-\-connection\-timeout=\fR\fB\fItimeout\fR\fR
+.\" connection-timeout option (ndb_error_reporter)
+\fB\-\-connection\-timeout=\fR\fB\fItimeout\fR\fR
 .TS
 allbox tab(:);
 l l s s
@@ -189,7 +192,8 @@ Wait this many seconds when trying to connect to nodes before timing out\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" dry-scp option (ndb_error_reporter)\fB\-\-dry\-scp\fR
+.\" dry-scp option (ndb_error_reporter)
+\fB\-\-dry\-scp\fR
 .TS
 allbox tab(:);
 l l s s
@@ -237,7 +241,8 @@ without using scp from remote hosts\&. Used for testing only\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" fs option (ndb_error_reporter)\fB\-\-fs\fR
+.\" fs option (ndb_error_reporter)
+\fB\-\-fs\fR
 .TS
 allbox tab(:);
 l l s s
@@ -281,7 +286,8 @@ send archives created using this option to Oracle unless you are specifically re
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" skip-nodegroup option (ndb_error_reporter)\fB\-\-skip\-nodegroup=\fR\fB\fInodegroup_id\fR\fR
+.\" skip-nodegroup option (ndb_error_reporter)
+\fB\-\-skip\-nodegroup=\fR\fB\fInodegroup_id\fR\fR
 .TS
 allbox tab(:);
 l l s s
@@ -321,7 +327,7 @@ Skip all nodes belong to the node group having the supplied node group ID\&.
 .SH "COPYRIGHT"
 .br
 .PP
-Copyright \(co 1997, 2013, Oracle and/or its affiliates. All rights reserved.
+Copyright \(co 1997, 2014, Oracle and/or its affiliates. All rights reserved.
 .PP
 This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
 .PP

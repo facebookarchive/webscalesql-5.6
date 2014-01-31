@@ -2,12 +2,12 @@
 .\"     Title: \fBndb_select_all\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 11/15/2013
+.\"      Date: 01/14/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBNDB_SELECT_ALL\FR" "1" "11/15/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBNDB_SELECT_ALL\FR" "1" "01/14/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -73,6 +73,7 @@ T}:T{
 Added / Removed
 T}
 .T&
+l l l
 l l l
 l l l
 l l l
@@ -204,6 +205,15 @@ All MySQL 5\&.6 based releases
 T}
 T{
 .PP
+--gci64
+T}:T{
+Include GCI and row epoch in output
+T}:T{
+.PP
+All MySQL 5\&.6 based releases
+T}
+T{
+.PP
 --tup,
 .PP
 -t
@@ -233,8 +243,10 @@ T}
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_select_all: database option\fB\-\-database=\fR\fB\fIdbname\fR\fR,
-\fB\-d\fR\fIdbname\fR
+.\" ndb_select_all: database option
+\fB\-\-database=\fR\fB\fIdbname\fR\fR,
+\fB\-d\fR
+\fIdbname\fR
 .sp
 Name of the database in which the table is found\&. The default value is
 TEST_DB\&.
@@ -248,8 +260,10 @@ TEST_DB\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_select_all: parallelism option\fBparallelism=\fR\fB\fI#\fR\fR,
-\fB\-p\fR\fI#\fR
+.\" ndb_select_all: parallelism option
+\fBparallelism=\fR\fB\fI#\fR\fR,
+\fB\-p\fR
+\fI#\fR
 .sp
 Specifies the degree of parallelism\&.
 .RE
@@ -262,7 +276,9 @@ Specifies the degree of parallelism\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_select_all: lock option.\" lock option: ndb_select_all\fB\-\-lock=\fR\fB\fIlock_type\fR\fR,
+.\" ndb_select_all: lock option
+.\" lock option: ndb_select_all
+\fB\-\-lock=\fR\fB\fIlock_type\fR\fR,
 \fB\-l \fR\fB\fIlock_type\fR\fR
 .sp
 Employs a lock when reading the table\&. Possible values for
@@ -313,7 +329,9 @@ There is no default value for this option\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_select_all: order option.\" order option: ndb_select_all\fB\-\-order=\fR\fB\fIindex_name\fR\fR,
+.\" ndb_select_all: order option
+.\" order option: ndb_select_all
+\fB\-\-order=\fR\fB\fIindex_name\fR\fR,
 \fB\-o \fR\fB\fIindex_name\fR\fR
 .sp
 Orders the output according to the index named
@@ -328,7 +346,9 @@ Orders the output according to the index named
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_select_all: descending option.\" descending option: ndb_select_all\fB\-\-descending\fR,
+.\" ndb_select_all: descending option
+.\" descending option: ndb_select_all
+\fB\-\-descending\fR,
 \fB\-z\fR
 .sp
 Sorts the output in descending order\&. This option can be used only in conjunction with the
@@ -344,7 +364,9 @@ Sorts the output in descending order\&. This option can be used only in conjunct
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_select_all: header option.\" header option: ndb_select_all\fB\-\-header=FALSE\fR
+.\" ndb_select_all: header option
+.\" header option: ndb_select_all
+\fB\-\-header=FALSE\fR
 .sp
 Excludes column headers from the output\&.
 .RE
@@ -357,7 +379,10 @@ Excludes column headers from the output\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_select_all: useHexFormat option.\" useHexFormat option: ndb_select_all\fB\-\-useHexFormat\fR\fB\-x\fR
+.\" ndb_select_all: useHexFormat option
+.\" useHexFormat option: ndb_select_all
+\fB\-\-useHexFormat\fR
+\fB\-x\fR
 .sp
 Causes all numeric values to be displayed in hexadecimal format\&. This does not affect the output of numerals contained in strings or datetime values\&.
 .RE
@@ -370,7 +395,9 @@ Causes all numeric values to be displayed in hexadecimal format\&. This does not
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_select_all: delimiter option.\" delimiter option: ndb_select_all\fB\-\-delimiter=\fR\fB\fIcharacter\fR\fR,
+.\" ndb_select_all: delimiter option
+.\" delimiter option: ndb_select_all
+\fB\-\-delimiter=\fR\fB\fIcharacter\fR\fR,
 \fB\-D \fR\fB\fIcharacter\fR\fR
 .sp
 Causes the
@@ -388,7 +415,9 @@ The default delimiter is the tab character\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_select_all: disk option.\" disk option: ndb_select_all\fB\-\-disk\fR
+.\" ndb_select_all: disk option
+.\" disk option: ndb_select_all
+\fB\-\-disk\fR
 .sp
 Adds a disk reference column to the output\&. The column is nonempty only for Disk Data tables having nonindexed columns\&.
 .RE
@@ -401,7 +430,9 @@ Adds a disk reference column to the output\&. The column is nonempty only for Di
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_select_all: rowid option.\" rowid option: ndb_select_all\fB\-\-rowid\fR
+.\" ndb_select_all: rowid option
+.\" rowid option: ndb_select_all
+\fB\-\-rowid\fR
 .sp
 Adds a
 ROWID
@@ -416,9 +447,13 @@ column providing information about the fragments in which rows are stored\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_select_all: gci option.\" gci option: ndb_select_all\fB\-\-gci\fR
+.\" ndb_select_all: gci option
+.\" gci option: ndb_select_all
+\fB\-\-gci\fR
 .sp
-Adds a column to the output showing the global checkpoint at which each row was last updated\&. See
+Adds a
+GCI
+column to the output showing the global checkpoint at which each row was last updated\&. See
 Section\ \&17.1, \(lqMySQL Cluster Overview\(rq, and
 Section\ \&17.5.6.2, \(lqMySQL Cluster Log Events\(rq, for more information about checkpoints\&.
 .RE
@@ -431,7 +466,26 @@ Section\ \&17.5.6.2, \(lqMySQL Cluster Log Events\(rq, for more information abou
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_select_all: tupscan option.\" tupscan option: ndb_select_all\fB\-\-tupscan\fR,
+.\" ndb_select_all: gci64 option
+.\" gci64 option: ndb_select_all
+\fB\-\-gci64\fR
+.sp
+Adds a
+ROW$GCI64
+column to the output showing the global checkpoint at which each row was last updated, as well as the number of the epoch in which this update occurred\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" ndb_select_all: tupscan option
+.\" tupscan option: ndb_select_all
+\fB\-\-tupscan\fR,
 \fB\-t\fR
 .sp
 Scan the table in the order of the tuples\&.
@@ -445,7 +499,9 @@ Scan the table in the order of the tuples\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" ndb_select_all: nodata option.\" nodata option: ndb_select_all\fB\-\-nodata\fR
+.\" ndb_select_all: nodata option
+.\" nodata option: ndb_select_all
+\fB\-\-nodata\fR
 .sp
 Causes any table data to be omitted\&.
 .RE
@@ -547,7 +603,7 @@ NDBT_ProgramExit: 0 \- OK
 .SH "COPYRIGHT"
 .br
 .PP
-Copyright \(co 1997, 2013, Oracle and/or its affiliates. All rights reserved.
+Copyright \(co 1997, 2014, Oracle and/or its affiliates. All rights reserved.
 .PP
 This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
 .PP

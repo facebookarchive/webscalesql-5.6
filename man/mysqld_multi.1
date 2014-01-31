@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqld_multi\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 11/15/2013
+.\"      Date: 01/14/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLD_MULTI\FR" "1" "11/15/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLD_MULTI\FR" "1" "01/14/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -49,7 +49,7 @@ searches for groups named
 in
 my\&.cnf
 (or in the file named by the
-\fB\-\-config\-file\fR
+\fB\-\-defaults\-file\fR
 option)\&.
 \fIN\fR
 can be any positive integer\&. This number is referred to in the following discussion as the option group number, or
@@ -158,7 +158,8 @@ searches for option files as follows:
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqld_multi: no-defaults option.\" no-defaults option: mysqld_multi
+.\" mysqld_multi: no-defaults option
+.\" no-defaults option: mysqld_multi
 With
 \fB\-\-no\-defaults\fR, no option files are read\&.
 .RE
@@ -171,7 +172,8 @@ With
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqld_multi: defaults-file option.\" defaults-file option: mysqld_multi
+.\" mysqld_multi: defaults-file option
+.\" defaults-file option: mysqld_multi
 With
 \fB\-\-defaults\-file=\fR\fB\fIfile_name\fR\fR, only the named file is read\&.
 .RE
@@ -184,7 +186,8 @@ With
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqld_multi: defaults-extra-file option.\" defaults-extra-file option: mysqld_multi
+.\" mysqld_multi: defaults-extra-file option
+.\" defaults-extra-file option: mysqld_multi
 Otherwise, option files in the standard list of locations are read, including any file named by the
 \fB\-\-defaults\-extra\-file=\fR\fB\fIfile_name\fR\fR
 option, if one is given\&. (If the option is given multiple times, the last value is used\&.)
@@ -230,7 +233,9 @@ supports the following options\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqld_multi: help option.\" help option: mysqld_multi\fB\-\-help\fR
+.\" mysqld_multi: help option
+.\" help option: mysqld_multi
+\fB\-\-help\fR
 .sp
 Display a help message and exit\&.
 .RE
@@ -243,7 +248,9 @@ Display a help message and exit\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqld_multi: example option.\" example option: mysqld_multi\fB\-\-example\fR
+.\" mysqld_multi: example option
+.\" example option: mysqld_multi
+\fB\-\-example\fR
 .sp
 Display a sample option file\&.
 .RE
@@ -256,7 +263,9 @@ Display a sample option file\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqld_multi: log option.\" log option: mysqld_multi\fB\-\-log=\fR\fB\fIfile_name\fR\fR
+.\" mysqld_multi: log option
+.\" log option: mysqld_multi
+\fB\-\-log=\fR\fB\fIfile_name\fR\fR
 .sp
 Specify the name of the log file\&. If the file exists, log output is appended to it\&.
 .RE
@@ -269,7 +278,9 @@ Specify the name of the log file\&. If the file exists, log output is appended t
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqld_multi: mysqladmin option.\" mysqladmin option: mysqld_multi\fB\-\-mysqladmin=\fR\fB\fIprog_name\fR\fR
+.\" mysqld_multi: mysqladmin option
+.\" mysqladmin option: mysqld_multi
+\fB\-\-mysqladmin=\fR\fB\fIprog_name\fR\fR
 .sp
 The
 \fBmysqladmin\fR
@@ -284,7 +295,9 @@ binary to be used to stop servers\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqld_multi: mysqld option.\" mysqld option: mysqld_multi\fB\-\-mysqld=\fR\fB\fIprog_name\fR\fR
+.\" mysqld_multi: mysqld option
+.\" mysqld option: mysqld_multi
+\fB\-\-mysqld=\fR\fB\fIprog_name\fR\fR
 .sp
 The
 \fBmysqld\fR
@@ -324,7 +337,9 @@ ledir  = /opt/local/mysql/libexec
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqld_multi: no-log option.\" no-log option: mysqld_multi\fB\-\-no\-log\fR
+.\" mysqld_multi: no-log option
+.\" no-log option: mysqld_multi
+\fB\-\-no\-log\fR
 .sp
 Print log information to
 stdout
@@ -339,7 +354,9 @@ rather than to the log file\&. By default, output goes to the log file\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqld_multi: password option.\" password option: mysqld_multi\fB\-\-password=\fR\fB\fIpassword\fR\fR
+.\" mysqld_multi: password option
+.\" password option: mysqld_multi
+\fB\-\-password=\fR\fB\fIpassword\fR\fR
 .sp
 The password of the MySQL account to use when invoking
 \fBmysqladmin\fR\&. Note that the password value is not optional for this option, unlike for other MySQL programs\&.
@@ -353,7 +370,9 @@ The password of the MySQL account to use when invoking
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqld_multi: silent option.\" silent option: mysqld_multi\fB\-\-silent\fR
+.\" mysqld_multi: silent option
+.\" silent option: mysqld_multi
+\fB\-\-silent\fR
 .sp
 Silent mode; disable warnings\&.
 .RE
@@ -366,7 +385,9 @@ Silent mode; disable warnings\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqld_multi: tcp-ip option.\" tcp-ip option: mysqld_multi\fB\-\-tcp\-ip\fR
+.\" mysqld_multi: tcp-ip option
+.\" tcp-ip option: mysqld_multi
+\fB\-\-tcp\-ip\fR
 .sp
 Connect to each MySQL server through the TCP/IP port instead of the Unix socket file\&. (If a socket file is missing, the server might still be running, but accessible only through the TCP/IP port\&.) By default, connections are made using the Unix socket file\&. This option affects
 stop
@@ -383,7 +404,9 @@ operations\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqld_multi: user option.\" user option: mysqld_multi\fB\-\-user=\fR\fB\fIuser_name\fR\fR
+.\" mysqld_multi: user option
+.\" user option: mysqld_multi
+\fB\-\-user=\fR\fB\fIuser_name\fR\fR
 .sp
 The user name of the MySQL account to use when invoking
 \fBmysqladmin\fR\&.
@@ -397,7 +420,9 @@ The user name of the MySQL account to use when invoking
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqld_multi: verbose option.\" verbose option: mysqld_multi\fB\-\-verbose\fR
+.\" mysqld_multi: verbose option
+.\" verbose option: mysqld_multi
+\fB\-\-verbose\fR
 .sp
 Be more verbose\&.
 .RE
@@ -410,7 +435,9 @@ Be more verbose\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqld_multi: version option.\" version option: mysqld_multi\fB\-\-version\fR
+.\" mysqld_multi: version option
+.\" version option: mysqld_multi
+\fB\-\-version\fR
 .sp
 Display version information and exit\&.
 .RE
@@ -663,7 +690,7 @@ Section\ \&4.2.3.3, \(lqUsing Option Files\(rq\&.
 .SH "COPYRIGHT"
 .br
 .PP
-Copyright \(co 1997, 2013, Oracle and/or its affiliates. All rights reserved.
+Copyright \(co 1997, 2014, Oracle and/or its affiliates. All rights reserved.
 .PP
 This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
 .PP

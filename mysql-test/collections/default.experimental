@@ -22,3 +22,10 @@ rpl.rpl_gtid_logs_without_rotate_or_stop_event @windows    # Bug#16207800 2013-0
 perfschema.socket_summary_by_instance_func  # bug#16274580
 innodb.innodb_bug14676111                   # bug#17026780  2013-07-08 anitha Originally made experimental due to bug#16371942 which is now fixed. Now fails with mismatch in CLUST_INDEX_SIZE
 
+# This file is for marking internal tests as experimental.
+# Use the same way as the "normal" default.experimental
+# The contents of this file will be appended to it in PB2 but not for
+# normal developer builds.
+# Internal tests should *not* be listed in the public default.experimental!
+
+i_innodb.innodb_bug14712710 bug#14765080 has been assigned to Thayu

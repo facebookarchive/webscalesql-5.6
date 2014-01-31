@@ -2,12 +2,12 @@
 .\"     Title: \fBmyisampack\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 11/15/2013
+.\"      Date: 01/14/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYISAMPACK\FR" "1" "11/15/2013" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYISAMPACK\FR" "1" "01/14/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -83,6 +83,18 @@ if the table might be updated by the server during the packing process\&. It is 
 .\}
 After packing a table, it becomes read only\&. This is generally intended (such as when accessing packed tables on a CD)\&.
 .RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fBmyisampack\fR
+does not support partitioned tables\&.
+.RE
 .PP
 Invoke
 \fBmyisampack\fR
@@ -120,7 +132,9 @@ Section\ \&4.2.3.4, \(lqCommand-Line Options that Affect Option-File Handling\(r
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisampack: help option.\" help option: myisampack\fB\-\-help\fR,
+.\" myisampack: help option
+.\" help option: myisampack
+\fB\-\-help\fR,
 \fB\-?\fR
 .sp
 Display a help message and exit\&.
@@ -134,7 +148,9 @@ Display a help message and exit\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisampack: backup option.\" backup option: myisampack\fB\-\-backup\fR,
+.\" myisampack: backup option
+.\" backup option: myisampack
+\fB\-\-backup\fR,
 \fB\-b\fR
 .sp
 Make a backup of each table\*(Aqs data file using the name
@@ -149,7 +165,9 @@ Make a backup of each table\*(Aqs data file using the name
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisampack: character-sets-dir option.\" character-sets-dir option: myisampack\fB\-\-character\-sets\-dir=\fR\fB\fIpath\fR\fR
+.\" myisampack: character-sets-dir option
+.\" character-sets-dir option: myisampack
+\fB\-\-character\-sets\-dir=\fR\fB\fIpath\fR\fR
 .sp
 The directory where character sets are installed\&. See
 Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&.
@@ -163,7 +181,9 @@ Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisampack: debug option.\" debug option: myisampack\fB\-\-debug[=\fR\fB\fIdebug_options\fR\fR\fB]\fR,
+.\" myisampack: debug option
+.\" debug option: myisampack
+\fB\-\-debug[=\fR\fB\fIdebug_options\fR\fR\fB]\fR,
 \fB\-# [\fR\fB\fIdebug_options\fR\fR\fB]\fR
 .sp
 Write a debugging log\&. A typical
@@ -181,7 +201,9 @@ string is
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisampack: force option.\" force option: myisampack\fB\-\-force\fR,
+.\" myisampack: force option
+.\" force option: myisampack
+\fB\-\-force\fR,
 \fB\-f\fR
 .sp
 Produce a packed table even if it becomes larger than the original or if the intermediate file from an earlier invocation of
@@ -210,7 +232,9 @@ packs the table anyway\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisampack: join option.\" join option: myisampack\fB\-\-join=\fR\fB\fIbig_tbl_name\fR\fR,
+.\" myisampack: join option
+.\" join option: myisampack
+\fB\-\-join=\fR\fB\fIbig_tbl_name\fR\fR,
 \fB\-j \fR\fB\fIbig_tbl_name\fR\fR
 .sp
 Join all tables named on the command line into a single packed table
@@ -238,7 +262,9 @@ file from one of the source tables and name it
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisampack: silent option.\" silent option: myisampack\fB\-\-silent\fR,
+.\" myisampack: silent option
+.\" silent option: myisampack
+\fB\-\-silent\fR,
 \fB\-s\fR
 .sp
 Silent mode\&. Write output only when errors occur\&.
@@ -252,7 +278,9 @@ Silent mode\&. Write output only when errors occur\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisampack: test option.\" test option: myisampack\fB\-\-test\fR,
+.\" myisampack: test option
+.\" test option: myisampack
+\fB\-\-test\fR,
 \fB\-t\fR
 .sp
 Do not actually pack the table, just test packing it\&.
@@ -266,7 +294,9 @@ Do not actually pack the table, just test packing it\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisampack: tmpdir option.\" tmpdir option: myisampack\fB\-\-tmpdir=\fR\fB\fIpath\fR\fR,
+.\" myisampack: tmpdir option
+.\" tmpdir option: myisampack
+\fB\-\-tmpdir=\fR\fB\fIpath\fR\fR,
 \fB\-T \fR\fB\fIpath\fR\fR
 .sp
 Use the named directory as the location where
@@ -282,7 +312,9 @@ creates temporary files\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisampack: verbose option.\" verbose option: myisampack\fB\-\-verbose\fR,
+.\" myisampack: verbose option
+.\" verbose option: myisampack
+\fB\-\-verbose\fR,
 \fB\-v\fR
 .sp
 Verbose mode\&. Write information about the progress of the packing operation and its result\&.
@@ -296,7 +328,9 @@ Verbose mode\&. Write information about the progress of the packing operation an
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisampack: version option.\" version option: myisampack\fB\-\-version\fR,
+.\" myisampack: version option
+.\" version option: myisampack
+\fB\-\-version\fR,
 \fB\-V\fR
 .sp
 Display version information and exit\&.
@@ -310,7 +344,9 @@ Display version information and exit\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" myisampack: wait option.\" wait option: myisampack\fB\-\-wait\fR,
+.\" myisampack: wait option
+.\" wait option: myisampack
+\fB\-\-wait\fR,
 \fB\-w\fR
 .sp
 Wait and retry if the table is in use\&. If the
@@ -817,7 +853,7 @@ option to
 .SH "COPYRIGHT"
 .br
 .PP
-Copyright \(co 1997, 2013, Oracle and/or its affiliates. All rights reserved.
+Copyright \(co 1997, 2014, Oracle and/or its affiliates. All rights reserved.
 .PP
 This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
 .PP

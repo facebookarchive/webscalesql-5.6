@@ -17,7 +17,7 @@
 
    MySQL compressed tar file binary distributions have names of the
    form mysql-VERSION-OS.tar.gz, where VERSION is a number (for
-   example, 5.6.16), and OS indicates the type of operating system
+   example, 5.6.17), and OS indicates the type of operating system
    for which the distribution is intended (for example, pc-linux-i686
    or winx64).
 
@@ -174,24 +174,20 @@ Perform Postinstallation Setup
    passwords for them using the instructions in Section 2.10.2,
    "Securing the Initial MySQL Accounts."
 
-   Copyright (c) 1997, 2013, Oracle and/or its affiliates. All rights
+   Copyright (c) 1997, 2014, Oracle and/or its affiliates. All rights
    reserved. Legal Notices
 
 2.3. Installing MySQL on Microsoft Windows
 
-   MySQL for Microsoft Windows is available in a number of different
-   forms. A Microsoft Windows operating system such as Windows Vista,
-   Windows 7, Windows 8, Windows Server 2008, or Windows Server 2012.
-   Both 32-bit and 64-bit versions are supported. For supported
-   platform information, see
+   MySQL is available for Microsoft Windows, for both 32-bit and
+   64-bit versions. For supported Windows platform information, see
    http://www.mysql.com/support/supportedplatforms/database.html.
 
-   In addition to running MySQL as a standard application, you can
-   also run the MySQL server as a Windows service. By using a service
-   you can monitor and control the operation of the server through
-   the standard Windows service management tools. For more
-   information, see Section 2.3.5.7, "Starting MySQL as a Windows
-   Service."
+   It is possible to run MySQL as a standard application or as a
+   Windows service. By using a service, you can monitor and control
+   the operation of the server through the standard Windows service
+   management tools. For more information, see Section 2.3.5.7,
+   "Starting MySQL as a Windows Service."
 
    Generally, you should install MySQL on Windows using an account
    that has administrator rights. Otherwise, you may encounter
@@ -200,21 +196,21 @@ Perform Postinstallation Setup
    Once installed, MySQL does not need to be executed using a user
    with Administrator privileges.
 
-   For a list of limitations within the Windows version of MySQL, see
-   Section E.10.6, "Windows Platform Limitations."
+   For a list of limitations on the use of MySQL on the Windows
+   platform, see Section E.10.6, "Windows Platform Limitations."
 
    In addition to the MySQL Server package, you may need or want
    additional components to use MySQL with your application or
    development environment. These include, but are not limited to:
 
-     * If you plan to connect to the MySQL server using ODBC, you
-       need a Connector/ODBC driver. For more information, including
+     * To connect to the MySQL server using ODBC, you must have a
+       Connector/ODBC driver. For more information, including
        installation and configuration instructions, see Section 22.1,
        "MySQL Connector/ODBC." But note that MySQL Installer will
        install and configure Connector/ODBC for you.
 
-     * If you plan to use MySQL server with .NET applications, you
-       need the Connector/Net driver. For more information, including
+     * To use MySQL server with .NET applications, you must have the
+       Connector/Net driver. For more information, including
        installation and configuration instructions, see Section 22.2,
        "MySQL Connector/Net." But note that MySQL Installer will
        install and configure Connector/NET for you.
@@ -224,34 +220,34 @@ Perform Postinstallation Setup
    MySQL."
 
    MySQL for Windows is available in several distribution formats,
-   detailed below. Generally speaking, you should use MySQL
-   Installer. It is simpler to use than the ZIP file, and you need no
-   additional tools to get MySQL up and running. MySQL Installer will
-   automatically install MySQL Server, install additional MySQL
-   products, create an options file, starts the server, and allow you
-   to create default user accounts. For more information on choosing
-   a package, see Section 2.3.2, "Choosing An Installation Package."
+   detailed following. Generally speaking, you should use MySQL
+   Installer. It is simpler to use than the Zip file, and you need no
+   additional tools to get MySQL up and running. MySQL Installer
+   automatically installs MySQL Server and additional MySQL products,
+   creates an options file, starts the server, and enables you to
+   create default user accounts. For more information on choosing a
+   package, see Section 2.3.2, "Choosing An Installation Package."
 
-     * MySQL Installer. It includes MySQL Server and additional MySQL
-       products including MySQL Workbench, MySQL Notifier, and MySQL
-       for Excel. And MySQL Installer can also be used to upgrade
-       these product in the future.
+     * A MySQL Installer distribution includes MySQL Server and
+       additional MySQL products including MySQL Workbench, MySQL
+       Notifier, and MySQL for Excel. MySQL Installer can also be
+       used to upgrade these products in the future.
        For instructions on installing MySQL using MySQL Installer,
        see Section 2.3.3, "Installing MySQL on Microsoft Windows
        Using MySQL Installer."
 
-     * Standard binary distribution format packaged as a Zip file
-       containing all of the necessary files that you unpack into
-       your chosen location. This package contains all of the files
-       in the full Windows MSI Installer package, but does not
-       include an installation program.
+     * The standard binary distribution (packaged as a Zip file)
+       contains all of the necessary files that you unpack into your
+       chosen location. This package contains all of the files in the
+       full Windows MSI Installer package, but does not include an
+       installation program.
        For instructions on installing MySQL using the Zip file, see
        Section 2.3.5, "Installing MySQL on Microsoft Windows Using a
        noinstall Zip Archive."
 
-     * The source distribution contains all the code and support
-       files for building the executables using the Visual Studio
-       compiler system.
+     * The source distribution format contains all the code and
+       support files for building the executables using the Visual
+       Studio compiler system.
        For instructions on building MySQL from source on Windows, see
        Section 2.9, "Installing MySQL from Source."
 
@@ -264,23 +260,23 @@ Perform Postinstallation Setup
        13.1.17, "CREATE TABLE Syntax."
 
      * MySQL and Virus Checking Software
-       Using virus scanning software such as Norton/Symantec
-       Anti-Virus on directories containing MySQL data and temporary
-       tables can cause issues, both in terms of the performance of
-       MySQL and the virus-scanning software mis-identifying the
-       contents of the files as containing spam. This is because of
-       the fingerprinting mechanism used by the virus scanning
-       software, and the way in which MySQL rapidly updates different
-       files, which may be identified as a potential security risk.
+       Virus-scanning software such as Norton/Symantec Anti-Virus on
+       directories containing MySQL data and temporary tables can
+       cause issues, both in terms of the performance of MySQL and
+       the virus-scanning software misidentifying the contents of the
+       files as containing spam. This is due to the fingerprinting
+       mechanism used by the virus-scanning software, and the way in
+       which MySQL rapidly updates different files, which may be
+       identified as a potential security risk.
        After installing MySQL Server, it is recommended that you
-       disable virus scanning on the main directory (datadir) being
-       used to store your MySQL table data. There is usually a system
-       built into the virus scanning software to permit certain
-       directories to be specifically ignored during virus scanning.
+       disable virus scanning on the main directory (datadir) used to
+       store your MySQL table data. There is usually a system built
+       into the virus scanning software to enable specific
+       directories to be ignored.
        In addition, by default, MySQL creates temporary files in the
        standard Windows temporary directory. To prevent the temporary
-       files also being scanned, you should configure a separate
-       temporary directory for MySQL temporary files and add this to
+       files also being scanned, configure a separate temporary
+       directory for MySQL temporary files and add this directory to
        the virus scanning exclusion list. To do this, add a
        configuration option for the tmpdir parameter to your my.ini
        configuration file. For more information, see Section 2.3.5.2,
@@ -329,8 +325,8 @@ Perform Postinstallation Setup
    from when installing MySQL on Windows:
 
      * MySQL Installer: This package has a file name similar to
-       mysql-installer-community-5.6.16.0.msi or
-       mysql-installer-commercial-5.6.16.0.msi, and utilizes MSI's to
+       mysql-installer-community-5.6.17.0.msi or
+       mysql-installer-commercial-5.6.17.0.msi, and utilizes MSI's to
        automatically install MySQL server and other products. It will
        download and apply updates to itself, and for each of the
        installed products. It also configures the additional
@@ -343,15 +339,18 @@ Perform Postinstallation Setup
        MySQL Installer will run on all Windows platforms that are
        supported by MySQL (see
        http://www.mysql.com/support/supportedplatforms/database.html)
-       . Note: because MySQL is not a native component of Windows and
-       depends on .NET, it will not work on minimal installation
-       options like the "Server Core" version of Windows Server 2008.
+       .
+       Note
+       Because MySQL Installer is not a native component of Microsoft
+       Windows and depends on .NET, it will not work on minimal
+       installation options like the "Server Core" version of Windows
+       Server 2008.
        For instructions on installing MySQL using MySQL Installer,
        see Section 2.3.3, "Installing MySQL on Microsoft Windows
        Using MySQL Installer."
 
      * The Noinstall Archive: This package has a file name similar to
-       mysql-5.6.16-win32.zip or mysql-5.6.16-winx64.zip, and
+       mysql-5.6.17-win32.zip or mysql-5.6.17-winx64.zip, and
        contains all the files found in the Complete install package,
        with the exception of the GUI. This package does not include
        an automated installer, and must be manually installed and
@@ -1298,15 +1297,12 @@ datadir=E:\\mydata\\data
    database directories.
 
    MySQL supports TCP/IP on all Windows platforms. MySQL servers on
-   Windows support named pipes as indicated in the following list.
-   However, the default is to use TCP/IP regardless of platform.
-   (Named pipes are slower than TCP/IP in many Windows
-   configurations.)
-
-   Named pipes are enabled only if you start the server with the
+   Windows also support named pipes, if you start the server with the
    --enable-named-pipe option. It is necessary to use this option
    explicitly because some users have experienced problems with
-   shutting down the MySQL server when named pipes were used.
+   shutting down the MySQL server when named pipes were used. The
+   default is to use TCP/IP regardless of platform because named
+   pipes are slower than TCP/IP in many Windows configurations.
 
 2.3.5.4. Starting the Server for the First Time
 
@@ -1375,7 +1371,7 @@ InnoDB: foreign key constraint system tables created
    something like this, which indicates that the server is ready to
    service client connections:
 mysqld: ready for connections
-Version: '5.6.16'  socket: ''  port: 3306
+Version: '5.6.17'  socket: ''  port: 3306
 
    The server continues to write to the console any further
    diagnostic output it produces. You can open a new console window
@@ -1704,9 +1700,9 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysql" test
    default pipe name.
 
    Note that if you have set a password for the root account, deleted
-   the anonymous account, or created a new user account, then you
-   must use the appropriate -u and -p options with the commands shown
-   above to connect with the MySQL Server. See Section 4.2.2,
+   the anonymous account, or created a new user account, then to
+   connect to the MySQL server you must use the appropriate -u and -p
+   options with the commands shown previously. See Section 4.2.2,
    "Connecting to the MySQL Server."
 
    For more information about mysqlshow, see Section 4.5.6,
@@ -1997,5 +1993,5 @@ C:\> C:\mysql\bin\mysql -e "SELECT Host,Db,User FROM mysql.db"
    starts. See Section 2.3.5.7, "Starting MySQL as a Windows
    Service."
 
-   Copyright (c) 1997, 2013, Oracle and/or its affiliates. All rights
+   Copyright (c) 1997, 2014, Oracle and/or its affiliates. All rights
    reserved. Legal Notices

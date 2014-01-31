@@ -2,12 +2,12 @@
 .\"     Title: \fBmysql_fix_extensions\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 01/14/2014
+.\"      Date: 03/14/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQL_FIX_EXTENSI" "1" "01/14/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQL_FIX_EXTENSI" "1" "03/14/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -34,6 +34,22 @@ mysql_fix_extensions \- normalize table file name extensions
 .HP \w'\fBmysql_fix_extensions\ \fR\fB\fIdata_dir\fR\fR\ 'u
 \fBmysql_fix_extensions \fR\fB\fIdata_dir\fR\fR
 .SH "DESCRIPTION"
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+This utility is deprecated in MySQL 5\&.6\&.17 and removed in MySQL 5\&.7
+.sp .5v
+.RE
 .PP
 \fBmysql_fix_extensions\fR
 converts the extensions for

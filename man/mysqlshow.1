@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqlshow\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 01/14/2014
+.\"      Date: 03/14/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLSHOW\FR" "1" "01/14/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLSHOW\FR" "1" "03/14/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -227,8 +227,8 @@ tables\&.
 Write a debugging log\&. A typical
 \fIdebug_options\fR
 string is
-\*(Aqd:t:o,\fIfile_name\fR\*(Aq\&. The default is
-\*(Aqd:t:o\*(Aq\&.
+d:t:o,\fIfile_name\fR\&. The default is
+d:t:o\&.
 .RE
 .sp
 .RS 4
@@ -327,6 +327,31 @@ Connect to the MySQL server on the given host\&.
 \fB\-k\fR
 .sp
 Show table indexes\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysqlshow: login-path option
+.\" login-path option: mysqlshow
+\fB\-\-login\-path=\fR\fB\fIname\fR\fR
+.sp
+Read options from the named login path in the
+\&.mylogin\&.cnf
+login file\&. A
+\(lqlogin path\(rq
+is an option group that permits only a limited set of options:
+\fBhost\fR,
+\fBuser\fR, and
+\fBpassword\fR\&. Think of a login path as a set of values that indicate the server host and the credentials for authenticating with the server\&. To create the login file, use the
+\fBmysql_config_editor\fR
+utility\&. See
+\fBmysql_config_editor\fR(1)\&. This option was added in MySQL 5\&.6\&.6\&.
 .RE
 .sp
 .RS 4
@@ -436,6 +461,39 @@ Section\ \&4.2.2, \(lqConnecting to the MySQL Server\(rq\&.
 .sp -1
 .IP \(bu 2.3
 .\}
+.\" mysqlshow: secure-auth option
+.\" secure-auth option: mysqlshow
+\fB\-\-secure\-auth\fR
+.sp
+Do not send passwords to the server in old (pre\-4\&.1) format\&. This prevents connections except for servers that use the newer password format\&. This option is enabled by default; use
+\fB\-\-skip\-secure\-auth\fR
+to disable it\&. This option was added in MySQL 5\&.6\&.17\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+Passwords that use the pre\-4\&.1 hashing method are less secure than passwords that use the native password hashing method and should be avoided\&. Pre\-4\&.1 passwords are deprecated and support for them will be removed in a future MySQL release\&. For account upgrade instructions, see
+Section\ \&6.3.8.3, \(lqMigrating Away from Pre-4.1 Password Hashing and the mysql_old_password Plugin\(rq\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
 .\" mysqlshow: show-table-type option
 .\" show-table-type option: mysqlshow
 \fB\-\-show\-table\-type\fR,
@@ -480,7 +538,7 @@ localhost, the Unix socket file to use, or, on Windows, the name of the named pi
 Options that begin with
 \fB\-\-ssl\fR
 specify whether to connect to the server using SSL and indicate where to find SSL keys and certificates\&. See
-Section\ \&6.3.9.4, \(lqSSL Command Options\(rq\&.
+Section\ \&6.3.10.4, \(lqSSL Command Options\(rq\&.
 .RE
 .sp
 .RS 4

@@ -2,12 +2,12 @@
 .\"     Title: \fBmysql_upgrade\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 01/14/2014
+.\"      Date: 03/14/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQL_UPGRADE\FR" "1" "01/14/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQL_UPGRADE\FR" "1" "03/14/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -48,7 +48,7 @@ should be executed each time you upgrade MySQL\&.
 If
 \fBmysql_upgrade\fR
 finds that a table has a possible incompatibility, it performs a table check and, if problems are found, attempts a table repair\&. If the table cannot be repaired, see
-Section\ \&2.11.4, \(lqRebuilding or Repairing Tables or Indexes\(rq
+Section\ \&2.10.4, \(lqRebuilding or Repairing Tables or Indexes\(rq
 for manual table repair strategies\&.
 .if n \{\
 .sp
@@ -88,7 +88,7 @@ Section\ \&7.2, \(lqDatabase Backup Methods\(rq\&.
 .PP
 Some upgrade incompatibilities may require special handling before you upgrade your MySQL installation and run
 \fBmysql_upgrade\fR\&. See
-Section\ \&2.11.1, \(lqUpgrading MySQL\(rq, for instructions on determining whether any such incompatibilities apply to your installation and how to handle them\&.
+Section\ \&2.10.1, \(lqUpgrading MySQL\(rq, for instructions on determining whether any such incompatibilities apply to your installation and how to handle them\&.
 .sp .5v
 .RE
 .PP
@@ -283,6 +283,26 @@ The path to the MySQL installation directory\&. This option is accepted for back
 \fB\-\-datadir=\fR\fB\fIpath\fR\fR
 .sp
 The path to the data directory\&. This option is accepted for backward compatibility but ignored\&. It is removed in MySQL 5\&.7\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysql_upgrade: debug option
+.\" debug option: mysql_upgrade
+\fB\-\-debug=\fR\fB\fIdebug_options\fR\fR,
+\fB\-# \fR\fB\fIdebug_options\fR\fR
+.sp
+Write a debugging log\&. A typical
+\fIdebug_options\fR
+string is
+d:t:O,\fIfile_name\fR\&. The default is
+d:t:O,/tmp/mysql_upgrade\&.trace\&.
 .RE
 .sp
 .RS 4

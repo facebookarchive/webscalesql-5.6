@@ -2,12 +2,12 @@
 .\"     Title: \fBmy_print_defaults\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 01/14/2014
+.\"      Date: 03/14/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMY_PRINT_DEFAULTS" "1" "01/14/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMY_PRINT_DEFAULTS" "1" "03/14/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -115,8 +115,8 @@ Read only the given option file\&.
 Write a debugging log\&. A typical
 \fIdebug_options\fR
 string is
-\*(Aqd:t:o,\fIfile_name\fR\*(Aq\&. The default is
-\*(Aqd:t:o,/tmp/my_print_defaults\&.trace\*(Aq\&.
+d:t:o,\fIfile_name\fR\&. The default is
+d:t:o,/tmp/my_print_defaults\&.trace\&.
 .RE
 .sp
 .RS 4
@@ -168,7 +168,14 @@ In addition to the groups named on the command line, read groups that have the g
 .sp
 Read options from the named login path in the
 \&.mylogin\&.cnf
-login file\&. See
+login file\&. A
+\(lqlogin path\(rq
+is an option group that permits only a limited set of options:
+\fBhost\fR,
+\fBuser\fR, and
+\fBpassword\fR\&. Think of a login path as a set of values that indicate the server host and the credentials for authenticating with the server\&. To create the login file, use the
+\fBmysql_config_editor\fR
+utility\&. See
 \fBmysql_config_editor\fR(1)\&. This option was added in MySQL 5\&.6\&.6\&.
 .RE
 .sp

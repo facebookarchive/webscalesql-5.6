@@ -1,5 +1,5 @@
 
-2.2. Installing MySQL on Unix/Linux Using Generic Binaries
+2.2 Installing MySQL on Unix/Linux Using Generic Binaries
 
    Oracle provides a set of binary distributions of MySQL. These
    include binary distributions in the form of compressed tar files
@@ -17,7 +17,7 @@
 
    MySQL compressed tar file binary distributions have names of the
    form mysql-VERSION-OS.tar.gz, where VERSION is a number (for
-   example, 5.6.17), and OS indicates the type of operating system
+   example, 5.6.18), and OS indicates the type of operating system
    for which the distribution is intended (for example, pc-linux-i686
    or winx64).
 
@@ -53,7 +53,7 @@
    /usr/local/mysql). This creates the directories shown in the
    following table.
 
-   Table 2.3. MySQL Installation Layout for Generic Unix/Linux Binary
+   Table 2.3 MySQL Installation Layout for Generic Unix/Linux Binary
    Package
    Directory Contents of Directory
    bin Client programs and the mysqld server
@@ -71,7 +71,7 @@
    To compile your own debug version of MySQL from a source
    distribution, use the appropriate configuration options to enable
    debugging support. For more information on compiling from source,
-   see Section 2.9, "Installing MySQL from Source."
+   see Section 2.8, "Installing MySQL from Source."
 
    To install and use a MySQL binary distribution, the basic command
    sequence looks like this:
@@ -105,8 +105,8 @@ shell> cp support-files/mysql.server /etc/init.d/mysql.server
    the sudo (Linux) or pfexec (OpenSolaris) command.
 
    The procedure does not set up any passwords for MySQL accounts.
-   After following the procedure, proceed to Section 2.10.2,
-   "Securing the Initial MySQL Accounts."
+   After following the procedure, proceed to Section 2.9.2, "Securing
+   the Initial MySQL Accounts."
 
 Create a mysql User and Group
 
@@ -165,19 +165,19 @@ Perform Postinstallation Setup
 
    The remainder of the installation process involves setting up the
    configuration file, creating the core databases, and starting the
-   MySQL server. For next steps, see Section 2.10, "Postinstallation
+   MySQL server. For next steps, see Section 2.9, "Postinstallation
    Setup and Testing."
    Note
 
    The accounts that are listed in the MySQL grant tables initially
    have no passwords. After starting the server, you should set up
-   passwords for them using the instructions in Section 2.10.2,
+   passwords for them using the instructions in Section 2.9.2,
    "Securing the Initial MySQL Accounts."
 
    Copyright (c) 1997, 2014, Oracle and/or its affiliates. All rights
    reserved. Legal Notices
 
-2.3. Installing MySQL on Microsoft Windows
+2.3 Installing MySQL on Microsoft Windows
 
    MySQL is available for Microsoft Windows, for both 32-bit and
    64-bit versions. For supported Windows platform information, see
@@ -205,15 +205,19 @@ Perform Postinstallation Setup
 
      * To connect to the MySQL server using ODBC, you must have a
        Connector/ODBC driver. For more information, including
-       installation and configuration instructions, see Section 22.1,
-       "MySQL Connector/ODBC." But note that MySQL Installer will
-       install and configure Connector/ODBC for you.
+       installation and configuration instructions, see MySQL
+       Connector/ODBC Developer Guide
+       (http://dev.mysql.com/doc/connector-odbc/en/index.html). But
+       note that MySQL Installer will install and configure
+       Connector/ODBC for you.
 
      * To use MySQL server with .NET applications, you must have the
        Connector/Net driver. For more information, including
-       installation and configuration instructions, see Section 22.2,
-       "MySQL Connector/Net." But note that MySQL Installer will
-       install and configure Connector/NET for you.
+       installation and configuration instructions, see MySQL
+       Connector/Net Developer Guide
+       (http://dev.mysql.com/doc/connector-net/en/index.html). But
+       note that MySQL Installer will install and configure
+       Connector/NET for you.
 
    MySQL distributions for Windows can be downloaded from
    http://dev.mysql.com/downloads/. See Section 2.1.3, "How to Get
@@ -249,7 +253,7 @@ Perform Postinstallation Setup
        support files for building the executables using the Visual
        Studio compiler system.
        For instructions on building MySQL from source on Windows, see
-       Section 2.9, "Installing MySQL from Source."
+       Section 2.8, "Installing MySQL from Source."
 
    MySQL on Windows considerations:
 
@@ -282,7 +286,7 @@ Perform Postinstallation Setup
        configuration file. For more information, see Section 2.3.5.2,
        "Creating an Option File."
 
-2.3.1. MySQL Installation Layout on Microsoft Windows
+2.3.1 MySQL Installation Layout on Microsoft Windows
 
    For MySQL 5.6 on Windows, the default installation directory is
    C:\Program Files\MySQL\MySQL Server 5.6. Some Windows users prefer
@@ -293,7 +297,7 @@ Perform Postinstallation Setup
    All of the files are located within this parent directory, using
    the structure shown in the following table.
 
-   Table 2.4. Default MySQL Installation Layout for Microsoft Windows
+   Table 2.4 Default MySQL Installation Layout for Microsoft Windows
    Directory Contents of Directory Notes
    bin Client programs and the mysqld server
    %ALLUSERSPROFILE%\MySQL\MySQL Server 5.6\ Log files, databases
@@ -319,14 +323,14 @@ Perform Postinstallation Setup
    can be copied to set up additional MySQL instances. See Section
    5.3, "Running Multiple MySQL Instances on One Machine."
 
-2.3.2. Choosing An Installation Package
+2.3.2 Choosing An Installation Package
 
    For MySQL 5.6, there are installation package formats to choose
    from when installing MySQL on Windows:
 
      * MySQL Installer: This package has a file name similar to
-       mysql-installer-community-5.6.17.0.msi or
-       mysql-installer-commercial-5.6.17.0.msi, and utilizes MSI's to
+       mysql-installer-community-5.6.18.0.msi or
+       mysql-installer-commercial-5.6.18.0.msi, and utilizes MSI's to
        automatically install MySQL server and other products. It will
        download and apply updates to itself, and for each of the
        installed products. It also configures the additional
@@ -350,7 +354,7 @@ Perform Postinstallation Setup
        Using MySQL Installer."
 
      * The Noinstall Archive: This package has a file name similar to
-       mysql-5.6.17-win32.zip or mysql-5.6.17-winx64.zip, and
+       mysql-5.6.18-win32.zip or mysql-5.6.18-winx64.zip, and
        contains all the files found in the Complete install package,
        with the exception of the GUI. This package does not include
        an automated installer, and must be manually installed and
@@ -363,7 +367,7 @@ Perform Postinstallation Setup
    Section 2.3.5, "Installing MySQL on Microsoft Windows Using a
    noinstall Zip Archive."
 
-2.3.3. Installing MySQL on Microsoft Windows Using MySQL Installer
+2.3.3 Installing MySQL on Microsoft Windows Using MySQL Installer
 
    MySQL Installer is an application that simplifies the installation
    and updating process for a wide range of MySQL products, including
@@ -455,7 +459,7 @@ Installer editions
    MySQL Installer can optionally check for updated components and
    download them for you automatically.
 
-2.3.3.1. MySQL Installer GUI
+2.3.3.1 MySQL Installer GUI
 
    After installation of the GUI version, the installer will have add
    its own Start Menu item under MySQL.
@@ -470,7 +474,7 @@ Installer editions
    After the installer itself has been installed and started, the
    following screen is displayed:
 
-   Figure 2.7. MySQL Installer - Welcome Screen
+   Figure 2.7 MySQL Installer - Welcome Screen
    MySQL Installer - Welcome Screen
 
    There are three main options:
@@ -485,7 +489,7 @@ Installer editions
    first time, you must accept the license agreement before
    proceeding with the installation process.
 
-   Figure 2.8. MySQL Installer - License Agreement
+   Figure 2.8 MySQL Installer - License Agreement
    MySQL Installer - License Agreement
 
    If you are connected to the Internet, then the Installer will
@@ -493,7 +497,7 @@ Installer editions
    installation bundle. Click Connect to the Internet to complete
    this step, or otherwise check the Skip checkbox and then Continue.
 
-   Figure 2.9. MySQL Installer - Find latest products
+   Figure 2.9 MySQL Installer - Find latest products
    MySQL Installer - Find latest products
 
    If you chose "Connect to the Internet," the next page will show
@@ -501,7 +505,7 @@ Installer editions
    When the search is complete (or if you opted to skip the search),
    you will be taken to the Choose Setup Type page:
 
-   Figure 2.10. MySQL Installer - Choosing a Setup Type
+   Figure 2.10 MySQL Installer - Choosing a Setup Type
    MySQL Installer - Choosing a Setup Type
 
    Determine the option most compatible with your preferences by
@@ -515,19 +519,19 @@ Installer editions
    system for the necessary external requirements and download then
    install missing components onto your system.
 
-   Figure 2.11. MySQL Installer - Check Requirements
+   Figure 2.11 MySQL Installer - Check Requirements
    MySQL Installer - Check Requirements
 
    The next window lists the MySQL products that are scheduled to be
    installed:
 
-   Figure 2.12. MySQL Installer - Installation Progress
+   Figure 2.12 MySQL Installer - Installation Progress
    MySQL Installer - Installation Progress
 
    As components are installed, you'll see their status change from
    "to be installed" to "install success."
 
-   Figure 2.13. MySQL Installer - Installation Progress status
+   Figure 2.13 MySQL Installer - Installation Progress status
    MySQL Installer - Installation Progress status
 
    After all components are installed, the next step involves
@@ -535,7 +539,7 @@ Installer editions
    displays the progress and then loads a configuration window if it
    is required.
 
-   Figure 2.14. MySQL Installer - Configuration Overview
+   Figure 2.14 MySQL Installer - Configuration Overview
    MySQL Installer - Configuration Overview
 
    The ideal MySQL Server configuration depends on your intended use,
@@ -551,7 +555,7 @@ Installer editions
    configuration of seconds it requires to execute a query), and the
    binary log.
 
-   Figure 2.15. MySQL Installer - MySQL Server Configuration: Define
+   Figure 2.15 MySQL Installer - MySQL Server Configuration: Define
    platform, networking, and logging options
    MySQL Installer- MySQL Server Configuration: Define platform,
    networking, and logging options
@@ -562,7 +566,7 @@ Installer editions
    different permission levels. For example, a "DB Admin" will have
    more privileges than a "DB Designer.".
 
-   Figure 2.16. MySQL Installer - MySQL Server Configuration: User
+   Figure 2.16 MySQL Installer - MySQL Server Configuration: User
    accounts
    MySQL Installer - MySQL Server Configuration: User accounts
    Note
@@ -574,7 +578,7 @@ Installer editions
    service name, how the MySQL Server should be loaded at startup,
    and how the Windows Service for MySQL Server will be run.
 
-   Figure 2.17. MySQL Installer - MySQL Server Configuration: Windows
+   Figure 2.17 MySQL Installer - MySQL Server Configuration: Windows
    service details
    MySQL Installer - MySQL Server Configuration: Windows service
    details
@@ -595,7 +599,7 @@ Installer editions
    Configuration option was checked, and it includes configuration
    options related to log file names:
 
-   Figure 2.18. MySQL Installer - MySQL Server Configuration: Logging
+   Figure 2.18 MySQL Installer - MySQL Server Configuration: Logging
    options
    MySQL Installer - MySQL Server Configuration: Logging options
 
@@ -603,7 +607,7 @@ Installer editions
    may save the installation log, and then load MySQL Workbench if
    the Start MySQL Workbench after Setup option is checked:
 
-   Figure 2.19. MySQL Installer - Installation Complete
+   Figure 2.19 MySQL Installer - Installation Complete
    MySQL Installer - Installation Complete
 
    You can now open MySQL Installer from the Microsoft Windows Start
@@ -611,7 +615,7 @@ Installer editions
    Maintenance Screen. This is used to add, update, and remove
    features.
 
-   Figure 2.20. MySQL Installer - Maintenance Screen
+   Figure 2.20 MySQL Installer - Maintenance Screen
    MySQL Installer - Maintenance Screen
    Note
 
@@ -623,7 +627,7 @@ Installer editions
    Add/Modify Products and Features will list all installed and
    available MySQL products.
 
-   Figure 2.21. MySQL Installer - Add/Modify Products and Features
+   Figure 2.21 MySQL Installer - Add/Modify Products and Features
    MySQL Installer - Add/Modify Products and Features
 
    The installation is now complete. MySQL Server should be running,
@@ -632,7 +636,7 @@ Installer editions
    See also the MySQL Workbench documentation
    (http://dev.mysql.com/doc/workbench/en/).
 
-2.3.3.2. MySQL Installer Console
+2.3.3.2 MySQL Installer Console
 
    MySQLInstallerConsole provides functionality similar to the GUI
    version of MySQL Installer, but from the command-line. It is
@@ -711,7 +715,7 @@ C:\> MySQLInstallerConsole --help
        Requires: name, host, role, and the password or tokens. Tokens
        are separated by pipe ("|") characters.
 
-2.3.4. MySQL Notifier for Microsoft Windows
+2.3.4 MySQL Notifier for Microsoft Windows
 
    The MySQL Notifier for Microsoft Windows is a tool that enables
    you to monitor and adjust the status of your local and remote
@@ -795,7 +799,7 @@ C:\> MySQLInstallerConsole --help
    Windows window, and enables you to Stop, Start, and Restart the
    MySQL Server.
 
-   Figure 2.22. MySQL Notifier for Microsoft Windows Service Instance
+   Figure 2.22 MySQL Notifier for Microsoft Windows Service Instance
    menu
    MySQL Notifier for Microsoft Windows Service Instance menu
 
@@ -812,7 +816,7 @@ C:\> MySQLInstallerConsole --help
    The Refresh Status feature is available since MySQL Notifier for
    Microsoft Windows 1.1.0.
 
-   Figure 2.23. MySQL Notifier for Microsoft Windows Actions menu
+   Figure 2.23 MySQL Notifier for Microsoft Windows Actions menu
    MySQL Notifier for Microsoft Windows Actions menu
 
    The Actions, Options menu configures MySQL Notifier for Microsoft
@@ -845,20 +849,20 @@ C:\> MySQLInstallerConsole --help
        balloon notification from the taskbar when a monitored service
        changes its status.
 
-   Figure 2.24. MySQL Notifier for Microsoft Windows Options menu
+   Figure 2.24 MySQL Notifier for Microsoft Windows Options menu
    MySQL Notifier for Microsoft Windows Options menu
 
    The Actions, Manage Monitored Items menu enables you to configure
    the monitored services and MySQL instances. First, with the
    Services tab open:
 
-   Figure 2.25. MySQL Notifier for Microsoft Windows Manage Services
+   Figure 2.25 MySQL Notifier for Microsoft Windows Manage Services
    menu
    MySQL Notifier for Microsoft Windows Manage Services menu
 
    The Instances tab is similar:
 
-   Figure 2.26. MySQL Notifier for Microsoft Windows Manage Instances
+   Figure 2.26 MySQL Notifier for Microsoft Windows Manage Instances
    menu
    MySQL Notifier for Microsoft Windows Manage Instances menu
 
@@ -869,13 +873,13 @@ C:\> MySQLInstallerConsole --help
    instance by clicking service name from the list, then OK to
    accept. Multiple services and instances may be selected.
 
-   Figure 2.27. MySQL Notifier for Microsoft Windows Adding new
+   Figure 2.27 MySQL Notifier for Microsoft Windows Adding new
    services
    MySQL Notifier for Microsoft Windows Adding new services
 
    And instances:
 
-   Figure 2.28. MySQL Notifier for Microsoft Windows Adding new
+   Figure 2.28 MySQL Notifier for Microsoft Windows Adding new
    instances
    MySQL Notifier for Microsoft Windows Adding new instances
    Note
@@ -883,7 +887,7 @@ C:\> MySQLInstallerConsole --help
    The Instances tab available since MySQL Notifier for Microsoft
    Windows 1.1.0.
 
-2.3.4.1. Remote monitoring set up and installation instructions
+2.3.4.1 Remote monitoring set up and installation instructions
 
    The MySQL Notifier for Microsoft Windows uses Windows Management
    Instrumentation (WMI) to manage and monitor services in remote
@@ -911,7 +915,7 @@ C:\> MySQLInstallerConsole --help
    connection), so the Windows Firewall and DCOM settings must be
    properly configured for the communication to function properly.
 
-   Figure 2.29. MySQL Notifier for Microsoft Windows Distributed
+   Figure 2.29 MySQL Notifier for Microsoft Windows Distributed
    Component Object Model (DCOM)
    MySQL Notifier for Microsoft Windows Distributed Component Object
    Model (DCOM)
@@ -1150,7 +1154,7 @@ Common Errors
             its network location is set to Public. Make sure you can
             access it through the Windows Explorer.
 
-2.3.5. Installing MySQL on Microsoft Windows Using a noinstall Zip
+2.3.5 Installing MySQL on Microsoft Windows Using a noinstall Zip
 Archive
 
    Users who are installing from the noinstall package can use the
@@ -1169,7 +1173,7 @@ Archive
 
    This process is described in the sections that follow.
 
-2.3.5.1. Extracting the Install Archive
+2.3.5.1 Extracting the Install Archive
 
    To install MySQL manually, do the following:
 
@@ -1194,7 +1198,7 @@ Archive
        contents of the subfolder into the chosen installation
        location.
 
-2.3.5.2. Creating an Option File
+2.3.5.2 Creating an Option File
 
    If you need to specify startup options when you run the server,
    you can indicate them on the command line or place them in an
@@ -1276,7 +1280,7 @@ datadir=E:\\mydata\\data
     2. Use a --datadir option to specify the new data directory
        location each time you start the server.
 
-2.3.5.3. Selecting a MySQL Server Type
+2.3.5.3 Selecting a MySQL Server Type
 
    The following table shows the available servers for Windows in
    MySQL 5.6.
@@ -1304,7 +1308,7 @@ datadir=E:\\mydata\\data
    default is to use TCP/IP regardless of platform because named
    pipes are slower than TCP/IP in many Windows configurations.
 
-2.3.5.4. Starting the Server for the First Time
+2.3.5.4 Starting the Server for the First Time
 
    This section gives a general overview of starting the MySQL
    server. The following sections provide more specific information
@@ -1371,7 +1375,7 @@ InnoDB: foreign key constraint system tables created
    something like this, which indicates that the server is ready to
    service client connections:
 mysqld: ready for connections
-Version: '5.6.17'  socket: ''  port: 3306
+Version: '5.6.18'  socket: ''  port: 3306
 
    The server continues to write to the console any further
    diagnostic output it produces. You can open a new console window
@@ -1386,10 +1390,10 @@ Version: '5.6.17'  socket: ''  port: 3306
 
    The accounts that are listed in the MySQL grant tables initially
    have no passwords. After starting the server, you should set up
-   passwords for them using the instructions in Section 2.10.2,
+   passwords for them using the instructions in Section 2.9.2,
    "Securing the Initial MySQL Accounts."
 
-2.3.5.5. Starting MySQL from the Windows Command Line
+2.3.5.5 Starting MySQL from the Windows Command Line
 
    The MySQL server can be started manually from the command line.
    This can be done on any version of Windows.
@@ -1439,7 +1443,7 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysqladmin" -u root
    Use mysqld --verbose --help to display all the options that mysqld
    supports.
 
-2.3.5.6. Customizing the PATH for MySQL Tools
+2.3.5.6 Customizing the PATH for MySQL Tools
 
    To make it easier to invoke MySQL programs, you can add the path
    name of the MySQL bin directory to your Windows system PATH
@@ -1481,7 +1485,7 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysqladmin" -u root
    existing PATH value can leave you with a malfunctioning or even
    unusable system.
 
-2.3.5.7. Starting MySQL as a Windows Service
+2.3.5.7 Starting MySQL as a Windows Service
 
    On Windows, the recommended way to run MySQL is to install it as a
    Windows service, so that MySQL starts and stops automatically when
@@ -1676,7 +1680,7 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysqld" --remove
    2.3.6, "Troubleshooting a Microsoft Windows MySQL Server
    Installation."
 
-2.3.5.8. Testing The MySQL Installation
+2.3.5.8 Testing The MySQL Installation
 
    You can test whether the MySQL server is working by executing any
    of the following commands:
@@ -1708,7 +1712,7 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysql" test
    For more information about mysqlshow, see Section 4.5.6,
    "mysqlshow --- Display Database, Table, and Column Information."
 
-2.3.6. Troubleshooting a Microsoft Windows MySQL Server Installation
+2.3.6 Troubleshooting a Microsoft Windows MySQL Server Installation
 
    When installing and running MySQL for the first time, you may
    encounter certain errors that prevent the MySQL server from
@@ -1806,12 +1810,11 @@ C:\> sc delete mysql
        http://www.microsoft.com/windows2000/techinfo/reskit/tools/exi
        sting/delsrv-o.asp and use the delsrv mysql syntax.
 
-2.3.7. Upgrading MySQL on Windows
+2.3.7 Upgrading MySQL on Windows
 
-   This section lists some of the steps to take when upgrading MySQL
-   on Windows.
+   To upgrade MySQL on Windows, follow these steps:
 
-    1. Review Section 2.11.1, "Upgrading MySQL," for additional
+    1. Review Section 2.10.1, "Upgrading MySQL," for additional
        information on upgrading MySQL that is not specific to
        Windows.
 
@@ -1833,7 +1836,7 @@ C:\> "C:\Program Files\MySQL\MySQL Server 5.5\bin\mysqladmin" -u root
  shutdown
        Note
        If the MySQL root user account has a password, invoke
-       mysqladmin with the -p option and supply the password when
+       mysqladmin with the -p option and enter the password when
        prompted.
 
     5. Before upgrading to MySQL 5.6 from a version previous to
@@ -1852,11 +1855,31 @@ C:\> C:\mysql\bin\mysqld --remove
        Section 2.3.3, "Installing MySQL on Microsoft Windows Using
        MySQL Installer."
 
-    7. If you are installing MySQL from a Zip archive, extract the
+    7. If you are upgrading MySQL from a Zip archive, extract the
        archive. You may either overwrite your existing MySQL
        installation (usually located at C:\mysql), or install it into
        a different directory, such as C:\mysql5. Overwriting the
-       existing installation is recommended.
+       existing installation is recommended. However, for upgrades
+       (as opposed to installing for the first time), you must remove
+       the data directory from your existing MySQL installation to
+       avoid replacing your current data files. To do so, follow
+       these steps:
+         a. Unzip the Zip archive in some location other than your
+            current MySQL installation
+         b. Remove the data directory
+         c. Rezip the Zip archive
+         d. Unzip the modified Zip archive on top of your existing
+            installation
+       Alternatively:
+         a. Unzip the Zip archive in some location other than your
+            current MySQL installation
+         b. Remove the data directory
+         c. Move the data directory from the current MySQL
+            installation to the location of the just-removed data
+            directory
+         d. Remove the current MySQL installation
+         e. Move the unzipped installation to the location of the
+            just-removed installation
 
     8. If you were running MySQL as a Windows service and you had to
        remove the service earlier in this procedure, reinstall the
@@ -1873,7 +1896,7 @@ C:\> C:\mysql\bin\mysqld --remove
    11. If you encounter errors, see Section 2.3.6, "Troubleshooting a
        Microsoft Windows MySQL Server Installation."
 
-2.3.8. Windows Postinstallation Procedures
+2.3.8 Windows Postinstallation Procedures
 
    GUI tools exist that perform most of the tasks described below,
    including:
@@ -1895,7 +1918,7 @@ C:\> C:\mysql\bin\mysqld --remove
    the MySQL Installer, you may have already assigned passwords to
    the accounts. (See Section 2.3.3, "Installing MySQL on Microsoft
    Windows Using MySQL Installer.") Otherwise, use the
-   password-assignment procedure given in Section 2.10.2, "Securing
+   password-assignment procedure given in Section 2.9.2, "Securing
    the Initial MySQL Accounts."
 
    Before setting up passwords, you might want to try running some

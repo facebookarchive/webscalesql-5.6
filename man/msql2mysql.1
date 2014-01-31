@@ -2,12 +2,12 @@
 .\"     Title: \fBmsql2mysql\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 01/14/2014
+.\"      Date: 03/14/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMSQL2MYSQL\FR" "1" "01/14/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMSQL2MYSQL\FR" "1" "03/14/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -34,6 +34,22 @@ msql2mysql \- convert mSQL programs for use with MySQL
 .HP \w'\fBmsql2mysql\fR\fB\fIC\-source\-file\fR\fR\fB\ \&.\&.\&.\fR\ 'u
 \fBmsql2mysql\fR\fB\fIC\-source\-file\fR\fR\fB \&.\&.\&.\fR
 .SH "DESCRIPTION"
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+This utility is deprecated in MySQL 5\&.6\&.17 and removed in MySQL 5\&.7
+.sp .5v
+.RE
 .PP
 Initially, the MySQL C API was developed to be very similar to that for the mSQL database system\&. Because of this, mSQL programs often can be converted relatively easily for use with MySQL by changing the names of the C API functions\&.
 .PP

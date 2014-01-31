@@ -2,12 +2,12 @@
 .\"     Title: \fBmysql\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 01/14/2014
+.\"      Date: 03/14/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQL\FR" "1" "01/14/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQL\FR" "1" "03/14/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -394,8 +394,8 @@ The database to use\&. This is useful primarily in an option file\&.
 Write a debugging log\&. A typical
 \fIdebug_options\fR
 string is
-\*(Aqd:t:o,\fIfile_name\fR\*(Aq\&. The default is
-\*(Aqd:t:o,/tmp/mysql\&.trace\*(Aq\&.
+d:t:o,\fIfile_name\fR\&. The default is
+d:t:o,/tmp/mysql\&.trace\&.
 .RE
 .sp
 .RS 4
@@ -525,7 +525,7 @@ the section called \(lqMYSQL COMMANDS\(rq\&.
 Enable the
 mysql_clear_password
 cleartext authentication plugin\&. (See
-Section\ \&6.3.7.7, \(lqThe Cleartext Client-Side Authentication Plugin\(rq\&.) This option was added in MySQL 5\&.6\&.7\&.
+Section\ \&6.3.8.7, \(lqThe Cleartext Client-Side Authentication Plugin\(rq\&.) This option was added in MySQL 5\&.6\&.7\&.
 .RE
 .sp
 .RS 4
@@ -686,6 +686,31 @@ to explicitly disable or enable
 LOCAL\&. Enabling
 LOCAL
 has no effect if the server does not also support it\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysql: login-path option
+.\" login-path option: mysql
+\fB\-\-login\-path=\fR\fB\fIname\fR\fR
+.sp
+Read options from the named login path in the
+\&.mylogin\&.cnf
+login file\&. A
+\(lqlogin path\(rq
+is an option group that permits only a limited set of options:
+\fBhost\fR,
+\fBuser\fR, and
+\fBpassword\fR\&. Think of a login path as a set of values that indicate the server host and the credentials for authenticating with the server\&. To create the login file, use the
+\fBmysql_config_editor\fR
+utility\&. See
+\fBmysql_config_editor\fR(1)\&. This option was added in MySQL 5\&.6\&.6\&.
 .RE
 .sp
 .RS 4
@@ -1130,7 +1155,8 @@ to disable it\&.
 \fBNote\fR
 .ps -1
 .br
-Passwords that use the pre\-4\&.1 hashing method are less secure than passwords that use the native password hashing method and should be avoided\&. Pre\-4\&.1 passwords are deprecated and support for them will be removed in a future MySQL release\&.
+Passwords that use the pre\-4\&.1 hashing method are less secure than passwords that use the native password hashing method and should be avoided\&. Pre\-4\&.1 passwords are deprecated and support for them will be removed in a future MySQL release\&. For account upgrade instructions, see
+Section\ \&6.3.8.3, \(lqMigrating Away from Pre-4.1 Password Hashing and the mysql_old_password Plugin\(rq\&.
 .sp .5v
 .RE
 .RE
@@ -1156,7 +1182,7 @@ The server sends the public key to the client as needed, so it is not necessary 
 For additional discussion regarding use of the
 sha256_password
 plugin, including how to get the RSA public key, see
-Section\ \&6.3.7.4, \(lqThe SHA-256 Authentication Plugin\(rq\&.
+Section\ \&6.3.8.4, \(lqThe SHA-256 Authentication Plugin\(rq\&.
 .sp
 This option is available only if MySQL was built using OpenSSL\&. It was added in MySQL 5\&.6\&.6 under the name
 \fB\-\-server\-public\-key\fR
@@ -1281,7 +1307,7 @@ localhost, the Unix socket file to use, or, on Windows, the name of the named pi
 Options that begin with
 \fB\-\-ssl\fR
 specify whether to connect to the server using SSL and indicate where to find SSL keys and certificates\&. See
-Section\ \&6.3.9.4, \(lqSSL Command Options\(rq\&.
+Section\ \&6.3.10.4, \(lqSSL Command Options\(rq\&.
 .RE
 .sp
 .RS 4

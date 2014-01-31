@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # -*- cperl -*-
 
-# Copyright (c) 2004, 2013, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2004, 2014, Oracle and/or its affiliates. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -420,7 +420,6 @@ sub main {
     );
   mtr_error("Could not create testcase server port: $!") unless $server;
   my $server_port = $server->sockport();
-  mtr_report("Using server port $server_port");
 
   if ($opt_resfile) {
     resfile_init("$opt_vardir/mtr-results.txt");
@@ -478,7 +477,7 @@ sub main {
   # Send Ctrl-C to any children still running
   kill("INT", keys(%children));
 
-  if (!IS_WINDOWS) {
+  if (!IS_WINDOWS) { 
     # Wait for children to exit
     foreach my $pid (keys %children)
     {
@@ -492,7 +491,7 @@ sub main {
     }
   }
 
-  if ( not defined @$completed ) {
+  if ( not $completed ) {
     mtr_error("Test suite aborted");
   }
 

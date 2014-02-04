@@ -1,7 +1,7 @@
-source include/have_semisync_plugin.inc;
+source include/have_semisync.inc;
 source include/not_embedded.inc;
-source include/master-slave.inc;
 source include/have_innodb.inc;
+source include/master-slave.inc;
 
 let $engine_type= InnoDB;
 
@@ -19,31 +19,11 @@ call mtr.add_suppression("Slave SQL.*Request to stop slave SQL Thread received w
 enable_query_log;
 
 connection master;
-disable_query_log;
-let $value = query_get_value(show variables like 'rpl_semi_sync_master_enabled', Value, 1);
-if ($value == No such row)
-{
-    set sql_log_bin=0;
-    eval INSTALL PLUGIN rpl_semi_sync_master SONAME '$SEMISYNC_MASTER_PLUGIN';
-    SET GLOBAL rpl_semi_sync_master_enabled = 1;
-    set sql_log_bin=1;
-}
-enable_query_log;
+SET GLOBAL rpl_semi_sync_master_enabled = 1;
 
 connection slave;
 source include/stop_slave.inc;
-
-disable_query_log;
-let $value= query_get_value(show variables like 'rpl_semi_sync_slave_enabled', Value, 1);
-if ($value == No such row)
-{
-    set sql_log_bin=0;
-    eval INSTALL PLUGIN rpl_semi_sync_slave SONAME '$SEMISYNC_SLAVE_PLUGIN';
-    SET GLOBAL rpl_semi_sync_slave_enabled = 1;
-    set sql_log_bin=1;
-}
-enable_query_log;
-
+SET GLOBAL rpl_semi_sync_slave_enabled = 1;
 source include/start_slave.inc;
 
 connection master;
@@ -93,13 +73,10 @@ while ($run)
 #
 connection slave;
 source include/stop_slave.inc;
-
-disable_warnings;
-UNINSTALL PLUGIN rpl_semi_sync_slave;
+set global rpl_semi_sync_slave_enabled = 0;
 
 connection master;
-UNINSTALL PLUGIN rpl_semi_sync_master;
-enable_warnings;
+set global rpl_semi_sync_master_enabled = 0;
 
 connection slave;
 source include/start_slave.inc;

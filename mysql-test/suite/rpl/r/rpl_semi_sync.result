@@ -7,15 +7,16 @@ Note	####	Storing MySQL user name or password information in the master info rep
 # Uninstall semi-sync plugins on master and slave
 #
 include/stop_slave.inc
-UNINSTALL PLUGIN rpl_semi_sync_slave;
-UNINSTALL PLUGIN rpl_semi_sync_master;
-UNINSTALL PLUGIN rpl_semi_sync_slave;
-UNINSTALL PLUGIN rpl_semi_sync_master;
+set global rpl_semi_sync_master_enabled= 0;
+set global rpl_semi_sync_slave_enabled= 0;
+set global rpl_semi_sync_master_enabled= 0;
+set global rpl_semi_sync_slave_enabled= 0;
 include/rpl_reset.inc
 #
 # Main test of semi-sync replication start here
 #
 [ on master ]
+set global rpl_semi_sync_master_timeout= 60000 /* 60s */;
 [ default state of semi-sync on master should be OFF ]
 show variables like 'rpl_semi_sync_master_enabled';
 Variable_name	Value
@@ -50,9 +51,6 @@ show status like 'Rpl_semi_sync_master_yes_tx';
 Variable_name	Value
 Rpl_semi_sync_master_yes_tx	0
 include/rpl_reset.inc
-#
-# INSTALL PLUGIN semi-sync on slave
-#
 [ on slave ]
 [ default state of semi-sync on slave should be OFF ]
 show variables like 'rpl_semi_sync_slave_enabled';
@@ -394,9 +392,10 @@ Variable_name	Value
 Rpl_semi_sync_slave_status	ON
 include/stop_slave.inc
 [ on master ]
-UNINSTALL PLUGIN rpl_semi_sync_master;
+set global rpl_semi_sync_master_enabled= 0;
 SHOW VARIABLES LIKE 'rpl_semi_sync_master_enabled';
 Variable_name	Value
+rpl_semi_sync_master_enabled	OFF
 [ on slave ]
 SHOW VARIABLES LIKE 'rpl_semi_sync_slave_enabled';
 Variable_name	Value
@@ -404,14 +403,9 @@ rpl_semi_sync_slave_enabled	ON
 include/start_slave.inc
 [ on master ]
 insert into t1 values (10);
-[ on slave ]
-SHOW STATUS LIKE 'Rpl_semi_sync_slave_status';
-Variable_name	Value
-Rpl_semi_sync_slave_status	OFF
 #
 # Test non-semi-sync slave connect to semi-sync master
 #
-INSTALL PLUGIN rpl_semi_sync_master SONAME 'SEMISYNC_MASTER_PLUGIN';
 set global rpl_semi_sync_master_timeout= 60000;
 /* 60s */
 set global rpl_semi_sync_master_enabled= 1;
@@ -420,16 +414,7 @@ include/stop_slave.inc
 SHOW STATUS LIKE 'Rpl_semi_sync_slave_status';
 Variable_name	Value
 Rpl_semi_sync_slave_status	OFF
-[ uninstall semi-sync slave plugin ]
-UNINSTALL PLUGIN rpl_semi_sync_slave;
-SHOW VARIABLES LIKE 'rpl_semi_sync_slave_enabled';
-Variable_name	Value
-include/start_slave.inc
-SHOW STATUS LIKE 'Rpl_semi_sync_slave_status';
-Variable_name	Value
-include/stop_slave.inc
-[ reinstall semi-sync slave plugin and disable semi-sync ]
-INSTALL PLUGIN rpl_semi_sync_slave SONAME 'SEMISYNC_SLAVE_PLUGIN';
+[ disable semi-sync ]
 set global rpl_semi_sync_slave_enabled= 0;
 SHOW VARIABLES LIKE 'rpl_semi_sync_slave_enabled';
 Variable_name	Value
@@ -445,8 +430,8 @@ Rpl_semi_sync_slave_status	OFF
 # Clean up
 #
 include/stop_slave.inc
-UNINSTALL PLUGIN rpl_semi_sync_slave;
-UNINSTALL PLUGIN rpl_semi_sync_master;
+set global rpl_semi_sync_slave_enabled= 0;
+set global rpl_semi_sync_master_enabled= 0;
 change master to master_user='root',master_password='';
 Warnings:
 Note	####	Sending passwords in plain text without SSL/TLS is extremely insecure.
@@ -455,4 +440,5 @@ include/start_slave.inc
 drop table t1;
 drop user rpl@127.0.0.1;
 flush privileges;
+set global rpl_semi_sync_master_timeout= default;
 include/rpl_end.inc

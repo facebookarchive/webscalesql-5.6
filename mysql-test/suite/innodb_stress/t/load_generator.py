@@ -277,9 +277,8 @@ class Worker(threading.Thread):
       self.loop_num += 1
 
       # Randomly toggle innodb_prefix_index_cluster_optimization 5% of the time
-      # nizamordulu: disabled for now until we port it to 5.6
-      #if self.rand.randint(0, 20) == 0:
-        #cur.execute("SET GLOBAL innodb_prefix_index_cluster_optimization=1-@@innodb_prefix_index_cluster_optimization")
+      if self.rand.randint(0, 20) == 0:
+        cur.execute("SET GLOBAL innodb_prefix_index_cluster_optimization=1-@@innodb_prefix_index_cluster_optimization")
 
       try:
         stmt = None

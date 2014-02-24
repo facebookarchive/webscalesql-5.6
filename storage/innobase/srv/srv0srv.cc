@@ -350,7 +350,8 @@ UNIV_INTERN my_bool		srv_stats_persistent = TRUE;
 UNIV_INTERN unsigned long long	srv_stats_persistent_sample_pages = 20;
 UNIV_INTERN my_bool		srv_stats_auto_recalc = TRUE;
 
-UNIV_INTERN ibool	srv_use_doublewrite_buf	= TRUE;
+UNIV_INTERN ulong	srv_use_doublewrite_buf	= 1;
+UNIV_INTERN my_bool	srv_doublewrite_reset = FALSE;
 
 /** doublewrite buffer is 1MB is size i.e.: it can hold 128 16K pages.
 The following parameter is the size of the buffer that is used for

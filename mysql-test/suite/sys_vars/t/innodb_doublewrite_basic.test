@@ -37,22 +37,30 @@ SELECT COUNT(@@GLOBAL.innodb_doublewrite);
 #   Check if Value can set                                         #
 ####################################################################
 
---error ER_INCORRECT_GLOBAL_LOCAL_VAR
-SET @@GLOBAL.innodb_doublewrite=1;
---echo Expected error 'Read only variable'
+SET @global_start_value = @@global.innodb_flush_log_at_trx_commit;
+SELECT @global_start_value;
+
+SET @@GLOBAL.innodb_doublewrite = 1 ;
+
 
 SELECT COUNT(@@GLOBAL.innodb_doublewrite);
 --echo 1 Expected
 
 
+SET @@GLOBAL.innodb_doublewrite = 2;
 
+SELECT @@GLOBAL.innodb_doublewrite;
+
+SET @@GLOBAL.innodb_doublewrite = 0;
+SELECT @@GLOBAL.innodb_doublewrite;
+--echo 2 Expected
 
 --echo '#---------------------BS_STVARS_026_03----------------------#'
 #################################################################
 # Check if the value in GLOBAL Table matches value in variable  #
 #################################################################
 
-SELECT IF(@@GLOBAL.innodb_doublewrite, "ON", "OFF") = VARIABLE_VALUE
+SELECT @@GLOBAL.innodb_doublewrite = VARIABLE_VALUE
 FROM INFORMATION_SCHEMA.GLOBAL_VARIABLES
 WHERE VARIABLE_NAME='innodb_doublewrite';
 --echo 1 Expected
@@ -88,15 +96,8 @@ SELECT COUNT(@@innodb_doublewrite);
 SELECT COUNT(@@local.innodb_doublewrite);
 --echo Expected error 'Variable is a GLOBAL variable'
 
---Error ER_INCORRECT_GLOBAL_LOCAL_VAR
-SELECT COUNT(@@SESSION.innodb_doublewrite);
---echo Expected error 'Variable is a GLOBAL variable'
-
 SELECT COUNT(@@GLOBAL.innodb_doublewrite);
 --echo 1 Expected
 
---Error ER_BAD_FIELD_ERROR
-SELECT innodb_doublewrite = @@SESSION.innodb_doublewrite;
---echo Expected error 'Readonly variable'
-
-
+SET @@global.innodb_doublewrite = @global_start_value;
+SELECT @@global.innodb_doublewrite;

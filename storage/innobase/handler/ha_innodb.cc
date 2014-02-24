@@ -175,7 +175,6 @@ static my_bool	innobase_file_format_check		= TRUE;
 static my_bool	innobase_log_archive			= FALSE;
 static char*	innobase_log_arch_dir			= NULL;
 #endif /* UNIV_LOG_ARCHIVE */
-static my_bool	innobase_use_doublewrite		= TRUE;
 static my_bool	innobase_use_checksums			= TRUE;
 static my_bool	innobase_locks_unsafe_for_binlog	= FALSE;
 static my_bool	innobase_rollback_on_timeout		= FALSE;
@@ -3173,8 +3172,6 @@ innobase_change_buffering_inited_ok:
 	srv_n_file_io_threads = (ulint) innobase_file_io_threads;
 	srv_n_read_io_threads = (ulint) innobase_read_io_threads;
 	srv_n_write_io_threads = (ulint) innobase_write_io_threads;
-
-	srv_use_doublewrite_buf = (ibool) innobase_use_doublewrite;
 
 	if (!innobase_use_checksums) {
 		ut_print_timestamp(stderr);
@@ -13860,6 +13857,38 @@ innodb_io_capacity_max_update(
 }
 
 /****************************************************************//**
+Update the system variable innodb_doublewrite using the "saved"
+value. This function is registered as a callback with MySQL. */
+static
+void
+innodb_doublewrite_update(
+/*======================*/
+	THD*				thd,	/*!< in: thread handle */
+	struct st_mysql_sys_var*	var,	/*!< in: pointer to
+						system variable */
+	void*				var_ptr,/*!< out: where the
+						formal string goes */
+	const void*			save)	/*!< in: immediate result
+						from check function */
+{
+	ulong	in_val = *static_cast<const ulong*>(save);
+	if (!in_val || !srv_use_doublewrite_buf) {
+		push_warning_printf(thd, Sql_condition::WARN_LEVEL_WARN,
+				    ER_WRONG_ARGUMENTS,
+				    "innodb_doublewrite can not be "
+				    "dynamically changed to or from 0. "
+				    "Do a clean shutdown if you want to "
+				    "change it from or to 0.");
+	} else {
+		ut_a(in_val == 1 || in_val == 2);
+		if (srv_use_doublewrite_buf != in_val) {
+			srv_use_doublewrite_buf = in_val;
+			srv_doublewrite_reset = 1;
+		}
+	}
+}
+
+/****************************************************************//**
 Update the system variable innodb_io_capacity using the "saved"
 value. This function is registered as a callback with MySQL. */
 static
@@ -15725,11 +15754,12 @@ static MYSQL_SYSVAR_STR(data_home_dir, innobase_data_home_dir,
   "The common part for InnoDB table spaces.",
   NULL, NULL, NULL);
 
-static MYSQL_SYSVAR_BOOL(doublewrite, innobase_use_doublewrite,
-  PLUGIN_VAR_NOCMDARG | PLUGIN_VAR_READONLY,
-  "Enable InnoDB doublewrite buffer (enabled by default). "
-  "Disable with --skip-innodb-doublewrite.",
-  NULL, NULL, TRUE);
+static MYSQL_SYSVAR_ULONG(doublewrite, srv_use_doublewrite_buf,
+  PLUGIN_VAR_OPCMDARG,
+  "0=Disable InnoDB doublewrite buffer."
+  "1=Enable full doublewrite mode(default)."
+  "2=Enable reduced doublewrite mode. ",
+  NULL, innodb_doublewrite_update, 1, 0, 2, 0);
 
 static MYSQL_SYSVAR_ULONG(io_capacity, srv_io_capacity,
   PLUGIN_VAR_RQCMDARG,

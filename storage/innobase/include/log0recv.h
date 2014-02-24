@@ -368,12 +368,18 @@ struct recv_addr_t{
 	hash_node_t	addr_hash;/*!< hash node in the hash bucket chain */
 };
 
+struct recv_dblwr_item_t {
+	byte*	page;
+	ulint	space_id;
+	ulint	page_no;
+};
+
 struct recv_dblwr_t {
-	void add(byte* page);
+	void add(byte* page, ulint space_id, ulint page_no);
 
 	byte* find_page(ulint space_id, ulint page_no);
 
-	std::list<byte *> pages; /* Pages from double write buffer */
+	std::list<recv_dblwr_item_t> pages; /* Pages from double write buffer */
 
 	void operator() () {
 		pages.clear();

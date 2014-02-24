@@ -1,0 +1,1 @@
+--source suite/innodb/include/innodb_doublewrite.inc

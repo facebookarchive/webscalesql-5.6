@@ -6,7 +6,7 @@
 SET GLOBAL innodb_fast_shutdown = 0;
 show variables like 'innodb_doublewrite';
 Variable_name	Value
-innodb_doublewrite	ON
+innodb_doublewrite	1
 show variables like 'innodb_fil_make_page_dirty_debug';
 Variable_name	Value
 innodb_fil_make_page_dirty_debug	0

@@ -1,0 +1,5 @@
+--innodb-fast-shutdown=2
+--innodb-file-per-table
+--innodb_file_format='Barracuda'
+--innodb_flush_log_at_trx_commit=1
+--force-restart

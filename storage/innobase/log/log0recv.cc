@@ -3978,9 +3978,10 @@ recv_recovery_from_archive_finish(void)
 #endif /* UNIV_LOG_ARCHIVE */
 
 
-void recv_dblwr_t::add(byte* page)
+void recv_dblwr_t::add(byte* page, ulint space_id, ulint page_no)
 {
-	pages.push_back(page);
+	recv_dblwr_item_t item = { page, space_id, page_no };
+	pages.push_back(item);
 }
 
 byte* recv_dblwr_t::find_page(ulint space_id, ulint page_no)
@@ -3988,12 +3989,12 @@ byte* recv_dblwr_t::find_page(ulint space_id, ulint page_no)
 	std::vector<byte*> matches;
 	byte*	result = 0;
 
-	for (std::list<byte*>::iterator i = pages.begin();
+	for (std::list<recv_dblwr_item_t>::iterator i = pages.begin();
 	     i != pages.end(); ++i) {
 
-		if ((page_get_space_id(*i) == space_id)
-		    && (page_get_page_no(*i) == page_no)) {
-			matches.push_back(*i);
+		if (i->page && (page_get_space_id(i->page) == space_id)
+		    && (page_get_page_no(i->page) == page_no)) {
+			matches.push_back(i->page);
 		}
 	}
 
@@ -4007,11 +4008,13 @@ byte* recv_dblwr_t::find_page(ulint space_id, ulint page_no)
 		for (std::vector<byte*>::iterator i = matches.begin();
 		     i != matches.end(); ++i) {
 
-			page_lsn = mach_read_from_8(*i + FIL_PAGE_LSN);
+			if (*i) {
+				page_lsn = mach_read_from_8(*i + FIL_PAGE_LSN);
 
-			if (page_lsn > max_lsn) {
-				max_lsn = page_lsn;
-				result = *i;
+				if (page_lsn > max_lsn) {
+					max_lsn = page_lsn;
+					result = *i;
+				}
 			}
 		}
 	}

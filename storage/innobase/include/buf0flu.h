@@ -36,6 +36,9 @@ Created 11/5/1995 Heikki Tuuri
 /** Flag indicating if the page_cleaner is in active state. */
 extern ibool buf_page_cleaner_is_active;
 
+/** Event to synchronise with the flushing. */
+extern os_event_t	buf_flush_event;
+
 /********************************************************************//**
 Remove a block from the flush list of modified blocks. */
 UNIV_INTERN
@@ -110,12 +113,12 @@ buf_flush_list(
 					which were processed is passed
 					back to caller. Ignored if NULL */
 /******************************************************************//**
-This function picks up a single dirty page from the tail of the LRU
-list, flushes it, removes it from page_hash and LRU list and puts
-it on the free list. It is called from user threads when they are
-unable to find a replacable page at the tail of the LRU list i.e.:
-when the background LRU flushing in the page_cleaner thread is not
-fast enough to keep pace with the workload.
+This function picks up a single page from the tail of the LRU
+list, flushes it (if it is dirty), removes it from page_hash and LRU
+list and puts it on the free list. It is called from user threads when
+they are unable to find a replaceable page at the tail of the LRU
+list i.e.: when the background LRU flushing in the page_cleaner thread
+is not fast enough to keep pace with the workload.
 @return TRUE if success. */
 UNIV_INTERN
 ibool

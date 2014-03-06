@@ -2589,7 +2589,9 @@ files_checked:
 	}
 
 	/* Flush the changes made to TRX_SYS_PAGE by trx_sys_create_rsegs()*/
-	if (!srv_force_recovery && !srv_read_only_mode) {
+	if (!srv_force_recovery
+	    && !recv_needed_recovery
+	    && !srv_read_only_mode) {
 		bool success = buf_flush_list(ULINT_MAX, LSN_MAX, NULL);
 		ut_a(success);
 		buf_flush_wait_batch_end(NULL, BUF_FLUSH_LIST);

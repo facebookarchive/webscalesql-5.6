@@ -2284,11 +2284,10 @@ DECLARE_THREAD(buf_flush_page_cleaner_thread)(
 
 			/* Flush pages from flush_list if required */
 			n_flushed += page_cleaner_flush_pages_if_needed();
-		} else {
+		} else if (srv_idle_flush_pct) {
 			n_flushed = page_cleaner_do_flush_batch(
-							PCT_IO(100),
-							LSN_MAX);
-
+				PCT_IO(srv_idle_flush_pct),
+				LSN_MAX);
 			if (n_flushed) {
 				MONITOR_INC_VALUE_CUMULATIVE(
 					MONITOR_FLUSH_BACKGROUND_TOTAL_PAGE,
@@ -2296,6 +2295,8 @@ DECLARE_THREAD(buf_flush_page_cleaner_thread)(
 					MONITOR_FLUSH_BACKGROUND_PAGES,
 					n_flushed);
 			}
+		} else {
+			n_flushed = 0;
 		}
 	}
 

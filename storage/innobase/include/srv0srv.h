@@ -294,6 +294,8 @@ extern ulong	srv_read_ahead_threshold;
 extern ulint	srv_n_read_io_threads;
 extern ulint	srv_n_write_io_threads;
 
+extern ulint	srv_idle_flush_pct;
+
 /* Number of IO operations per second the server can do */
 extern ulong    srv_io_capacity;
 

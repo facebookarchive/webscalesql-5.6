@@ -929,7 +929,8 @@ bool do_command(THD *thd)
     the client, the connection is closed or "net_wait_timeout"
     number of seconds has passed.
   */
-  my_net_set_read_timeout(net, thd->variables.net_wait_timeout);
+  my_net_set_read_timeout(
+    net, timeout_from_seconds(thd->variables.net_wait_timeout_seconds));
 
   /*
     XXX: this code is here only to clear possible errors of init_connect. 
@@ -1030,7 +1031,8 @@ bool do_command(THD *thd)
                      command_name[command].str));
 
   /* Restore read timeout value */
-  my_net_set_read_timeout(net, thd->variables.net_read_timeout);
+  my_net_set_read_timeout(
+    net, timeout_from_seconds(thd->variables.net_read_timeout_seconds));
 
   DBUG_ASSERT(packet_length);
 

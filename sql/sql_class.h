@@ -465,11 +465,11 @@ typedef struct system_variables
   ulong myisam_sort_buff_size;
   ulong myisam_stats_method;
   ulong net_buffer_length;
-  ulong net_interactive_timeout;
-  ulong net_read_timeout;
+  ulong net_interactive_timeout_seconds;
+  ulong net_read_timeout_seconds;
   ulong net_retry_count;
-  ulong net_wait_timeout;
-  ulong net_write_timeout;
+  ulong net_wait_timeout_seconds;
+  ulong net_write_timeout_seconds;
   ulong optimizer_prune_level;
   ulong optimizer_search_depth;
   ulong preload_buff_size;

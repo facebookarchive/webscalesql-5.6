@@ -262,7 +262,7 @@
 #define DELAYED_QUEUE_SIZE	1000
 #define DELAYED_WAIT_TIMEOUT	5*60		/**< Wait for delayed insert */
 
-#define LONG_TIMEOUT ((ulong) 3600L*24L*365L)
+#define LONG_TIMEOUT ((ulong) 3600L*24L*7L)
 
 /**
   Maximum length of time zone name that we support (Time zone name is

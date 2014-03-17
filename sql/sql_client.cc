@@ -35,9 +35,12 @@ void my_net_local_init(NET *net)
 #ifndef EMBEDDED_LIBRARY
   net->max_packet=   (uint) global_system_variables.net_buffer_length;
 
-  my_net_set_read_timeout(net, (uint)global_system_variables.net_read_timeout);
-  my_net_set_write_timeout(net,
-                           (uint)global_system_variables.net_write_timeout);
+  my_net_set_read_timeout(
+    net,
+    timeout_from_seconds(global_system_variables.net_read_timeout_seconds));
+  my_net_set_write_timeout(
+    net,
+    timeout_from_seconds(global_system_variables.net_write_timeout_seconds));
 
   net->retry_count=  (uint) global_system_variables.net_retry_count;
   net->max_packet_size= max<size_t>(global_system_variables.net_buffer_length,

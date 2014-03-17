@@ -252,7 +252,7 @@ PSI_thread *thd_get_psi(THD *thd)
 */
 ulong thd_get_net_wait_timeout(THD* thd)
 {
-  return thd->variables.net_wait_timeout;
+  return thd->variables.net_wait_timeout_seconds;
 }
 
 /**

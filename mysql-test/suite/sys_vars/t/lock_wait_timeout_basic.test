@@ -5,7 +5,7 @@
 # Access Type: Dynamic                                                         #
 # Data Type: Numeric                                                           #
 # Default Value: 1                                                             #
-# Range: 1 - 31536000                                                          #
+# Range: 1 - 604800                                                            #
 #                                                                              #
 #                                                                              #
 # Creation Date: 2010-02-08                                                    #
@@ -59,9 +59,9 @@ SELECT @@session.lock_wait_timeout;
 #####################################################################
 
 SET @@global.lock_wait_timeout = @start_global_value;
-SELECT @@global.lock_wait_timeout = 31536000;
+SELECT @@global.lock_wait_timeout = 604800;
 SET @@session.lock_wait_timeout = @start_session_value;
-SELECT @@session.lock_wait_timeout = 31536000;
+SELECT @@session.lock_wait_timeout = 604800;
 
 
 --echo '#--------------------FN_DYNVARS_002_03-------------------------#'
@@ -99,7 +99,7 @@ SET @@global.lock_wait_timeout = 0;
 SELECT @@global.lock_wait_timeout;
 SET @@global.lock_wait_timeout = -1024;
 SELECT @@global.lock_wait_timeout;
-SET @@global.lock_wait_timeout = 31536001;
+SET @@global.lock_wait_timeout = 604801;
 SELECT @@global.lock_wait_timeout;
 --Error ER_WRONG_TYPE_FOR_VAR
 SET @@global.lock_wait_timeout = ON;
@@ -115,7 +115,7 @@ SET @@session.lock_wait_timeout = 0;
 SELECT @@session.lock_wait_timeout;
 SET @@session.lock_wait_timeout = -2;
 SELECT @@session.lock_wait_timeout;
-SET @@session.lock_wait_timeout = 31537000;
+SET @@session.lock_wait_timeout = 604900;
 SELECT @@session.lock_wait_timeout;
 
 --Error ER_WRONG_TYPE_FOR_VAR

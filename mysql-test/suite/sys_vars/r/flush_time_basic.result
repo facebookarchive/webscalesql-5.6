@@ -37,5 +37,5 @@ Warnings:
 Warning	1292	Truncated incorrect flush_time value: '18446744073709551615'
 select @@global.flush_time;
 @@global.flush_time
-31536000
+604800
 SET @@global.flush_time = @start_global_value;

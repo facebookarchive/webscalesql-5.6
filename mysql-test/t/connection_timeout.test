@@ -1,0 +1,23 @@
+# Two test cases, one for each type of timeout.  First the integer
+# timeout (which uses MYSQL_OPT_READ_TIMEOUT).
+connect (con1,127.0.0.1,root,,,,,TIMEOUT_1S);
+connection con1;
+select "no timeout, should work";
+select "short timeout, should work", sleep(0.90);
+--error 2062  # CR_CR_NET_READ_INTERRUPTED
+select "long timeout, should fail 1s accuracty", sleep(1.01);
+
+# Now confirm MYSQL_OPT_READ_TIMEOUT_MS works, too.
+connect (con2,127.0.0.1,root,,,,,TIMEOUT_1500MS);
+connection con2;
+select "no timeout, should work";
+select "short timeout, should work", sleep(0.5);
+select "short timeout, over one second, should also work", sleep(1.49);
+--error 2062  # CR_NET_READ_INTERRUPTED
+select "long timeout, should 1500ms accuracy", sleep(1.51);
+
+# 192.0.2.1 is in the TEST-NET range, defined by RFC to never be
+# reachable. Used to confirm connect timeouts.
+--disable_abort_on_error
+connect (con3,192.0.2.1,root,,,,,TIMEOUT_1500MS);
+--error 2003

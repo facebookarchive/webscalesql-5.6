@@ -54,7 +54,8 @@ int vio_errno(Vio *vio __attribute__((unused)))
 
 int vio_socket_io_wait(Vio *vio, enum enum_vio_io_event event)
 {
-  int timeout, ret;
+  timeout_t timeout;
+  int ret;
 
   DBUG_ASSERT(event == VIO_IO_EVENT_READ || event == VIO_IO_EVENT_WRITE);
 
@@ -108,7 +109,7 @@ size_t vio_read(Vio *vio, uchar *buf, size_t size)
   DBUG_ASSERT(vio->read_end == vio->read_pos);
 
   /* If timeout is enabled, do not block if data is unavailable. */
-  if (vio->read_timeout >= 0)
+  if (timeout_is_nonzero(vio->read_timeout))
     flags= VIO_DONTWAIT;
 
   while ((ret= mysql_socket_recv(vio->mysql_socket, (SOCKBUF_T *)buf, size, flags)) == -1)
@@ -186,7 +187,7 @@ size_t vio_write(Vio *vio, const uchar* buf, size_t size)
   DBUG_ENTER("vio_write");
 
   /* If timeout is enabled, do not block. */
-  if (vio->write_timeout >= 0)
+  if (timeout_is_nonzero(vio->write_timeout))
     flags= VIO_DONTWAIT;
 
   while ((ret= mysql_socket_send(vio->mysql_socket, (SOCKBUF_T *)buf, size, flags)) == -1)
@@ -302,7 +303,9 @@ int vio_socket_timeout(Vio *vio,
 #endif
   {
     /* Deduce what should be the new blocking mode of the socket. */
-    my_bool new_mode= vio->write_timeout < 0 && vio->read_timeout < 0;
+    my_bool new_mode =
+      timeout_is_infinite(vio->write_timeout) &&
+      timeout_is_infinite(vio->read_timeout);
 
     /* If necessary, update the blocking mode. */
     if (new_mode != old_mode)
@@ -732,7 +735,7 @@ static my_bool socket_peek_read(Vio *vio, uint *bytes)
 */
 
 #if !defined(_WIN32) && !defined(__APPLE__)
-int vio_io_wait(Vio *vio, enum enum_vio_io_event event, int timeout)
+int vio_io_wait(Vio *vio, enum enum_vio_io_event event, timeout_t timeout)
 {
   int ret;
   short DBUG_ONLY revents= 0;
@@ -768,7 +771,7 @@ int vio_io_wait(Vio *vio, enum enum_vio_io_event event, int timeout)
     Wait for the I/O event and return early in case of
     error or timeout.
   */
-  switch ((ret= poll(&pfd, 1, timeout)))
+  switch ((ret = poll(&pfd, 1, timeout_to_millis(timeout))))
   {
   case -1:
     /* On error, -1 is returned. */
@@ -792,7 +795,7 @@ int vio_io_wait(Vio *vio, enum enum_vio_io_event event, int timeout)
 
 #else
 
-int vio_io_wait(Vio *vio, enum enum_vio_io_event event, int timeout)
+int vio_io_wait(Vio *vio, enum enum_vio_io_event event, timeout_t timeout)
 {
   int ret;
   struct timeval tm;
@@ -807,10 +810,11 @@ int vio_io_wait(Vio *vio, enum enum_vio_io_event event, int timeout)
     DBUG_RETURN(-1);
 
   /* Convert the timeout, in milliseconds, to seconds and microseconds. */
-  if (timeout >= 0)
+  if (!timeout_is_infinite(timeout))
   {
-    tm.tv_sec= timeout / 1000;
-    tm.tv_usec= (timeout % 1000) * 1000;
+    uint timeout_ms = timeout_to_millis(timeout);
+    tm.tv_sec= timeout_ms / 1000;
+    tm.tv_usec= (timeout_ms % 1000) * 1000;
   }
 
   FD_ZERO(&readfds);
@@ -837,7 +841,7 @@ int vio_io_wait(Vio *vio, enum enum_vio_io_event event, int timeout)
 
   /* The first argument is ignored on Windows. */
   ret= select(fd + 1, &readfds, &writefds, &exceptfds, 
-              (timeout >= 0) ? &tm : NULL);
+              timeout_is_infinite(timeout) ? NULL : &tm);
 
   MYSQL_END_SOCKET_WAIT(locker, 0);
 
@@ -893,7 +897,8 @@ int vio_io_wait(Vio *vio, enum enum_vio_io_event event, int timeout)
 */
 
 my_bool
-vio_socket_connect(Vio *vio, struct sockaddr *addr, socklen_t len, int timeout)
+vio_socket_connect(Vio *vio, struct sockaddr *addr, socklen_t len,
+                   timeout_t timeout)
 {
   int ret, wait;
   DBUG_ENTER("vio_socket_connect");
@@ -902,7 +907,7 @@ vio_socket_connect(Vio *vio, struct sockaddr *addr, socklen_t len, int timeout)
   DBUG_ASSERT(vio->type == VIO_TYPE_SOCKET || vio->type == VIO_TYPE_TCPIP);
 
   /* If timeout is not infinite, set socket to non-blocking mode. */
-  if ((timeout > -1) && vio_set_blocking(vio, FALSE))
+  if (!timeout_is_infinite(timeout) && vio_set_blocking(vio, FALSE))
     DBUG_RETURN(TRUE);
 
   /* Initiate the connection. */
@@ -956,7 +961,7 @@ vio_socket_connect(Vio *vio, struct sockaddr *addr, socklen_t len, int timeout)
   }
 
   /* If necessary, restore the blocking mode, but only if connect succeeded. */
-  if ((timeout > -1) && (ret == 0))
+  if (timeout_is_nonzero(timeout) && (ret == 0))
   {
     if (vio_set_blocking(vio, TRUE))
       DBUG_RETURN(TRUE);
@@ -989,7 +994,7 @@ my_bool vio_is_connected(Vio *vio)
     the EOF. An exceptional condition event and/or errors are
     interpreted as if there is data to read.
   */
-  if (!vio_io_wait(vio, VIO_IO_EVENT_READ, 0))
+  if (!vio_io_wait(vio, VIO_IO_EVENT_READ, timeout_from_seconds(0)))
     DBUG_RETURN(TRUE);
 
   /*

@@ -29,7 +29,7 @@ SET @@global.wait_timeout = 60020;
 SELECT @@global.wait_timeout;
 @@global.wait_timeout
 60020
-SET @@global.wait_timeout = 31536000;
+SET @@global.wait_timeout = 604800;
 SELECT @@global.wait_timeout = @max_wait_timeout;
 @@global.wait_timeout = @max_wait_timeout
 1

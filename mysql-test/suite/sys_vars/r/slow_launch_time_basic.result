@@ -22,14 +22,14 @@ SET @@global.slow_launch_time = 1;
 SELECT @@global.slow_launch_time;
 @@global.slow_launch_time
 1
-SET @@global.slow_launch_time = 31536000;
+SET @@global.slow_launch_time = 604800;
 SELECT @@global.slow_launch_time;
 @@global.slow_launch_time
-31536000
-SET @@global.slow_launch_time = 31535999;
+604800
+SET @@global.slow_launch_time = 604799;
 SELECT @@global.slow_launch_time;
 @@global.slow_launch_time
-31535999
+604799
 SET @@global.slow_launch_time = 65536;
 SELECT @@global.slow_launch_time;
 @@global.slow_launch_time
@@ -41,23 +41,23 @@ Warning	1292	Truncated incorrect slow_launch_time value: '-1'
 SELECT @@global.slow_launch_time;
 @@global.slow_launch_time
 0
-SET @@global.slow_launch_time = 31536001;
+SET @@global.slow_launch_time = 604801;
 Warnings:
-Warning	1292	Truncated incorrect slow_launch_time value: '31536001'
+Warning	1292	Truncated incorrect slow_launch_time value: '604801'
 SELECT @@global.slow_launch_time;
 @@global.slow_launch_time
-31536000
+604800
 SET @@global.slow_launch_time = 10240022115;
 Warnings:
 Warning	1292	Truncated incorrect slow_launch_time value: '10240022115'
 SELECT @@global.slow_launch_time;
 @@global.slow_launch_time
-31536000
+604800
 SET @@global.slow_launch_time = 10000.01;
 ERROR 42000: Incorrect argument type to variable 'slow_launch_time'
 SELECT @@global.slow_launch_time;
 @@global.slow_launch_time
-31536000
+604800
 SET @@global.slow_launch_time = -1024;
 Warnings:
 Warning	1292	Truncated incorrect slow_launch_time value: '-1024'
@@ -69,23 +69,23 @@ Warnings:
 Warning	1292	Truncated incorrect slow_launch_time value: '42949672950'
 SELECT @@global.slow_launch_time;
 @@global.slow_launch_time
-31536000
+604800
 SET @@global.slow_launch_time = ON;
 ERROR 42000: Incorrect argument type to variable 'slow_launch_time'
 SELECT @@global.slow_launch_time;
 @@global.slow_launch_time
-31536000
+604800
 SET @@global.slow_launch_time = 'test';
 ERROR 42000: Incorrect argument type to variable 'slow_launch_time'
 SELECT @@global.slow_launch_time;
 @@global.slow_launch_time
-31536000
+604800
 '#-------------------FN_DYNVARS_150_05----------------------------#'
 SET @@session.slow_launch_time = 0;
 ERROR HY000: Variable 'slow_launch_time' is a GLOBAL variable and should be set with SET GLOBAL
 SELECT @@slow_launch_time;
 @@slow_launch_time
-31536000
+604800
 '#----------------------FN_DYNVARS_150_06------------------------#'
 SELECT @@global.slow_launch_time = VARIABLE_VALUE 
 FROM INFORMATION_SCHEMA.GLOBAL_VARIABLES 

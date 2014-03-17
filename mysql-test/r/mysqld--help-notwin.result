@@ -1100,7 +1100,7 @@ lc-messages en_US
 lc-messages-dir MYSQL_SHAREDIR/
 lc-time-names en_US
 local-infile TRUE
-lock-wait-timeout 31536000
+lock-wait-timeout 604800
 log-bin (No default value)
 log-bin-index (No default value)
 log-bin-trust-function-creators FALSE
@@ -1246,7 +1246,7 @@ report-host (No default value)
 report-password (No default value)
 report-port 0
 report-user (No default value)
-rpl-stop-slave-timeout 31536000
+rpl-stop-slave-timeout 604800
 safe-user-create FALSE
 secure-auth TRUE
 secure-file-priv (No default value)

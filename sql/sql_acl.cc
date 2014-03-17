@@ -10503,7 +10503,8 @@ skip_to_ssl:
       return packet_error;
 
     DBUG_PRINT("info", ("IO layer change in progress..."));
-    if (sslaccept(ssl_acceptor_fd, net->vio, net->read_timeout, &errptr))
+    if (sslaccept(ssl_acceptor_fd, net->vio,
+                  timeout_to_seconds(net->read_timeout), &errptr))
     {
       DBUG_PRINT("error", ("Failed to accept new SSL connection"));
       return packet_error;
@@ -11163,7 +11164,8 @@ server_mpvio_update_thd(THD *thd, MPVIO_EXT *mpvio)
   thd->client_capabilities= mpvio->client_capabilities;
   thd->max_client_packet_length= mpvio->max_client_packet_length;
   if (mpvio->client_capabilities & CLIENT_INTERACTIVE)
-    thd->variables.net_wait_timeout= thd->variables.net_interactive_timeout;
+    thd->variables.net_wait_timeout_seconds =
+      thd->variables.net_interactive_timeout_seconds;
   thd->security_ctx->user= mpvio->auth_info.user_name;
   if (thd->client_capabilities & CLIENT_IGNORE_SPACE)
     thd->variables.sql_mode|= MODE_IGNORE_SPACE;

@@ -301,6 +301,33 @@ enum enum_server_command
 
 #define ONLY_KILL_QUERY         1
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/*
+  In order to avoid confusion about whether a timeout value is in
+  seconds or milliseconds, a timeout_t struct is used.  It simply tracks
+  milliseconds but this helps ensure type safety and clear intention
+  when converting for use in syscalls etc.
+*/
+
+typedef struct {
+  uint value_ms_;
+} timeout_t;
+
+timeout_t timeout_from_seconds(uint seconds);
+timeout_t timeout_from_millis(uint ms);
+timeout_t timeout_infinite();
+my_bool timeout_is_infinite(const timeout_t t);
+int timeout_is_nonzero(const timeout_t t);
+uint timeout_to_millis(const timeout_t t);
+// toSeconds rounds down.
+uint timeout_to_seconds(const timeout_t t);
+
+#ifdef __cplusplus
+}
+#endif
 
 struct st_vio;					/* Only C */
 typedef struct st_vio Vio;
@@ -326,7 +353,8 @@ typedef struct st_net {
   unsigned long remain_in_buf,length, buf_length, where_b;
   unsigned long max_packet,max_packet_size;
   unsigned int pkt_nr,compress_pkt_nr;
-  unsigned int write_timeout, read_timeout, retry_count;
+  timeout_t write_timeout, read_timeout;
+  uint retry_count;
   int fcntl;
   unsigned int *return_status;
   unsigned char reading_or_writing;
@@ -492,8 +520,8 @@ my_bool net_write_packet(NET *net, const unsigned char *packet, size_t length);
 unsigned long my_net_read(NET *net);
 
 #ifdef MY_GLOBAL_INCLUDED
-void my_net_set_write_timeout(NET *net, uint timeout);
-void my_net_set_read_timeout(NET *net, uint timeout);
+void my_net_set_write_timeout(NET *net, const timeout_t timeout);
+void my_net_set_read_timeout(NET *net, const timeout_t timeout);
 #endif
 
 struct rand_struct {

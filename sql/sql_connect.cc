@@ -740,8 +740,8 @@ bool login_connection(THD *thd)
                       thd->thread_id));
 
   /* Use "connect_timeout" value during connection phase */
-  my_net_set_read_timeout(net, connect_timeout);
-  my_net_set_write_timeout(net, connect_timeout);
+  my_net_set_read_timeout(net, timeout_from_seconds(connect_timeout));
+  my_net_set_write_timeout(net, timeout_from_seconds(connect_timeout));
 
   error= check_connection(thd);
   thd->protocol->end_statement();
@@ -756,8 +756,10 @@ bool login_connection(THD *thd)
     DBUG_RETURN(1);
   }
   /* Connect completed, set read/write timeouts back to default */
-  my_net_set_read_timeout(net, thd->variables.net_read_timeout);
-  my_net_set_write_timeout(net, thd->variables.net_write_timeout);
+  my_net_set_read_timeout(
+    net, timeout_from_seconds(thd->variables.net_read_timeout_seconds));
+  my_net_set_write_timeout(
+    net, timeout_from_seconds(thd->variables.net_write_timeout_seconds));
   DBUG_RETURN(0);
 }
 
@@ -842,7 +844,8 @@ void prepare_new_connection_state(THD* thd)
       sql_print_warning("%s", thd->get_stmt_da()->message());
 
       thd->lex->current_select= 0;
-      my_net_set_read_timeout(net, thd->variables.net_wait_timeout);
+      my_net_set_read_timeout(
+        net, timeout_from_seconds(thd->variables.net_wait_timeout_seconds));
       thd->clear_error();
       net_new_transaction(net);
       packet_length= my_net_read(net);

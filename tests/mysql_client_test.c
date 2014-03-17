@@ -18948,8 +18948,7 @@ static void test_bug54790()
   rc= mysql_query(lmysql, "SELECT SLEEP(100);");
   myquery_r(rc);
 
-  /* A timeout error (ER_NET_READ_INTERRUPTED) would be more appropriate. */
-  DIE_UNLESS(mysql_errno(lmysql) == CR_SERVER_LOST);
+  DIE_UNLESS(mysql_errno(lmysql) == CR_NET_READ_INTERRUPTED);
 
   mysql_close(lmysql);
 

@@ -188,7 +188,7 @@ pre_init_event_thread(THD* thd)
   thd->security_ctx->host_or_ip= (char*)my_localhost;
   my_net_init(&thd->net, NULL);
   thd->security_ctx->set_user((char*)"event_scheduler");
-  thd->net.read_timeout= slave_net_timeout;
+  thd->net.read_timeout = timeout_from_seconds(slave_net_timeout);
   thd->slave_thread= 0;
   thd->variables.option_bits|= OPTION_AUTO_IS_NULL;
   thd->client_capabilities|= CLIENT_MULTI_RESULTS;

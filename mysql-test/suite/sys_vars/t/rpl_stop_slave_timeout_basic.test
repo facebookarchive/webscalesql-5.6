@@ -8,8 +8,8 @@
 # Scope: GLOBAL                                                                #
 # Access Type: Dynamic                                                         #
 # Data Type: Numeric                                                           #
-# Default Value: 31536000                                                      #
-# Range: 2 - 31536000                                                          #
+# Default Value: 604800                                                        #
+# Range: 2 - 604800                                                            #
 #                                                                              #
 #                                                                              #
 # Creation Date: 2013-06-14                                                    #
@@ -65,7 +65,7 @@ SET @@global.rpl_stop_slave_timeout = 2;
 SELECT @@global.rpl_stop_slave_timeout;
 SET @@global.rpl_stop_slave_timeout = 10000;
 SELECT @@global.rpl_stop_slave_timeout;
-SET @@global.rpl_stop_slave_timeout = 21221204;
+SET @@global.rpl_stop_slave_timeout = 212204;
 SELECT @@global.rpl_stop_slave_timeout;
 
 
@@ -81,7 +81,7 @@ SELECT @@global.rpl_stop_slave_timeout;
 SET @@global.rpl_stop_slave_timeout = 42949672950;
 SELECT @@global.rpl_stop_slave_timeout;
 --Error ER_WRONG_TYPE_FOR_VAR
-SET @@global.rpl_stop_slave_timeout = 21221204.10;
+SET @@global.rpl_stop_slave_timeout = 212204.10;
 --Error ER_WRONG_TYPE_FOR_VAR
 SET @@global.rpl_stop_slave_timeout = ON;
 

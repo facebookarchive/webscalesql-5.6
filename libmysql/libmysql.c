@@ -1132,8 +1132,8 @@ my_bool STDCALL mysql_embedded(void)
 void my_net_local_init(NET *net)
 {
   net->max_packet=   (uint) net_buffer_length;
-  my_net_set_read_timeout(net, CLIENT_NET_READ_TIMEOUT);
-  my_net_set_write_timeout(net, CLIENT_NET_WRITE_TIMEOUT);
+  my_net_set_read_timeout(net, timeout_from_seconds(CLIENT_NET_READ_TIMEOUT));
+  my_net_set_write_timeout(net, timeout_from_seconds(CLIENT_NET_WRITE_TIMEOUT));
   net->retry_count=  1;
   net->max_packet_size= MY_MAX(net_buffer_length, max_allowed_packet);
 }
@@ -2090,11 +2090,21 @@ static my_bool execute(MYSQL_STMT *stmt, char *packet, ulong length)
   stmt->insert_id= mysql->insert_id;
   if (res)
   {
-    /* 
-      Don't set stmt error if stmt->mysql is NULL, as the error in this case 
-      has already been set by mysql_prune_stmt_list(). 
+    /*
+      Don't set stmt error if stmt->mysql is NULL, as the error in this case
+      has already been set by mysql_prune_stmt_list().
+
+      However, do set the error if it is CR_NET_(READ|WRITE)_INTERRUPTED.
+      WebScaleSQL added new error codes vs. upstream for timeouts to
+      disambiguate them from "server has gone away." mysql_prune_stmt_list
+      has the error hard coded to CR_SERVER_LOST for the full list of stmts.
+      Special case the new timeout errors here so that only the single stmt
+      that hit it gets the correct error. Other stmts on the connection will
+      still get the corect CR_SERVER_LOST.
     */
-    if (stmt->mysql)
+    if (stmt->mysql ||
+        net->last_errno == CR_NET_READ_INTERRUPTED ||
+        net->last_errno == CR_NET_WRITE_INTERRUPTED)
       set_stmt_errmsg(stmt, net);
     DBUG_RETURN(1);
   }
@@ -2315,11 +2325,21 @@ stmt_read_row_from_cursor(MYSQL_STMT *stmt, unsigned char **row)
                                             buff, sizeof(buff), (uchar*) 0, 0,
                                             1, stmt))
     {
-      /* 
-        Don't set stmt error if stmt->mysql is NULL, as the error in this case 
-        has already been set by mysql_prune_stmt_list(). 
+      /*
+        Don't set stmt error if stmt->mysql is NULL, as the error in this case
+        has already been set by mysql_prune_stmt_list().
+
+        However, do set the error if it is CR_NET_(READ|WRITE)_INTERRUPTED.
+        WebScaleSQL added new error codes vs. upstream for timeouts to
+        disambiguate them from "server has gone away." mysql_prune_stmt_list
+        has the error hard coded to CR_SERVER_LOST for the full list of stmts.
+        Special case the new timeout errors here so that only the single stmt
+        that hit it gets the correct error. Other stmts on the connection will
+        still get the corect CR_SERVER_LOST.
       */
-      if (stmt->mysql)
+      if (stmt->mysql ||
+          net->last_errno == CR_NET_READ_INTERRUPTED ||
+          net->last_errno == CR_NET_WRITE_INTERRUPTED)
         set_stmt_errmsg(stmt, net);
       return 1;
     }
@@ -3010,11 +3030,21 @@ mysql_stmt_send_long_data(MYSQL_STMT *stmt, uint param_number,
                                             buff, sizeof(buff), (uchar*) data,
                                             length, 1, stmt))
     {
-      /* 
-        Don't set stmt error if stmt->mysql is NULL, as the error in this case 
-        has already been set by mysql_prune_stmt_list(). 
+      /*
+        Don't set stmt error if stmt->mysql is NULL, as the error in this case
+        has already been set by mysql_prune_stmt_list().
+
+        However, do set the error if it is CR_NET_(READ|WRITE)_INTERRUPTED.
+        WebScaleSQL added new error codes vs. upstream for timeouts to
+        disambiguate them from "server has gone away." mysql_prune_stmt_list
+        has the error hard coded to CR_SERVER_LOST for the full list of stmts.
+        Special case the new timeout errors here so that only the single stmt
+        that hit it gets the correct error. Other stmts on the connection will
+        still get the corect CR_SERVER_LOST.
       */
-      if (stmt->mysql)
+      if (stmt->mysql ||
+          mysql->net.last_errno == CR_NET_READ_INTERRUPTED ||
+          mysql->net.last_errno == CR_NET_WRITE_INTERRUPTED)
         set_stmt_errmsg(stmt, &mysql->net);
       DBUG_RETURN(1);
     }
@@ -4460,11 +4490,21 @@ int STDCALL mysql_stmt_store_result(MYSQL_STMT *stmt)
     if (cli_advanced_command(mysql, COM_STMT_FETCH, buff, sizeof(buff),
                              (uchar*) 0, 0, 1, stmt))
     {
-      /* 
-        Don't set stmt error if stmt->mysql is NULL, as the error in this case 
-        has already been set by mysql_prune_stmt_list(). 
+      /*
+        Don't set stmt error if stmt->mysql is NULL, as the error in this case
+        has already been set by mysql_prune_stmt_list().
+
+        However, do set the error if it is CR_NET_(READ|WRITE)_INTERRUPTED.
+        WebScaleSQL added new error codes vs. upstream for timeouts to
+        disambiguate them from "server has gone away." mysql_prune_stmt_list
+        has the error hard coded to CR_SERVER_LOST for the full list of stmts.
+        Special case the new timeout errors here so that only the single stmt
+        that hit it gets the correct error. Other stmts on the connection will
+        still get the corect CR_SERVER_LOST.
       */
-      if (stmt->mysql)
+      if (stmt->mysql ||
+          net->last_errno == CR_NET_READ_INTERRUPTED ||
+          net->last_errno == CR_NET_WRITE_INTERRUPTED)
         set_stmt_errmsg(stmt, net);
       DBUG_RETURN(1);
     }

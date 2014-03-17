@@ -451,7 +451,7 @@ static int send_file(THD *thd)
   size_t bytes;
   char fname[FN_REFLEN+1];
   const char *errmsg = 0;
-  int old_timeout;
+  timeout_t old_timeout;
   unsigned long packet_len;
   uchar buf[IO_SIZE];				// It's safe to alloc this
   DBUG_ENTER("send_file");
@@ -461,7 +461,8 @@ static int send_file(THD *thd)
     the job
   */
   old_timeout= net->read_timeout;
-  my_net_set_read_timeout(net, thd->variables.net_wait_timeout);
+  my_net_set_read_timeout(
+    net, timeout_from_seconds(thd->variables.net_wait_timeout_seconds));
 
   /*
     We need net_flush here because the client will not know it needs to send

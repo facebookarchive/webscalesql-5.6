@@ -64,7 +64,7 @@ SET @@global.binlog_stmt_cache_size = 4294967295;
 SELECT @@global.binlog_stmt_cache_size;
 SET @@global.binlog_stmt_cache_size = 10000;
 SELECT @@global.binlog_stmt_cache_size;
-SET @@global.binlog_stmt_cache_size = 21221204;
+SET @@global.binlog_stmt_cache_size = 212204;
 SELECT @@global.binlog_stmt_cache_size;
 echo 'Bug: Invalid values are coming in variable on assigning valid values';
 

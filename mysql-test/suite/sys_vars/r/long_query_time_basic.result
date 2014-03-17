@@ -39,10 +39,10 @@ SET @@global.long_query_time = 60020;
 SELECT @@global.long_query_time;
 @@global.long_query_time
 60020.000000
-SET @@global.long_query_time = 31536000;
+SET @@global.long_query_time = 604800;
 SELECT @@global.long_query_time;
 @@global.long_query_time
-31536000.000000
+604800.000000
 SET @@global.long_query_time = 65536;
 SELECT @@global.long_query_time;
 @@global.long_query_time
@@ -60,10 +60,10 @@ SET @@session.long_query_time = 50050;
 SELECT @@session.long_query_time;
 @@session.long_query_time
 50050.000000
-SET @@session.long_query_time = 31536000;
+SET @@session.long_query_time = 604800;
 SELECT @@session.long_query_time;
 @@session.long_query_time
-31536000.000000
+604800.000000
 SET @@session.long_query_time = 65550;
 SELECT @@session.long_query_time;
 @@session.long_query_time
@@ -74,7 +74,7 @@ Warnings:
 Warning	1292	Truncated incorrect long_query_time value: '100000000000'
 SELECT @@global.long_query_time;
 @@global.long_query_time
-31536000.000000
+604800.000000
 SET @@global.long_query_time = -1;
 Warnings:
 Warning	1292	Truncated incorrect long_query_time value: '-1'
@@ -95,7 +95,7 @@ Warnings:
 Warning	1292	Truncated incorrect long_query_time value: '100000000000'
 SELECT @@session.long_query_time;
 @@session.long_query_time
-31536000.000000
+604800.000000
 SET @@session.long_query_time = -2;
 Warnings:
 Warning	1292	Truncated incorrect long_query_time value: '-2'

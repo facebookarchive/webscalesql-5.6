@@ -134,25 +134,9 @@ char mysql_server_last_error[MYSQL_ERRMSG_SIZE];
   @return The timeout value in milliseconds, or -1 if no timeout.
 */
 
-static int get_vio_connect_timeout(MYSQL *mysql)
+static timeout_t get_vio_connect_timeout(MYSQL *mysql)
 {
-  int timeout_ms;
-  uint timeout_sec;
-
-  /*
-    A timeout of 0 means no timeout. Also, the connect_timeout
-    option value is in seconds, while VIO timeouts are measured
-    in milliseconds. Hence, check for a possible overflow. In
-    case of overflow, set to no timeout.
-  */
-  timeout_sec= mysql->options.connect_timeout;
-
-  if (!timeout_sec || (timeout_sec > INT_MAX/1000))
-    timeout_ms= -1;
-  else
-    timeout_ms= (int) (timeout_sec * 1000);
-
-  return timeout_ms;
+  return mysql->options.connect_timeout;
 }
 
 
@@ -621,6 +605,7 @@ cli_safe_read(MYSQL *mysql)
 
   if (len == packet_error || len == 0)
   {
+    int errcode = CR_SERVER_LOST;
     DBUG_PRINT("error",("Wrong connection or packet. fd: %s  len: %lu",
 			vio_description(net->vio),len));
 #ifdef MYSQL_SERVER
@@ -628,8 +613,14 @@ cli_safe_read(MYSQL *mysql)
       return (packet_error);
 #endif /*MYSQL_SERVER*/
     end_server(mysql);
-    set_mysql_error(mysql, net->last_errno == ER_NET_PACKET_TOO_LARGE ?
-                    CR_NET_PACKET_TOO_LARGE: CR_SERVER_LOST, unknown_sqlstate);
+    if (net->last_errno == ER_NET_PACKET_TOO_LARGE) {
+      errcode = CR_NET_PACKET_TOO_LARGE;
+    } else if (net->last_errno == ER_NET_READ_INTERRUPTED) {
+      errcode = CR_NET_READ_INTERRUPTED;
+    } else if (net->last_errno == CR_NET_WRITE_INTERRUPTED) {
+      errcode = CR_NET_WRITE_INTERRUPTED;
+    }
+    set_mysql_error(mysql, errcode, unknown_sqlstate);
     return (packet_error);
   }
   if (net->read_pos[0] == 255)
@@ -1128,6 +1119,17 @@ static int add_init_command(struct st_mysql_options *options, const char *cmd)
     } while(0)
 #endif
 
+
+/* Hack to convert 0 timeouts to infinite timeouts; we need value_ms_
+ to always be accurate, so we convert any zero passed to us via
+ mysql_options into infinite timeouts.  Used here and in
+ mysql_options.*/
+static void fixup_zero_timeout(timeout_t *t) {
+  if (t->value_ms_ == 0) {
+    *t = timeout_infinite();
+  }
+}
+
 void mysql_read_default_options(struct st_mysql_options *options,
 				const char *filename,const char *group)
 {
@@ -1191,8 +1193,10 @@ void mysql_read_default_options(struct st_mysql_options *options,
           options->protocol = MYSQL_PROTOCOL_PIPE;
 	case OPT_connect_timeout:
 	case OPT_timeout:
-	  if (opt_arg)
-	    options->connect_timeout=atoi(opt_arg);
+	  if (opt_arg) {
+	    options->connect_timeout = timeout_from_seconds(atoi(opt_arg));
+	    fixup_zero_timeout(&options->connect_timeout);
+	  }
 	  break;
 	case OPT_user:
 	  if (opt_arg)
@@ -1693,6 +1697,10 @@ mysql_init(MYSQL *mysql)
 
   mysql->options.methods_to_use= MYSQL_OPT_GUESS_CONNECTION;
   mysql->options.report_data_truncation= TRUE;  /* default */
+
+  mysql->options.connect_timeout = timeout_infinite();
+  mysql->options.read_timeout = timeout_infinite();
+  mysql->options.write_timeout = timeout_infinite();
 
   /*
     By default we don't reconnect because it could silently corrupt data (after
@@ -2682,7 +2690,7 @@ static int send_client_reply_packet(MCPVIO_EXT *mpvio,
     /* Connect to the server */
     DBUG_PRINT("info", ("IO layer change in progress..."));
     if (sslconnect(ssl_fd, net->vio,
-                   (long) (mysql->options.connect_timeout), &ssl_error))
+                   timeout_to_seconds(mysql->options.connect_timeout), &ssl_error))
     {    
       char buf[512];
       ERR_error_string_n(ssl_error, buf, 512);
@@ -3602,11 +3610,11 @@ CLI_MYSQL_REAL_CONNECT(MYSQL *mysql,const char *host, const char *user,
   vio_keepalive(net->vio,TRUE);
 
   /* If user set read_timeout, let it override the default */
-  if (mysql->options.read_timeout)
+  if (timeout_is_nonzero(mysql->options.read_timeout))
     my_net_set_read_timeout(net, mysql->options.read_timeout);
 
   /* If user set write_timeout, let it override the default */
-  if (mysql->options.write_timeout)
+  if (timeout_is_nonzero(mysql->options.write_timeout))
     my_net_set_write_timeout(net, mysql->options.write_timeout);
 
   if (mysql->options.max_allowed_packet)
@@ -3614,7 +3622,7 @@ CLI_MYSQL_REAL_CONNECT(MYSQL *mysql,const char *host, const char *user,
 
   /* Get version info */
   mysql->protocol_version= PROTOCOL_VERSION;	/* Assume this */
-  if (mysql->options.connect_timeout &&
+  if (timeout_is_nonzero(mysql->options.connect_timeout) &&
       (vio_io_wait(net->vio, VIO_IO_EVENT_READ,
                    get_vio_connect_timeout(mysql)) < 1))
   {
@@ -4359,13 +4367,28 @@ mysql_options(MYSQL *mysql,enum mysql_option option, const void *arg)
   DBUG_PRINT("enter",("option: %d",(int) option));
   switch (option) {
   case MYSQL_OPT_CONNECT_TIMEOUT:
-    mysql->options.connect_timeout= *(uint*) arg;
+    mysql->options.connect_timeout = timeout_from_seconds((*(uint*) arg));
+    fixup_zero_timeout(&mysql->options.connect_timeout);
+    break;
+  case MYSQL_OPT_CONNECT_TIMEOUT_MS:
+    mysql->options.connect_timeout = timeout_from_millis((*(uint*) arg));
+    fixup_zero_timeout(&mysql->options.connect_timeout);
     break;
   case MYSQL_OPT_READ_TIMEOUT:
-    mysql->options.read_timeout= *(uint*) arg;
+    mysql->options.read_timeout = timeout_from_seconds((*(uint*) arg));
+    fixup_zero_timeout(&mysql->options.read_timeout);
+    break;
+  case MYSQL_OPT_READ_TIMEOUT_MS:
+    mysql->options.read_timeout = timeout_from_millis((*(uint*) arg));
+    fixup_zero_timeout(&mysql->options.read_timeout);
     break;
   case MYSQL_OPT_WRITE_TIMEOUT:
-    mysql->options.write_timeout= *(uint*) arg;
+    mysql->options.write_timeout = timeout_from_seconds((*(uint*) arg));
+    fixup_zero_timeout(&mysql->options.write_timeout);
+    break;
+  case MYSQL_OPT_WRITE_TIMEOUT_MS:
+    mysql->options.write_timeout = timeout_from_millis((*(uint*) arg));
+    fixup_zero_timeout(&mysql->options.write_timeout);
     break;
   case MYSQL_OPT_COMPRESS:
     mysql->options.compress= 1;			/* Remember for connect */

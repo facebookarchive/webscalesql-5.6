@@ -1403,7 +1403,7 @@ static Sys_var_ulong Sys_interactive_timeout(
        "interactive_timeout",
        "The number of seconds the server waits for activity on an interactive "
        "connection before closing it",
-       SESSION_VAR(net_interactive_timeout),
+       SESSION_VAR(net_interactive_timeout_seconds),
        CMD_LINE(REQUIRED_ARG),
        VALID_RANGE(1, LONG_TIMEOUT), DEFAULT(NET_WAIT_TIMEOUT), BLOCK_SIZE(1));
 
@@ -1977,14 +1977,15 @@ static Sys_var_ulong Sys_net_buffer_length(
 static bool fix_net_read_timeout(sys_var *self, THD *thd, enum_var_type type)
 {
   if (type != OPT_GLOBAL)
-    my_net_set_read_timeout(&thd->net, thd->variables.net_read_timeout);
+    my_net_set_read_timeout(
+      &thd->net, timeout_from_seconds(thd->variables.net_read_timeout_seconds));
   return false;
 }
 static Sys_var_ulong Sys_net_read_timeout(
        "net_read_timeout",
        "Number of seconds to wait for more data from a connection before "
        "aborting the read",
-       SESSION_VAR(net_read_timeout), CMD_LINE(REQUIRED_ARG),
+       SESSION_VAR(net_read_timeout_seconds), CMD_LINE(REQUIRED_ARG),
        VALID_RANGE(1, LONG_TIMEOUT), DEFAULT(NET_READ_TIMEOUT), BLOCK_SIZE(1),
        NO_MUTEX_GUARD, NOT_IN_BINLOG, ON_CHECK(0),
        ON_UPDATE(fix_net_read_timeout));
@@ -1992,14 +1993,15 @@ static Sys_var_ulong Sys_net_read_timeout(
 static bool fix_net_write_timeout(sys_var *self, THD *thd, enum_var_type type)
 {
   if (type != OPT_GLOBAL)
-    my_net_set_write_timeout(&thd->net, thd->variables.net_write_timeout);
+    my_net_set_write_timeout(
+      &thd->net, timeout_from_seconds(thd->variables.net_write_timeout_seconds));
   return false;
 }
 static Sys_var_ulong Sys_net_write_timeout(
        "net_write_timeout",
        "Number of seconds to wait for a block to be written to a connection "
        "before aborting the write",
-       SESSION_VAR(net_write_timeout), CMD_LINE(REQUIRED_ARG),
+       SESSION_VAR(net_write_timeout_seconds), CMD_LINE(REQUIRED_ARG),
        VALID_RANGE(1, LONG_TIMEOUT), DEFAULT(NET_WRITE_TIMEOUT), BLOCK_SIZE(1),
        NO_MUTEX_GUARD, NOT_IN_BINLOG, ON_CHECK(0),
        ON_UPDATE(fix_net_write_timeout));
@@ -3151,7 +3153,7 @@ static Sys_var_ulong Sys_net_wait_timeout(
        "wait_timeout",
        "The number of seconds the server waits for activity on a "
        "connection before closing it",
-       SESSION_VAR(net_wait_timeout), CMD_LINE(REQUIRED_ARG),
+       SESSION_VAR(net_wait_timeout_seconds), CMD_LINE(REQUIRED_ARG),
        VALID_RANGE(1, IF_WIN(INT_MAX32/1000, LONG_TIMEOUT)),
        DEFAULT(NET_WAIT_TIMEOUT), BLOCK_SIZE(1));
 

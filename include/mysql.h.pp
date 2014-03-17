@@ -14,6 +14,16 @@ enum enum_server_command
   COM_BINLOG_DUMP_GTID,
   COM_END
 };
+typedef struct {
+  uint value_ms_;
+} timeout_t;
+timeout_t timeout_from_seconds(uint seconds);
+timeout_t timeout_from_millis(uint ms);
+timeout_t timeout_infinite();
+my_bool timeout_is_infinite(const timeout_t t);
+int timeout_is_nonzero(const timeout_t t);
+uint timeout_to_millis(const timeout_t t);
+uint timeout_to_seconds(const timeout_t t);
 struct st_vio;
 typedef struct st_vio Vio;
 typedef struct st_net {
@@ -23,7 +33,8 @@ typedef struct st_net {
   unsigned long remain_in_buf,length, buf_length, where_b;
   unsigned long max_packet,max_packet_size;
   unsigned int pkt_nr,compress_pkt_nr;
-  unsigned int write_timeout, read_timeout, retry_count;
+  timeout_t write_timeout, read_timeout;
+  uint retry_count;
   int fcntl;
   unsigned int *return_status;
   unsigned char reading_or_writing;
@@ -272,11 +283,14 @@ enum mysql_option
   MYSQL_OPT_CONNECT_ATTR_DELETE,
   MYSQL_SERVER_PUBLIC_KEY,
   MYSQL_ENABLE_CLEARTEXT_PLUGIN,
-  MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS
+  MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS,
+  MYSQL_OPT_CONNECT_TIMEOUT_MS,
+  MYSQL_OPT_READ_TIMEOUT_MS,
+  MYSQL_OPT_WRITE_TIMEOUT_MS
 };
 struct st_mysql_options_extention;
 struct st_mysql_options {
-  unsigned int connect_timeout, read_timeout, write_timeout;
+  timeout_t connect_timeout, read_timeout, write_timeout;
   unsigned int port, protocol;
   unsigned long client_flag;
   char *host,*user,*password,*unix_socket,*db;

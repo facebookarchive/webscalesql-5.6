@@ -20,6 +20,6 @@ SET @max_sql_select_limit = 4294967295;
 
 SET @default_wait_timeout= 28800;
 SET @min_wait_timeout= 1;
-SET @max_wait_timeout= 31536000;
+SET @max_wait_timeout= 604800;
 
 --enable_query_log

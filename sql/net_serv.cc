@@ -1029,25 +1029,64 @@ my_net_read(NET *net)
   return len;
 }
 
-
-void my_net_set_read_timeout(NET *net, uint timeout)
+void my_net_set_read_timeout(NET *net, timeout_t timeout)
 {
   DBUG_ENTER("my_net_set_read_timeout");
-  DBUG_PRINT("enter", ("timeout: %d", timeout));
+  DBUG_PRINT("enter", ("timeout: %d", timeout_to_millis(timeout)));
   net->read_timeout= timeout;
   if (net->vio)
     vio_timeout(net->vio, 0, timeout);
   DBUG_VOID_RETURN;
 }
 
-
-void my_net_set_write_timeout(NET *net, uint timeout)
+void my_net_set_write_timeout(NET *net, timeout_t timeout)
 {
   DBUG_ENTER("my_net_set_write_timeout");
-  DBUG_PRINT("enter", ("timeout: %d", timeout));
+  DBUG_PRINT("enter", ("timeout: %d", timeout_to_millis(timeout)));
   net->write_timeout= timeout;
   if (net->vio)
     vio_timeout(net->vio, 1, timeout);
   DBUG_VOID_RETURN;
 }
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+timeout_t timeout_from_seconds(uint seconds) {
+  timeout_t t;
+  /* Prevent accidental overflows; cap them at UINT_MAX - 1 milliseconds */
+  if (UINT_MAX / 1000 <= seconds) {
+    t.value_ms_ = UINT_MAX - 1;
+  } else {
+    t.value_ms_ = seconds * 1000;
+  }
+  return t;
+}
+
+timeout_t timeout_from_millis(uint ms) {
+  timeout_t t;
+  t.value_ms_ = ms;
+  return t;
+}
+
+timeout_t timeout_infinite() {
+  timeout_t t;
+  t.value_ms_ = UINT_MAX;
+  return t;
+}
+
+int timeout_is_nonzero(const timeout_t t) {
+  return t.value_ms_ != 0;
+}
+
+uint timeout_to_millis(const timeout_t t) { return t.value_ms_; }
+uint timeout_to_seconds(const timeout_t t) { return t.value_ms_ / 1000; }
+
+my_bool timeout_is_infinite(const timeout_t t) {
+  return t.value_ms_ == UINT_MAX;
+}
+
+#ifdef __cplusplus
+}
+#endif

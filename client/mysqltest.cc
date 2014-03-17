@@ -5501,7 +5501,7 @@ void do_connect(struct st_command *command)
 {
   int con_port= opt_port;
   char *con_options;
-  my_bool con_ssl= 0, con_compress= 0;
+  my_bool con_ssl= 0, con_compress= 0, con_timeout_1s=0, con_timeout_1500ms=0;
   my_bool con_pipe= 0, con_shm= 0, con_cleartext_enable= 0;
   my_bool con_secure_auth= 1;
   struct st_connection* con_slot;
@@ -5589,6 +5589,10 @@ void do_connect(struct st_command *command)
       con_ssl= 1;
     else if (!strncmp(con_options, "COMPRESS", 8))
       con_compress= 1;
+    else if (!strncmp(con_options, "TIMEOUT_1S", 10))
+      con_timeout_1s = 1;
+    else if (!strncmp(con_options, "TIMEOUT_1500MS", 14))
+      con_timeout_1500ms = 1;
     else if (!strncmp(con_options, "PIPE", 4))
       con_pipe= 1;
     else if (!strncmp(con_options, "SHM", 3))
@@ -5629,6 +5633,17 @@ void do_connect(struct st_command *command)
 
   if (opt_compress || con_compress)
     mysql_options(&con_slot->mysql, MYSQL_OPT_COMPRESS, NullS);
+  if (con_timeout_1s) {
+    int timeout = 1;
+    mysql_options(&con_slot->mysql, MYSQL_OPT_READ_TIMEOUT, &timeout);
+    mysql_options(&con_slot->mysql, MYSQL_OPT_WRITE_TIMEOUT, &timeout);
+    mysql_options(&con_slot->mysql, MYSQL_OPT_CONNECT_TIMEOUT, &timeout);
+  } else if (con_timeout_1500ms) {
+    int timeout = 1500;
+    mysql_options(&con_slot->mysql, MYSQL_OPT_READ_TIMEOUT_MS, &timeout);
+    mysql_options(&con_slot->mysql, MYSQL_OPT_WRITE_TIMEOUT_MS, &timeout);
+    mysql_options(&con_slot->mysql, MYSQL_OPT_CONNECT_TIMEOUT_MS, &timeout);
+  }
   mysql_options(&con_slot->mysql, MYSQL_OPT_LOCAL_INFILE, 0);
   mysql_options(&con_slot->mysql, MYSQL_SET_CHARSET_NAME,
                 charset_info->csname);

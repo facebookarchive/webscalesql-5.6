@@ -85,7 +85,7 @@ SET @@global.table_definition_cache = 42949672950;
 SELECT @@global.table_definition_cache;
 
 --Error ER_WRONG_TYPE_FOR_VAR
-SET @@global.table_definition_cache = 21221204.10;
+SET @@global.table_definition_cache = 212204.10;
 --Error ER_WRONG_TYPE_FOR_VAR
 SET @@global.table_definition_cache = ON;
 

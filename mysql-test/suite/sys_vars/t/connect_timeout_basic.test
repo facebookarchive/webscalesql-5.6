@@ -5,7 +5,7 @@
 # Access Type: Dynamic                                                         #
 # Data Type: Numeric                                                           #
 # Default Value: 5                                                             #
-# Range: 2 - 31536000                                                          #
+# Range: 2 - 604800                                                            #
 #                                                                              #
 #                                                                              #
 # Creation Date: 2008-02-07                                                    #
@@ -64,7 +64,7 @@ SET @@global.connect_timeout = 2;
 SELECT @@global.connect_timeout;
 SET @@global.connect_timeout = 10000;
 SELECT @@global.connect_timeout;
-SET @@global.connect_timeout = 21221204;
+SET @@global.connect_timeout = 212204;
 SELECT @@global.connect_timeout;
 
 
@@ -80,7 +80,7 @@ SELECT @@global.connect_timeout;
 SET @@global.connect_timeout = 42949672950;
 SELECT @@global.connect_timeout;
 --Error ER_WRONG_TYPE_FOR_VAR
-SET @@global.connect_timeout = 21221204.10;
+SET @@global.connect_timeout = 212204.10;
 --Error ER_WRONG_TYPE_FOR_VAR
 SET @@global.connect_timeout = ON;
 

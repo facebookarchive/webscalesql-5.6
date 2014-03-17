@@ -22,6 +22,7 @@
 #define	vio_violite_h_
 
 #include "my_net.h"   /* needed because of struct in_addr */
+#include "mysql_com.h"
 #include <mysql/psi/mysql_socket.h>
 
 
@@ -97,16 +98,16 @@ my_socket vio_fd(Vio*vio);
 /* Remote peer's address and name in text form */
 my_bool vio_peer_addr(Vio *vio, char *buf, uint16 *port, size_t buflen);
 /* Wait for an I/O event notification. */
-int vio_io_wait(Vio *vio, enum enum_vio_io_event event, int timeout);
+int vio_io_wait(Vio *vio, enum enum_vio_io_event event, timeout_t timeout);
 my_bool vio_is_connected(Vio *vio);
 #ifndef DBUG_OFF
 ssize_t vio_pending(Vio *vio);
 #endif
 /* Set timeout for a network operation. */
-int vio_timeout(Vio *vio, uint which, int timeout_sec);
+int vio_timeout(Vio *vio, uint which, timeout_t timeout);
 /* Connect to a peer. */
 my_bool vio_socket_connect(Vio *vio, struct sockaddr *addr, socklen_t len,
-                           int timeout);
+                           timeout_t timeout);
 
 my_bool vio_get_normalized_ip_string(const struct sockaddr *addr, int addr_length,
                                      char *ip_string, size_t ip_string_size);
@@ -226,8 +227,8 @@ struct st_vio
   char                  *read_pos;      /* start of unfetched data in the
                                            read buffer */
   char                  *read_end;      /* end of unfetched data */
-  int                   read_timeout;   /* Timeout value (ms) for read ops. */
-  int                   write_timeout;  /* Timeout value (ms) for write ops. */
+  timeout_t             read_timeout;   /* Timeout value for read ops. */
+  timeout_t             write_timeout;  /* Timeout value for write ops. */
   
   /* 
      VIO vtable interface to be implemented by VIO's like SSL, Socket,
@@ -257,7 +258,7 @@ struct st_vio
   int     (*vioshutdown)(Vio*);
   my_bool (*is_connected)(Vio*);
   my_bool (*has_data) (Vio*);
-  int (*io_wait)(Vio*, enum enum_vio_io_event, int);
+  int (*io_wait)(Vio*, enum enum_vio_io_event, timeout_t);
   my_bool (*connect)(Vio*, struct sockaddr *, socklen_t, int);
 #ifdef _WIN32
   OVERLAPPED overlapped;

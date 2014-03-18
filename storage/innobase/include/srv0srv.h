@@ -276,6 +276,7 @@ extern my_bool	srv_use_sys_malloc;
 extern ibool	srv_use_sys_malloc;
 #endif /* UNIV_HOTBACKUP */
 extern ulint	srv_buf_pool_size;	/*!< requested size in bytes */
+extern my_bool	srv_buf_pool_populate;	/*!< virtual page preallocation */
 extern ulint    srv_buf_pool_instances; /*!< requested number of buffer pool instances */
 extern ulong	srv_n_page_hash_locks;	/*!< number of locks to
 					protect buf_pool->page_hash */

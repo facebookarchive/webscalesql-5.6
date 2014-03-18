@@ -1,0 +1,16 @@
+--source include/have_innodb.inc
+
+CALL mtr.add_suppression(".* Forcing preallocation by faulting in pages.");
+
+# Display current value of innodb_buffer_pool_populate
+SELECT @@GLOBAL.innodb_buffer_pool_populate;
+--echo 1 Expected
+
+# Variable should be read-only
+--error ER_INCORRECT_GLOBAL_LOCAL_VAR
+SET @@GLOBAL.innodb_buffer_pool_populate=0;
+--echo Expected error 'Read only variable'
+
+SELECT @@GLOBAL.innodb_buffer_pool_populate;
+--echo 1 Expected
+

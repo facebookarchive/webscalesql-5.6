@@ -1,0 +1,12 @@
+CALL mtr.add_suppression(".* Forcing preallocation by faulting in pages.");
+SELECT @@GLOBAL.innodb_buffer_pool_populate;
+@@GLOBAL.innodb_buffer_pool_populate
+1
+1 Expected
+SET @@GLOBAL.innodb_buffer_pool_populate=0;
+ERROR HY000: Variable 'innodb_buffer_pool_populate' is a read only variable
+Expected error 'Read only variable'
+SELECT @@GLOBAL.innodb_buffer_pool_populate;
+@@GLOBAL.innodb_buffer_pool_populate
+1
+1 Expected

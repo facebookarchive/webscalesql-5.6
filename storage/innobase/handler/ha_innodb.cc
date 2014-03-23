@@ -134,6 +134,7 @@ static ulong innobase_write_io_threads;
 static long innobase_buffer_pool_instances = 1;
 
 static long long innobase_buffer_pool_size, innobase_log_file_size;
+static unsigned long innobase_sync_pool_size;
 
 /** Percentage of the buffer pool to reserve for 'old' blocks.
 Connected to buf_LRU_old_ratio. */
@@ -3165,6 +3166,7 @@ innobase_change_buffering_inited_ok:
 #endif /* defined(__WIN__) && !defined(_WIN64) */
 	}
 	srv_buf_pool_size = (ulint) innobase_buffer_pool_size;
+	srv_sync_pool_size = (ulint) innobase_sync_pool_size;
 	srv_buf_pool_instances = (ulint) innobase_buffer_pool_instances;
 
 	srv_mem_pool_size = (ulint) innobase_additional_mem_pool_size;
@@ -16151,6 +16153,12 @@ static MYSQL_SYSVAR_LONGLONG(buffer_pool_size, innobase_buffer_pool_size,
   "The size of the memory buffer InnoDB uses to cache data and indexes of its tables.",
   NULL, NULL, 128*1024*1024L, 5*1024*1024L, LONGLONG_MAX, 1024*1024L);
 
+static MYSQL_SYSVAR_ULONG(sync_pool_size, innobase_sync_pool_size,
+  PLUGIN_VAR_RQCMDARG | PLUGIN_VAR_READONLY,
+  "The size of the shared sync pool buffer InnoDB uses to store system lock"
+  "and condition variables.",
+  NULL, NULL, 1024UL, 1UL, ULONG_MAX, 1UL);
+
 #if defined UNIV_DEBUG || defined UNIV_PERF_DEBUG
 static MYSQL_SYSVAR_ULONG(page_hash_locks, srv_n_page_hash_locks,
   PLUGIN_VAR_OPCMDARG | PLUGIN_VAR_READONLY,
@@ -16669,6 +16677,7 @@ static struct st_mysql_sys_var* innobase_system_variables[]= {
   MYSQL_SYSVAR(autoextend_increment),
   MYSQL_SYSVAR(buffer_pool_size),
   MYSQL_SYSVAR(buffer_pool_populate),
+  MYSQL_SYSVAR(sync_pool_size),
   MYSQL_SYSVAR(buffer_pool_instances),
   MYSQL_SYSVAR(buffer_pool_filename),
   MYSQL_SYSVAR(buffer_pool_dump_now),

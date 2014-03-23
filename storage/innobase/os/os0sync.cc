@@ -25,6 +25,7 @@ Created 9/6/1995 Heikki Tuuri
 *******************************************************/
 
 #include "os0sync.h"
+#include "sync0rw.h"
 #ifdef UNIV_NONINL
 #include "os0sync.ic"
 #endif
@@ -58,12 +59,14 @@ static ibool		os_sync_mutex_inited	= FALSE;
 /** TRUE when os_sync_free() is being executed */
 static ibool		os_sync_free_called	= FALSE;
 
+UNIV_INTERN os_event_support_t*	os_support = NULL;
+
 /** This is incremented by 1 in os_thread_create and decremented by 1 in
 os_thread_exit */
 UNIV_INTERN ulint	os_thread_count		= 0;
 
 /** The list of all events created */
-static UT_LIST_BASE_NODE_T(os_event)		os_event_list;
+static UT_LIST_BASE_NODE_T(os_event_wrapper_struct_t)		os_event_list;
 
 /** The list of all OS 'slow' mutexes */
 static UT_LIST_BASE_NODE_T(os_mutex_t)		os_mutex_list;
@@ -301,6 +304,21 @@ os_cond_module_init(void)
 }
 
 /*********************************************************//**
+Initializes underlying os_support structure for events. */
+static
+void
+os_support_init(os_event_support_t *ev_sup)
+/*==============*/
+{
+#ifndef PFS_SKIP_EVENT_MUTEX
+	os_fast_mutex_init(event_os_mutex_key, &(ev_sup->os_mutex));
+#else
+	os_fast_mutex_init(PFS_NOT_INSTRUMENTED, &(ev_sup->os_mutex));
+#endif
+	os_cond_init(&(ev_sup->cond_var));
+}
+
+/*********************************************************//**
 Initializes global event and OS 'slow' mutex lists. */
 UNIV_INTERN
 void
@@ -317,6 +335,12 @@ os_sync_init(void)
 	os_cond_module_init();
 
 	os_sync_mutex = os_mutex_create();
+
+	os_support = (os_event_support_t*)ut_malloc(sizeof(os_event_support_t)
+	                                            * srv_sync_pool_size);
+	for(unsigned int i = 0; i < srv_sync_pool_size; ++i) {
+		os_support_init(os_support + i);
+	}
 
 	os_sync_mutex_inited = TRUE;
 }
@@ -356,6 +380,34 @@ os_sync_free(void)
 		mutex = UT_LIST_GET_FIRST(os_mutex_list);
 	}
 	os_sync_free_called = FALSE;
+
+	/* This is the code that should run to clean up
+	int i = 0;
+	for(; i < srv_sync_pool_size; ++i) {
+		os_fast_mutex_free(&os_support[i].os_mutex);
+		os_cond_destroy(&os_support[i].cond_var);
+	}
+	...but we do this instead, since we don't clean up the events pool,
+	and so should not remove the pthread data they all point to: */
+	os_fast_mutex_count -= srv_sync_pool_size;
+
+	if (UNIV_UNLIKELY(os_sync_mutex_inited)) {
+		os_mutex_enter(os_sync_mutex);
+	}
+
+	/* Account for the events, and their fast_mutexes,
+	*  within the (never de-initialized) rw_lock structs */
+	os_event_count -= rw_lock_count*2;
+	rw_lock_count = 0; /* Not used after here, just reset for neatness. */
+
+	if (UNIV_UNLIKELY(os_sync_mutex_inited)) {
+		os_mutex_exit(os_sync_mutex);
+	}
+
+#ifdef UNIV_DEBUG_VALGRIND
+	if (os_support != NULL)
+		ut_free(os_support);
+#endif
 }
 
 /*********************************************************//**
@@ -368,8 +420,37 @@ os_event_t
 os_event_create(void)
 /*==================*/
 {
-	os_event_t	event;
+	os_event_t event = (os_event_t)ut_malloc(
+	                   sizeof(struct os_event_wrapper_struct));
+	os_event_create2(&event->ev);
 
+	/*Note: this overwrites the "sup" element, that was pointed to a
+	shared sync data pool element by os_event_create2, with a
+	dynamically-allocated set of data exclusively for this event. */
+	event->ev.sup = (os_event_support_t*)ut_malloc(sizeof(os_event_support_t));
+
+	os_support_init(event->ev.sup);
+
+	if (UNIV_LIKELY(os_sync_mutex_inited)) {
+		os_mutex_enter(os_sync_mutex);
+	}
+
+	/* Put to the list of events */
+	UT_LIST_ADD_FIRST(os_event_list, os_event_list, event);
+
+	if (UNIV_LIKELY(os_sync_mutex_inited)) {
+		os_mutex_exit(os_sync_mutex);
+	}
+
+	return(event);
+}
+
+UNIV_INTERN
+void
+os_event_create2(
+/*=============*/
+	os_event_struct_t* event)/*!< in: pre-allocated struct, or NULL */
+{
 #ifdef __WIN__
 	if(!srv_use_native_conditions) {
 
@@ -385,44 +466,34 @@ os_event_create(void)
 	} else /* Windows with condition variables */
 #endif
 	{
-		event = static_cast<os_event_t>(ut_malloc(sizeof *event));
-
-#ifndef PFS_SKIP_EVENT_MUTEX
-		os_fast_mutex_init(event_os_mutex_key, &event->os_mutex);
-#else
-		os_fast_mutex_init(PFS_NOT_INSTRUMENTED, &event->os_mutex);
-#endif
-
-		os_cond_init(&(event->cond_var));
-
-		event->is_set = FALSE;
-
 		/* We return this value in os_event_reset(), which can then be
 		be used to pass to the os_event_wait_low(). The value of zero
 		is reserved in os_event_wait_low() for the case when the
 		caller does not want to pass any signal_count value. To
 		distinguish between the two cases we initialize signal_count
 		to 1 here. */
-		event->signal_count = 1;
+		event->stats = 1;
 	}
 
 	/* The os_sync_mutex can be NULL because during startup an event
 	can be created [ because it's embedded in the mutex/rwlock ] before
 	this module has been initialized */
-	if (os_sync_mutex != NULL) {
+	if (UNIV_LIKELY(os_sync_mutex_inited)) {
 		os_mutex_enter(os_sync_mutex);
 	}
 
-	/* Put to the list of events */
-	UT_LIST_ADD_FIRST(os_event_list, os_event_list, event);
-
+	/* Note: this sets the "sup" element to point to a shared sync data
+	pool element.  The event itself is not shared, but the underlying
+	OS data used by them is.  Using a smaller shared pool of these
+	elements saves a great deal of memory.  This is only done for the
+	buffer pool events.  The other events call os_event_create(), and
+	this will be overwritten if this was called via os_event_create. */
+	event->sup = os_support + (os_event_count % srv_sync_pool_size);
 	os_event_count++;
 
-	if (os_sync_mutex != NULL) {
+	if (UNIV_LIKELY(os_sync_mutex_inited)) {
 		os_mutex_exit(os_sync_mutex);
 	}
-
-	return(event);
 }
 
 /**********************************************************//**
@@ -430,9 +501,9 @@ Sets an event semaphore to the signaled state: lets waiting threads
 proceed. */
 UNIV_INTERN
 void
-os_event_set(
-/*=========*/
-	os_event_t	event)	/*!< in: event to set */
+os_event_set2(
+/*==========*/
+	os_event_struct_t*	event)	/*!< in: event to set */
 {
 	ut_a(event);
 
@@ -443,17 +514,17 @@ os_event_set(
 	}
 #endif
 
-	os_fast_mutex_lock(&(event->os_mutex));
+	os_fast_mutex_lock(&(event->sup->os_mutex));
 
-	if (event->is_set) {
+	if (IS_SET(event)) {
 		/* Do nothing */
 	} else {
-		event->is_set = TRUE;
-		event->signal_count += 1;
-		os_cond_broadcast(&(event->cond_var));
+		INC_SIGNAL_COUNT(event);
+		SET_IS_SET(event);
+		os_cond_broadcast(&(event->sup->cond_var));
 	}
 
-	os_fast_mutex_unlock(&(event->os_mutex));
+	os_fast_mutex_unlock(&(event->sup->os_mutex));
 }
 
 /**********************************************************//**
@@ -466,9 +537,9 @@ os_event_wait_low() call. See comments for os_event_wait_low().
 @return	current signal_count. */
 UNIV_INTERN
 ib_int64_t
-os_event_reset(
+os_event_reset2(
 /*===========*/
-	os_event_t	event)	/*!< in: event to reset */
+	os_event_struct_t*	event)	/*!< in: event to reset */
 {
 	ib_int64_t	ret = 0;
 
@@ -481,16 +552,16 @@ os_event_reset(
 	}
 #endif
 
-	os_fast_mutex_lock(&(event->os_mutex));
+	os_fast_mutex_lock(&(event->sup->os_mutex));
 
-	if (!event->is_set) {
+	if (!IS_SET(event)) {
 		/* Do nothing */
 	} else {
-		event->is_set = FALSE;
+		CLEAR_IS_SET(event);
 	}
-	ret = event->signal_count;
+	ret = SIGNAL_COUNT(event);
 
-	os_fast_mutex_unlock(&(event->os_mutex));
+	os_fast_mutex_unlock(&(event->sup->os_mutex));
 	return(ret);
 }
 
@@ -512,16 +583,16 @@ os_event_free_internal(
 		ut_a(event);
 
 		/* This is to avoid freeing the mutex twice */
-		os_fast_mutex_free(&(event->os_mutex));
+		os_fast_mutex_free(&(event->ev.sup->os_mutex));
 
-		os_cond_destroy(&(event->cond_var));
+		os_cond_destroy(&(event->ev.sup->cond_var));
 	}
 
 	/* Remove from the list of events */
 	UT_LIST_REMOVE(os_event_list, os_event_list, event);
 
 	os_event_count--;
-
+	ut_free(event->ev.sup);
 	ut_free(event);
 }
 
@@ -534,6 +605,29 @@ os_event_free(
 	os_event_t	event)	/*!< in: event to free */
 
 {
+	os_fast_mutex_free(&(event->ev.sup->os_mutex));
+	os_cond_destroy(&(event->ev.sup->cond_var));
+	ut_free(event->ev.sup);
+
+	os_event_free2(&event->ev);
+
+	os_mutex_enter(os_sync_mutex);
+
+	UT_LIST_REMOVE(os_event_list, os_event_list, event);
+
+	os_mutex_exit(os_sync_mutex);
+
+	ut_free(event);
+}
+
+/**********************************************************//**
+Cleans up an event object. */
+UNIV_INTERN
+void
+os_event_free2(
+/*===========*/
+	os_event_struct_t* event) /*!< in: event to free */
+{
 	ut_a(event);
 #ifdef __WIN__
 	if(!srv_use_native_conditions){
@@ -541,21 +635,15 @@ os_event_free(
 	} else /*Windows with condition variables */
 #endif
 	{
-		os_fast_mutex_free(&(event->os_mutex));
-
-		os_cond_destroy(&(event->cond_var));
+		event->sup = NULL;
 	}
 
 	/* Remove from the list of events */
 	os_mutex_enter(os_sync_mutex);
 
-	UT_LIST_REMOVE(os_event_list, os_event_list, event);
-
 	os_event_count--;
 
 	os_mutex_exit(os_sync_mutex);
-
-	ut_free(event);
 }
 
 /**********************************************************//**
@@ -577,9 +665,9 @@ value returned by os_event_reset() should be passed in as
 reset_sig_count. */
 UNIV_INTERN
 void
-os_event_wait_low(
+os_event_wait_low2(
 /*==============*/
-	os_event_t	event,		/*!< in: event to wait */
+	os_event_struct_t*	event,	/*!< in: event to wait */
 	ib_int64_t	reset_sig_count)/*!< in: zero or the value
 					returned by previous call of
 					os_event_reset(). */
@@ -600,21 +688,21 @@ os_event_wait_low(
 	}
 #endif
 
-	os_fast_mutex_lock(&event->os_mutex);
+	os_fast_mutex_lock(&event->sup->os_mutex);
 
 	if (!reset_sig_count) {
-		reset_sig_count = event->signal_count;
+		reset_sig_count = SIGNAL_COUNT(event);
 	}
 
-	while (!event->is_set && event->signal_count == reset_sig_count) {
-		os_cond_wait(&(event->cond_var), &(event->os_mutex));
+	while (!IS_SET(event) && SIGNAL_COUNT(event) == reset_sig_count) {
+		os_cond_wait(&(event->sup->cond_var), &(event->sup->os_mutex));
 
 		/* Solaris manual said that spurious wakeups may occur: we
 		have to check if the event really has been signaled after
 		we came here to wait */
 	}
 
-	os_fast_mutex_unlock(&event->os_mutex);
+	os_fast_mutex_unlock(&event->sup->os_mutex);
 }
 
 /**********************************************************//**
@@ -623,9 +711,9 @@ a timeout is exceeded.
 @return	0 if success, OS_SYNC_TIME_EXCEEDED if timeout was exceeded */
 UNIV_INTERN
 ulint
-os_event_wait_time_low(
+os_event_wait_time_low2(
 /*===================*/
-	os_event_t	event,			/*!< in: event to wait */
+	os_event_struct_t*	event,		/*!< in: event to wait */
 	ulint		time_in_usec,		/*!< in: timeout in
 						microseconds, or
 						OS_SYNC_INFINITE_TIME */
@@ -701,20 +789,20 @@ os_event_wait_time_low(
 
 #endif /* __WIN__ */
 
-	os_fast_mutex_lock(&event->os_mutex);
+	os_fast_mutex_lock(&event->sup->os_mutex);
 
 	if (!reset_sig_count) {
-		reset_sig_count = event->signal_count;
+		reset_sig_count = SIGNAL_COUNT(event);
 	}
 
 	do {
-		if (event->is_set || event->signal_count != reset_sig_count) {
+		if (IS_SET(event) || SIGNAL_COUNT(event) != reset_sig_count) {
 
 			break;
 		}
 
 		timed_out = os_cond_wait_timed(
-			&event->cond_var, &event->os_mutex,
+			&event->sup->cond_var, &event->sup->os_mutex,
 #ifndef __WIN__
 			&abstime
 #else
@@ -724,7 +812,7 @@ os_event_wait_time_low(
 
 	} while (!timed_out);
 
-	os_fast_mutex_unlock(&event->os_mutex);
+	os_fast_mutex_unlock(&event->sup->os_mutex);
 
 	return(timed_out ? OS_SYNC_TIME_EXCEEDED : 0);
 }

@@ -1,0 +1,53 @@
+'#---------------------BS_STVARS_022_01----------------------#'
+SELECT @@GLOBAL.innodb_sync_pool_size;
+@@GLOBAL.innodb_sync_pool_size
+1024
+1024 Expected
+'#---------------------BS_STVARS_022_02----------------------#'
+SET @@GLOBAL.innodb_sync_pool_size=1;
+ERROR HY000: Variable 'innodb_sync_pool_size' is a read only variable
+Expected error 'Read only variable'
+SELECT @@GLOBAL.innodb_sync_pool_size;
+@@GLOBAL.innodb_sync_pool_size
+1024
+1024 Expected
+'#---------------------BS_STVARS_022_03----------------------#'
+SELECT @@GLOBAL.innodb_sync_pool_size = VARIABLE_VALUE
+FROM INFORMATION_SCHEMA.GLOBAL_VARIABLES
+WHERE VARIABLE_NAME='innodb_sync_pool_size';
+@@GLOBAL.innodb_sync_pool_size = VARIABLE_VALUE
+1
+1 Expected
+SELECT @@GLOBAL.innodb_sync_pool_size;
+@@GLOBAL.innodb_sync_pool_size
+1024
+1024 Expected
+SELECT VARIABLE_VALUE
+FROM INFORMATION_SCHEMA.GLOBAL_VARIABLES
+WHERE VARIABLE_NAME='innodb_sync_pool_size';
+VARIABLE_VALUE
+1024
+1024 Expected
+'#---------------------BS_STVARS_022_04----------------------#'
+SELECT @@innodb_sync_pool_size = @@GLOBAL.innodb_sync_pool_size;
+@@innodb_sync_pool_size = @@GLOBAL.innodb_sync_pool_size
+1
+1 Expected
+'#---------------------BS_STVARS_022_05----------------------#'
+SELECT @@innodb_sync_pool_size;
+@@innodb_sync_pool_size
+1024
+1024 Expected
+SELECT @@local.innodb_sync_pool_size;
+ERROR HY000: Variable 'innodb_sync_pool_size' is a GLOBAL variable
+Expected error 'Variable is a GLOBAL variable'
+SELECT @@SESSION.innodb_sync_pool_size;
+ERROR HY000: Variable 'innodb_sync_pool_size' is a GLOBAL variable
+Expected error 'Variable is a GLOBAL variable'
+SELECT @@GLOBAL.innodb_sync_pool_size;
+@@GLOBAL.innodb_sync_pool_size
+1024
+1024 Expected
+SELECT innodb_sync_pool_size = @@SESSION.innodb_sync_pool_size;
+ERROR 42S22: Unknown column 'innodb_sync_pool_size' in 'field list'
+Expected error 'Unknown column'

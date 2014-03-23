@@ -1,0 +1,93 @@
+################## mysql-test\t\innodb_sync_pool_size_basic.test ##############
+#                                                                             #
+# Variable Name: innodb_sync_pool_size                                        #
+# Scope: Global                                                               #
+# Access Type: Static                                                         #
+# Data Type: numeric                                                          #
+#                                                                             #
+#                                                                             #
+# Creation Date: 2012-02-27                                                   #
+# Author : Steaphan Greene                                                    #
+#                                                                             #
+#                                                                             #
+# Description: Test Cases of Dynamic System Variable innodb_sync_pool_size    #
+#              that checks the behavior of this variable.                     #
+#                                                                             #
+###############################################################################
+
+--source include/have_innodb.inc
+
+--echo '#---------------------BS_STVARS_022_01----------------------#'
+####################################################################
+#   Displaying default value                                       #
+####################################################################
+SELECT @@GLOBAL.innodb_sync_pool_size;
+--echo 1024 Expected
+
+
+--echo '#---------------------BS_STVARS_022_02----------------------#'
+####################################################################
+#   Check if Value can set                                         #
+####################################################################
+
+--error ER_INCORRECT_GLOBAL_LOCAL_VAR
+SET @@GLOBAL.innodb_sync_pool_size=1;
+--echo Expected error 'Read only variable'
+
+SELECT @@GLOBAL.innodb_sync_pool_size;
+--echo 1024 Expected
+
+
+
+
+--echo '#---------------------BS_STVARS_022_03----------------------#'
+#################################################################
+# Check if the value in GLOBAL Table matches value in variable  #
+#################################################################
+
+SELECT @@GLOBAL.innodb_sync_pool_size = VARIABLE_VALUE
+FROM INFORMATION_SCHEMA.GLOBAL_VARIABLES
+WHERE VARIABLE_NAME='innodb_sync_pool_size';
+--echo 1 Expected
+
+SELECT @@GLOBAL.innodb_sync_pool_size;
+--echo 1024 Expected
+
+SELECT VARIABLE_VALUE
+FROM INFORMATION_SCHEMA.GLOBAL_VARIABLES
+WHERE VARIABLE_NAME='innodb_sync_pool_size';
+--echo 1024 Expected
+
+
+
+--echo '#---------------------BS_STVARS_022_04----------------------#'
+################################################################################
+#  Check if accessing variable with and without GLOBAL point to same variable  #
+################################################################################
+SELECT @@innodb_sync_pool_size = @@GLOBAL.innodb_sync_pool_size;
+--echo 1 Expected
+
+
+
+--echo '#---------------------BS_STVARS_022_05----------------------#'
+################################################################################
+#   Check if innodb_sync_pool_size can be accessed with and without @@ sign  #
+################################################################################
+
+SELECT @@innodb_sync_pool_size;
+--echo 1024 Expected
+
+--Error ER_INCORRECT_GLOBAL_LOCAL_VAR
+SELECT @@local.innodb_sync_pool_size;
+--echo Expected error 'Variable is a GLOBAL variable'
+
+--Error ER_INCORRECT_GLOBAL_LOCAL_VAR
+SELECT @@SESSION.innodb_sync_pool_size;
+--echo Expected error 'Variable is a GLOBAL variable'
+
+SELECT @@GLOBAL.innodb_sync_pool_size;
+--echo 1024 Expected
+
+--Error ER_BAD_FIELD_ERROR
+SELECT innodb_sync_pool_size = @@SESSION.innodb_sync_pool_size;
+--echo Expected error 'Unknown column'

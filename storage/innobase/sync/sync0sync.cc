@@ -279,7 +279,7 @@ mutex_create_func(
 	os_fast_mutex_init(PFS_NOT_INSTRUMENTED, &mutex->os_fast_mutex);
 	mutex->lock_word = 0;
 #endif
-	mutex->event = os_event_create();
+	os_event_create2(&mutex->event);
 	mutex_set_waiters(mutex, 0);
 #ifdef UNIV_DEBUG
 	mutex->magic_n = MUTEX_MAGIC_N;
@@ -361,7 +361,7 @@ mutex_free_func(
 		mutex_exit(&mutex_list_mutex);
 	}
 
-	os_event_free(mutex->event);
+	os_event_free2(&mutex->event);
 #ifdef UNIV_MEM_DEBUG
 func_exit:
 #endif /* UNIV_MEM_DEBUG */
@@ -594,7 +594,7 @@ mutex_signal_object(
 
 	/* The memory order of resetting the waiters field and
 	signaling the object is important. See LEMMA 1 above. */
-	os_event_set(mutex->event);
+	os_event_set2(&mutex->event);
 	sync_array_object_signalled();
 }
 

@@ -747,7 +747,8 @@ implementation of a mutual exclusion semaphore. */
 
 /** InnoDB mutex */
 struct ib_mutex_t {
-	os_event_t	event;	/*!< Used by sync0arr.cc for the wait queue */
+	os_event_struct_t	event;
+				/*!< Used by sync0arr.cc for the wait queue */
 	volatile lock_word_t	lock_word;	/*!< lock_word is the target
 				of the atomic test-and-set instruction when
 				atomic operations are enabled. */

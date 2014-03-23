@@ -5735,7 +5735,7 @@ os_aio_print(
 			srv_io_thread_function[i]);
 
 #ifndef __WIN__
-		if (os_aio_segment_wait_events[i]->is_set) {
+		if (IS_SET(&os_aio_segment_wait_events[i]->ev)) {
 			fprintf(file, " ev set");
 		}
 #endif /* __WIN__ */

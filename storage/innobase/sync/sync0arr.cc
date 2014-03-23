@@ -286,7 +286,7 @@ sync_array_validate(
 /*******************************************************************//**
 Returns the event that the thread owning the cell waits for. */
 static
-os_event_t
+os_event_struct_t*
 sync_cell_get_event(
 /*================*/
 	sync_cell_t*	cell) /*!< in: non-empty sync array cell */
@@ -294,11 +294,11 @@ sync_cell_get_event(
 	ulint type = cell->request_type;
 
 	if (type == SYNC_MUTEX) {
-		return(((ib_mutex_t*) cell->wait_object)->event);
+		return(&((ib_mutex_t*) cell->wait_object)->event);
 	} else if (type == RW_LOCK_WAIT_EX) {
-		return(((rw_lock_t*) cell->wait_object)->wait_ex_event);
+		return(&((rw_lock_t*) cell->wait_object)->wait_ex_event);
 	} else { /* RW_LOCK_SHARED and RW_LOCK_EX wait on the same event */
-		return(((rw_lock_t*) cell->wait_object)->event);
+		return(&((rw_lock_t*) cell->wait_object)->event);
 	}
 }
 
@@ -318,7 +318,7 @@ sync_array_reserve_cell(
 	ulint*		index)	/*!< out: index of the reserved cell */
 {
 	sync_cell_t*	cell;
-	os_event_t      event;
+	os_event_struct_t*      event;
 	ulint		i;
 
 	ut_a(object);
@@ -360,7 +360,7 @@ sync_array_reserve_cell(
 			the value of signal_count at which the event
 			was reset. */
                         event = sync_cell_get_event(cell);
-			cell->signal_count = os_event_reset(event);
+			cell->signal_count = os_event_reset2(event);
 
 			cell->reservation_time = ut_time();
 
@@ -387,7 +387,7 @@ sync_array_wait_event(
 	ulint		index)	/*!< in: index of the reserved cell */
 {
 	sync_cell_t*	cell;
-	os_event_t	event;
+	os_event_struct_t*	event;
 
 	ut_a(arr);
 
@@ -421,7 +421,7 @@ sync_array_wait_event(
 #endif
 	sync_array_exit(arr);
 
-	os_event_wait_low(event, cell->signal_count);
+	os_event_wait_low2(event, cell->signal_count);
 
 	sync_array_free_cell(arr, index);
 }
@@ -852,11 +852,11 @@ sync_array_wake_threads_if_sema_free_low(
 			count++;
 
 			if (sync_arr_cell_can_wake_up(cell)) {
-				os_event_t      event;
+				os_event_struct_t*      event;
 
 				event = sync_cell_get_event(cell);
 
-				os_event_set(event);
+				os_event_set2(event);
 			}
 		}
 	}

@@ -101,6 +101,7 @@ struct rw_lock_debug_t;
 #endif /* UNIV_SYNC_DEBUG */
 
 typedef UT_LIST_BASE_NODE_T(rw_lock_t)	rw_lock_list_t;
+extern ulint	rw_lock_count;
 
 extern rw_lock_list_t	rw_lock_list;
 extern ib_mutex_t		rw_lock_list_mutex;
@@ -594,8 +595,9 @@ struct rw_lock_t {
 				/*!< Thread id of writer thread. Is only
 				guaranteed to have sane and non-stale
 				value iff recursive flag is set. */
-	os_event_t	event;	/*!< Used by sync0arr.cc for thread queueing */
-	os_event_t	wait_ex_event;
+	os_event_struct_t	event;
+				/*!< Used by sync0arr.cc for thread queueing */
+	os_event_struct_t	wait_ex_event;
 				/*!< Event for next-writer to wait on. A thread
 				must decrement lock_word before waiting. */
 #ifndef INNODB_RW_LOCKS_USE_ATOMICS

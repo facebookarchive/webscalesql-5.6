@@ -132,7 +132,8 @@ row_sel_sec_rec_is_for_blob(
 
 	len = btr_copy_externally_stored_field_prefix(buf, prefix_len,
 						      zip_size,
-						      clust_field, clust_len);
+						      clust_field, clust_len,
+						      NULL);
 
 	if (UNIV_UNLIKELY(len == 0)) {
 		/* The BLOB was being deleted as the server crashed.
@@ -451,7 +452,7 @@ row_sel_fetch_columns(
 				data = btr_rec_copy_externally_stored_field(
 					rec, offsets,
 					dict_table_zip_size(index->table),
-					field_no, &len, heap);
+					field_no, &len, heap, NULL);
 
 				/* data == NULL means that the
 				externally stored field was not
@@ -1399,7 +1400,7 @@ table_loop:
 
 	/* Open a cursor to index, or restore an open cursor position */
 
-	mtr_start(&mtr);
+	mtr_start_trx(&mtr, thr_get_trx(thr));
 
 	if (consistent_read && plan->unique_search && !plan->pcur_is_open
 	    && !plan->must_get_clust
@@ -1439,7 +1440,7 @@ table_loop:
 		plan_reset_cursor(plan);
 
 		mtr_commit(&mtr);
-		mtr_start(&mtr);
+		mtr_start_trx(&mtr, thr_get_trx(thr));
 	}
 
 	if (search_latch_locked) {
@@ -2810,7 +2811,7 @@ row_sel_store_mysql_field_func(
 		data = btr_rec_copy_externally_stored_field(
 			rec, offsets,
 			dict_table_zip_size(prebuilt->table),
-			field_no, &len, heap);
+			field_no, &len, heap, NULL);
 
 		if (UNIV_UNLIKELY(!data)) {
 			/* The externally stored field was not written
@@ -3883,7 +3884,7 @@ row_search_for_mysql(
 		}
 	}
 
-	mtr_start(&mtr);
+	mtr_start_trx(&mtr, trx);
 
 	/*-------------------------------------------------------------*/
 	/* PHASE 2: Try fast adaptive hash index search if possible */
@@ -4011,7 +4012,7 @@ release_search_latch_if_needed:
 			}
 
 			mtr_commit(&mtr);
-			mtr_start(&mtr);
+			mtr_start_trx(&mtr, trx);
 		}
 	}
 
@@ -4994,7 +4995,7 @@ next_rec:
 		mtr_commit(&mtr);
 		mtr_has_extra_clust_latch = FALSE;
 
-		mtr_start(&mtr);
+		mtr_start_trx(&mtr, trx);
 		if (sel_restore_position_for_mysql(&same_user_rec,
 						   BTR_SEARCH_LEAF,
 						   pcur, moves_up, &mtr)) {
@@ -5059,7 +5060,7 @@ lock_table_wait:
 		/* It was a lock wait, and it ended */
 
 		thr->lock_state = QUE_THR_LOCK_NOLOCK;
-		mtr_start(&mtr);
+		mtr_start_trx(&mtr, trx);
 
 		/* Table lock waited, go try to obtain table lock
 		again */

@@ -271,7 +271,7 @@ row_merge_buf_redundant_convert(
 			    field_ref_zero, BTR_EXTERN_FIELD_REF_SIZE));
 
 		byte*	data = btr_copy_externally_stored_field(
-			&ext_len, field_data, zip_size, field_len, heap);
+			&ext_len, field_data, zip_size, field_len, heap, NULL);
 
 		ut_ad(ext_len < len);
 
@@ -2363,7 +2363,7 @@ row_merge_copy_blobs(
 		BLOB pointers are read (row_merge_read_clustered_index())
 		and dereferenced (below). */
 		data = btr_rec_copy_externally_stored_field(
-			mrec, offsets, zip_size, i, &len, heap);
+			mrec, offsets, zip_size, i, &len, heap, NULL);
 		/* Because we have locked the table, any records
 		written by incomplete transactions must have been
 		rolled back already. There must not be any incomplete

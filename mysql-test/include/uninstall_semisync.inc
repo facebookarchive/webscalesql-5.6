@@ -8,13 +8,11 @@
 --connection slave
 --source include/stop_slave_io.inc
 
-# Uninstall rpl_semi_sync_slave first
---disable_warnings
-UNINSTALL PLUGIN rpl_semi_sync_slave;
+SET GLOBAL rpl_semi_sync_slave_enabled = 0;
 
 --connection master
-UNINSTALL PLUGIN rpl_semi_sync_master;
---enable_warnings
+SET GLOBAL rpl_semi_sync_master_enabled = 0;
+SET GLOBAL rpl_semi_sync_master_timeout = DEFAULT;
 
 --connection slave
 --source include/start_slave_io.inc

@@ -18,10 +18,10 @@ SET(SEMISYNC_MASTER_SOURCES
  semisync.h semisync_master.h)
 
 MYSQL_ADD_PLUGIN(semisync_master ${SEMISYNC_MASTER_SOURCES}  
-  MODULE_ONLY MODULE_OUTPUT_NAME "semisync_master")
+  MODULE_OUTPUT_NAME "semisync_master" DEFAULT STATIC_ONLY)
 
 SET(SEMISYNC_SLAVE_SOURCES  semisync.cc semisync_slave.cc 
   semisync_slave_plugin.cc semisync.h semisync_slave.h )
 MYSQL_ADD_PLUGIN(semisync_slave ${SEMISYNC_SLAVE_SOURCES} 
-  MODULE_ONLY MODULE_OUTPUT_NAME "semisync_slave")
+  MODULE_OUTPUT_NAME "semisync_slave" DEFAULT STATIC_ONLY)
 

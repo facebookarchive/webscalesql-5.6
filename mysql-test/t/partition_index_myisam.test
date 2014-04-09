@@ -58,12 +58,12 @@ SELECT TRACE FROM INFORMATION_SCHEMA.OPTIMIZER_TRACE;
 # a reads 3rd row from p1 (0xe)
 # a returns 0xe from p1
 # MATCH! (0xe from p1 == 0xe from p1)
-SELECT a,b,c FROM t1 WHERE b = 2 AND a = 2;
+SELECT a,b,c FROM t1 WHERE b = 2 AND a = 2 ORDER BY a,b,c;
 
 SET @old_opt_switch = @@session.optimizer_switch;
 SET SESSION optimizer_switch="index_merge_intersection=off";
 --echo # Without index_merge_intersection
-SELECT a,b,c FROM t1 WHERE b = 2 AND a = 2;
+SELECT a,b,c FROM t1 WHERE b = 2 AND a = 2 ORDER BY a,b,c;
 EXPLAIN SELECT a,b,c FROM t1 WHERE b = 2 AND a = 2;
 
 SET SESSION optimizer_switch="index_merge_union=on";
@@ -90,9 +90,9 @@ SELECT TRACE FROM INFORMATION_SCHEMA.OPTIMIZER_TRACE;
 # Fetch row 0x0 from p1 (2,2,1) (Dup, doh).
 # Fetch row 0xe from p1 (2,2,4)
 
-SELECT a,b,c FROM t1 WHERE (b = 2 OR a = 2) AND  c > 0 AND c < 100;
+SELECT a,b,c FROM t1 WHERE (b = 2 OR a = 2) AND  c > 0 AND c < 100 ORDER BY a,b,c;
 SET SESSION optimizer_switch="index_merge_union=off";
-SELECT a,b,c FROM t1 WHERE (b = 2 OR a = 2) AND  c > 0 AND c < 100;
+SELECT a,b,c FROM t1 WHERE (b = 2 OR a = 2) AND  c > 0 AND c < 100 ORDER BY a,b,c;
 EXPLAIN SELECT a,b,c FROM t1 WHERE (b = 2 OR a = 2) AND  c > 0 AND c < 100;
 
 SET SESSION optimizer_switch="index_merge_sort_union=on";
@@ -104,9 +104,9 @@ SET SESSION optimizer_trace="enabled=off";
 }
 --echo # Not affected, added for completeness...
 # Verified that it does not demand sorted results, index_init(sorted=false)!
-SELECT a,b,c FROM t1 WHERE (b >= 2 OR a >= 2) AND  c > 0 AND c < 100;
+SELECT a,b,c FROM t1 WHERE (b >= 2 OR a >= 2) AND  c > 0 AND c < 100 ORDER BY a,b,c;
 SET SESSION optimizer_switch="index_merge_sort_union=off";
-SELECT a,b,c FROM t1 WHERE (b >= 2 OR a >= 2) AND  c > 0 AND c < 100;
+SELECT a,b,c FROM t1 WHERE (b >= 2 OR a >= 2) AND  c > 0 AND c < 100 ORDER BY a,b,c;
 EXPLAIN SELECT a,b,c FROM t1 WHERE (b >= 2 OR a >= 2) AND  c > 0 AND c < 100;
 
 SET @@session.optimizer_switch = @old_opt_switch;

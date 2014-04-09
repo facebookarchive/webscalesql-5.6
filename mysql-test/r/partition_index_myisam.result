@@ -35,14 +35,14 @@ id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
 # Make 'a' read p0-R3, p1-R1, p1-R3
 # Make 'b' read p1-R1, p1-R3
 # 'b' will skip p1-R1 since R3 is bigger than R1.
-SELECT a,b,c FROM t1 WHERE b = 2 AND a = 2;
+SELECT a,b,c FROM t1 WHERE b = 2 AND a = 2 ORDER BY a,b,c;
 a	b	c
 2	2	1
 2	2	4
 SET @old_opt_switch = @@session.optimizer_switch;
 SET SESSION optimizer_switch="index_merge_intersection=off";
 # Without index_merge_intersection
-SELECT a,b,c FROM t1 WHERE b = 2 AND a = 2;
+SELECT a,b,c FROM t1 WHERE b = 2 AND a = 2 ORDER BY a,b,c;
 a	b	c
 2	2	1
 2	2	4
@@ -53,12 +53,12 @@ SET SESSION optimizer_switch="index_merge_union=on";
 EXPLAIN SELECT a,b,c FROM t1 WHERE (b = 2 OR a = 2) AND  c > 0 AND c < 100;
 id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
 1	SIMPLE	t1	index_merge	a,b	b,a	3,3	NULL	5	Using union(b,a); Using where
-SELECT a,b,c FROM t1 WHERE (b = 2 OR a = 2) AND  c > 0 AND c < 100;
+SELECT a,b,c FROM t1 WHERE (b = 2 OR a = 2) AND  c > 0 AND c < 100 ORDER BY a,b,c;
 a	b	c
 2	2	1
 2	2	4
 SET SESSION optimizer_switch="index_merge_union=off";
-SELECT a,b,c FROM t1 WHERE (b = 2 OR a = 2) AND  c > 0 AND c < 100;
+SELECT a,b,c FROM t1 WHERE (b = 2 OR a = 2) AND  c > 0 AND c < 100 ORDER BY a,b,c;
 a	b	c
 2	2	1
 2	2	4
@@ -70,12 +70,12 @@ EXPLAIN SELECT a,b,c FROM t1 WHERE (b >= 2 OR a >= 2) AND  c > 0 AND c < 100;
 id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
 1	SIMPLE	t1	index_merge	a,b	b,a	3,3	NULL	10	Using sort_union(b,a); Using where
 # Not affected, added for completeness...
-SELECT a,b,c FROM t1 WHERE (b >= 2 OR a >= 2) AND  c > 0 AND c < 100;
+SELECT a,b,c FROM t1 WHERE (b >= 2 OR a >= 2) AND  c > 0 AND c < 100 ORDER BY a,b,c;
 a	b	c
 2	2	1
 2	2	4
 SET SESSION optimizer_switch="index_merge_sort_union=off";
-SELECT a,b,c FROM t1 WHERE (b >= 2 OR a >= 2) AND  c > 0 AND c < 100;
+SELECT a,b,c FROM t1 WHERE (b >= 2 OR a >= 2) AND  c > 0 AND c < 100 ORDER BY a,b,c;
 a	b	c
 2	2	1
 2	2	4

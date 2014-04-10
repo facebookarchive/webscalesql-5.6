@@ -5321,6 +5321,7 @@ btr_copy_zblob_prefix(
 	mem_heap_t*	heap;
 	int		err;
 	z_stream	d_stream;
+	ibool		inflate_inited = FALSE;
 
 	d_stream.next_out = buf;
 	d_stream.avail_out = static_cast<uInt>(len);
@@ -5336,9 +5337,6 @@ btr_copy_zblob_prefix(
 	ut_ad(zip_size >= UNIV_ZIP_SIZE_MIN);
 	ut_ad(zip_size <= UNIV_ZIP_SIZE_MAX);
 	ut_ad(space_id);
-
-	err = inflateInit(&d_stream);
-	ut_a(err == Z_OK);
 
 	for (;;) {
 		buf_page_t*	bpage;
@@ -5386,6 +5384,13 @@ btr_copy_zblob_prefix(
 
 		d_stream.next_in = bpage->zip.data + offset;
 		d_stream.avail_in = static_cast<uInt>(zip_size - offset);
+
+		if (!inflate_inited) {
+			inflate_inited = page_zip_init_d_stream(&d_stream,
+				15 /* Default windowBits for zlib */,
+				FALSE);
+			ut_a(inflate_inited);
+		}
 
 		err = inflate(&d_stream, Z_NO_FLUSH);
 		switch (err) {

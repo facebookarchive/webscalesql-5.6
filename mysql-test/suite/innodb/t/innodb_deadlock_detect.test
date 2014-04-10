@@ -1,0 +1,68 @@
+#
+# Check innodb_deadlock_detect functionality
+#
+--source include/have_innodb.inc
+
+set @start_lock_wait_value = @@global.innodb_lock_wait_timeout;
+set @start_deadlock_detect_value = @@global.innodb_deadlock_detect;
+
+set global innodb_lock_wait_timeout = 2;
+set global innodb_deadlock_detect = 0;
+
+--echo # Establish connection con1 (user=root)
+connect (con1,localhost,root,,);
+--echo # Establish connection con2 (user=root)
+connect (con2,localhost,root,,);
+
+--disable_warnings
+drop table if exists t1;
+--enable_warnings
+
+create table t1 (id int primary key) engine = InnoDB;
+insert into t1 values(1),(2);
+commit;
+
+--echo # Switch to connection con1
+connection con1;
+--echo # Lock first row in con1
+start transaction;
+select * from t1 where id = 1 for update;
+
+--echo # Switch to connection con2
+connection con2;
+--echo # Lock second row in con2
+start transaction;
+select * from t1 where id = 2 for update;
+
+--echo # Try locking first row in con2
+--send
+update t1 set id = 3 where id = 1;
+
+--echo # Switch to connection con1
+connection con1;
+--echo # Wait for con2 to start lock wait
+let $wait_condition=
+  select count(*) = 1 from
+  information_schema.innodb_lock_waits w, information_schema.innodb_locks l
+  where w.requested_lock_id = l.lock_id and l.lock_table = '`test`.`t1`';
+--source include/wait_condition.inc
+
+--echo # Try locking second row in con1
+--error ER_LOCK_WAIT_TIMEOUT
+update t1 set id = 4 where id = 2;
+commit;
+
+--echo # Switch to connection con2
+connection con2;
+--echo # reap the update command
+--error ER_LOCK_WAIT_TIMEOUT
+--reap
+commit;
+
+--echo # Cleanup
+connection default;
+disconnect con1;
+disconnect con2;
+drop table t1;
+set global innodb_lock_wait_timeout = @start_lock_wait_value;
+set global innodb_deadlock_detect = @start_deadlock_detect_value;

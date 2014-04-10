@@ -1953,28 +1953,30 @@ lock_rec_enqueue_waiting(
 	its state can only be changed by this thread, which is
 	currently associated with the transaction. */
 
-	trx_mutex_exit(trx);
+	if (srv_deadlock_detect) {
+		trx_mutex_exit(trx);
 
-	victim_trx_id = lock_deadlock_check_and_resolve(lock, trx);
+		victim_trx_id = lock_deadlock_check_and_resolve(lock, trx);
 
-	trx_mutex_enter(trx);
+		trx_mutex_enter(trx);
 
-	if (victim_trx_id != 0) {
+		if (victim_trx_id != 0) {
 
-		ut_ad(victim_trx_id == trx->id);
+			ut_ad(victim_trx_id == trx->id);
 
-		lock_reset_lock_and_trx_wait(lock);
-		lock_rec_reset_nth_bit(lock, heap_no);
+			lock_reset_lock_and_trx_wait(lock);
+			lock_rec_reset_nth_bit(lock, heap_no);
 
-		return(DB_DEADLOCK);
+			return(DB_DEADLOCK);
 
-	} else if (trx->lock.wait_lock == NULL) {
+		} else if (trx->lock.wait_lock == NULL) {
 
-		/* If there was a deadlock but we chose another
-		transaction as a victim, it is possible that we
-		already have the lock now granted! */
+			/* If there was a deadlock but we chose another
+			transaction as a victim, it is possible that we
+			already have the lock now granted! */
 
-		return(DB_SUCCESS_LOCKED_REC);
+			return(DB_SUCCESS_LOCKED_REC);
+		}
 	}
 
 	trx->lock.que_state = TRX_QUE_LOCK_WAIT;
@@ -4300,26 +4302,28 @@ lock_table_enqueue_waiting(
 	its state can only be changed by this thread, which is
 	currently associated with the transaction. */
 
-	trx_mutex_exit(trx);
+	if (srv_deadlock_detect) {
+		trx_mutex_exit(trx);
 
-	victim_trx_id = lock_deadlock_check_and_resolve(lock, trx);
+		victim_trx_id = lock_deadlock_check_and_resolve(lock, trx);
 
-	trx_mutex_enter(trx);
+		trx_mutex_enter(trx);
 
-	if (victim_trx_id != 0) {
-		ut_ad(victim_trx_id == trx->id);
+		if (victim_trx_id != 0) {
+			ut_ad(victim_trx_id == trx->id);
 
-		/* The order here is important, we don't want to
-		lose the state of the lock before calling remove. */
-		lock_table_remove_low(lock);
-		lock_reset_lock_and_trx_wait(lock);
+			/* The order here is important, we don't want to
+			lose the state of the lock before calling remove. */
+			lock_table_remove_low(lock);
+			lock_reset_lock_and_trx_wait(lock);
 
-		return(DB_DEADLOCK);
-	} else if (trx->lock.wait_lock == NULL) {
-		/* Deadlock resolution chose another transaction as a victim,
-		and we accidentally got our lock granted! */
+			return(DB_DEADLOCK);
+		} else if (trx->lock.wait_lock == NULL) {
+			/* Deadlock resolution chose another transaction as a victim,
+			and we accidentally got our lock granted! */
 
-		return(DB_SUCCESS);
+			return(DB_SUCCESS);
+		}
 	}
 
 	trx->lock.que_state = TRX_QUE_LOCK_WAIT;

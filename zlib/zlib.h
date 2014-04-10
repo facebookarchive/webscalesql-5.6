@@ -796,6 +796,18 @@ ZEXTERN int ZEXPORT inflateReset OF((z_streamp strm));
    stream state was inconsistent (such as zalloc or state being NULL).
 */
 
+ZEXTERN int ZEXPORT inflateReset2 OF((z_streamp strm,
+                                      int windowBits));
+/*
+     This function is the same as inflateReset, but it also permits changing
+   the wrap and window size requests.  The windowBits parameter is interpreted
+   the same as it is for inflateInit2.
+
+     inflateReset2 returns Z_OK if success, or Z_STREAM_ERROR if the source
+   stream state was inconsistent (such as zalloc or state being Z_NULL), or if
+   the windowBits parameter is invalid.
+*/
+
 ZEXTERN int ZEXPORT inflatePrime OF((z_streamp strm,
                                      int bits,
                                      int value));

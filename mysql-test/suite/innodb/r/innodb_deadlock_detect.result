@@ -1,0 +1,38 @@
+set @start_lock_wait_value = @@global.innodb_lock_wait_timeout;
+set @start_deadlock_detect_value = @@global.innodb_deadlock_detect;
+set global innodb_lock_wait_timeout = 2;
+set global innodb_deadlock_detect = 0;
+# Establish connection con1 (user=root)
+# Establish connection con2 (user=root)
+drop table if exists t1;
+create table t1 (id int primary key) engine = InnoDB;
+insert into t1 values(1),(2);
+commit;
+# Switch to connection con1
+# Lock first row in con1
+start transaction;
+select * from t1 where id = 1 for update;
+id
+1
+# Switch to connection con2
+# Lock second row in con2
+start transaction;
+select * from t1 where id = 2 for update;
+id
+2
+# Try locking first row in con2
+update t1 set id = 3 where id = 1;
+# Switch to connection con1
+# Wait for con2 to start lock wait
+# Try locking second row in con1
+update t1 set id = 4 where id = 2;
+ERROR HY000: Lock wait timeout exceeded; try restarting transaction
+commit;
+# Switch to connection con2
+# reap the update command
+ERROR HY000: Lock wait timeout exceeded; try restarting transaction
+commit;
+# Cleanup
+drop table t1;
+set global innodb_lock_wait_timeout = @start_lock_wait_value;
+set global innodb_deadlock_detect = @start_deadlock_detect_value;

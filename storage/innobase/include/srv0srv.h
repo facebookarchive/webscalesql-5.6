@@ -451,6 +451,9 @@ extern atomic_stat<ulint>	srv_sec_rec_cluster_reads;
 /** Number of times prefix optimization avoided triggering cluster lookup */
 extern atomic_stat<ulint>	srv_sec_rec_cluster_reads_avoided;
 
+/** Perform deadlock detection check. */
+extern my_bool srv_deadlock_detect;
+
 /** Status variables to be passed to MySQL */
 extern struct export_var_t export_vars;
 

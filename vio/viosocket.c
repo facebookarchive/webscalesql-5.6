@@ -795,7 +795,7 @@ int vio_io_wait(Vio *vio, enum enum_vio_io_event event, timeout_t timeout)
 
 #else
 
-int vio_io_wait(Vio *vio, enum enum_vio_io_event event, int timeout)
+int vio_io_wait(Vio *vio, enum enum_vio_io_event event, timeout_t timeout)
 {
   int ret;
   struct timeval tm;
@@ -810,10 +810,11 @@ int vio_io_wait(Vio *vio, enum enum_vio_io_event event, int timeout)
     DBUG_RETURN(-1);
 
   /* Convert the timeout, in milliseconds, to seconds and microseconds. */
-  if (timeout >= 0)
+  if (!timeout_is_infinite(timeout))
   {
-    tm.tv_sec= timeout / 1000;
-    tm.tv_usec= (timeout % 1000) * 1000;
+    uint timeout_ms = timeout_to_millis(timeout);
+    tm.tv_sec= timeout_ms / 1000;
+    tm.tv_usec= (timeout_ms % 1000) * 1000;
   }
 
   FD_ZERO(&readfds);
@@ -840,7 +841,7 @@ int vio_io_wait(Vio *vio, enum enum_vio_io_event event, int timeout)
 
   /* The first argument is ignored on Windows. */
   ret= select(fd + 1, &readfds, &writefds, &exceptfds, 
-              (timeout >= 0) ? &tm : NULL);
+              timeout_is_infinite(timeout) ? NULL : &tm);
 
   MYSQL_END_SOCKET_WAIT(locker, 0);
 

@@ -211,7 +211,7 @@ Production Releases
    version string is incremented. When the file format changes, the
    first number is increased.
 
-   Release names also include a suffix to indicates the stability
+   Release names also include a suffix that indicates the stability
    level of the release. Releases within a series progress through a
    set of suffixes to indicate how the stability level improves. The
    possible suffixes are:
@@ -438,11 +438,11 @@ Production Releases
    Windows examples will assume the name md5.exe.
 
    Linux and Microsoft Windows examples:
-shell> md5sum mysql-standard-5.6.18-linux-i686.tar.gz
-aaab65abbec64d5e907dcd41b8699945  mysql-standard-5.6.18-linux-i686.ta
+shell> md5sum mysql-standard-5.6.20-linux-i686.tar.gz
+aaab65abbec64d5e907dcd41b8699945  mysql-standard-5.6.20-linux-i686.ta
 r.gz
-shell> md5.exe mysql-installer-community-5.6.18.msi
-aaab65abbec64d5e907dcd41b8699945  mysql-installer-community-5.6.18.ms
+shell> md5.exe mysql-installer-community-5.6.20.msi
+aaab65abbec64d5e907dcd41b8699945  mysql-installer-community-5.6.20.ms
 i
 
    You should verify that the resulting checksum (the string of
@@ -612,8 +612,8 @@ shell> rpm --import mysql_pubkey.asc
 
    Table 2.1 MySQL Package and Signature Files for Source files
        File Type                      File Name
-   Distribution file mysql-standard-5.6.18-linux-i686.tar.gz
-   Signature file    mysql-standard-5.6.18-linux-i686.tar.gz.asc
+   Distribution file mysql-standard-5.6.20-linux-i686.tar.gz
+   Signature file    mysql-standard-5.6.20-linux-i686.tar.gz.asc
 
    Make sure that both files are stored in the same directory and
    then run the following command to verify the signature for the
@@ -622,7 +622,7 @@ shell> gpg --verify package_name.asc
 
    If the downloaded package is valid, you will see a "Good
    signature" similar to:
-shell> gpg --verify mysql-standard-5.6.18-linux-i686.tar.gz.asc
+shell> gpg --verify mysql-standard-5.6.20-linux-i686.tar.gz.asc
 gpg: Signature made Tue 01 Feb 2011 02:38:30 AM CST using DSA key ID
 5072E1F5
 gpg: Good signature from "MySQL Release Engineering <mysql-build@oss.
@@ -631,7 +631,7 @@ oracle.com>"
    The Good signature message indicates that the file signature is
    valid, when compared to the signature listed on our site. But you
    might also see warnings, like so:
-shell> gpg --verify mysql-standard-5.6.18-linux-i686.tar.gz.asc
+shell> gpg --verify mysql-standard-5.6.20-linux-i686.tar.gz.asc
 gpg: Signature made Wed 23 Jan 2013 02:25:45 AM PST using DSA key ID
 5072E1F5
 gpg: checking the trustdb
@@ -713,8 +713,8 @@ Primary key fingerprint: A4A9 4068 76FC BD3C 4567  70C8 8C71 8D3B 507
    Table 2.2 MySQL Package and Signature Files for MySQL Installer
    for Microsoft Windows
        File Type                    File Name
-   Distribution file mysql-installer-community-5.6.18.msi
-   Signature file    mysql-installer-community-5.6.18.msi.asc
+   Distribution file mysql-installer-community-5.6.20.msi
+   Signature file    mysql-installer-community-5.6.20.msi.asc
 
    Make sure that both files are stored in the same directory and
    then run the following command to verify the signature for the
@@ -750,8 +750,8 @@ Primary key fingerprint: A4A9 4068 76FC BD3C 4567  70C8 8C71 8D3B 507
 shell> rpm --checksig package_name.rpm
 
    Example:
-shell> rpm --checksig MySQL-server-5.6.18-0.linux_glibc2.5.i386.rpm
-MySQL-server-5.6.18-0.linux_glibc2.5.i386.rpm: md5 gpg OK
+shell> rpm --checksig MySQL-server-5.6.20-0.linux_glibc2.5.i386.rpm
+MySQL-server-5.6.20-0.linux_glibc2.5.i386.rpm: md5 gpg OK
 
    Note
 
@@ -830,7 +830,7 @@ pg-signature.html
 
    MySQL compressed tar file binary distributions have names of the
    form mysql-VERSION-OS.tar.gz, where VERSION is a number (for
-   example, 5.6.18), and OS indicates the type of operating system
+   example, 5.6.20), and OS indicates the type of operating system
    for which the distribution is intended (for example, pc-linux-i686
    or winx64).
 
@@ -1139,8 +1139,8 @@ Perform Postinstallation Setup
    from when installing MySQL on Windows:
 
      * MySQL Installer: This package has a file name similar to
-       mysql-installer-community-5.6.18.0.msi or
-       mysql-installer-commercial-5.6.18.0.msi, and utilizes MSI's to
+       mysql-installer-community-5.6.20.0.msi or
+       mysql-installer-commercial-5.6.20.0.msi, and utilizes MSIs to
        automatically install MySQL server and other products. It will
        download and apply updates to itself, and for each of the
        installed products. It also configures the additional
@@ -1164,7 +1164,7 @@ Perform Postinstallation Setup
        Using MySQL Installer."
 
      * The Noinstall Archive: This package has a file name similar to
-       mysql-5.6.18-win32.zip or mysql-5.6.18-winx64.zip, and
+       mysql-5.6.20-win32.zip or mysql-5.6.20-winx64.zip, and
        contains all the files found in the Complete install package,
        with the exception of the GUI. This package does not include
        an automated installer, and must be manually installed and
@@ -1193,17 +1193,17 @@ Installer package types
 
 
      * Full: Bundles all of the MySQL products (including MySQL
-       Server). The file is over 160MB, and have names of the form
-       mysql-installer-community-VERSION.N.msi where VERSION is the
-       MySQL Server version number such as 5.6 and N is the package
-       number, which begins at 0.
+       Server). The file' size is over 160MB, and its name has the
+       form mysql-installer-community-VERSION.N.msi where VERSION is
+       the MySQL Server version number such as 5.6 and N is the
+       package number, which begins at 0.
 
      * Web: Only contains the Installer and configuration files, and
        it only downloads the MySQL products you choose to install.
-       The file is about 2MB, and have names of the form
-       mysql-installer-community-web-VERSION.N.msi where VERSION is
-       the MySQL Server version number such as 5.6 and N is the
-       package number, which begins at 0.
+       The size of this file is about 2MB; the name of the file has
+       the form mysql-installer-community-web-VERSION.N.msi where
+       VERSION is the MySQL Server version number such as 5.6 and N
+       is the package number, which begins at 0.
 
 Installer editions
 
@@ -1225,7 +1225,7 @@ Installer editions
    (http://dev.mysql.com/doc/relnotes/mysql-installer/en/).
 
    MySQL Installer is compatible with pre-existing installations, and
-   adds them to its list of installed components. And while the MySQL
+   adds them to its list of installed components. While the MySQL
    Installer is bundled with a specific version of MySQL Server, a
    single MySQL Installer instance can install and manage multiple
    MySQL Server versions. For example, a single MySQL Installer
@@ -1717,7 +1717,7 @@ C:\> MySQLInstallerConsole --help
    asynchronous callback to the computer running the MySQL Notifier
    for Microsoft Windows so it knows when a service status has
    changed on the remote computer. Asynchronous notifications offer
-   the best performance compared to semi-synchronous notifications or
+   the best performance compared to semisynchronous notifications or
    synchronous notifications that use timers.
 
    Asynchronous notifications requires the remote computer to send a
@@ -2185,7 +2185,7 @@ InnoDB: foreign key constraint system tables created
    something like this, which indicates that the server is ready to
    service client connections:
 mysqld: ready for connections
-Version: '5.6.18'  socket: ''  port: 3306
+Version: '5.6.20'  socket: ''  port: 3306
 
    The server continues to write to the console any further
    diagnostic output it produces. You can open a new console window
@@ -3261,7 +3261,7 @@ Additional Resources
    As an alternative, you can use the package manager on your system
    to automatically download and install MySQL with packages from the
    native software repositories of your Linux distribution. These
-   native package are often several versions behind the currently
+   native packages are often several versions behind the currently
    available release. You will also normally be unable to install
    development milestone releases (DMRs), as these are not usually
    made available in the native repositories. For more information on
@@ -3296,16 +3296,6 @@ Additional Resources
    client, MySQL Workbench, MySQL Utilities (not available for
    EL5-based platforms), Connector/ODBC, and Connector/Python (not
    available for EL5-based platforms).
-
-   MySQL does not currently provide software repositories for other
-   Linux platforms. Refer to Section 2.5, "Installing MySQL on Linux"
-   for instructions on how to install MySQL on those platforms.
-   Note
-
-   The MySQL Yum repository service is now in development release. We
-   encourage you to try it and provide us with feedback. Please
-   report any bugs or inconsistencies you observe to our Bugs
-   Database (http://bugs.mysql.com).
 
 Before You Start
 
@@ -3362,7 +3352,7 @@ rch.rpm
             details on GnuPG key checking.
             You can check that the MySQL Yum repository has been
             successfully added by the following command:
-shell> sudo yum repolist enabled | grep "mysql*-community*"
+shell> yum repolist enabled | grep "mysql.*-community.*"
        Note
        Once the MySQL Yum repository is enabled on your system, any
        system-wide update by the yum update command will upgrade
@@ -3461,7 +3451,7 @@ of MySQL
        still in developer milestone release (DMR) status) are
        disabled by default. Use this command to see all the
        sub-repositories in the MySQL Yum repository:
-shell> sudo yum repolist all | grep "mysql*-community*"
+shell> yum repolist all | grep "mysql.*-community.*"
        To install the latest release from a specific series other
        than the latest GA series, simply disable the sub-repository
        for the latest GA series and enable the sub-repository for the
@@ -3486,7 +3476,7 @@ gpgkey=file:/etc/pki/rpm-gpg/RPM-GPG-KEY-mysql
        You can verify that the enabling and disabling of
        sub-repositories have been done correctly by run the following
        command and check its output:
-shell> sudo yum repolist enabled | grep "mysql*-community*"
+shell> yum repolist enabled | grep "mysql.*-community.*"
        Note
        You can only enable sub-repository for one release series at a
        time. When sub-repositories for more than one release series
@@ -3613,9 +3603,8 @@ shell> sudo yum install mysql-server
        the common error messages and character sets for client and
        server, are now installed from the MySQL Yum repository. To
        install more components for MySQL, see Section 2.5.1, "."
-       Follow the postinstallation procedures exdocbuild-run-cmd
-       push-docs-to-web-staging.sh downloadsplained in Section 2.9,
-       "Postinstallation Setup and Testing."
+       Follow the postinstallation procedures explained in Section
+       2.9, "Postinstallation Setup and Testing."
 
 2.5.3 Installing MySQL on Linux Using RPM Packages
 
@@ -3981,7 +3970,7 @@ shell> apt-get install libaio1
    installing MySQL using those package management systems.
    Important
 
-   Native package are often several versions behind the currently
+   Native packages are often several versions behind the currently
    available release. You will also normally be unable to install
    development milestone releases (DMRs), as these are not usually
    made available in the native repositories. Before proceeding, we
@@ -4322,15 +4311,15 @@ Error in accept: Protocol error
    To use this package, download the corresponding
    mysql-VERSION-solaris10-PLATFORM.pkg.gz file, then uncompress it.
    For example:
-shell> gunzip mysql-5.6.18-solaris10-x86_64.pkg.gz
+shell> gunzip mysql-5.6.20-solaris10-x86_64.pkg.gz
 
    To install a new package, use pkgadd and follow the onscreen
    prompts. You must have root privileges to perform this operation:
-shell> pkgadd -d mysql-5.6.18-solaris10-x86_64.pkg
+shell> pkgadd -d mysql-5.6.20-solaris10-x86_64.pkg
 
 The following packages are available:
   1  mysql     MySQL Community Server (GPL)
-               (i86pc) 5.6.18
+               (i86pc) 5.6.20
 
 Select package(s) you wish to process (or 'all' to process
 all packages). (default: all) [?,??,q]:
@@ -4368,7 +4357,7 @@ shell> ln /etc/init.d/mysql /etc/rc0.d/K02mysql
    The typical upgrade sequence is therefore:
 shell> mysqladmin shutdown
 shell> pkgrm mysql
-shell> pkgadd -d mysql-5.6.18-solaris10-x86_64.pkg
+shell> pkgadd -d mysql-5.6.20-solaris10-x86_64.pkg
 shell> mysqld_safe &
 shell> mysql_upgrade
 
@@ -4528,7 +4517,7 @@ Source Installation Methods
        Standard distributions are available as compressed tar files,
        Zip archives, or RPM packages. Distribution files have names
        of the form mysql-VERSION.tar.gz, mysql-VERSION.zip, or
-       mysql-VERSION.rpm, where VERSION is a number like 5.6.18. File
+       mysql-VERSION.rpm, where VERSION is a number like 5.6.20. File
        names for source distributions can be distinguished from those
        for precompiled binary distributions in that source
        distribution names are generic and include no platform name,
@@ -4563,7 +4552,7 @@ Source Installation System Requirements
        your system as gmake. GNU make is available from
        http://www.gnu.org/software/make/.
 
-     * A working ANSI C++ compiler. GCC 4.2.1 or later, Sun Studio 10
+     * A working ANSI C++ compiler. GCC 4.2.1 or later, Sun Studio 12
        or later, Visual Studio 2010 or later, and many current
        vendor-supplied compilers are known to work.
 
@@ -6051,10 +6040,10 @@ shell> bin/mysqladmin variables
        on your platform and version of MySQL, but should be similar
        to that shown here:
 shell> bin/mysqladmin version
-mysqladmin  Ver 14.12 Distrib 5.6.18, for pc-linux-gnu on i686
+mysqladmin  Ver 14.12 Distrib 5.6.20, for pc-linux-gnu on i686
 ...
 
-Server version          5.6.18
+Server version          5.6.20
 Protocol version        10
 Connection              Localhost via UNIX socket
 UNIX socket             /var/lib/mysql/mysql.sock
@@ -6945,9 +6934,9 @@ mysql> DROP DATABASE test;
        kinds of functions.
 
    For EL5, EL6, or EL7-based Linux platforms and Fedora 19 or 20,
-   you can perform an in-place upgrade of MySQL and its components to
-   the latest GA releases with the MySQL Yum repository. See Section
-   2.10.1.1, "Upgrading MySQL with the MySQL Yum Repository."
+   you can perform an in-place upgrade of MySQL and its components
+   with the MySQL Yum repository. See Section 2.10.1.1, "Upgrading
+   MySQL with the MySQL Yum Repository."
 
    For upgrades between versions of a MySQL release series that has
    reached General Availability status, you can move the MySQL format
@@ -8209,11 +8198,8 @@ shell> make install
    If you do not have access rights to install Perl modules in the
    system directory or if you want to install local Perl modules, the
    following reference may be useful:
-   http://servers.digitaldaze.com/extensions/perl/modules.html#module
-   s
-
-   Look under the heading "Installing New Modules that Require
-   Locally Installed Modules."
+   http://learn.perl.org/faq/perlfaq8.html#How-do-I-keep-my-own-modul
+   e-library-directory-
 
 2.12.2 Installing ActiveState Perl on Windows
 

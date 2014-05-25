@@ -2,12 +2,12 @@
 .\"     Title: \fBmysql_install_db\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 03/14/2014
+.\"      Date: 05/05/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQL_INSTALL_DB\" "1" "03/14/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQL_INSTALL_DB\" "1" "05/05/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -82,7 +82,7 @@ shell> \fBmysql_install_db [\fR\fB\fIoptions\fR\fR\fB]\fR
 .\}
 .PP
 Because the MySQL server,
-\fBmysqld\fR, needs to access the data directory when it runs later, you should either run
+\fBmysqld\fR, must access the data directory when it runs later, you should either run
 \fBmysql_install_db\fR
 from the same system account that will be used for running
 \fBmysqld\fR
@@ -111,15 +111,45 @@ shell> \fBscripts/mysql_install_db \-\-user=mysql \e\fR
 .if n \{\
 .RE
 .\}
+.sp
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
 .PP
+After
 \fBmysql_install_db\fR
-needs to invoke
-\fBmysqld\fR
-with the
-\fB\-\-bootstrap\fR
+sets up the
+InnoDB
+system tablespace, changes to some tablespace characteristics require setting up a whole new
+instance\&. This includes the file name of the first file in the system tablespace and the number of undo logs\&. If you do not want to use the default values, make sure that the settings for the
+innodb_data_file_path
 and
-\fB\-\-skip\-grant\-tables\fR
-options\&.
+innodb_log_file_size
+configuration parameters are in place in the MySQL
+configuration file
+before running
+\fBmysql_install_db\fR\&. Also make sure to specify as necessary other parameters that affect the creation and location of
+InnoDB
+files, such as
+innodb_data_home_dir
+and
+innodb_log_group_home_dir\&.
+.PP
+If those options are in your configuration file but that file is not in a location that MySQL reads by default, specify the file location using the
+\fB\-\-defaults\-extra\-file\fR
+option when you run
+\fBmysql_install_db\fR\&.
+.sp .5v
+.RE
 .if n \{\
 .sp
 .\}
@@ -143,20 +173,6 @@ or set
 TMPDIR
 to point to the system temporary directory (usually
 /tmp)\&.
-.PP
-After
-\fBmysql_install_db\fR
-sets up the
-InnoDB
-system tablespace, changes to some of tablespace characteristics require setting up a whole new
-instance\&. This includes the file name of the first file in the system tablespace and the number of undo logs\&. If you do not want to use the default values, make sure that the settings for the
-innodb_data_file_path
-and
-innodb_log_file_size
-configuration options are in place in the MySQL
-configuration file
-before running
-\fBmysql_install_db\fR\&.
 .sp .5v
 .RE
 .PP
@@ -170,9 +186,21 @@ can also be specified in the
 group\&.) Other options are passed to
 \fBmysqld\fR\&. For information about option files, see
 Section\ \&4.2.3.3, \(lqUsing Option Files\(rq\&.
-\fBmysql_install_db\fR
-also supports the options for processing option files described at
-Section\ \&4.2.3.4, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysql_install_db: help option
+.\" help option: mysql_install_db
+\fB\-\-help\fR
+.sp
+Display a help message and exit\&.
+.RE
 .sp
 .RS 4
 .ie n \{\
@@ -187,6 +215,38 @@ Section\ \&4.2.3.4, \(lqCommand-Line Options that Affect Option-File Handling\(r
 \fB\-\-basedir=\fR\fB\fIpath\fR\fR
 .sp
 The path to the MySQL installation directory\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysql_install_db: builddir option
+.\" builddir option: mysql_install_db
+\fB\-\-builddir=\fR\fB\fIpath\fR\fR
+.sp
+For use with
+\fB\-\-srcdir\fR
+and out\-of\-source builds\&. Set this to the location of the directory where the built files reside\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysql_install_db: cross-bootstrap option
+.\" cross-bootstrap option: mysql_install_db
+\fB\-\-cross\-bootstrap\fR
+.sp
+For internal use\&. This option is used for building system tables on one host intended for another\&.
 .RE
 .sp
 .RS 4
@@ -217,13 +277,61 @@ is more strict about the option value\&. Only the last component of the path nam
 .sp -1
 .IP \(bu 2.3
 .\}
+.\" defaults-extra-file option
+\fB\-\-defaults\-extra\-file=\fR\fB\fIfile_name\fR\fR
+.sp
+Read this option file after the global option file but (on Unix) before the user option file\&. If the file does not exist or is otherwise inaccessible, an error occurs\&.
+\fIfile_name\fR
+is interpreted relative to the current directory if given as a relative path name rather than a full path name\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" defaults-file option
+\fB\-\-defaults\-file=\fR\fB\fIfile_name\fR\fR
+.sp
+Use only the given option file\&. If the file does not exist or is otherwise inaccessible, an error occurs\&.
+\fIfile_name\fR
+is interpreted relative to the current directory if given as a relative path name rather than a full path name\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
 .\" mysql_install_db: force option
 .\" force option: mysql_install_db
 \fB\-\-force\fR
 .sp
 Cause
 \fBmysql_install_db\fR
-to run even if DNS does not work\&. Grant table entries that normally use host names will use IP addresses\&.
+to run even if DNS does not work\&. Grant table entries normally created using host names will use IP addresses instead\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" no-defaults option
+\fB\-\-no\-defaults\fR
+.sp
+Do not read any option files\&. If program startup fails due to reading unknown options from an option file,
+\fB\-\-no\-defaults\fR
+can be used to prevent them from being read\&.
 .RE
 .sp
 .RS 4
@@ -252,9 +360,9 @@ causes it to perform the following actions in addition to its normal operation:
 .sp -1
 .IP \(bu 2.3
 .\}
-Create a random password, assign it to the initial MySQL
+The installation process creates a random password, assigns it to the initial MySQL
 root
-accounts, and set the
+accounts, and sets the
 \(lqpassword expired\(rq
 flag for those accounts\&.
 .RE
@@ -267,7 +375,10 @@ flag for those accounts\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-Write the initial password file to the
+.\" .mysql_secret file
+The initial random
+root
+password is written to the
 \&.mysql_secret
 file in the directory named by the
 HOME
@@ -295,14 +406,14 @@ is created with mode 600 to be accessible only to the system user for whom it is
 .sp -1
 .IP \(bu 2.3
 .\}
-Not create anonymous\-user MySQL accounts\&.
+No anonymous\-user MySQL accounts are created\&.
 .RE
 .sp
 As a result of these actions, it is necessary after installation to start the server, connect as
 root
 using the password written to the
 \&.mysql_secret
-file, and to assign a new
+file, and to select a new
 root
 password\&. Until this is done,
 root

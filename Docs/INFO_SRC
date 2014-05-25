@@ -1,7 +1,7 @@
-revision-id: balasubramanian.kandasamy@oracle.com-20140314184558-306ypv6ttf5dyrss
-date: 2014-03-14 19:45:58 +0100
-build-date: 2014-03-14 19:57:32 +0100
-revno: 5859
-branch-nick: mysql-5.6.17-release
+revision-id: balasubramanian.kandasamy@oracle.com-20140506101329-mosabsiw1y0k0y0c
+date: 2014-05-06 12:13:29 +0200
+build-date: 2014-05-06 12:34:17 +0200
+revno: 5913
+branch-nick: mysql-5.6.19-release
 
-MySQL source 5.6.17
+MySQL source 5.6.19

@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqlslap\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 03/14/2014
+.\"      Date: 05/05/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLSLAP\FR" "1" "03/14/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLSLAP\FR" "1" "05/05/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -162,10 +162,8 @@ supports the following options, which can be specified on the command line or in
 [mysqlslap]
 and
 [client]
-groups of an option file\&.
-\fBmysqlslap\fR
-also supports the options for processing option files described at
-Section\ \&4.2.3.4, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+groups of an option file\&. For information about option files, see
+Section\ \&4.2.3.3, \(lqUsing Option Files\(rq\&.
 .sp
 .RS 4
 .ie n \{\
@@ -527,6 +525,70 @@ This option was added in MySQL 5\&.6\&.2\&.
 .sp -1
 .IP \(bu 2.3
 .\}
+.\" mysqlslap: defaults-extra-file option
+.\" defaults-extra-file option: mysqlslap
+\fB\-\-defaults\-extra\-file=\fR\fB\fIfile_name\fR\fR
+.sp
+Read this option file after the global option file but (on Unix) before the user option file\&. If the file does not exist or is otherwise inaccessible, an error occurs\&.
+\fIfile_name\fR
+is interpreted relative to the current directory if given as a relative path name rather than a full path name\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysqlslap: defaults-file option
+.\" defaults-file option: mysqlslap
+\fB\-\-defaults\-file=\fR\fB\fIfile_name\fR\fR
+.sp
+Use only the given option file\&. If the file does not exist or is otherwise inaccessible, an error occurs\&.
+\fIfile_name\fR
+is interpreted relative to the current directory if given as a relative path name rather than a full path name\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysqlslap: defaults-group-suffix option
+.\" defaults-group-suffix option: mysqlslap
+\fB\-\-defaults\-group\-suffix=\fR\fB\fIstr\fR\fR
+.sp
+Read not only the usual option groups, but also groups with the usual names and a suffix of
+\fIstr\fR\&. For example,
+\fBmysqlslap\fR
+normally reads the
+[client]
+and
+[mysqlslap]
+groups\&. If the
+\fB\-\-defaults\-group\-suffix=_other\fR
+option is given,
+\fBmysqlslap\fR
+also reads the
+[client_other]
+and
+[mysqlslap_other]
+groups\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
 .\" mysqlslap: delimiter option
 .\" delimiter option: mysqlslap
 \fB\-\-delimiter=\fR\fB\fIstr\fR\fR,
@@ -658,6 +720,33 @@ utility\&. See
 Prevent
 \fBmysqlslap\fR
 from dropping any schema it creates during the test run\&. This option was added in MySQL 5\&.6\&.3\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysqlslap: no-defaults option
+.\" no-defaults option: mysqlslap
+\fB\-\-no\-defaults\fR
+.sp
+Do not read any option files\&. If program startup fails due to reading unknown options from an option file,
+\fB\-\-no\-defaults\fR
+can be used to prevent them from being read\&.
+.sp
+The exception is that the
+\&.mylogin\&.cnf
+file, if it exists, is read in all cases\&. This permits passwords to be specified in a safer way than on the command line even when
+\fB\-\-no\-defaults\fR
+is used\&. (\&.mylogin\&.cnf
+is created by the
+\fBmysql_config_editor\fR
+utility\&. See
+\fBmysql_config_editor\fR(1)\&.)
 .RE
 .sp
 .RS 4
@@ -853,21 +942,6 @@ The file or string containing the statement to execute after the tests have comp
 .sp -1
 .IP \(bu 2.3
 .\}
-.\" mysqlslap: shared-memory-base-name option
-.\" shared-memory-base-name option: mysqlslap
-\fB\-\-shared\-memory\-base\-name=\fR\fB\fIname\fR\fR
-.sp
-On Windows, the shared\-memory name to use, for connections made using shared memory to a local server\&. This option applies only if the server supports shared\-memory connections\&.
-.RE
-.sp
-.RS 4
-.ie n \{\
-\h'-04'\(bu\h'+03'\c
-.\}
-.el \{\
-.sp -1
-.IP \(bu 2.3
-.\}
 .\" mysqlslap: post-system option
 .\" post-system option: mysqlslap
 \fB\-\-post\-system=\fR\fB\fIstr\fR\fR
@@ -907,6 +981,21 @@ The file or string containing the statement to execute before running the tests\
 The string to execute using
 system()
 before running the tests\&. This execution is not counted for timing purposes\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysqlslap: print-defaults option
+.\" print-defaults option: mysqlslap
+\fB\-\-print\-defaults\fR
+.sp
+Print the program name and all options that it gets from option files\&.
 .RE
 .sp
 .RS 4
@@ -974,6 +1063,21 @@ Passwords that use the pre\-4\&.1 hashing method are less secure than passwords 
 Section\ \&6.3.8.3, \(lqMigrating Away from Pre-4.1 Password Hashing and the mysql_old_password Plugin\(rq\&.
 .sp .5v
 .RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysqlslap: shared-memory-base-name option
+.\" shared-memory-base-name option: mysqlslap
+\fB\-\-shared\-memory\-base\-name=\fR\fB\fIname\fR\fR
+.sp
+On Windows, the shared\-memory name to use, for connections made using shared memory to a local server\&. This option applies only if the server supports shared\-memory connections\&.
 .RE
 .sp
 .RS 4

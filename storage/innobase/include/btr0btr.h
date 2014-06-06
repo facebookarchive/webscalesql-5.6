@@ -468,7 +468,7 @@ btr_page_reorganize_low(
 				there cannot exist locks on the
 				page, and a hash index should not be
 				dropped: it cannot exist */
-	ulint		z_level,/*!< in: compression level to be used
+	uchar		compression_flags,/*!< in: compression options to be used
 				if dealing with compressed page */
 	page_cur_t*	cursor,	/*!< in/out: page cursor */
 	dict_index_t*	index,	/*!< in: the index tree of the page */

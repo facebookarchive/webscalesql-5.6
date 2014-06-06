@@ -1,0 +1,8 @@
+#
+# Testing crash recovery when log_compressed_pages=OFF and innodb_zlib_strategy option is changed dynamically.
+#
+# Don't test this under valgrind, memory leaks will occur
+# Binary must be compiled with debug for crash to occur
+CHECKSUM TABLE t1;
+Table	Checksum
+test.t1	1855900423

@@ -280,6 +280,10 @@ class Worker(threading.Thread):
       if self.rand.randint(0, 20) == 0:
         cur.execute("SET GLOBAL innodb_prefix_index_cluster_optimization=1-@@innodb_prefix_index_cluster_optimization")
 
+      # Randomly change the value of innodb_zlib_wrap 2.77% of the time
+      if self.rand.randint(0, 36) == 0:
+        cur.execute("SET GLOBAL innodb_zlib_wrap=1-@@innodb_zlib_wrap");
+
       try:
         stmt = None
 

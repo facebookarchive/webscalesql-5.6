@@ -15211,6 +15211,31 @@ innodb_reset_all_monitor_update(
 }
 
 /****************************************************************//**
+Update the system variable innodb_log_compressed_pages using the
+"saved" value. This function is registered as a callback with MySQL. */
+static
+void
+innodb_log_compressed_pages_update(
+/*===============================*/
+	THD* thd,  /*!< in: thread handle */
+	struct st_mysql_sys_var* var,  /*!< in: pointer to
+	          system variable */
+	void* var_ptr,/*!< out: where the
+	          formal string goes */
+	const void* save) /*!< in: immediate result
+	          from check function */
+{
+	/* We have this call back just to avoid confusion between
+	   my_bool and bool datatypes. */
+
+	if (*(my_bool*) save) {
+		page_zip_log_pages = true;
+	} else {
+		page_zip_log_pages = false;
+	}
+}
+
+/****************************************************************//**
 Parse and enable InnoDB monitor counters during server startup.
 User can list the monitor counters/groups to be enable by specifying
 "loose-innodb_monitor_enable=monitor_name1;monitor_name2..."
@@ -15971,14 +15996,38 @@ static MYSQL_SYSVAR_UINT(compression_level, page_zip_level,
   ", 1 is fastest, 9 is best compression and default is 6.",
   NULL, NULL, DEFAULT_COMPRESSION_LEVEL, 0, 9, 0);
 
+static MYSQL_SYSVAR_BOOL(zlib_wrap, page_zip_zlib_wrap,
+  PLUGIN_VAR_OPCMDARG,
+  "When this parameter is OFF, innodb tells zlib to not compute adler32 values "
+  "for the compressed data by specifying a negative windowBits value for "
+  "deflateInit2(). This reduces the size of the compressed data and saves CPU. "
+  "See the documentation for deflateInit2() at http://zlib.net/manual.html "
+  "for details. Changing this dynamically may break xtrabackup and crash "
+  "recovery.",
+  NULL, NULL, FALSE);
+
+static MYSQL_SYSVAR_UINT(zlib_strategy, page_zip_zlib_strategy,
+  PLUGIN_VAR_OPCMDARG,
+  "This parameter determines the strategy to be used by zlib. "
+  "Possible values are 0 (DEFAULT), 1 (FILTERED), 2 (HUFFMAN_ONLY), "
+  "3 (RLE = run length encoding), and 4 (FIXED = no dynamic huffman codes, "
+  "faster decompression). This value should not be set to something other than "
+  "0 except for testing purposes. In the future we may add the ability to set "
+  "this per table which should be more useful. Changing this dynamically may "
+  "break xtrabackup and crash recovery.",
+  NULL, NULL, 0, 0, 4, 0);
+
 static MYSQL_SYSVAR_BOOL(log_compressed_pages, page_zip_log_pages,
        PLUGIN_VAR_OPCMDARG,
   "Enables/disables the logging of entire compressed page images."
-  " InnoDB logs the compressed pages to prevent corruption if"
-  " the zlib compression algorithm changes."
-  " When turned OFF, InnoDB will assume that the zlib"
-  " compression algorithm doesn't change.",
-  NULL, NULL, FALSE);
+  " Logging compressed page images acts as a shelter for crash recovery"
+  " bugs where the page compresses differently during crash recovery than"
+  " it did during runtime. Zlib is a deterministic compression algorithm"
+  " and it guarantees that the output of compression doesn't change provided"
+  " the input doesn't change. When innodb uses other compression algorithms,"
+  " this variable should be turned ON, if the used compression algorithm is"
+  " not deterministic.",
+  NULL, innodb_log_compressed_pages_update, FALSE);
 
 static MYSQL_SYSVAR_LONG(additional_mem_pool_size, innobase_additional_mem_pool_size,
   PLUGIN_VAR_RQCMDARG | PLUGIN_VAR_READONLY,
@@ -16657,6 +16706,8 @@ static struct st_mysql_sys_var* innobase_system_variables[]= {
   MYSQL_SYSVAR(fil_make_page_dirty_debug),
   MYSQL_SYSVAR(saved_page_number_debug),
 #endif /* UNIV_DEBUG */
+  MYSQL_SYSVAR(zlib_wrap),
+  MYSQL_SYSVAR(zlib_strategy),
   NULL
 };
 

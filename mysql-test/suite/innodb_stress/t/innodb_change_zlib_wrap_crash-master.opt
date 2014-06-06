@@ -1,0 +1,4 @@
+--innodb_zlib_wrap=1
+--innodb-file-per-table=1
+--innodb-compression-level=1
+--innodb-log-compressed-pages=0

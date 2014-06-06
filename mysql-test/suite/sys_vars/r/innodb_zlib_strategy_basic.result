@@ -1,0 +1,71 @@
+SET @start_global_value = @@global.innodb_zlib_strategy;
+SELECT @start_global_value;
+@start_global_value
+0
+Valid values are 0 through 4
+SELECT @@global.innodb_zlib_strategy between 0 and 4;
+@@global.innodb_zlib_strategy between 0 and 4
+1
+SELECT @@global.innodb_zlib_strategy;
+@@global.innodb_zlib_strategy
+0
+SELECT @@session.innodb_zlib_strategy;
+ERROR HY000: Variable 'innodb_zlib_strategy' is a GLOBAL variable
+SHOW global variables like 'innodb_zlib_strategy';
+Variable_name	Value
+innodb_zlib_strategy	0
+SHOW session variables like 'innodb_zlib_strategy';
+Variable_name	Value
+innodb_zlib_strategy	0
+SELECT * from information_schema.global_variables where variable_name='innodb_zlib_strategy';
+VARIABLE_NAME	VARIABLE_VALUE
+INNODB_ZLIB_STRATEGY	0
+SELECT * from information_schema.session_variables where variable_name='innodb_zlib_strategy';
+VARIABLE_NAME	VARIABLE_VALUE
+INNODB_ZLIB_STRATEGY	0
+SET GLOBAL innodb_zlib_strategy = 1;
+SELECT @@global.innodb_zlib_strategy;
+@@global.innodb_zlib_strategy
+1
+SELECT * from information_schema.global_variables where variable_name='innodb_zlib_strategy';
+VARIABLE_NAME	VARIABLE_VALUE
+INNODB_ZLIB_STRATEGY	1
+SELECT * from information_schema.session_variables where variable_name='innodb_zlib_strategy';
+VARIABLE_NAME	VARIABLE_VALUE
+INNODB_ZLIB_STRATEGY	1
+SET session innodb_zlib_strategy = 1;
+ERROR HY000: Variable 'innodb_zlib_strategy' is a GLOBAL variable and should be set with SET GLOBAL
+SET global innodb_zlib_strategy = 1.1;
+ERROR 42000: Incorrect argument type to variable 'innodb_zlib_strategy'
+SET global innodb_zlib_strategy = 1e1;
+ERROR 42000: Incorrect argument type to variable 'innodb_zlib_strategy'
+SET global innodb_zlib_strategy = "foo";
+ERROR 42000: Incorrect argument type to variable 'innodb_zlib_strategy'
+SET global innodb_zlib_strategy = -7;
+Warnings:
+Warning	1292	Truncated incorrect innodb_zlib_strategy value: '-7'
+SELECT @@global.innodb_zlib_strategy;
+@@global.innodb_zlib_strategy
+0
+SET global innodb_zlib_strategy = 1007;
+Warnings:
+Warning	1292	Truncated incorrect innodb_zlib_strategy value: '1007'
+SELECT @@global.innodb_zlib_strategy;
+@@global.innodb_zlib_strategy
+4
+SET global innodb_zlib_strategy = 0;
+SELECT @@global.innodb_zlib_strategy;
+@@global.innodb_zlib_strategy
+0
+SET global innodb_zlib_strategy = 4;
+SELECT @@global.innodb_zlib_strategy;
+@@global.innodb_zlib_strategy
+4
+SET global innodb_zlib_strategy = DEFAULT;
+SELECT @@global.innodb_zlib_strategy;
+@@global.innodb_zlib_strategy
+0
+SET @@global.innodb_zlib_strategy = @start_global_value;
+SELECT @@global.innodb_zlib_strategy;
+@@global.innodb_zlib_strategy
+0

@@ -1760,8 +1760,8 @@ btr_page_reorganize_low(
 				there cannot exist locks on the
 				page, and a hash index should not be
 				dropped: it cannot exist */
-	ulint		z_level,/*!< in: compression level to be used
-				if dealing with compressed page */
+	uchar		compression_flags,/*!< in: compression options to be
+				used if dealing with compressed page */
 	page_cur_t*	cursor,	/*!< in/out: page cursor */
 	dict_index_t*	index,	/*!< in: the index tree of the page */
 	mtr_t*		mtr)	/*!< in/out: mini-transaction */
@@ -1850,7 +1850,8 @@ btr_page_reorganize_low(
 	}
 
 	if (page_zip
-	    && !page_zip_compress(page_zip, page, index, z_level, mtr)) {
+	    && !page_zip_compress(page_zip, page, index,
+				  compression_flags, mtr)) {
 
 		/* Restore the old page and exit. */
 		btr_blob_dbg_restore(page, temp_page, index,
@@ -1949,7 +1950,7 @@ func_exit:
 
 		/* For compressed pages write the compression level. */
 		if (log_ptr && page_zip) {
-			mach_write_to_1(log_ptr, z_level);
+			mach_write_to_1(log_ptr, compression_flags);
 			mlog_close(mtr, log_ptr + 1);
 		}
 
@@ -1980,8 +1981,8 @@ btr_page_reorganize_block(
 				there cannot exist locks on the
 				page, and a hash index should not be
 				dropped: it cannot exist */
-	ulint		z_level,/*!< in: compression level to be used
-				if dealing with compressed page */
+	uchar		compression_flags,/*!< in: compression options to be
+				used if dealing with compressed page */
 	buf_block_t*	block,	/*!< in/out: B-tree page */
 	dict_index_t*	index,	/*!< in: the index tree of the page */
 	mtr_t*		mtr)	/*!< in/out: mini-transaction */
@@ -1989,7 +1990,8 @@ btr_page_reorganize_block(
 	page_cur_t	cur;
 	page_cur_set_before_first(block, &cur);
 
-	return(btr_page_reorganize_low(recovery, z_level, &cur, index, mtr));
+	return(btr_page_reorganize_low(recovery, compression_flags, &cur,
+				       index, mtr));
 }
 
 #ifndef UNIV_HOTBACKUP
@@ -2012,7 +2014,7 @@ btr_page_reorganize(
 	dict_index_t*	index,	/*!< in: the index tree of the page */
 	mtr_t*		mtr)	/*!< in/out: mini-transaction */
 {
-	return(btr_page_reorganize_low(false, page_zip_level,
+	return(btr_page_reorganize_low(false, page_zip_compression_flags,
 				       cursor, index, mtr));
 }
 #endif /* !UNIV_HOTBACKUP */
@@ -2031,7 +2033,7 @@ btr_parse_page_reorganize(
 	buf_block_t*	block,	/*!< in: page to be reorganized, or NULL */
 	mtr_t*		mtr)	/*!< in: mtr or NULL */
 {
-	ulint	level;
+	uchar	compression_flags = (uchar) ~0;
 
 	ut_ad(ptr && end_ptr);
 
@@ -2043,16 +2045,18 @@ btr_parse_page_reorganize(
 			return(NULL);
 		}
 
-		level = mach_read_from_1(ptr);
-
-		ut_a(level <= 9);
+		compression_flags = mach_read_from_1(ptr);
+		/* compression level is the lower 4 bits of compression flags
+                   we assert here that this is <= 9, a zlib requirement */
+		ut_a((((int) compression_flags) & (0xF)) <= 9);
 		++ptr;
 	} else {
-		level = page_zip_level;
+		compression_flags = page_zip_compression_flags;
 	}
 
 	if (block != NULL) {
-		btr_page_reorganize_block(true, level, block, index, mtr);
+		btr_page_reorganize_block(true, compression_flags, block,
+					  index, mtr);
 	}
 
 	return(ptr);

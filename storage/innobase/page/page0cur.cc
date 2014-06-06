@@ -1244,7 +1244,7 @@ page_cur_insert_rec_zip(
 	    || reorg_before_insert) {
 		/* The values can change dynamically. */
 		bool	log_compressed	= page_zip_log_pages;
-		ulint	level		= page_zip_level;
+		uchar	compression_flags	= page_zip_compression_flags;
 #ifdef UNIV_DEBUG
 		rec_t*	cursor_rec	= page_cur_get_rec(cursor);
 #endif /* UNIV_DEBUG */
@@ -1282,7 +1282,7 @@ page_cur_insert_rec_zip(
 			/* Insert into uncompressed page only, and
 			try page_zip_reorganize() afterwards. */
 		} else if (btr_page_reorganize_low(
-				   recv_recovery_is_on(), level,
+				   recv_recovery_is_on(), compression_flags,
 				   cursor, index, mtr)) {
 			ut_ad(!page_header_get_ptr(page, PAGE_FREE));
 
@@ -1337,12 +1337,13 @@ page_cur_insert_rec_zip(
 			if (!log_compressed) {
 				if (page_zip_compress(
 					    page_zip, page, index,
-					    level, NULL)) {
+					    compression_flags, NULL)) {
 					page_cur_insert_rec_write_log(
 						insert_rec, rec_size,
 						cursor->rec, index, mtr);
 					page_zip_compress_write_log_no_data(
-						level, page, index, mtr);
+						compression_flags, page,
+						index, mtr);
 
 					rec_offs_make_valid(
 						insert_rec, index, offsets);

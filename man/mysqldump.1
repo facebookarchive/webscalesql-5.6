@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqldump\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 05/05/2014
+.\"      Date: 07/18/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLDUMP\FR" "1" "05/05/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLDUMP\FR" "1" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -98,7 +98,7 @@ InnoDB
 backups with minimal disruption; it can also back up tables from
 MyISAM
 and other storage engines; and it provides a number of convenient options to accommodate different backup scenarios\&. See
-Section\ \&24.2, \(lqMySQL Enterprise Backup\(rq\&.
+Section\ \&25.2, \(lqMySQL Enterprise Backup\(rq\&.
 .RE
 .sp
 .RS 4
@@ -177,7 +177,7 @@ supports the following options, which can be specified on the command line or in
 and
 [client]
 groups of an option file\&. For information about option files, see
-Section\ \&4.2.3.3, \(lqUsing Option Files\(rq\&.
+Section\ \&4.2.6, \(lqUsing Option Files\(rq\&.
 Connection Options.PP
 The
 \fBmysqldump\fR
@@ -1259,7 +1259,7 @@ option, which overrides
 and causes it to be ignored if both options are used\&.
 .sp
 Prior to MySQL 5\&.6\&.4, this option was required for dumping the replication log tables (see
-Section\ \&16.2.2, \(lqReplication Relay and Status Logs\(rq)\&.
+Section\ \&17.2.2, \(lqReplication Relay and Status Logs\(rq)\&.
 .RE
 .sp
 .RS 4
@@ -1749,7 +1749,7 @@ slave_master_info
 and
 slave_relay_log_info
 tables (see
-Section\ \&16.2.2, \(lqReplication Relay and Status Logs\(rq) were not included by this option\&.
+Section\ \&17.2.2, \(lqReplication Relay and Status Logs\(rq) were not included by this option\&.
 .RE
 .sp
 .RS 4
@@ -2542,18 +2542,16 @@ Restrictions.\" mysqldump: views
 \fBmysqldump\fR
 does not dump the
 INFORMATION_SCHEMA
-database by default\&. To dump
-INFORMATION_SCHEMA, name it explicitly on the command line and also use the
+or
+performance_schema
+database by default\&. To dump either of these, name it explicitly on the command line and also use the
 \fB\-\-skip\-lock\-tables\fR
+option\&. You can also name them with the
+\fB\-\-databases\fR
 option\&.
 .PP
 \fBmysqldump\fR
-never dumps the
-performance_schema
-database\&.
-.PP
-\fBmysqldump\fR
-also does not dump the MySQL Cluster
+does not dump the MySQL Cluster
 ndbinfo
 information database\&.
 .PP
@@ -2568,7 +2566,7 @@ mysql
 database\&. As of 5\&.6\&.6, the dump includes statements to recreate those tables so that they are not missing after reloading the dump file\&. Log table contents are not dumped\&.
 .PP
 If you encounter problems backing up views due to insufficient privileges, see
-Section\ \&E.5, \(lqRestrictions on Views\(rq
+Section\ \&D.5, \(lqRestrictions on Views\(rq
 for a workaround\&.
 .SH "COPYRIGHT"
 .br

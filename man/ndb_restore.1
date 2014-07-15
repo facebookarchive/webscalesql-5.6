@@ -2,12 +2,12 @@
 .\"     Title: \fBndb_restore\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 05/05/2014
+.\"      Date: 07/18/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBNDB_RESTORE\FR" "1" "05/05/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBNDB_RESTORE\FR" "1" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -48,7 +48,7 @@ directory\&. This program reads the files created as a result of the backup and 
 must be executed once for each of the backup files that were created by the
 START BACKUP
 command used to create the backup (see
-Section\ \&17.5.3.2, \(lqUsing The MySQL Cluster Management Client to Create a Backup\(rq)\&. This is equal to the number of data nodes in the cluster at the time that the backup was created\&.
+Section\ \&18.5.3.2, \(lqUsing The MySQL Cluster Management Client to Create a Backup\(rq)\&. This is equal to the number of data nodes in the cluster at the time that the backup was created\&.
 .\" single user mode (MySQL Cluster): and ndb_restore
 .if n \{\
 .sp
@@ -65,7 +65,7 @@ Section\ \&17.5.3.2, \(lqUsing The MySQL Cluster Management Client to Create a B
 .PP
 Before using
 \fBndb_restore\fR, it is recommended that the cluster be running in single user mode, unless you are restoring multiple data nodes in parallel\&. See
-Section\ \&17.5.8, \(lqMySQL Cluster Single User Mode\(rq, for more information\&.
+Section\ \&18.5.8, \(lqMySQL Cluster Single User Mode\(rq, for more information\&.
 .sp .5v
 .RE
 .PP
@@ -78,7 +78,7 @@ Options Common to MySQL Cluster Programs(1)\&.
 .nr an-no-space-flag 1
 .nr an-break-flag 1
 .br
-.B Table\ \&17.23.\ \&ndb_restore Options and Variables: MySQL Cluster NDB 7.3
+.B Table\ \&18.23.\ \&ndb_restore Options and Variables: MySQL Cluster NDB 7.3
 .TS
 allbox tab(:);
 lB lB lB.
@@ -90,6 +90,7 @@ T}:T{
 Added / Removed
 T}
 .T&
+l l l
 l l l
 l l l
 l l l
@@ -463,9 +464,9 @@ T{
 .PP
 --exclude-tables=table-list
 T}:T{
-List of one or more tables to exclude (includes those in same database
-            that are not not named); each table reference must include
-            the database name
+List of one or more tables to exclude (includes those in the same
+            database that are not named); each table reference must
+            include the database name
 T}:T{
 .PP
 All MySQL 5\&.6 based releases
@@ -494,8 +495,9 @@ T{
 .PP
 --rebuild-indexes
 T}:T{
-Causes multi\-threaded ordered index rebuilding of indexes found in the
-            backup\&.
+Causes multi\-threaded rebuilding of ordered indexes found in the backup\&.
+            Number of threads used is determined by setting
+            BuildIndexThreads parameter\&.
 T}:T{
 .PP
 All MySQL 5\&.6 based releases
@@ -550,10 +552,34 @@ T}:T{
 .PP
 All MySQL 5\&.6 based releases
 T}
+T{
+.PP
+--exclude-intermediate-sql-tables[=TRUE|FALSE]
+T}:T{
+If TRUE (the default), do not restore any intermediate tables (having
+            names prefixed with \*(Aq#sql\-\*(Aq) that were left over from
+            copying ALTER TABLE operations\&.
+T}:T{
+.PP
+ADDED: NDB 7\&.3\&.6
+T}
 .TE
 .sp 1
+.\" ndb_restore: typical and required options
 .PP
 Typical options for this utility are shown here:
+.PP
+Normally, when restoring from a MySQL Cluster backup,
+\fBndb_restore\fR
+requires at a minimum the
+\fB\-\-nodeid\fR
+(short form:
+\fB\-n\fR),
+\fB\-\-backupid\fR
+(short form:
+\fB\-b\fR), and
+\fB\-\-backup_path\fR
+options\&.
 .sp
 .if n \{\
 .RS 4
@@ -572,7 +598,7 @@ The
 option is used to specify a connection string which tells
 ndb_restore
 where to locate the cluster management server\&. (See
-Section\ \&17.3.2.3, \(lqMySQL Cluster Connection Strings\(rq, for information on connection strings\&.) If this option is not used, then
+Section\ \&18.3.2.3, \(lqMySQL Cluster Connection Strings\(rq, for information on connection strings\&.) If this option is not used, then
 \fBndb_restore\fR
 attempts to connect to a management server on
 localhost:1186\&. This utility acts as a cluster API node, and so requires a free connection
@@ -590,7 +616,7 @@ or
 section in
 config\&.ini
 that is not being used for a MySQL server or other application for this reason (see
-Section\ \&17.3.2.7, \(lqDefining SQL and Other API Nodes in a MySQL Cluster\(rq)\&.
+Section\ \&18.3.2.7, \(lqDefining SQL and Other API Nodes in a MySQL Cluster\(rq)\&.
 .PP
 You can verify that
 \fBndb_restore\fR
@@ -713,7 +739,7 @@ column can be restored to a column of type
 INT
 or
 BIGINT\&. See
-Section\ \&16.4.1.9.2, \(lqReplication of Columns Having Different Data Types\(rq, for a table of type conversions currently supported by attribute promotion\&.
+Section\ \&17.4.1.9.2, \(lqReplication of Columns Having Different Data Types\(rq, for a table of type conversions currently supported by attribute promotion\&.
 .PP
 Attribute promotion by
 \fBndb_restore\fR
@@ -828,7 +854,7 @@ This option is intended to complement the
 option\&. Using
 \fB\-\-lossy\-conversions\fR
 allows lossy conversions of column values (type demotions or changes in sign) when restoring data from backup\&. With some exceptions, the rules governing demotion are the same as for MySQL replication; see
-Section\ \&16.4.1.9.2, \(lqReplication of Columns Having Different Data Types\(rq, for information about specific type conversions currently supported by attribute demotion\&.
+Section\ \&17.4.1.9.2, \(lqReplication of Columns Having Different Data Types\(rq, for information about specific type conversions currently supported by attribute demotion\&.
 .PP
 \fBndb_restore\fR
 reports any truncation of data that it performs during lossy conversions once per attribute and column\&.
@@ -882,7 +908,7 @@ The
 option is used to specify the ID or sequence number of the backup, and is the same number shown by the management client in the
 Backup \fIbackup_id\fR completed
 message displayed upon completion of a backup\&. (See
-Section\ \&17.5.3.2, \(lqUsing The MySQL Cluster Management Client to Create a Backup\(rq\&.)
+Section\ \&18.5.3.2, \(lqUsing The MySQL Cluster Management Client to Create a Backup\(rq\&.)
 .if n \{\
 .sp
 .\}
@@ -910,7 +936,7 @@ having
 in the
 id
 column is updated if it already exists; such a row is inserted if it does not already exist\&. (See
-Section\ \&17.6.9, \(lqMySQL Cluster Backups With MySQL Cluster Replication\(rq\&.)
+Section\ \&18.6.9, \(lqMySQL Cluster Backups With MySQL Cluster Replication\(rq\&.)
 .PP
 .\" restore_data option (ndb_restore)
 \fB\-\-restore_data\fR
@@ -942,7 +968,7 @@ to restore the privilege tables\&.
 This works only if the privilege tables were converted to
 NDB
 before the backup was taken\&. For more information, see
-Section\ \&17.5.14, \(lqDistributed MySQL Privileges for MySQL Cluster\(rq\&.
+Section\ \&18.5.14, \(lqDistributed MySQL Privileges for MySQL Cluster\(rq\&.
 .PP
 .\" backup_path option (ndb_restore)
 .\" ndb_restore: backup_path option
@@ -971,7 +997,7 @@ and
 must be run twice\(emonce for each database node in the cluster where the backup was taken\&. However,
 \fBndb_restore\fR
 cannot always restore backups made from a cluster running one version of MySQL to a cluster running a different MySQL version\&. See
-Section\ \&17.2.8, \(lqUpgrading and Downgrading MySQL Cluster NDB 7.3\(rq, for more information\&.
+Section\ \&18.2.8, \(lqUpgrading and Downgrading MySQL Cluster NDB 7.3\(rq, for more information\&.
 .if n \{\
 .sp
 .\}
@@ -1413,7 +1439,7 @@ to their binary logs\&.
 This option stops
 \fBndb_restore\fR
 from restoring any MySQL Cluster Disk Data objects, such as tablespaces and log file groups; see
-Section\ \&17.5.12, \(lqMySQL Cluster Disk Data Tables\(rq, for more information about these\&.
+Section\ \&18.5.12, \(lqMySQL Cluster Disk Data Tables\(rq, for more information about these\&.
 .PP
 .\" ndb_restore: parallelism option
 .\" parallelism option (ndb_restore)
@@ -1938,7 +1964,27 @@ You can use this option with
 \fBndb_restore\fR
 to cause multi\-threaded rebuilding of the ordered indexes while restoring a native
 NDB
-backup\&.
+backup\&. The number of threads used for building ordered indexes by
+\fBndb_restore\fR
+with this option is controlled by the
+BuildIndexThreads
+data node configuration parameter\&.
+.\" indexes: and ndb_restore
+.PP
+It is necessary to use this option only for the first run of
+\fBndb_restore\fR; this causes all ordered indexes to be rebuilt without using
+\fB\-\-rebuild\-indexes\fR
+again when restoring subsequent nodes\&. You should use this option prior to inserting new rows into the database; otherwise, it is possible for a row to be inserted that later causes a unique constraint violation when trying to rebuild the indexes\&.
+.PP
+Rebuilding of unique indexes uses disk write bandwidth for redo logging and local checkpointing\&. An insufficient amount of this bandwith can lead to redo buffer overload or log overload errors\&. In such cases you can run
+\fBndb_restore\fR
+\fB\-\-rebuild\-indexes\fR
+again; the process resumes at the point where the error occurred\&. You can also do this when you have encountered temporarary errors\&. You can repeat execution of
+\fBndb_restore\fR
+\fB\-\-rebuild\-indexes\fR
+indefinitely; you may be able to stop such errors by reducing the value of
+DiskCheckpointSpeed
+to provide additional disk bandwidth to redo logging\&.
 .PP
 .\" ndb_restore: skip-broken-objects option
 .\" skip-broken-objects option (ndb_restore)
@@ -2078,6 +2124,62 @@ When restoring from multiple backup databases into a single target database usin
 \fB\-\-rewrite\-database\fR, no check is made for collisions between table or other object names, and the order in which rows are restored is not guaranteed\&. This means that it is possible in such cases for rows to be overwritten and updates to be lost\&.
 .sp .5v
 .RE
+.PP
+.\" ndb_restore: exclude-intermediate-sql-tables option
+.\" exclude-intermediate-sql-tables option (ndb_restore)
+\fB\-\-exclude\-intermediate\-sql\-tables[=TRUE|FALSE]\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s
+l l s s
+^ l l s
+^ l l s.
+T{
+\fBIntroduced\fR
+T}:T{
+5\&.6\&.17\-ndb\-7\&.3\&.6
+T}
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-exclude\-intermediate\-sql\-tables[=TRUE|FALSE]
+T}
+T{
+\ \&
+T}:T{
+\fBPermitted Values\fR
+T}
+:T{
+\fBType\fR
+T}:T{
+boolean
+T}
+:T{
+\fBDefault\fR
+T}:T{
+TRUE
+T}
+.TE
+.sp 1
+.PP
+When performing copying
+ALTER TABLE
+operations,
+\fBmysqld\fR
+creates intermediate tables (whose names are prefixed with
+#sql\-)\&. When
+TRUE, the
+\fB\-\-exclude\-intermediate\-sql\-tables\fR
+option keeps
+\fBndb_restore\fR
+from restoring such tables that may have been left over from such operations\&. This option is
+TRUE
+by default\&.
+.PP
+The
+\fB\-\-exclude\-intermediate\-sql\-tables\fR
+option was introduced in MySQL Cluster NDB 7\&.3\&.6\&. (Bug #17882305)
 .PP
 \fBError reporting\fR. .\" ndb_restore: errors
 \fBndb_restore\fR

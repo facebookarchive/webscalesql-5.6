@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqlhotcopy\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 05/05/2014
+.\"      Date: 07/18/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLHOTCOPY\FR" "1" "05/05/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLHOTCOPY\FR" "1" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -38,6 +38,22 @@ mysqlhotcopy \- a database backup program
 .HP \w'\fBmysqlhotcopy\ \fR\fB\fIarguments\fR\fR\ 'u
 \fBmysqlhotcopy \fR\fB\fIarguments\fR\fR
 .SH "DESCRIPTION"
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+This utility is deprecated in MySQL 5\&.6\&.20 and removed in MySQL 5\&.7
+.sp .5v
+.RE
 .PP
 \fBmysqlhotcopy\fR
 is a Perl script that was originally written and contributed by Tim Bunce\&. It uses
@@ -114,7 +130,7 @@ supports the following options, which can be specified on the command line or in
 and
 [client]
 groups of an option file\&. For information about option files, see
-Section\ \&4.2.3.3, \(lqUsing Option Files\(rq\&.
+Section\ \&4.2.6, \(lqUsing Option Files\(rq\&.
 .sp
 .RS 4
 .ie n \{\

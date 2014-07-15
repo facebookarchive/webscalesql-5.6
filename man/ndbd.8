@@ -2,12 +2,12 @@
 .\"     Title: \fBndbd\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 05/05/2014
+.\"      Date: 07/18/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBNDBD\FR" "8" "05/05/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBNDBD\FR" "8" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -59,7 +59,7 @@ Options Common to MySQL Cluster Programs(1)\&.
 .nr an-no-space-flag 1
 .nr an-break-flag 1
 .br
-.B Table\ \&17.10.\ \&ndbd Options and Variables: MySQL Cluster NDB 7.3
+.B Table\ \&18.10.\ \&ndbd Options and Variables: MySQL Cluster NDB 7.3
 .TS
 allbox tab(:);
 lB lB lB.
@@ -556,7 +556,7 @@ Backup files that have already been created by the affected node
 .IP \(bu 2.3
 .\}
 MySQL Cluster Disk Data files (see
-Section\ \&17.5.12, \(lqMySQL Cluster Disk Data Tables\(rq)\&.
+Section\ \&18.5.12, \(lqMySQL Cluster Disk Data Tables\(rq)\&.
 .RE
 .sp
 This option also has no effect on recovery of data by a data node that is just starting (or restarting) from data nodes that are already running\&. This recovery of data occurs automatically, and requires no user intervention in a MySQL Cluster that is running normally\&.
@@ -756,7 +756,7 @@ not to start automatically\&. When this option is used,
 connects to the management server, obtains configuration data from it, and initializes communication objects\&. However, it does not actually start the execution engine until specifically requested to do so by the management server\&. This can be accomplished by issuing the proper
 START
 command in the management client (see
-Section\ \&17.5.2, \(lqCommands in the MySQL Cluster Management Client\(rq)\&.
+Section\ \&18.5.2, \(lqCommands in the MySQL Cluster Management Client\(rq)\&.
 .RE
 .sp
 .RS 4
@@ -1149,7 +1149,7 @@ shell> \fBndbd \-\-connect\-string="nodeid=2;host=ndb_mgmd\&.mysql\&.com:1186"\f
 .\}
 .PP
 See
-Section\ \&17.3.2.3, \(lqMySQL Cluster Connection Strings\(rq, for additional information about this issue\&.
+Section\ \&18.3.2.3, \(lqMySQL Cluster Connection Strings\(rq, for additional information about this issue\&.
 \fBndbd\fR(8), describes other options for
 \fBndbd\fR\&.
 .PP
@@ -1175,7 +1175,7 @@ process can consume up to 2 CPUs if permitted to do so\&.
 For a machine with many CPUs it is possible to use several
 \fBndbd\fR
 processes which belong to different node groups; however, such a configuration is still considered experimental and is not supported for MySQL 5\&.6 in a production setting\&. See
-Section\ \&17.1.6, \(lqKnown Limitations of MySQL Cluster\(rq\&.
+Section\ \&18.1.6, \(lqKnown Limitations of MySQL Cluster\(rq\&.
 .SH "COPYRIGHT"
 .br
 .PP

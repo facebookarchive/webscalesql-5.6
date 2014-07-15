@@ -2,12 +2,12 @@
 .\"     Title: Options Common to MySQL Cluster Programs
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 05/05/2014
+.\"      Date: 07/18/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "OPTIONS COMMON TO MY" "1" "05/05/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "OPTIONS COMMON TO MY" "1" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -97,7 +97,7 @@ The options in the following table are common to all MySQL Cluster executables (
 .nr an-no-space-flag 1
 .nr an-break-flag 1
 .br
-.B Table\ \&17.30.\ \&Common MySQL Cluster Program Options and Variables: MySQL Cluster NDB 7.3
+.B Table\ \&18.30.\ \&Common MySQL Cluster Program Options and Variables: MySQL Cluster NDB 7.3
 .TS
 allbox tab(:);
 lB lB lB.
@@ -217,10 +217,10 @@ T}
 .sp 1
 .PP
 For options specific to individual MySQL Cluster programs, see
-Section\ \&17.4, \(lqMySQL Cluster Programs\(rq\&.
+Section\ \&18.4, \(lqMySQL Cluster Programs\(rq\&.
 .PP
 See
-Section\ \&17.3.4.2, \(lqMySQL Server Options for MySQL Cluster\(rq, for
+Section\ \&18.3.4.2, \(lqMySQL Server Options for MySQL Cluster\(rq, for
 \fBmysqld\fR
 options relating to MySQL Cluster\&.
 .sp
@@ -371,7 +371,7 @@ shell> \fBndbd \-\-ndb\-connectstring="nodeid=2;host=ndb_mgmd\&.mysql\&.com:1186
 .\}
 .sp
 For more information, see
-Section\ \&17.3.2.3, \(lqMySQL Cluster Connection Strings\(rq\&.
+Section\ \&18.3.2.3, \(lqMySQL Cluster Connection Strings\(rq\&.
 .RE
 .sp
 .RS 4
@@ -559,7 +559,7 @@ T}
 .sp 1
 Sets this node\*(Aqs MySQL Cluster node ID\&.
 \fIThe range of permitted values depends on the node\*(Aqs type (data, management, or API) and the MySQL Cluster software version\fR\&. See
-Section\ \&17.1.6.2, \(lqLimits and Differences of MySQL Cluster from Standard MySQL Limits\(rq, for more information\&.
+Section\ \&18.1.6.2, \(lqLimits and Differences of MySQL Cluster from Standard MySQL Limits\(rq, for more information\&.
 .RE
 .sp
 .RS 4
@@ -634,7 +634,7 @@ T}
 Prints the MySQL Cluster version number of the executable\&. The version number is relevant because not all versions can be used together, and the MySQL Cluster startup process verifies that the versions of the binaries being used can co\-exist in the same cluster\&. This is also important when performing an online (rolling) software upgrade or downgrade of MySQL Cluster\&.
 .sp
 See
-Section\ \&17.5.5, \(lqPerforming a Rolling Restart of a MySQL Cluster\(rq), for more information\&.
+Section\ \&18.5.5, \(lqPerforming a Rolling Restart of a MySQL Cluster\(rq), for more information\&.
 .RE
 .SH "COPYRIGHT"
 .br

@@ -2,12 +2,12 @@
 .\"     Title: \fBmysql\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 05/05/2014
+.\"      Date: 07/18/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQL\FR" "1" "05/05/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQL\FR" "1" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -122,7 +122,7 @@ supports the following options, which can be specified on the command line or in
 and
 [client]
 groups of an option file\&. For information about option files, see
-Section\ \&4.2.3.3, \(lqUsing Option Files\(rq\&.
+Section\ \&4.2.6, \(lqUsing Option Files\(rq\&.
 .sp
 .RS 4
 .ie n \{\
@@ -158,11 +158,32 @@ to disable rehashing\&. That causes
 \fBmysql\fR
 to start faster, but you must issue the
 rehash
-command if you want to use name completion\&.
+command or its
+\e#
+shortcut if you want to use name completion\&.
 .sp
 To complete a name, enter the first part and press Tab\&. If the name is unambiguous,
 \fBmysql\fR
 completes it\&. Otherwise, you can press Tab again to see the possible names that begin with what you have typed so far\&. Completion does not occur if there is no default database\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+This feature requires a MySQL client that is compiled with the
+\fBreadline\fR
+library\&. Typically, the
+\fBreadline\fR
+library is not available on Windows\&.
+.sp .5v
+.RE
 .RE
 .sp
 .RS 4
@@ -605,7 +626,7 @@ Section\ \&6.3.8.7, \(lqThe Cleartext Client-Side Authentication Plugin\(rq\&.) 
 .sp
 Execute the statement and quit\&. The default output format is like that produced with
 \fB\-\-batch\fR\&. See
-Section\ \&4.2.3.1, \(lqUsing Options on the Command Line\(rq, for some examples\&. With this option,
+Section\ \&4.2.4, \(lqUsing Options on the Command Line\(rq, for some examples\&. With this option,
 \fBmysql\fR
 does not use the history file\&.
 .RE
@@ -814,7 +835,7 @@ the section called \(lqMYSQL COMMANDS\(rq\&.
 \fB\-A\fR
 .sp
 This has the same effect as
-\fB\-skip\-auto\-rehash\fR\&. See the description for
+\fB\-\-skip\-auto\-rehash\fR\&. See the description for
 \fB\-\-auto\-rehash\fR\&.
 .RE
 .sp
@@ -1883,8 +1904,8 @@ is set to something other than the default of
 \(lq;\(rq, instances of that character are sent to the server without interpretation\&. However, the server itself still interprets
 \(lq;\(rq
 as a statement delimiter and processes statements accordingly\&. This behavior on the server side comes into play for multiple\-statement execution (see
-Section\ \&22.8.17, \(lqC API Support for Multiple Statement Execution\(rq), and for parsing the body of stored procedures and functions, triggers, and events (see
-Section\ \&19.1, \(lqDefining Stored Programs\(rq)\&.
+Section\ \&23.8.17, \(lqC API Support for Multiple Statement Execution\(rq), and for parsing the body of stored procedures and functions, triggers, and events (see
+Section\ \&20.1, \(lqDefining Stored Programs\(rq)\&.
 .RE
 .sp
 .RS 4
@@ -2015,7 +2036,7 @@ tee\&.
 nowarning,
 \ew
 .sp
-Enable display of warnings after each statement\&.
+Disable display of warnings after each statement\&.
 .RE
 .sp
 .RS 4
@@ -2696,7 +2717,7 @@ prompt=(\e\eu@\e\eh) [\e\ed]>\e\e_
 In this example, note that the backslashes are doubled\&. If you set the prompt using the
 prompt
 option in an option file, it is advisable to double the backslashes when using the special prompt options\&. There is some overlap in the set of permissible prompt options and the set of special escape sequences that are recognized in option files\&. (The rules for escape sequences in option files are listed in
-Section\ \&4.2.3.3, \(lqUsing Option Files\(rq\&.) The overlap may cause you problems if you use single backslashes\&. For example,
+Section\ \&4.2.6, \(lqUsing Option Files\(rq\&.) The overlap may cause you problems if you use single backslashes\&. For example,
 \es
 is interpreted as a space rather than as the current seconds value\&. The following example shows how to define a prompt within an option file to include the current time in
 HH:MM:SS>
@@ -3078,7 +3099,7 @@ mysql> SHOW BINARY LOGS;
 .RE
 .\}
 .PP
-The search string can contain the the wildcard characters
+The search string can contain the wildcard characters
 \(lq%\(rq
 and
 \(lq_\(rq\&. These have the same meaning as for pattern\-matching operations performed with the
@@ -3554,7 +3575,7 @@ client with the
 option\&.
 .PP
 For more information about auto\-reconnect and its effect on state information when a reconnection occurs, see
-Section\ \&22.8.16, \(lqControlling Automatic Reconnection Behavior\(rq\&.
+Section\ \&23.8.16, \(lqControlling Automatic Reconnection Behavior\(rq\&.
 .SH "COPYRIGHT"
 .br
 .PP

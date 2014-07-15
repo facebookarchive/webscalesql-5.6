@@ -2,12 +2,12 @@
 .\"     Title: \fBndb_index_stat\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 05/05/2014
+.\"      Date: 07/18/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBNDB_INDEX_STAT\FR" "1" "05/05/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBNDB_INDEX_STAT\FR" "1" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -65,21 +65,69 @@ mytable
 in the
 test
 database:
+.\" ndb_index_stat: interpreting output
+.\" ndb_index_stat: example
 .sp
 .if n \{\
 .RS 4
 .\}
 .nf
 shell> \fBndb_index_stat \-d test mytable\fR
-table:mytable index:PRIMARY fragCount:4
-sampleVersion:2 loadTime:1336751773 sampleCount:0 keyBytes:0
-query cache: valid:1 sampleCount:0 totalBytes:0
-times in ms: save: 12\&.380 sort: 0\&.001
+table:City index:PRIMARY fragCount:2
+sampleVersion:3 loadTime:1399585986 sampleCount:1994 keyBytes:7976
+query cache: valid:1 sampleCount:1994 totalBytes:27916
+times in ms: save: 7\&.133 sort: 1\&.974 sort per sample: 0\&.000
 NDBT_ProgramExit: 0 \- OK
 .fi
 .if n \{\
 .RE
 .\}
+.PP
+sampleVersion
+is the version number of the cache from which the statistics data is taken\&. Running
+\fBndb_index_stat\fR
+with the
+\fB\-\-update\fR
+option causes sampleVersion to be incremented\&.
+.PP
+loadTime
+shows when the cache was last updated\&. This is expressed as seconds since the Unix Epoch\&.
+.PP
+sampleCount
+is the number of index entries found per partition\&. You can estimate the total number of entries by multiplying this by the number of fragments (shown as
+fragCount)\&.
+.PP
+sampleCount cab be compared with the cardinality of
+SHOW INDEX
+or
+INFORMATION_SCHEMA\&.STATISTICS, although the latter two provide a view of the table as a whole, while
+\fBndb_index_stat\fR
+provides a per\-fragment average\&.
+.PP
+keyBytes
+is the number of bytes used by the index\&. In this example, the primary key is an integer, which requires four bytes for each index, so
+keyBytes
+can be calculated in this case as shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+    keyBytes = sampleCount * (4 bytes per index) = 1994 * 4 = 7976
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This information can also be obtained using the corresponding column definitions from
+INFORMATION_SCHEMA\&.COLUMNS
+(this requires a MySQL Server and a MySQL client application)\&.
+.PP
+totalBytes
+is the total memory consumed by all indexes on the table, in bytes\&.
+.PP
+Timings shown in the preceding examples are specific to each invocation of
+\fBndb_index_stat\fR\&.
 .PP
 The
 \fB\-\-verbose\fR
@@ -118,7 +166,7 @@ Options Common to MySQL Cluster Programs(1)\&.
 .nr an-no-space-flag 1
 .nr an-break-flag 1
 .br
-.B Table\ \&17.21.\ \&ndb_index_stat Options and Variables: MySQL Cluster NDB 7.3
+.B Table\ \&18.21.\ \&ndb_index_stat Options and Variables: MySQL Cluster NDB 7.3
 .TS
 allbox tab(:);
 lB lB lB.

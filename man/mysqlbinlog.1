@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqlbinlog\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 05/05/2014
+.\"      Date: 07/18/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLBINLOG\FR" "1" "05/05/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLBINLOG\FR" "1" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -43,7 +43,7 @@ utility\&. You can also use
 \fBmysqlbinlog\fR
 to display the contents of relay log files written by a slave server in a replication setup because relay logs have the same format as binary logs\&. The binary log and relay log are discussed further in
 Section\ \&5.2.4, \(lqThe Binary Log\(rq, and
-Section\ \&16.2.2, \(lqReplication Relay and Status Logs\(rq\&.
+Section\ \&17.2.2, \(lqReplication Relay and Status Logs\(rq\&.
 .PP
 Invoke
 \fBmysqlbinlog\fR
@@ -74,7 +74,7 @@ shell> \fBmysqlbinlog binlog\&.0000003\fR
 .PP
 The output includes events contained in
 binlog\&.000003\&. For statement\-based logging, event information includes the SQL statement, the ID of the server on which it was executed, the timestamp when the statement was executed, how much time it took, and so forth\&. For row\-based logging, the event indicates a row change rather than an SQL statement\&. See
-Section\ \&16.1.2, \(lqReplication Formats\(rq, for information about logging modes\&.
+Section\ \&17.1.2, \(lqReplication Formats\(rq, for information about logging modes\&.
 .PP
 Events are preceded by header comments that provide additional information\&. For example:
 .sp
@@ -92,7 +92,7 @@ Events are preceded by header comments that provide additional information\&. Fo
 .PP
 In the first line, the number following
 at
-indicates the starting position of the event in the binary log file\&.
+indicates the file offset, or starting position, of the event in the binary log file\&.
 .PP
 The second line starts with a date and time indicating when the statement started on the server where the event originated\&. For replication, this timestamp is propagated to slave servers\&.
 server id
@@ -134,7 +134,7 @@ supports the following options, which can be specified on the command line or in
 and
 [client]
 groups of an option file\&. For information about option files, see
-Section\ \&4.2.3.3, \(lqUsing Option Files\(rq\&.
+Section\ \&4.2.6, \(lqUsing Option Files\(rq\&.
 .sp
 .RS 4
 .ie n \{\
@@ -344,6 +344,31 @@ Specify the maximum size of a row\-based binary log event, in bytes\&. Rows are 
 .sp
 The directory where character sets are installed\&. See
 Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysqlbinlog: connection-server-id option
+.\" connection-server-id option: mysqlbinlog
+\fB\-\-connection\-server\-id=\fR\fB\fIserver_id\fR\fR
+.sp
+This option is used to test a MySQL server for support of the
+BINLOG_DUMP_NON_BLOCK
+connection flag, which was inadvertently removed in MySQL 5\&.6\&.5, and restored in MySQL 5\&.6\&.20 (Bug #18000079, Bug #71178)\&. It is not required for normal operation\&.
+.sp
+The effective default and minimum values for this option depend on whether
+\fBmysqlbinlog\fR
+is run in blocking mode or non\-blocking mode\&. When
+\fBmysqlbinlog\fR
+is run in blocking mode, the default (and minimum) value is 1; when run in non\-blocking mode, the default (and minimum) value is 0\&.
+.sp
+This option was added in MySQL 5\&.6\&.20\&.
 .RE
 .sp
 .RS 4

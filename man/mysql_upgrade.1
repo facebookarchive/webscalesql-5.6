@@ -2,12 +2,12 @@
 .\"     Title: \fBmysql_upgrade\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 05/05/2014
+.\"      Date: 07/18/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQL_UPGRADE\FR" "1" "05/05/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQL_UPGRADE\FR" "1" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -115,15 +115,43 @@ executes the following commands to check and repair tables and to upgrade the sy
 .RS 4
 .\}
 .nf
-mysqlcheck \-\-all\-databases \-\-check\-upgrade \-\-auto\-repair
-mysql < \fIfix_priv_tables\fR
-mysqlcheck \-\-all\-databases \-\-check\-upgrade \-\-fix\-db\-names \-\-fix\-table\-names
+mysqlcheck \-\-no\-defaults \-\-databases
+ \-\-fix\-db\-names \-\-fix\-table\-names mysql
+mysqlcheck \-\-no\-defaults \-\-check\-upgrade \-\-databases
+ \-\-auto\-repair mysql
+mysql < fix_priv_tables
+mysqlcheck \-\-no\-defaults \-\-all\-databases
+ \-\-skip\-database=mysql \-\-fix\-db\-names \-\-fix\-table\-names
+mysqlcheck \-\-no\-defaults \-\-check\-upgrade \-\-all\-databases
+ \-\-skip\-database=mysql \-\-auto\-repair
 .fi
 .if n \{\
 .RE
 .\}
 .PP
 Notes about the preceding commands:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fBmysql_upgrade\fR
+also adds
+\fB\-\-write\-binlog\fR
+or
+\fB\-\-skip\-write\-binlog\fR
+to the
+\fBmysqlcheck\fR
+commands, depending on whether the
+\fB\-\-write\-binlog\fR
+option was specified on the
+\fBmysql_upgrade\fR
+command\&.
+.RE
 .sp
 .RS 4
 .ie n \{\
@@ -193,7 +221,7 @@ If you install MySQL from RPM packages on Linux, you must install the server and
 \fBmysql_upgrade\fR
 is included in the server RPM but requires the client RPM because the latter includes
 \fBmysqlcheck\fR\&. (See
-Section\ \&2.5.3, \(lqInstalling MySQL on Linux Using RPM Packages\(rq\&.)
+Section\ \&2.5.4, \(lqInstalling MySQL on Linux Using RPM Packages\(rq\&.)
 .PP
 \fBmysql_upgrade\fR
 does not upgrade the contents of the help tables\&. For upgrade instructions, see
@@ -236,7 +264,7 @@ groups of an option file\&. Other options are passed to
 \fBmysqlcheck\fR\&. For example, it might be necessary to specify the
 \fB\-\-password[=\fR\fB\fIpassword\fR\fR\fB]\fR
 option\&. For information about option files, see
-Section\ \&4.2.3.3, \(lqUsing Option Files\(rq\&.
+Section\ \&4.2.6, \(lqUsing Option Files\(rq\&.
 .sp
 .RS 4
 .ie n \{\
@@ -618,7 +646,7 @@ is not recommended with a MySQL Server that is running with global transaction i
 might need to perform on system tables using a nontransactional storage engine such as
 MyISAM
 to fail\&. See
-Section\ \&16.1.3.4, \(lqRestrictions on Replication with GTIDs\(rq, for more information\&.
+Section\ \&17.1.3.4, \(lqRestrictions on Replication with GTIDs\(rq, for more information\&.
 .RE
 .SH "COPYRIGHT"
 .br

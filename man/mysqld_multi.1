@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqld_multi\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 05/05/2014
+.\"      Date: 07/18/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLD_MULTI\FR" "1" "05/05/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLD_MULTI\FR" "1" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -301,9 +301,9 @@ binary to be used to stop servers\&.
 .sp
 The
 \fBmysqld\fR
-binary to be used\&. Note that you can specify
+binary to be used\&. You can specify
 \fBmysqld_safe\fR
-as the value for this option also\&. If you use
+as the value for this option\&. If you use
 \fBmysqld_safe\fR
 to start the server, you can include the
 mysqld
@@ -359,7 +359,7 @@ rather than to the log file\&. By default, output goes to the log file\&.
 \fB\-\-password=\fR\fB\fIpassword\fR\fR
 .sp
 The password of the MySQL account to use when invoking
-\fBmysqladmin\fR\&. Note that the password value is not optional for this option, unlike for other MySQL programs\&.
+\fBmysqladmin\fR\&. The password value is not optional for this option, unlike for other MySQL programs\&.
 .RE
 .sp
 .RS 4
@@ -539,7 +539,7 @@ mysql> \fBGRANT SHUTDOWN ON *\&.*\fR
 See
 Section\ \&6.2, \(lqThe MySQL Access Privilege System\(rq\&. You have to do this for each
 \fBmysqld\fR
-server\&. Change the connection parameters appropriately when connecting to each one\&. Note that the host name part of the account name must permit you to connect as
+server\&. Change the connection parameters appropriately when connecting to each one\&. The host name part of the account name must permit you to connect as
 multi_admin
 from the host where you want to run
 \fBmysqld_multi\fR\&.
@@ -586,7 +586,7 @@ monitors its
 \fBmysqld\fR
 process and restarts it if the process terminates due to a signal sent using
 kill \-9
-or for other reasons, such as a segmentation fault\&. Please note that the
+or for other reasons, such as a segmentation fault\&. The
 \fBmysqld_safe\fR
 script might require that you start it from a certain place\&. This means that you might have to change location to a certain directory before running
 \fBmysqld_multi\fR\&. If you have problems starting, please see the
@@ -686,7 +686,7 @@ user       = jani
 .\}
 .PP
 See
-Section\ \&4.2.3.3, \(lqUsing Option Files\(rq\&.
+Section\ \&4.2.6, \(lqUsing Option Files\(rq\&.
 .SH "COPYRIGHT"
 .br
 .PP

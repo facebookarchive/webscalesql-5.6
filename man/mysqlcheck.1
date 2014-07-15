@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqlcheck\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 05/05/2014
+.\"      Date: 07/18/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLCHECK\FR" "1" "05/05/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLCHECK\FR" "1" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -205,7 +205,7 @@ supports the following options, which can be specified on the command line or in
 and
 [client]
 groups of an option file\&. For information about option files, see
-Section\ \&4.2.3.3, \(lqUsing Option Files\(rq\&.
+Section\ \&4.2.6, \(lqUsing Option Files\(rq\&.
 .sp
 .RS 4
 .ie n \{\
@@ -238,7 +238,13 @@ Display a help message and exit\&.
 .sp
 Check all tables in all databases\&. This is the same as using the
 \fB\-\-databases\fR
-option and naming all the databases on the command line\&.
+option and naming all the databases on the command line, except that the
+INFORMATION_SCHEMA
+and
+performace_schema
+databases are not dumped\&. They can be dumped by explicitly naming them with the
+\fB\-\-databases\fR
+option\&.
 .RE
 .sp
 .RS 4
@@ -408,6 +414,15 @@ Compress all information sent between the client and the server if both support 
 Process all tables in the named databases\&. Normally,
 \fBmysqlcheck\fR
 treats the first name argument on the command line as a database name and following names as table names\&. With this option, it treats all name arguments as database names\&.
+.sp
+This option may be used to dump the
+INFORMATION_SCHEMA
+and
+performace_schema
+databases, which normally are not dumped even with
+\fB\-\-all\-databases\fR\&. option\&. (Also use the
+\fB\-\-skip\-lock\-tables\fR
+option\&.)
 .RE
 .sp
 .RS 4

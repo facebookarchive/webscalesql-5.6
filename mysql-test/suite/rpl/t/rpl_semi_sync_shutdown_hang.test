@@ -19,7 +19,7 @@
 # dump thread should wakeup the waiting transaction thread and switch off
 # semisync as there are no active slaves connected to the server.
 ###############################################################################
---source include/have_semisync_plugin.inc
+--source include/have_semisync.inc
 --source include/master-slave.inc
 --source include/install_semisync.inc
 # Test script is independent of binlog format.

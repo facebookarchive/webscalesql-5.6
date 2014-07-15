@@ -3,7 +3,9 @@ Warnings:
 Note	####	Sending passwords in plain text without SSL/TLS is extremely insecure.
 Note	####	Storing MySQL user name or password information in the master info repository is not secure and is therefore not recommended. Please consider using the USER and PASSWORD connection options for START SLAVE; see the 'START SLAVE Syntax' in the MySQL Manual for more information.
 [connection master]
+SET GLOBAL rpl_semi_sync_master_enabled = 1;
 include/stop_slave.inc
+SET GLOBAL rpl_semi_sync_slave_enabled = 1;
 include/start_slave.inc
 SET GLOBAL event_scheduler = ON;
 CREATE TABLE t1 (i INT NOT NULL AUTO_INCREMENT PRIMARY KEY, f varchar(8)) ENGINE=ENGINE_TYPE;
@@ -37,8 +39,8 @@ UPDATE t1 SET f = CONCAT('up_',CONNECTION_ID()) WHERE i = 2;
 UPDATE t1 SET f = CONCAT('up_',CONNECTION_ID()) WHERE i = 1;
 SET GLOBAL event_scheduler = OFF;
 include/stop_slave.inc
-UNINSTALL PLUGIN rpl_semi_sync_slave;
-UNINSTALL PLUGIN rpl_semi_sync_master;
+set global rpl_semi_sync_slave_enabled = 0;
+set global rpl_semi_sync_master_enabled = 0;
 include/start_slave.inc
 DROP EVENT ev1;
 DROP EVENT ev2;

@@ -19,7 +19,7 @@
 #include "semisync_slave.h"
 #include <mysql.h>
 
-ReplSemiSyncSlave repl_semisync;
+static ReplSemiSyncSlave repl_semisync;
 
 /*
   indicate whether or not the slave should send a reply to the master.
@@ -213,7 +213,7 @@ struct Mysql_replication semi_sync_slave_plugin= {
 /*
   Plugin library descriptor
 */
-mysql_declare_plugin(semi_sync_slave)
+mysql_declare_plugin(semisync_slave)
 {
   MYSQL_REPLICATION_PLUGIN,
   &semi_sync_slave_plugin,

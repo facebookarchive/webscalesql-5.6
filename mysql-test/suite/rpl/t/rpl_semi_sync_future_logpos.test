@@ -13,7 +13,7 @@
 # to a future binlog file name and position which doesn't exist. Master should
 # not assert.
 ###############################################################################
---source include/have_semisync_plugin.inc
+--source include/have_semisync.inc
 --source include/master-slave.inc
 --source include/install_semisync.inc
 

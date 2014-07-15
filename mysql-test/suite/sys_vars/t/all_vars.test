@@ -6,7 +6,7 @@
 # not want the test skiped if they are not, we cannot use the 'have_xxx' mecanizm.
 # Added an 'all_vars-master.opt' file that includes
 # "$SEMISYNC_PLUGIN_OPT --loose-innodb" (see $SEMISYNC_PLUGIN_OPT setting in mysql-test-run.pl)
-# and logic similar to 'include/have_semisync_plugin.inc' that will load semisync plugin
+# and logic similar to 'include/have_semisync.inc' that will load semisync plugin
 if (`SELECT @@have_dynamic_loading = 'YES' AND LENGTH('$SEMISYNC_MASTER_PLUGIN') > 0`)
 {
   --disable_query_log

@@ -474,7 +474,9 @@ class ReplSemiSyncMaster
 
  public:
   ReplSemiSyncMaster();
-  ~ReplSemiSyncMaster();
+  ~ReplSemiSyncMaster() {}
+
+  void cleanup();
 
   bool getMasterEnabled() {
     return master_enabled_;

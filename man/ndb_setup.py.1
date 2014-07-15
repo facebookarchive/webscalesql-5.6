@@ -2,12 +2,12 @@
 .\"     Title: \fBndb_setup.py\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 07/18/2014
+.\"      Date: 09/11/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBNDB_SETUP\&.PY\FR" "1" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBNDB_SETUP\&.PY\FR" "1" "09/11/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -78,7 +78,7 @@ The following table includes all options that are supported by the MySQL Cluster
 .nr an-no-space-flag 1
 .nr an-break-flag 1
 .br
-.B Table\ \&18.26.\ \&ndb_setup\&.py Options and Variables: MySQL Cluster NDB 7.3
+.B Table\ \&18.88.\ \& This table describes command-line options for the ndb_setup.py program
 .TS
 allbox tab(:);
 lB lB lB.
@@ -87,7 +87,7 @@ Format
 T}:T{
 Description
 T}:T{
-Added / Removed
+Added or Removed
 T}
 .T&
 l l l
@@ -107,10 +107,10 @@ T{
 .PP
 -s
 T}:T{
-Page that the web browser opens when starting\&.
+Page that the web browser opens when starting.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -118,11 +118,11 @@ T{
 .PP
 -a
 T}:T{
-File containing list of client certificates allowed to connect to the
-            server
+File containing list of client certificates allowed to connect to
+      the server
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -130,11 +130,11 @@ T{
 .PP
 -c
 T}:T{
-File containing X509 certificate that identifies the server\&. (Default:
-            cfg\&.pem)
+File containing X509 certificate that identifies the server.
+      (Default: cfg.pem)
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -142,11 +142,11 @@ T{
 .PP
 -d
 T}:T{
-Python logging module debug level\&. One of DEBUG, INFO, WARNING
-            (default), ERROR, or CRITICAL\&.
+Python logging module debug level. One of DEBUG, INFO, WARNING
+      (default), ERROR, or CRITICAL.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -157,7 +157,7 @@ T}:T{
 Print help message
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -165,10 +165,11 @@ T{
 .PP
 -k
 T}:T{
-Specify file containing private key (if not included in \-\-cert\-file)
+Specify file containing private key (if not included in
+      --cert-file)
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -179,7 +180,7 @@ T}:T{
 Do not open the start page in a browser, merely start the tool
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -190,18 +191,19 @@ T}:T{
 Specify the port used by the web server
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
-\-\-server\-log\-file=file,
+--server-log-file=file,
 .PP
 o
 T}:T{
-Log requests to this file\&. Use \*(Aq\-\*(Aq to force logging to stderr instead\&.
+Log requests to this file. Use '-' to force logging to stderr
+      instead.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -212,18 +214,18 @@ T}:T{
 The name of the server to connect with
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
-\-\-use\-https,
+--use-https,
 .PP
-\-S
+-S
 T}:T{
-Use secure (HTTPS) client\-server connection
+Use secure (HTTPS) client-server connection
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 .TE
 .sp 1
@@ -581,6 +583,7 @@ l l s s
 l l s s
 ^ l l s
 ^ l l s
+^ l l s
 ^ l l s.
 T{
 \fBCommand\-Line Format\fR
@@ -608,9 +611,14 @@ T}:T{
 8081
 T}
 :T{
-\fBRange\fR
+\fBMin Value\fR
 T}:T{
-1 \&.\&. 65535
+1
+T}
+:T{
+\fBMax Value\fR
+T}:T{
+65535
 T}
 .TE
 .sp 1

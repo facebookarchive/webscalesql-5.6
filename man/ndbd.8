@@ -2,12 +2,12 @@
 .\"     Title: \fBndbd\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 07/18/2014
+.\"      Date: 09/11/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBNDBD\FR" "8" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBNDBD\FR" "8" "09/11/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -59,7 +59,7 @@ Options Common to MySQL Cluster Programs(1)\&.
 .nr an-no-space-flag 1
 .nr an-break-flag 1
 .br
-.B Table\ \&18.10.\ \&ndbd Options and Variables: MySQL Cluster NDB 7.3
+.B Table\ \&18.72.\ \& This table describes command-line options for the ndbd program
 .TS
 allbox tab(:);
 lB lB lB.
@@ -68,7 +68,7 @@ Format
 T}:T{
 Description
 T}:T{
-Added / Removed
+Added or Removed
 T}
 .T&
 l l l
@@ -87,11 +87,11 @@ T{
 .PP
 --initial
 T}:T{
-Perform initial start of ndbd, including cleaning the file system\&.
-            Consult the documentation before using this option
+Perform initial start of ndbd, including cleaning the file system.
+      Consult the documentation before using this option
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -99,11 +99,11 @@ T{
 .PP
 -n
 T}:T{
-Don\*(Aqt start ndbd immediately; ndbd waits for command to start from
-            ndb_mgmd
+Don't start ndbd immediately; ndbd waits for command to start
+      from ndb_mgmd
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -111,10 +111,10 @@ T{
 .PP
 -d
 T}:T{
-Start ndbd as daemon (default); override with \-\-nodaemon
+Start ndbd as daemon (default); override with --nodaemon
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -123,36 +123,36 @@ T}:T{
 Do not start ndbd as daemon; provided for testing purposes
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --foreground
 T}:T{
 Run ndbd in foreground, provided for debugging purposes (implies
-            \-\-nodaemon)
+      --nodaemon)
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --nowait-nodes=list
 T}:T{
-Do not wait for these data nodes to start (takes comma\-separated list of
-            node IDs)\&. Also requires \-\-ndb\-nodeid to be used\&.
+Do not wait for these data nodes to start (takes comma-separated
+      list of node IDs). Also requires --ndb-nodeid to be used.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --initial-start
 T}:T{
-Perform partial initial start (requires \-\-nowait\-nodes)
+Perform partial initial start (requires --nowait-nodes)
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -161,46 +161,47 @@ T}:T{
 Local bind address
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --install[=name]
 T}:T{
-Used to install the data node process as a Windows service\&. Does not
-            apply on non\-Windows platforms\&.
+Used to install the data node process as a Windows service. Does
+      not apply on non-Windows platforms.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --remove[=name]
 T}:T{
-Used to remove a data node process that was previously installed as a
-            Windows service\&. Does not apply on non\-Windows platforms\&.
+Used to remove a data node process that was previously installed
+      as a Windows service. Does not apply on non-Windows platforms.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --connect-retries=#
 T}:T{
-Number of times to try contacting the management server; set to \-1 to
-            keep trying indefinitely
+Number of times to try contacting the management server; set to -1
+      to keep trying indefinitely
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --connect-delay=#
 T}:T{
-Time to wait between attempts to contact a management server, in seconds
+Time to wait between attempts to contact a management server, in
+      seconds
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 .TE
 .sp 1
@@ -893,6 +894,7 @@ l l s s
 l l s s
 ^ l l s
 ^ l l s
+^ l l s
 ^ l l s.
 T{
 \fBCommand\-Line Format\fR
@@ -915,9 +917,14 @@ T}:T{
 12
 T}
 :T{
-\fBRange\fR
+\fBMin Value\fR
 T}:T{
-\-1 \&.\&. 65535
+\-1
+T}
+:T{
+\fBMax Value\fR
+T}:T{
+65535
 T}
 .TE
 .sp 1
@@ -943,6 +950,7 @@ l l s s
 l l s s
 ^ l l s
 ^ l l s
+^ l l s
 ^ l l s.
 T{
 \fBCommand\-Line Format\fR
@@ -965,9 +973,14 @@ T}:T{
 5
 T}
 :T{
-\fBRange\fR
+\fBMin Value\fR
 T}:T{
-0 \&.\&. 3600
+0
+T}
+:T{
+\fBMax Value\fR
+T}:T{
+3600
 T}
 .TE
 .sp 1

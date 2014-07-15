@@ -2,12 +2,12 @@
 .\"     Title: \fBndb_restore\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 07/18/2014
+.\"      Date: 09/11/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBNDB_RESTORE\FR" "1" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBNDB_RESTORE\FR" "1" "09/11/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -78,7 +78,7 @@ Options Common to MySQL Cluster Programs(1)\&.
 .nr an-no-space-flag 1
 .nr an-break-flag 1
 .br
-.B Table\ \&18.23.\ \&ndb_restore Options and Variables: MySQL Cluster NDB 7.3
+.B Table\ \&18.85.\ \& This table describes command-line options for the ndb_restore program
 .TS
 allbox tab(:);
 lB lB lB.
@@ -87,9 +87,10 @@ Format
 T}:T{
 Description
 T}:T{
-Added / Removed
+Added or Removed
 T}
 .T&
+l l l
 l l l
 l l l
 l l l
@@ -138,10 +139,10 @@ T{
 .PP
 -c
 T}:T{
-Alias for \-\-connectstring\&.
+Alias for --connectstring.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -152,7 +153,7 @@ T}:T{
 Back up files from node with this ID
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -163,7 +164,7 @@ T}:T{
 Restore from the backup with the given ID
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -174,7 +175,7 @@ T}:T{
 Restore table data and logs into NDB Cluster using the NDB API
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -185,7 +186,7 @@ T}:T{
 Restore metadata to NDB Cluster using the NDB API
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -193,11 +194,11 @@ T{
 .PP
 -u
 T}:T{
-Do not upgrade array type for varsize attributes which do not already
-            resize VAR data, and do not change column attributes
+Do not upgrade array type for varsize attributes which do not
+      already resize VAR data, and do not change column attributes
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -208,7 +209,7 @@ T}:T{
 Allow attributes to be promoted when restoring data from backup
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -216,11 +217,11 @@ T{
 .PP
 -P
 T}:T{
-Allow preservation of trailing spaces (including padding) when promoting
-            fixed\-width string types to variable\-width types
+Allow preservation of trailing spaces (including padding) when
+      promoting fixed-width string types to variable-width types
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -231,7 +232,7 @@ T}:T{
 Do not restore objects relating to Disk Data
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -239,12 +240,12 @@ T{
 .PP
 -e
 T}:T{
-Restore epoch info into the status table\&. Convenient on a MySQL Cluster
-            replication slave for starting replication\&. The row in
-            mysql\&.ndb_apply_status with id 0 will be updated/inserted\&.
+Restore epoch info into the status table. Convenient on a MySQL
+      Cluster replication slave for starting replication. The row in
+      mysql.ndb_apply_status with id 0 will be updated/inserted.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -255,7 +256,7 @@ T}:T{
 Skip table structure check during restoring of data
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -266,17 +267,17 @@ T}:T{
 Number of parallel transactions to use while restoring data
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --print
 T}:T{
-Print metadata, data and log to stdout (equivalent to \-\-print_meta
-            \-\-print_data \-\-print_log)
+Print metadata, data and log to stdout (equivalent to --print_meta
+      --print_data --print_log)
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -285,7 +286,7 @@ T}:T{
 Print metadata to stdout
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -294,7 +295,7 @@ T}:T{
 Print data to stdout
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -303,7 +304,7 @@ T}:T{
 Print to stdout
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -312,7 +313,7 @@ T}:T{
 Path to backup files directory
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -320,11 +321,11 @@ T{
 .PP
 -f
 T}:T{
-Do not ignore system table during restore\&. Experimental only; not for
-            production use
+Do not ignore system table during restore. Experimental only; not
+      for production use
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -332,11 +333,11 @@ T{
 .PP
 -z
 T}:T{
-Nodegroup map for NDBCLUSTER storage engine\&. Syntax: list of
-            (source_nodegroup, destination_nodegroup)
+Nodegroup map for NDBCLUSTER storage engine. Syntax: list of
+      (source_nodegroup, destination_nodegroup)
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -345,7 +346,7 @@ T}:T{
 Fields are enclosed with the indicated character
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -354,7 +355,7 @@ T}:T{
 Fields are terminated by the indicated character
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -363,7 +364,7 @@ T}:T{
 Fields are optionally enclosed with the indicated character
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -372,7 +373,7 @@ T}:T{
 Lines are terminated by the indicated character
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -381,7 +382,7 @@ T}:T{
 Print binary types in hexadecimal format
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -389,19 +390,19 @@ T{
 .PP
 -T
 T}:T{
-Creates a tab\-separated \&.txt file for each table in the given path
+Creates a tab-separated .txt file for each table in the given path
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --append
 T}:T{
-Append data to a tab\-delimited file
+Append data to a tab-delimited file
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -410,17 +411,17 @@ T}:T{
 Print status of restoration each given number of seconds
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --no-binlog
 T}:T{
 If a mysqld is connected and using binary logging, do not log the
-            restored data
+      restored data
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -429,98 +430,110 @@ T}:T{
 Level of verbosity in output
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --include-databases=db-list
 T}:T{
-List of one or more databases to restore (excludes those not named)
+List of one or more databases to restore (excludes those not
+      named)
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --exclude-databases=db-list
 T}:T{
-List of one or more databases to exclude (includes those not named)
+List of one or more databases to exclude (includes those not
+      named)
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --include-tables=table-list
 T}:T{
-List of one or more tables to restore (excludes those in same database
-            that are not named); each table reference must include the
-            database name
+List of one or more tables to restore (excludes those in same
+      database that are not named); each table reference must include
+      the database name
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --exclude-tables=table-list
 T}:T{
 List of one or more tables to exclude (includes those in the same
-            database that are not named); each table reference must
-            include the database name
+      database that are not named); each table reference must include
+      the database name
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --exclude-missing-columns
 T}:T{
-Causes columns from the backup version of a table that are missing from
-            the version of the table in the database to be ignored\&.
+Causes columns from the backup version of a table that are missing
+      from the version of the table in the database to be ignored.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
+T}
+T{
+.PP
+--exclude-missing-tables
+T}:T{
+Causes tables from the backup that are missing from the database
+      to be ignored.
+T}:T{
+.PP
+ADDED: NDB 7.3.7
 T}
 T{
 .PP
 --disable-indexes
 T}:T{
-Causes indexes from a backup to be ignored; may decrease time needed to
-            restore data\&.
+Causes indexes from a backup to be ignored; may decrease time
+      needed to restore data.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --rebuild-indexes
 T}:T{
-Causes multi\-threaded rebuilding of ordered indexes found in the backup\&.
-            Number of threads used is determined by setting
-            BuildIndexThreads parameter\&.
+Causes multi-threaded rebuilding of ordered indexes found in the
+      backup. Number of threads used is determined by setting
+      BuildIndexThreads parameter.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --skip-broken-objects
 T}:T{
-Causes missing blob tables in the backup file to be ignored\&.
+Causes missing blob tables in the backup file to be ignored.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --skip-unknown-objects
 T}:T{
-Causes schema objects not recognized by ndb_restore to be ignored when
-            restoring a backup made from a newer MySQL Cluster version
-            to an older version\&.
+Causes schema objects not recognized by ndb_restore to be ignored
+      when restoring a backup made from a newer MySQL Cluster version to
+      an older version.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -529,7 +542,7 @@ T}:T{
 Restores to a database with a different name than the original
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -537,31 +550,31 @@ T{
 .PP
 -L
 T}:T{
-Allow lossy conversions of column values (type demotions or changes in
-            sign) when restoring data from backup
+Allow lossy conversions of column values (type demotions or
+      changes in sign) when restoring data from backup
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --restore-privilege-tables
 T}:T{
-Restore MySQL privilege tables that were previously moved to NDB\&.
+Restore MySQL privilege tables that were previously moved to NDB.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --exclude-intermediate-sql-tables[=TRUE|FALSE]
 T}:T{
-If TRUE (the default), do not restore any intermediate tables (having
-            names prefixed with \*(Aq#sql\-\*(Aq) that were left over from
-            copying ALTER TABLE operations\&.
+If TRUE (the default), do not restore any intermediate tables
+      (having names prefixed with '#sql-') that were left over from
+      copying ALTER TABLE operations.
 T}:T{
 .PP
-ADDED: NDB 7\&.3\&.6
+ADDED: NDB 7.3.6
 T}
 .TE
 .sp 1
@@ -782,6 +795,12 @@ or
 BLOB
 were not handled correctly (Bug #17325051)\&.
 .PP
+Prior to MySQL Cluster NDB 7\&.3\&.7, demotion of
+TEXT
+to
+TINYTEXT
+was not handled correctly (Bug #18875137)\&.
+.PP
 When converting between character data types and
 TEXT
 or
@@ -799,6 +818,10 @@ column to
 TEXT
 in the same invocation of
 \fBndb_restore\fR\&.
+.PP
+Converting between
+TEXT
+columns using different character sets is not supported\&. Beginning with MySQL Cluster NDB 7\&.3\&.7, it is expressly disallowed (Bug #18875137)\&.
 .PP
 When performing conversions of character or binary types to
 TEXT
@@ -1928,6 +1951,30 @@ It is also possible to restore only selected table columns using the
 option\&. When this option is used,
 \fBndb_restore\fR
 ignores any columns missing from tables being restored as compared to the versions of those tables found in the backup\&. This option applies to all tables being restored\&. If you wish to apply this option only to selected tables or databases, you can use it in combination with one or more of the options described in the previous paragraph to do so, then restore data to the remaining tables using a complementary set of these options\&.
+.PP
+.\" ndb_restore: exclude-missing-tables option
+.\" exclude-missing-tables option (ndb_restore)
+\fB\-\-exclude\-missing\-tables\fR
+.TS
+allbox tab(:);
+l l s s
+l l s s.
+T{
+\fBIntroduced\fR
+T}:T{
+5\&.6\&.20\-ndb\-7\&.3\&.7
+T}
+T{
+\fBCommand\-Line Format\fR
+T}:T{
+\-\-exclude\-missing\-tables
+T}
+.TE
+.sp 1
+.PP
+Beginning with MySQL Cluster NDB 7\&.3\&.7, it is also possible to restore only selected tables columns using this option, which causes
+\fBndb_restore\fR
+to ignore any tables from the backup that are not found in the target database\&.
 .PP
 .\" ndb_restore: disable-indexes option
 .\" disable-indexes option (ndb_restore)

@@ -2,12 +2,12 @@
 .\"     Title: \fBndbinfo_select_all\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 07/18/2014
+.\"      Date: 09/11/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBNDBINFO_SELECT_AL" "1" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBNDBINFO_SELECT_AL" "1" "09/11/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -120,7 +120,7 @@ Options Common to MySQL Cluster Programs(1)\&.
 .nr an-no-space-flag 1
 .nr an-break-flag 1
 .br
-.B Table\ \&18.11.\ \&ndbinfo_select_all Options and Variables: MySQL Cluster NDB 7.3
+.B Table\ \&18.73.\ \& This table describes command-line options for the ndbinfo_select_all program
 .TS
 allbox tab(:);
 lB lB lB.
@@ -129,7 +129,7 @@ Format
 T}:T{
 Description
 T}:T{
-Added / Removed
+Added or Removed
 T}
 .T&
 l l l
@@ -140,10 +140,10 @@ T{
 .PP
 --delay=#
 T}:T{
-Set the delay in seconds between loops\&. Default is 5\&.
+Set the delay in seconds between loops. Default is 5.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -151,10 +151,10 @@ T{
 .PP
 -l
 T}:T{
-Set the number of times to perform the select\&. Default is 1\&.
+Set the number of times to perform the select. Default is 1.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -162,10 +162,10 @@ T{
 .PP
 -d
 T}:T{
-Name of the database where the table located\&.
+Name of the database where the table located.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -173,10 +173,10 @@ T{
 .PP
 -p
 T}:T{
-Set the degree of parallelism\&.
+Set the degree of parallelism.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 .TE
 .sp 1
@@ -195,6 +195,7 @@ T}
 allbox tab(:);
 l l s s
 l l s s
+^ l l s
 ^ l l s
 ^ l l s
 ^ l l s.
@@ -219,9 +220,14 @@ T}:T{
 5
 T}
 :T{
-\fBRange\fR
+\fBMin Value\fR
 T}:T{
-0 \&.\&. MAX_INT
+0
+T}
+:T{
+\fBMax Value\fR
+T}:T{
+MAX_INT
 T}
 .TE
 .sp 1
@@ -247,6 +253,7 @@ allbox tab(:);
 l l s s
 l l s s
 l l s s
+^ l l s
 ^ l l s
 ^ l l s
 ^ l l s.
@@ -276,9 +283,14 @@ T}:T{
 1
 T}
 :T{
-\fBRange\fR
+\fBMin Value\fR
 T}:T{
-0 \&.\&. MAX_INT
+0
+T}
+:T{
+\fBMax Value\fR
+T}:T{
+MAX_INT
 T}
 .TE
 .sp 1

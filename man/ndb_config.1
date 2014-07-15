@@ -2,12 +2,12 @@
 .\"     Title: \fBndb_config\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 07/18/2014
+.\"      Date: 09/11/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBNDB_CONFIG\FR" "1" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBNDB_CONFIG\FR" "1" "09/11/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -69,7 +69,7 @@ Options Common to MySQL Cluster Programs(1)\&.
 .nr an-no-space-flag 1
 .nr an-break-flag 1
 .br
-.B Table\ \&18.15.\ \&ndb_config Options and Variables: MySQL Cluster NDB 7.3
+.B Table\ \&18.77.\ \& This table describes command-line options for the ndb_config program
 .TS
 allbox tab(:);
 lB lB lB.
@@ -78,7 +78,7 @@ Format
 T}:T{
 Description
 T}:T{
-Added / Removed
+Added or Removed
 T}
 .T&
 l l l
@@ -100,20 +100,20 @@ T{
 .PP
 --nodes
 T}:T{
-Print node information (DB section) only\&.
+Print node information (DB section) only.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --connections
 T}:T{
-Print CONNECTIONS section information only\&. Cannot be used with \-\-nodes
-            or \-\-system option\&.
+Print CONNECTIONS section information only. Cannot be used with
+      --nodes or --system option.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -124,7 +124,7 @@ T}:T{
 One or more query options (attributes)
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -133,7 +133,7 @@ T}:T{
 Specify host
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -142,7 +142,7 @@ T}:T{
 Specify node type
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -153,7 +153,7 @@ T}:T{
 Get configuration of node with this ID
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -164,7 +164,7 @@ T}:T{
 Field separator
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -175,76 +175,76 @@ T}:T{
 Row separator
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --config-file=path
 T}:T{
-Set the path to config\&.ini file
+Set the path to config.ini file
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --mycnf
 T}:T{
-Read configuration data from my\&.cnf file
+Read configuration data from my.cnf file
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 -c
 T}:T{
-Short form for \-\-ndb\-connectstring
+Short form for --ndb-connectstring
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --configinfo
 T}:T{
-Dumps information about all NDB configuration parameters in text format
-            with default, maximum, and minimum values\&. Use with \-\-xml to
-            obtain XML output\&.
+Dumps information about all NDB configuration parameters in text
+      format with default, maximum, and minimum values. Use with --xml
+      to obtain XML output.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --configinfo --xml
 T}:T{
-Use \-\-xml with \-\-configinfo to obtain a dump of all NDB configuration
-            parameters in XML format with default, maximum, and minimum
-            values\&.
+Use --xml with --configinfo to obtain a dump of all NDB
+      configuration parameters in XML format with default, maximum, and
+      minimum values.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --system
 T}:T{
-Print SYSTEM section information only\&. Cannot be used with \-\-nodes or
-            \-\-connections option\&.
+Print SYSTEM section information only. Cannot be used with --nodes
+      or --connections option.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --config_from_node=#
 T}:T{
-Obtain configuration data from the node having this ID (must be a data
-            node)\&.
+Obtain configuration data from the node having this ID (must be a
+      data node).
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 .TE
 .sp 1
@@ -306,6 +306,7 @@ l l s s
 l l s s
 ^ l l s
 ^ l l s
+^ l l s
 ^ l l s.
 T{
 \fBCommand\-Line Format\fR
@@ -328,9 +329,14 @@ T}:T{
 none
 T}
 :T{
-\fBRange\fR
+\fBMin Value\fR
 T}:T{
-1 \&.\&. 48
+1
+T}
+:T{
+\fBMax Value\fR
+T}:T{
+48
 T}
 .TE
 .sp 1
@@ -1230,7 +1236,7 @@ option\&. A portion of the resulting output is shown in this example:
 .\}
 .nf
 shell> \fBndb_config \-\-configinfo \-\-xml\fR
-<configvariables protocolversion="1" ndbversionstring="5\&.6\&.19\-ndb\-7\&.3\&.7"
+<configvariables protocolversion="1" ndbversionstring="5\&.6\&.20\-ndb\-7\&.3\&.7"
                     ndbversion="458758" ndbversionmajor="7" ndbversionminor="0"
                     ndbversionbuild="6">
   <section name="SYSTEM">

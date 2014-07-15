@@ -24,7 +24,7 @@
 %global mysql_vendor_2          Sun Microsystems, Inc.
 %global mysql_vendor            Oracle and/or its affiliates
 
-%global mysql_version   5.6.20
+%global mysql_version   5.6.21
 
 %global mysqld_user     mysql
 %global mysqld_group    mysql
@@ -142,9 +142,9 @@
   %else
     %if %(test -f /etc/oracle-release && echo 1 || echo 0)
       %define elver %(rpm -qf --qf '%%{version}\\n' /etc/oracle-release | sed -e 's/^\\([0-9]*\\).*/\\1/g')
-      %if "%elver" == "6"
-        %define distro_description      Oracle Linux 6
-        %define distro_releasetag       el6
+      %if "%elver" == "6" || "%elver" == "7"
+        %define distro_description      Oracle Linux %elver
+        %define distro_releasetag       el%elver
         %define distro_buildreq         gcc-c++ ncurses-devel perl time zlib-devel cmake libaio-devel
         %define distro_requires         chkconfig coreutils grep procps shadow-utils net-tools
       %else
@@ -242,7 +242,7 @@
 Name:           MySQL%{product_suffix}
 Summary:        MySQL: a very fast and reliable SQL database server
 Group:          Applications/Databases
-Version:        5.6.20
+Version:        5.6.21
 Release:        %{release}%{?distro_releasetag:.%{distro_releasetag}}
 Distribution:   %{distro_description}
 License:        Copyright (c) 2000, 2014, %{mysql_vendor}. All rights reserved. Under %{license_type} license as shown in the Description field.
@@ -442,7 +442,6 @@ For a description of MySQL see the base MySQL RPM or http://www.mysql.com/
 ##############################################################################
 %prep
 %setup -T -a 0 -c -n %{src_dir}
-
 ##############################################################################
 %build
 
@@ -561,6 +560,8 @@ install -d $RBR%{_includedir}
 install -d $RBR%{_libdir}
 install -d $RBR%{_mandir}
 install -d $RBR%{_sbindir}
+
+mkdir -p $RBR%{_sysconfdir}/my.cnf.d
 
 # Install all binaries
 (
@@ -1088,6 +1089,7 @@ echo "====="                                     >> $STATUS_HISTORY
 %doc %attr(644, root, man) %{_mandir}/man1/resolveip.1*
 
 %ghost %config(noreplace,missingok) %{_sysconfdir}/my.cnf
+%dir %{_sysconfdir}/my.cnf.d
 
 %attr(755, root, root) %{_bindir}/innochecksum
 %attr(755, root, root) %{_bindir}/my_print_defaults

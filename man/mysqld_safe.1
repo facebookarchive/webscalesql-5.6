@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqld_safe\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 07/18/2014
+.\"      Date: 09/11/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLD_SAFE\FR" "1" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLD_SAFE\FR" "1" "09/11/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -485,7 +485,7 @@ should be able to open\&. The option value is passed to
 \fBNote\fR
 .ps -1
 .br
-You need to start
+You must start
 \fBmysqld_safe\fR
 as
 root
@@ -603,7 +603,7 @@ When
 syslog
 is used, the
 daemon\&.err
-syslog priority/facility is used for all log messages\&.
+syslog facility/severity is used for all log messages\&.
 .RE
 .sp
 .RS 4
@@ -623,11 +623,11 @@ syslog, messages from
 \fBmysqld_safe\fR
 and
 \fBmysqld\fR
-are written with a tag of
+are written with identifiers of
 mysqld_safe
 and
-mysqld, respectively\&. To specify a suffix for the tag, use
-\fB\-\-syslog\-tag=\fR\fB\fItag\fR\fR, which modifies the tags to be
+mysqld, respectively\&. To specify a suffix for the identifiers, use
+\fB\-\-syslog\-tag=\fR\fB\fItag\fR\fR, which modifies the identifiers to be
 mysqld_safe\-\fItag\fR
 and
 mysqld\-\fItag\fR\&.
@@ -770,7 +770,7 @@ shell> \fBbin/mysqld_safe &\fR
 .PP
 If
 \fBmysqld_safe\fR
-fails, even when invoked from the MySQL installation directory, you can specify the
+fails, even when invoked from the MySQL installation directory, specify the
 \fB\-\-ledir\fR
 and
 \fB\-\-datadir\fR
@@ -855,20 +855,6 @@ writes a message, notices go to the logging destination (syslog
 or the error log file) and
 stdout\&. Errors go to the logging destination and
 stderr\&.
-.PP
-Normally, you should not edit the
-\fBmysqld_safe\fR
-script\&. Instead, configure
-\fBmysqld_safe\fR
-by using command\-line options or options in the
-[mysqld_safe]
-section of a
-my\&.cnf
-option file\&. In rare cases, it might be necessary to edit
-\fBmysqld_safe\fR
-to get it to start the server properly\&. However, if you do this, your modified version of
-\fBmysqld_safe\fR
-might be overwritten if you upgrade MySQL in the future, so you should make a copy of your edited version that you can reinstall\&.
 .SH "COPYRIGHT"
 .br
 .PP

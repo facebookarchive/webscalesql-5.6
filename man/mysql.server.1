@@ -2,12 +2,12 @@
 .\"     Title: \fBmysql.server\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 07/18/2014
+.\"      Date: 09/11/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQL\&.SERVER\FR" "1" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQL\&.SERVER\FR" "1" "09/11/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -57,7 +57,7 @@ Some vendors provide RPM packages that install a startup script under a differen
 If you install MySQL from a source distribution or using a binary distribution format that does not install
 \fBmysql\&.server\fR
 automatically, you can install it manually\&. Instructions are provided in
-Section\ \&2.9.1.2, \(lqStarting and Stopping MySQL Automatically\(rq\&.
+Section\ \&2.10.1.2, \(lqStarting and Stopping MySQL Automatically\(rq\&.
 .PP
 \fBmysql\&.server\fR
 reads options from the
@@ -128,7 +128,7 @@ The path name of the file in which the server should write its process ID\&.
 .\}
 .\" mysql.server: service-startup-timeout option
 .\" service-startup-timeout option: mysql.server
-\fB\-\-service\-startup\-timeout=\fR\fB\fIfile_name\fR\fR
+\fB\-\-service\-startup\-timeout=\fR\fB\fIseconds\fR\fR
 .sp
 How long in seconds to wait for confirmation of server startup\&. If the server does not start within this time,
 \fBmysql\&.server\fR

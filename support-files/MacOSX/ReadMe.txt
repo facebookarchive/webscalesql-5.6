@@ -173,8 +173,8 @@ alias mysqladmin /usr/local/mysql/bin/mysqladmin
 
     2. Double-click the MySQL installer package. It will be named
        according to the version of MySQL you have downloaded. For
-       example, if you have downloaded MySQL server 5.6.21,
-       double-click mysql-5.6.21-osx-10.7-x86_64.pkg.
+       example, if you have downloaded MySQL server 5.6.22,
+       double-click mysql-5.6.22-osx-10.7-x86_64.pkg.
 
     3. You will be presented with the opening installer dialog. Click
        Continue to begin installation.

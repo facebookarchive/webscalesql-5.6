@@ -2,12 +2,12 @@
 .\"     Title: Options Common to MySQL Cluster Programs
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 07/18/2014
+.\"      Date: 09/11/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "OPTIONS COMMON TO MY" "1" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "OPTIONS COMMON TO MY" "1" "09/11/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -97,7 +97,7 @@ The options in the following table are common to all MySQL Cluster executables (
 .nr an-no-space-flag 1
 .nr an-break-flag 1
 .br
-.B Table\ \&18.30.\ \&Common MySQL Cluster Program Options and Variables: MySQL Cluster NDB 7.3
+.B Table\ \&18.92.\ \& This table describes command-line options common to all MySQL Cluster programs
 .TS
 allbox tab(:);
 lB lB lB.
@@ -106,7 +106,7 @@ Format
 T}:T{
 Description
 T}:T{
-Added / Removed
+Added or Removed
 T}
 .T&
 l l l
@@ -129,7 +129,7 @@ T}:T{
 Display help message and exit
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -139,22 +139,22 @@ T{
 .PP
 -c
 T}:T{
-Set connection string for connecting to ndb_mgmd\&. Syntax:
-            [nodeid=<id>;][host=]<hostname>[:<port>]\&.
-            Overrides entries specified in NDB_CONNECTSTRING or my\&.cnf\&.
+Set connection string for connecting to ndb_mgmd. Syntax:
+      [nodeid=<id>;][host=]<hostname>[:<port>].
+      Overrides entries specified in NDB_CONNECTSTRING or my.cnf.
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --ndb-mgmd-host=host[:port]
 T}:T{
-Set the host (and port, if desired) for connecting to the management
-            server
+Set the host (and port, if desired) for connecting to management
+      server
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -163,7 +163,7 @@ T}:T{
 Set node id for this node
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -172,26 +172,26 @@ T}:T{
 Select nodes for transactions in a more optimal way
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --character-sets-dir=path
 T}:T{
-Directory where character sets are
+Directory where character sets are installed
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
 --debug=options
 T}:T{
-Enable output from debug calls\&. Can be used only for versions compiled
-            with debugging enabled
+Enable output from debug calls. Can be used only for versions
+      compiled with debugging enabled
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -200,7 +200,7 @@ T}:T{
 Write core on errors (defaults to TRUE in debug builds)
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 T{
 .PP
@@ -211,7 +211,7 @@ T}:T{
 Output version information and exit
 T}:T{
 .PP
-All MySQL 5\&.6 based releases
+All MySQL 5.6 based releases
 T}
 .TE
 .sp 1

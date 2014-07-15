@@ -2,12 +2,12 @@
 .\"     Title: \fBmysqlbinlog\fR
 .\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 07/18/2014
+.\"      Date: 09/11/2014
 .\"    Manual: MySQL Database System
 .\"    Source: MySQL 5.6
 .\"  Language: English
 .\"
-.TH "\FBMYSQLBINLOG\FR" "1" "07/18/2014" "MySQL 5\&.6" "MySQL Database System"
+.TH "\FBMYSQLBINLOG\FR" "1" "09/11/2014" "MySQL 5\&.6" "MySQL Database System"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -107,6 +107,22 @@ exec_time
 is the time spent executing the event, on a master server\&. On a slave, it is the difference of the end execution time on the slave minus the beginning execution time on the master\&. The difference serves as an indicator of how much replication lags behind the master\&.
 error_code
 indicates the result from executing the event\&. Zero means that no error occurred\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+When using event groups, the file offsets of events may be grouped together and the comments of events may be grouped together\&. Do not mistake these grouped events for blank file offsets\&.
+.sp .5v
+.RE
 .PP
 The output from
 \fBmysqlbinlog\fR
@@ -265,7 +281,7 @@ the section called \(lqMYSQLBINLOG ROW EVENT DISPLAY\(rq\&.
 .\" bind-address option: mysqlbinlog
 \fB\-\-bind\-address=\fR\fB\fIip_address\fR\fR
 .sp
-On a computer having multiple network interfaces, this option can be used to select which interface is employed when connecting to the MySQL server\&.
+On a computer having multiple network interfaces, use this option to select which interface to use for connecting to the MySQL server\&.
 .sp
 This option is supported beginning with MySQL 5\&.6\&.1\&.
 .RE
@@ -286,6 +302,7 @@ allbox tab(:);
 l l s s
 l l s s
 l l s s
+^ l l s
 ^ l l s
 ^ l l s
 ^ l l s
@@ -321,9 +338,14 @@ T}:T{
 4294967040
 T}
 :T{
-\fBRange\fR
+\fBMin Value\fR
 T}:T{
-256 \&.\&. 18446744073709547520
+256
+T}
+:T{
+\fBMax Value\fR
+T}:T{
+18446744073709547520
 T}
 .TE
 .sp 1
@@ -1204,6 +1226,26 @@ supplied with the MySQL Cluster distribution, or built from the MySQL Cluster so
 Add a
 SET NAMES \fIcharset_name\fR
 statement to the output to specify the character set to be used for processing log files\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+.\" mysqlbinlog: shared-memory-base-name option
+.\" shared-memory-base-name option: mysqlbinlog
+\fB\-\-shared\-memory\-base\-name=\fR\fB\fIname\fR\fR
+.sp
+On Windows, the shared\-memory name to use, for connections made using shared memory to a local server\&. The default value is
+MYSQL\&. The shared\-memory name is case sensitive\&.
+.sp
+The server must be started with the
+\fB\-\-shared\-memory\fR
+option to enable shared\-memory connections\&.
 .RE
 .sp
 .RS 4
@@ -2465,7 +2507,7 @@ for variable\-length strings\&.
 .sp -1
 .IP \(bu 2.3
 .\}
-For multi\-byte character sets, the maximum number of bytes per character is not present in the binary log, so the length for string types is displayed in bytes rather than in characters\&. For example,
+For multibyte character sets, the maximum number of bytes per character is not present in the binary log, so the length for string types is displayed in bytes rather than in characters\&. For example,
 STRING(4)
 will be used as the data type for values from either of these column types:
 .sp

@@ -1279,6 +1279,11 @@ trx_commit_in_memory(
 		}
 
 		trx->commit_lsn = lsn;
+
+		/* Tell server some activity has happened. Background
+		utility threads like master thread, purge thread or
+		page_cleaner thread might have some work to do. */
+		srv_active_wake_master_thread();
 	}
 
 	/* undo_no is non-zero if we're doing the final commit. */

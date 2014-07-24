@@ -4715,7 +4715,8 @@ locks_ok:
 	use_clustered_index =
 		(index != clust_index && prebuilt->need_to_access_clustered);
 
-	if (use_clustered_index && srv_prefix_index_cluster_optimization) {
+	if (use_clustered_index && srv_prefix_index_cluster_optimization
+	    && prebuilt->n_template <= index->n_fields) {
 		/* ...but, perhaps avoid the clustered index lookup if
 		all of the following are true:
 		1) all columns are in the secondary index

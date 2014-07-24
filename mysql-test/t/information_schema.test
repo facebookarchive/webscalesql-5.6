@@ -1297,6 +1297,16 @@ drop table t1;
 drop function f1;
 
 #
+# Bug#34517 SHOW GLOBAL STATUS does not work properly in embedded server.
+#
+
+create table t0 select * from information_schema.global_status where VARIABLE_NAME='COM_SELECT';
+SELECT 1;
+select a.VARIABLE_VALUE - b.VARIABLE_VALUE from t0 b, information_schema.global_status a
+   where a.VARIABLE_NAME = b.VARIABLE_NAME;
+drop table t0;
+
+#
 # Bug#34656 KILL a query = Assertion failed: m_status == DA_ERROR ||
 #           m_status == DA_OK
 #
@@ -1374,16 +1384,6 @@ drop table if exists t1;drop table if exists t1;\
 drop table if exists t1;drop table if exists t1;";
 select * from information_schema.global_variables where variable_name='init_connect';
 set global init_connect="";
-
-#
-# Bug#34517 SHOW GLOBAL STATUS does not work properly in embedded server.
-#
-
-create table t0 select * from information_schema.global_status where VARIABLE_NAME='COM_SELECT';
-SELECT 1;
-select a.VARIABLE_VALUE - b.VARIABLE_VALUE from t0 b, information_schema.global_status a
-   where a.VARIABLE_NAME = b.VARIABLE_NAME;
-drop table t0;
 
 #
 # Bug#35275 INFORMATION_SCHEMA.TABLES.CREATE_OPTIONS omits KEY_BLOCK_SIZE

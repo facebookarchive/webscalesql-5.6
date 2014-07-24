@@ -1610,6 +1610,15 @@ show open tables where f1()=0;
 show open tables where f1()=0;
 drop table t1;
 drop function f1;
+create table t0 select * from information_schema.global_status where VARIABLE_NAME='COM_SELECT';
+SELECT 1;
+1
+1
+select a.VARIABLE_VALUE - b.VARIABLE_VALUE from t0 b, information_schema.global_status a
+where a.VARIABLE_NAME = b.VARIABLE_NAME;
+a.VARIABLE_VALUE - b.VARIABLE_VALUE
+2
+drop table t0;
 select * from information_schema.tables where 1=sleep(100000);
 select * from information_schema.columns where 1=sleep(100000);
 explain select count(*) from information_schema.tables;
@@ -1668,15 +1677,6 @@ drop table if exists t1;drop table if exists
 Warnings:
 Warning	1265	Data truncated for column 'VARIABLE_VALUE' at row 1
 set global init_connect="";
-create table t0 select * from information_schema.global_status where VARIABLE_NAME='COM_SELECT';
-SELECT 1;
-1
-1
-select a.VARIABLE_VALUE - b.VARIABLE_VALUE from t0 b, information_schema.global_status a
-where a.VARIABLE_NAME = b.VARIABLE_NAME;
-a.VARIABLE_VALUE - b.VARIABLE_VALUE
-2
-drop table t0;
 CREATE TABLE t1(a INT) KEY_BLOCK_SIZE=1;
 SELECT CREATE_OPTIONS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='t1';
 CREATE_OPTIONS

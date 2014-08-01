@@ -3992,7 +3992,7 @@ byte* recv_dblwr_t::find_page(ulint space_id, ulint page_no)
 	for (std::list<recv_dblwr_item_t>::iterator i = pages.begin();
 	     i != pages.end(); ++i) {
 
-		if ((page_get_space_id(i->page) == space_id)
+		if (i->page && (page_get_space_id(i->page) == space_id)
 		    && (page_get_page_no(i->page) == page_no)) {
 			matches.push_back(i->page);
 		}

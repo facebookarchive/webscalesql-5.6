@@ -109,8 +109,6 @@ def main():
   global FIL_PAGE_DATA
   global FIL_PAGE_OFFSET
   global FIL_PAGE_ARCH_LOG_NO_OR_SPACE_ID
-  global DBLWR_FAIL_MESSAGE
-  global DBLWR_SUCCESS_MESSAGE
 
   UNIV_PAGE_SIZE = int(sys.argv[2])
   TRX_SYS_PAGE_NO = 5
@@ -127,6 +125,7 @@ def main():
   FIL_PAGE_OFFSET = 4
   FIL_PAGE_ARCH_LOG_NO_OR_SPACE_ID = 34
   DBLWR_FAIL_MESSAGE = "InnoDB: Cannot recover it from the doublewrite buffer because it was written in reduced-doublewrite mode.\n"
+  DBLWR_FAIL0_MESSAGE = "InnoDB: Doublewrite does not have page_no=0 of space: "
   DBLWR_SUCCESS_MESSAGE = "InnoDB: Trying to recover it from the doublewrite buffer.\n"
   DBLWR_SUCCESS0_MESSAGE = "InnoDB: Restoring page 0 of tablespace "
 
@@ -176,9 +175,11 @@ def main():
       exit(1)
     ind = contents.find(DBLWR_FAIL_MESSAGE)
     if ind == -1:
-      print contents
-      raise Exception('Doublewrite did not fail to recover as expected on space_id=%d page_no=%d (doublewrite=2)'  % (space_id, page_no))
-      exit(1)
+      ind = contents.find(DBLWR_FAIL0_MESSAGE)
+      if ind == -1:
+        print contents
+        raise Exception('Doublewrite did not fail to recover as expected on space_id=%d page_no=%d (doublewrite=2)'  % (space_id, page_no))
+        exit(1)
     print DBLWR_FAIL_MESSAGE
     # undo the change to the page.
     uncorrupt_page(space_id, page_no, page, ibd_map)

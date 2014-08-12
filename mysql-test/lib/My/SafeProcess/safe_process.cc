@@ -164,7 +164,6 @@ int main(int argc, char* const argv[] )
   /* Install signal handlers */
   sigaction(SIGTERM, &sa,NULL);
   sigaction(SIGINT, &sa,NULL);
-  sigaction(SIGCHLD, &sa,NULL);
   sigaction(SIGABRT, &sa_abort,NULL);
 
   sprintf(safe_process_name, "safe_process[%ld]", (long) own_pid);

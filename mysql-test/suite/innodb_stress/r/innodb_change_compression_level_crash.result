@@ -5,7 +5,6 @@
 # Binary must be compiled with debug for crash to occur
 DROP TABLE IF EXISTS t1;
 SET GLOBAL INNODB_FILE_FORMAT = 'Barracuda';
-call mtr.add_suppression(".*");
 CREATE TABLE t1(id INT PRIMARY KEY, msg VARCHAR(255))
 ENGINE=INNODB
 ROW_FORMAT=COMPRESSED

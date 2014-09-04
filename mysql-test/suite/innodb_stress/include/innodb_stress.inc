@@ -23,8 +23,12 @@ if ($fake_changes)
 
 --connection master
 
-# since this test generates lot of errors in log, suppress checking errors
-call mtr.add_suppression(".*");
+--disable_query_log
+# some versions of this test use zipdebug, and so generate this warning in non-debug builds
+call mtr.add_suppression("innodb_zip_debug is enabled and this is a non-debug mysqld. Please disable it immediately if the machine is serving production traffic.");
+# Expected during mysql crash recovery due to partial binlog events written to the binary log
+call mtr.add_suppression("Error in Log_event::read_log_event()");
+--enable_query_log
 
 --sync_slave_with_master
 

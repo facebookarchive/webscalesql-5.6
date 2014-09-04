@@ -41,48 +41,7 @@ int repl_semi_reset_slave(Binlog_relay_IO_param *param)
 int repl_semi_slave_request_dump(Binlog_relay_IO_param *param,
 				 uint32 flags)
 {
-  MYSQL *mysql= param->mysql;
-  MYSQL_RES *res= 0;
-  MYSQL_ROW row;
-  const char *query;
-
-  if (!repl_semisync.getSlaveEnabled())
-    return 0;
-
-  /* Check if master server has semi-sync plugin installed */
-  query= "SHOW VARIABLES LIKE 'rpl_semi_sync_master_enabled'";
-  if (mysql_real_query(mysql, query, strlen(query)) ||
-      !(res= mysql_store_result(mysql)))
-  {
-    sql_print_error("Execution failed on master: %s", query);
-    return 1;
-  }
-
-  row= mysql_fetch_row(res);
-  if (!row)
-  {
-    /* Master does not support semi-sync */
-    sql_print_warning("Master server does not support semi-sync, "
-                      "fallback to asynchronous replication");
-    rpl_semi_sync_slave_status= 0;
-    mysql_free_result(res);
-    return 0;
-  }
-  mysql_free_result(res);
-
-  /*
-    Tell master dump thread that we want to do semi-sync
-    replication
-  */
-  query= "SET @rpl_semi_sync_slave= 1";
-  if (mysql_real_query(mysql, query, strlen(query)))
-  {
-    sql_print_error("Set 'rpl_semi_sync_slave=1' on master failed");
-    return 1;
-  }
-  mysql_free_result(mysql_store_result(mysql));
-  rpl_semi_sync_slave_status= 1;
-  return 0;
+  return repl_semisync.slaveRequestDump(param->mysql);
 }
 
 int repl_semi_slave_read_event(Binlog_relay_IO_param *param,

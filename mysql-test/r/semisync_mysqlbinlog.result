@@ -1,0 +1,71 @@
+set @save_master_timeout=@@global.rpl_semi_sync_master_timeout;
+set @save_master_wait_no_slave=@@global.rpl_semi_sync_master_wait_no_slave;
+set @save_master_enabled=@@global.rpl_semi_sync_master_enabled;
+[ enable semi-sync on master ]
+set global rpl_semi_sync_master_timeout= 60000 /* 60s */;
+set global rpl_semi_sync_master_enabled = 1;
+show variables like 'rpl_semi_sync_master_enabled';
+Variable_name	Value
+rpl_semi_sync_master_enabled	ON
+[ status of semi-sync on master should be ON even without any semi-sync slaves ]
+show status like 'Rpl_semi_sync_master_clients';
+Variable_name	Value
+Rpl_semi_sync_master_clients	0
+show status like 'Rpl_semi_sync_master_status';
+Variable_name	Value
+Rpl_semi_sync_master_status	ON
+show status like 'Rpl_semi_sync_master_yes_tx';
+Variable_name	Value
+Rpl_semi_sync_master_yes_tx	0
+[ initial master state after the semi-sync mysqlbinlog connected ]
+show status like 'Rpl_semi_sync_master_clients';
+Variable_name	Value
+Rpl_semi_sync_master_clients	1
+show status like 'Rpl_semi_sync_master_status';
+Variable_name	Value
+Rpl_semi_sync_master_status	ON
+show status like 'Rpl_semi_sync_master_no_tx';
+Variable_name	Value
+Rpl_semi_sync_master_no_tx	0
+show status like 'Rpl_semi_sync_master_yes_tx';
+Variable_name	Value
+Rpl_semi_sync_master_yes_tx	0
+create table t1(a int) engine = Innodb;
+[ master state after CREATE TABLE statement ]
+show status like 'Rpl_semi_sync_master_status';
+Variable_name	Value
+Rpl_semi_sync_master_status	ON
+show status like 'Rpl_semi_sync_master_no_tx';
+Variable_name	Value
+Rpl_semi_sync_master_no_tx	0
+show status like 'Rpl_semi_sync_master_yes_tx';
+Variable_name	Value
+Rpl_semi_sync_master_yes_tx	1
+[ insert records to table ]
+[ master status after inserts ]
+show status like 'Rpl_semi_sync_master_status';
+Variable_name	Value
+Rpl_semi_sync_master_status	ON
+show status like 'Rpl_semi_sync_master_no_tx';
+Variable_name	Value
+Rpl_semi_sync_master_no_tx	0
+show status like 'Rpl_semi_sync_master_yes_tx';
+Variable_name	Value
+Rpl_semi_sync_master_yes_tx	11
+set global rpl_semi_sync_master_wait_no_slave = OFF;
+show variables like 'rpl_semi_sync_master_wait_no_slave';
+Variable_name	Value
+rpl_semi_sync_master_wait_no_slave	OFF
+show variables like 'rpl_semi_sync_master_enabled';
+Variable_name	Value
+rpl_semi_sync_master_enabled	ON
+show status like 'Rpl_semi_sync_master_status';
+Variable_name	Value
+Rpl_semi_sync_master_status	ON
+#
+# Clean up
+#
+set @@global.rpl_semi_sync_master_timeout=@save_master_timeout;
+set @@global.rpl_semi_sync_master_wait_no_slave=@save_master_wait_no_slave;
+set @@global.rpl_semi_sync_master_enabled=@save_master_enabled;
+drop table t1;

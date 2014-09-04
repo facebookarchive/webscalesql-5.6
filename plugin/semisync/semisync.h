@@ -19,15 +19,20 @@
 #ifndef SEMISYNC_H
 #define SEMISYNC_H
 
+#ifndef MYSQL_CLIENT
 #define MYSQL_SERVER
 #define HAVE_REPLICATION
 #include <sql_priv.h>
 #include "unireg.h"
-#include <my_global.h>
 #include <my_pthread.h>
 #include <mysql/plugin.h>
 #include <replication.h>
 #include "log.h"                                /* sql_print_information */
+#else
+void sql_print_information(const char *format, ...);
+void sql_print_warning(const char *format, ...);
+void sql_print_error(const char *format, ...);
+#endif /* MYSQL_CLIENT */
 
 typedef struct st_mysql_show_var SHOW_VAR;
 typedef struct st_mysql_sys_var SYS_VAR;

@@ -69,6 +69,7 @@ int ReplSemiSyncSlave::slaveReadSyncHeader(const char *header,
   return function_exit(kWho, read_res);
 }
 
+#ifndef MYSQL_CLIENT
 int ReplSemiSyncSlave::slaveStart(Binlog_relay_IO_param *param)
 {
   bool semi_sync= getSlaveEnabled();
@@ -94,6 +95,7 @@ int ReplSemiSyncSlave::slaveStop(Binlog_relay_IO_param *param)
   mysql_reply= 0;
   return 0;
 }
+#endif /* MYSQL_CLIENT */
 
 int ReplSemiSyncSlave::slaveReply(MYSQL *mysql,
                                  const char *binlog_filename,
@@ -136,4 +138,61 @@ int ReplSemiSyncSlave::slaveReply(MYSQL *mysql,
   }
 
   return function_exit(kWho, reply_res);
+}
+
+/*
+ * Checks if master is semi-sync enabled and notify the dump thread
+ * we are a semi-sync enabled slave.
+ *
+ * Note: This function is moved from repl_semi_slave_request_dump()
+ *       in semisync_slave_plugin.cc.
+ *
+ * @param mysql Slave mysql connection with master
+ * @return 0 Success
+ *         1 Failure
+ *
+*/
+int ReplSemiSyncSlave::slaveRequestDump(MYSQL *mysql)
+{
+  MYSQL_RES *res= 0;
+  MYSQL_ROW row;
+  const char *query;
+
+  if (!getSlaveEnabled())
+    return 0;
+
+  /* Check if master server has semi-sync plugin installed */
+  query= "SHOW VARIABLES LIKE 'rpl_semi_sync_master_enabled'";
+  if (mysql_real_query(mysql, query, strlen(query)) ||
+      !(res= mysql_store_result(mysql)))
+  {
+    sql_print_error("Execution failed on master: %s", query);
+    return 1;
+  }
+
+  row= mysql_fetch_row(res);
+  if (!row)
+  {
+    /* Master does not support semi-sync */
+    sql_print_warning("Master server does not support semi-sync, "
+                      "fallback to asynchronous replication");
+    rpl_semi_sync_slave_status= 0;
+    mysql_free_result(res);
+    return 0;
+  }
+  mysql_free_result(res);
+
+  /*
+   * Tell master dump thread that we want to do semi-sync
+   * replication
+   **/
+  query= "SET @rpl_semi_sync_slave= 1";
+  if (mysql_real_query(mysql, query, strlen(query)))
+  {
+    sql_print_error("Set 'rpl_semi_sync_slave=1' on master failed");
+    return 1;
+  }
+  mysql_free_result(mysql_store_result(mysql));
+  rpl_semi_sync_slave_status= 1;
+  return 0;
 }

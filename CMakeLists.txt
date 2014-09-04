@@ -430,6 +430,8 @@ IF(NOT WITHOUT_SERVER)
 ELSE()
   # We may still want Cluster client libraries, use -DWITH_NDBCLUSTER=1
   ADD_SUBDIRECTORY(storage/ndb)
+  # mysqlbinlog needs semi-sync
+  ADD_SUBDIRECTORY(${CMAKE_SOURCE_DIR}/plugin/semisync/)
 ENDIF()
 
 ADD_SUBDIRECTORY(include)

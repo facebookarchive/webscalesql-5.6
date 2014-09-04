@@ -19,6 +19,9 @@
 #define SEMISYNC_SLAVE_H
 
 #include "semisync.h"
+#include <my_global.h>
+#include <mysql.h>
+#include <m_string.h>
 
 /**
    The extension class for the slave of semi-synchronous replication
@@ -78,9 +81,11 @@ public:
   int slaveReply(MYSQL *mysql, const char *binlog_filename,
                  my_off_t binlog_filepos);
 
+  int slaveRequestDump(MYSQL *mysql);
+#ifndef MYSQL_CLIENT
   int slaveStart(Binlog_relay_IO_param *param);
   int slaveStop(Binlog_relay_IO_param *param);
-
+#endif
 private:
   /* True when initObject has been called */
   bool init_done_;

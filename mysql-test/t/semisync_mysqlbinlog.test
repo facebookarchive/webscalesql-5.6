@@ -1,0 +1,99 @@
+source include/have_semisync.inc;
+source include/not_embedded.inc;
+source include/have_innodb.inc;
+source include/have_log_bin.inc;
+
+set @save_master_timeout=@@global.rpl_semi_sync_master_timeout;
+set @save_master_wait_no_slave=@@global.rpl_semi_sync_master_wait_no_slave;
+set @save_master_enabled=@@global.rpl_semi_sync_master_enabled;
+
+echo [ enable semi-sync on master ];
+set global rpl_semi_sync_master_timeout= 60000 /* 60s */;
+set global rpl_semi_sync_master_enabled = 1;
+show variables like 'rpl_semi_sync_master_enabled';
+
+echo [ status of semi-sync on master should be ON even without any semi-sync slaves ];
+show status like 'Rpl_semi_sync_master_clients';
+show status like 'Rpl_semi_sync_master_status';
+show status like 'Rpl_semi_sync_master_yes_tx';
+
+--write_file $MYSQL_TMP_DIR/mbl.sh
+#!/bin/bash
+$MYSQL_BINLOG --raw --read-from-remote-server --stop-never --user=root --host=127.0.0.1 --port=$MASTER_MYPORT --result-file=$MYSQL_TMP_DIR/ --use_semisync master-bin.000001 > /dev/null 2>$MYSQL_TMP_DIR/semisync.err &
+EOF
+--chmod 0755 $MYSQL_TMP_DIR/mbl.sh
+--exec $MYSQL_TMP_DIR/mbl.sh
+
+#
+# NOTE: Rpl_semi_sync_master_client will only be updated when
+# semi-sync mysqlbinlog has started binlog dump request
+let $status_var= Rpl_semi_sync_master_clients;
+let $status_var_value= 1;
+source include/wait_for_status_var.inc;
+
+echo [ initial master state after the semi-sync mysqlbinlog connected ];
+show status like 'Rpl_semi_sync_master_clients';
+show status like 'Rpl_semi_sync_master_status';
+show status like 'Rpl_semi_sync_master_no_tx';
+show status like 'Rpl_semi_sync_master_yes_tx';
+
+--let $yes_tx_before= query_get_value(SHOW STATUS LIKE 'Rpl_semi_sync_master_yes_tx', Value, 1)
+
+create table t1(a int) engine = Innodb;
+
+# wait for the ack to arrive
+--let $yes_tx_after= `SELECT $yes_tx_before + 1`
+--let $status_var= Rpl_semi_sync_master_yes_tx
+--let $status_var_value= $yes_tx_after
+--source include/wait_for_status_var.inc
+
+echo [ master state after CREATE TABLE statement ];
+show status like 'Rpl_semi_sync_master_status';
+show status like 'Rpl_semi_sync_master_no_tx';
+show status like 'Rpl_semi_sync_master_yes_tx';
+
+--let $yes_tx_before= query_get_value(SHOW STATUS LIKE 'Rpl_semi_sync_master_yes_tx', Value, 1)
+
+let $i=10;
+--let $acks_to_wait= 0
+echo [ insert records to table ];
+disable_query_log;
+while ($i)
+{
+  eval insert into t1 values ($i);
+  dec $i;
+  inc $acks_to_wait;
+}
+enable_query_log;
+
+# Wait for acks from slave to avoid test failures on slow platforms.
+--let $yes_tx_after= `SELECT $yes_tx_before + $acks_to_wait`
+let $status_var= Rpl_semi_sync_master_yes_tx;
+let $status_var_value= $yes_tx_after;
+let $status_timeout= 2400; # 240 seconds
+source include/wait_for_status_var.inc;
+
+echo [ master status after inserts ];
+show status like 'Rpl_semi_sync_master_status';
+show status like 'Rpl_semi_sync_master_no_tx';
+show status like 'Rpl_semi_sync_master_yes_tx';
+
+set global rpl_semi_sync_master_wait_no_slave = OFF;
+show variables like 'rpl_semi_sync_master_wait_no_slave';
+
+show variables like 'rpl_semi_sync_master_enabled';
+show status like 'Rpl_semi_sync_master_status';
+
+--echo #
+--echo # Clean up
+--echo #
+
+--remove_file $MYSQL_TMP_DIR/mbl.sh
+--remove_file $MYSQL_TMP_DIR/semisync.err
+--remove_file $MYSQL_TMP_DIR/master-bin.000001
+
+set @@global.rpl_semi_sync_master_timeout=@save_master_timeout;
+set @@global.rpl_semi_sync_master_wait_no_slave=@save_master_wait_no_slave;
+set @@global.rpl_semi_sync_master_enabled=@save_master_enabled;
+
+drop table t1;

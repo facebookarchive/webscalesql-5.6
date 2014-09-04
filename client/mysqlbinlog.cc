@@ -54,6 +54,7 @@ static void warning(const char *format, ...) ATTRIBUTE_FORMAT(printf, 1, 2);
 #include "sql_string.h"
 #include "my_decimal.h"
 #include "rpl_constants.h"
+#include "semisync_slave_client.h"
 
 #include <algorithm>
 
@@ -193,6 +194,9 @@ static bool filter_based_on_gtids= false;
 
 static bool in_transaction= false;
 static bool seen_gtids= false;
+static bool opt_use_semisync = false;
+static uint opt_semisync_debug = 0;
+ReplSemiSyncSlave repl_semisync;
 
 static Exit_status dump_local_log_entries(PRINT_EVENT_INFO *print_event_info,
                                           const char* logname);
@@ -1615,6 +1619,17 @@ static struct my_option my_long_options[] =
    "Identifiers were provided.",
    &opt_exclude_gtids_str, &opt_exclude_gtids_str, 0,
    GET_STR_ALLOC, REQUIRED_ARG, 0, 0, 0, 0, 0, 0},
+  {"use-semisync", OPT_USE_SEMISYNC,
+   "mysqlbinlog functions as a semisync slave sending acknowledgement "
+   "for received events.",
+   &opt_use_semisync, &opt_use_semisync, 0,
+   GET_BOOL, OPT_ARG, 0, 0, 0, 0, 0, 0},
+  {"semisync-debug", OPT_SEMISYNC_DEBUG,
+   "A value of 2 prints debug information of semi-sync. "
+   "A value of 1 prints function traces of semi-sync. "
+   "A value of of 0 doesn't print any debug information.",
+   &opt_semisync_debug, &opt_semisync_debug, 0,
+   GET_UINT, REQUIRED_ARG, 0, 0, 2, 1, 0, 0},
   {0, 0, 0, 0, 0, 0, GET_NO_ARG, NO_ARG, 0, 0, 0, 0, 0, 0}
 };
 
@@ -1644,21 +1659,6 @@ static void error_or_warning(const char *format, va_list args, const char *msg)
   varargs.
 */
 static void error(const char *format,...)
-{
-  va_list args;
-  va_start(args, format);
-  error_or_warning(format, args, "ERROR");
-  va_end(args);
-}
-
-
-/**
-  This function is used in log_event.cc to report errors.
-
-  @param format Printf-style format string, followed by printf
-  varargs.
-*/
-static void sql_print_error(const char *format,...)
 {
   va_list args;
   va_start(args, format);
@@ -1879,7 +1879,26 @@ static Exit_status safe_connect()
     error("Failed on connect: %s", mysql_error(mysql));
     return ERROR_STOP;
   }
-  mysql->reconnect= 1;
+  if (opt_use_semisync)
+  {
+    // set semi sync slave status to true
+    rpl_semi_sync_slave_enabled = 1;
+    // Note that kTraceDetail and kTraceFunction are the only trace
+    // levels used by semi-sync slave.
+    if (opt_semisync_debug == 2)
+      rpl_semi_sync_slave_trace_level = Trace::kTraceDetail;
+    else if (opt_semisync_debug == 1)
+      rpl_semi_sync_slave_trace_level = Trace::kTraceFunction;
+    else
+      rpl_semi_sync_slave_trace_level = 0;
+    // Initialize semi sync slave functionality
+    repl_semisync.initObject();
+    // Check with master if it has semisync enabled and notify
+    // master this is a semisync enabled slave.
+    if (repl_semisync.slaveRequestDump(mysql))
+      return ERROR_STOP;
+  }
+  mysql->reconnect= 0;
   return OK_CONTINUE;
 }
 
@@ -2112,8 +2131,11 @@ static Exit_status dump_remote_log_entries(PRINT_EVENT_INFO *print_event_info,
   my_off_t old_off= start_position_mot;
   char fname[FN_REFLEN + 1];
   char log_file_name[FN_REFLEN + 1];
+  char *log_file = NULL;
   Exit_status retval= OK_CONTINUE;
   enum enum_server_command command= COM_END;
+
+  bool semi_sync_need_reply = false;
 
   DBUG_ENTER("dump_remote_log_entries");
 
@@ -2258,8 +2280,24 @@ static Exit_status dump_remote_log_entries(PRINT_EVENT_INFO *print_event_info,
       ROTATE_EVENT or FORMAT_DESCRIPTION_EVENT
     */
 
-    type= (Log_event_type) net->read_pos[1 + EVENT_TYPE_OFFSET];
-
+    const char *event_buf = (const char*)net->read_pos + 1;
+    ulong event_len = len - 1;
+    if (rpl_semi_sync_slave_status)
+    {
+      // semisync event has 2 extra flags at the beginning of the event
+      // header.
+      type = (Log_event_type) net->read_pos[1 + 2 + EVENT_TYPE_OFFSET];
+      if (repl_semisync.slaveReadSyncHeader((const char*)net->read_pos + 1,
+                                        event_len, &semi_sync_need_reply,
+                                        &event_buf, &event_len)) {
+        error("Malformed semi-sync packet");
+        DBUG_RETURN(ERROR_STOP);
+      }
+    }
+    else
+    {
+      type = (Log_event_type) net->read_pos[1 + EVENT_TYPE_OFFSET];
+    }
     /*
       Ignore HEARBEAT events. They can show up if mysqlbinlog is
       running with:
@@ -2276,8 +2314,7 @@ static Exit_status dump_remote_log_entries(PRINT_EVENT_INFO *print_event_info,
 
     if (!raw_mode || (type == ROTATE_EVENT) || (type == FORMAT_DESCRIPTION_EVENT))
     {
-      if (!(ev= Log_event::read_log_event((const char*) net->read_pos + 1 ,
-                                          len - 1, &error_msg,
+      if (!(ev= Log_event::read_log_event(event_buf, event_len, &error_msg,
                                           glob_description_event,
                                           opt_verify_binlog_checksum)))
       {
@@ -2288,7 +2325,7 @@ static Exit_status dump_remote_log_entries(PRINT_EVENT_INFO *print_event_info,
         If reading from a remote host, ensure the temp_buf for the
         Log_event class is pointing to the incoming stream.
       */
-      ev->register_temp_buf((char *) net->read_pos + 1);
+      ev->register_temp_buf((char *)event_buf);
     }
     if (raw_mode || (type != LOAD_EVENT))
     {
@@ -2322,6 +2359,7 @@ static Exit_status dump_remote_log_entries(PRINT_EVENT_INFO *print_event_info,
           {
             strmov(log_file_name, rev->new_log_ident);
           }
+          log_file = log_file_name + dirname_length(log_file_name);
         }
 
         if (rev->when.tv_sec == 0)
@@ -2346,7 +2384,7 @@ static Exit_status dump_remote_log_entries(PRINT_EVENT_INFO *print_event_info,
              next binlog file (fake rotate) picked by mysqlbinlog --to-last-log
          */
           old_off= start_position_mot;
-          len= 1; // fake Rotate, so don't increment old_off
+          event_len = 0; // fake Rotate, so don't increment old_off
         }
       }
       else if (type == FORMAT_DESCRIPTION_EVENT)
@@ -2360,7 +2398,7 @@ static Exit_status dump_remote_log_entries(PRINT_EVENT_INFO *print_event_info,
         */
         // fake event when not in raw mode, don't increment old_off
         if ((old_off != BIN_LOG_HEADER_SIZE) && (!raw_mode))
-          len= 1;
+          event_len = 0;
         if (raw_mode)
         {
           if (result_file && (result_file != stdout))
@@ -2403,7 +2441,8 @@ static Exit_status dump_remote_log_entries(PRINT_EVENT_INFO *print_event_info,
       {
         DBUG_EXECUTE_IF("simulate_result_file_write_error",
                         DBUG_SET("+d,simulate_fwrite_error"););
-        if (my_fwrite(result_file, net->read_pos + 1 , len - 1, MYF(MY_NABP)))
+        if (my_fwrite(result_file, (const uchar*) event_buf, event_len,
+            MYF(MY_NABP)))
         {
           error("Could not write into log file '%s'", log_file_name);
           retval= ERROR_STOP;
@@ -2447,7 +2486,12 @@ static Exit_status dump_remote_log_entries(PRINT_EVENT_INFO *print_event_info,
       Let's adjust offset for remote log as for local log to produce
       similar text and to have --stop-position to work identically.
     */
-    old_off+= len-1;
+    old_off += event_len;
+    if (rpl_semi_sync_slave_status && semi_sync_need_reply)
+    {
+      DBUG_ASSERT(raw_mode);
+      repl_semisync.slaveReply(mysql, log_file, old_off);
+    }
   }
 
   DBUG_RETURN(OK_CONTINUE);
@@ -2868,6 +2912,12 @@ static int args_post_process(void)
           "--stop-never-slave-server-id= %lld. ", connection_server_id,
           stop_never_slave_server_id);
 #endif
+
+  if (opt_use_semisync && !raw_mode)
+  {
+    error("--raw option must be used when using --use_semisync option");
+    DBUG_RETURN(ERROR_STOP);
+  }
 
   DBUG_RETURN(OK_CONTINUE);
 }

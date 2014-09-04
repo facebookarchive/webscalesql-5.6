@@ -17,6 +17,10 @@
 
 
 #include "semisync.h"
+#ifdef MYSQL_CLIENT
+#include <stdarg.h>
+#include <stdio.h>
+#endif
 
 const unsigned char ReplSemiSyncBase::kPacketMagicNum = 0xef;
 const unsigned char ReplSemiSyncBase::kPacketFlagSync = 0x01;
@@ -29,3 +33,35 @@ const unsigned long Trace::kTraceFunction = 0x0040;
 
 const unsigned char  ReplSemiSyncBase::kSyncHeader[2] =
   {ReplSemiSyncBase::kPacketMagicNum, 0};
+
+#ifdef MYSQL_CLIENT
+void sql_print_information(const char *format, ...)
+{
+  va_list args;
+  va_start(args, format);
+  fprintf(stderr, "Info: ");
+  vfprintf(stderr, format, args);
+  fprintf(stderr, "\n");
+  va_end(args);
+}
+
+void sql_print_warning(const char *format, ...)
+{
+  va_list args;
+  va_start(args, format);
+  fprintf(stderr, "Warning: ");
+  vfprintf(stderr, format, args);
+  fprintf(stderr, "\n");
+  va_end(args);
+}
+
+void sql_print_error(const char *format, ...)
+{
+  va_list args;
+  va_start(args, format);
+  fprintf(stderr, "Error: ");
+  vfprintf(stderr, format, args);
+  fprintf(stderr, "\n");
+  va_end(args);
+}
+#endif

@@ -25,3 +25,8 @@ SET(SEMISYNC_SLAVE_SOURCES  semisync.cc semisync_slave.cc
 MYSQL_ADD_PLUGIN(semisync_slave ${SEMISYNC_SLAVE_SOURCES} 
   MODULE_OUTPUT_NAME "semisync_slave" DEFAULT STATIC_ONLY)
 
+SET(SEMISYNC_SLAVE_CLIENT_SOURCES semisync_slave_client.h
+semisync_slave_client.cc semisync_slave.h semisync_slave.cc semisync.h
+semisync.cc)
+ADD_LIBRARY(semisync_slave_client ${SEMISYNC_SLAVE_CLIENT_SOURCES})
+SET_TARGET_PROPERTIES(semisync_slave_client PROPERTIES COMPILE_FLAGS "-DMYSQL_CLIENT")

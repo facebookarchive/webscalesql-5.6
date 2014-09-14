@@ -1,0 +1,59 @@
+--echo #
+--echo # Test query throttling
+--echo #
+
+--source include/not_embedded.inc
+
+SET @old_general_query_throttling_limit= @@global.general_query_throttling_limit;
+SET @old_write_query_throttling_limit= @@global.general_query_throttling_limit;
+
+CREATE USER user1;
+CREATE USER user2;
+CREATE USER user3;
+CREATE USER user4;
+CREATE USER user5;
+
+CREATE TABLE t1 (a INT PRIMARY KEY, b INT) ENGINE=InnoDB;
+
+SET GLOBAL general_query_throttling_limit=2;
+
+--echo # Connect root
+connect(con1,localhost,root,,);
+insert into t1 (a,b) select 1, sleep(2) from dual;
+
+--echo # Connect user1
+connect(con1user1,localhost,user1,,);
+insert into t1 (a,b) select 2, sleep(1) from dual;
+
+--echo # Connect user2
+connect(con1user2,localhost,user2,,);
+insert into t1 (a,b) select 3, sleep(1) from dual;
+select * from t1;
+select a, sleep(1) from t1;
+
+-- replace_column 1 ##
+SELECT variable_value FROM information_schema.global_status WHERE LOWER(variable_name) = 'write_queries_running';
+-- replace_column 1 ##
+SELECT variable_value FROM information_schema.global_status WHERE LOWER(variable_name) = 'read_queries';
+-- replace_column 1 ##
+SELECT variable_value FROM information_schema.global_status WHERE LOWER(variable_name) = 'write_queries';
+-- replace_column 1 ##
+SELECT variable_value FROM information_schema.global_status WHERE LOWER(variable_name) = 'total_queries_rejected';
+-- replace_column 1 ##
+SELECT variable_value FROM information_schema.global_status WHERE LOWER(variable_name) = 'write_queries_rejected';
+
+disconnect con1;
+disconnect con1user1;
+disconnect con1user2;
+--echo # Connection: default
+connection default;
+
+DROP TABLE t1;
+DROP USER user1;
+DROP USER user2;
+DROP USER user3;
+DROP USER user4;
+DROP USER user5;
+
+SET global general_query_throttling_limit = @old_general_query_throttling_limit;
+SET global write_query_throttling_limit = @old_write_query_throttling_limit;

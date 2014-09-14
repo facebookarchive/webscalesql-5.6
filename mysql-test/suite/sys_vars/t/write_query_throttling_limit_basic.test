@@ -1,0 +1,31 @@
+--source include/load_sysvars.inc
+
+SET @old_write_query_throttling_limit = @@global.write_query_throttling_limit;
+SELECT @old_write_query_throttling_limit;
+
+SET @@global.write_query_throttling_limit = DEFAULT;
+SELECT @@global.write_query_throttling_limit;
+
+-- echo # write_query_throttling_limit is a global variable.
+--error ER_GLOBAL_VARIABLE
+SET @@session.write_query_throttling_limit = 1;
+SELECT @@write_query_throttling_limit;
+
+SET @@global.write_query_throttling_limit = 512;
+SELECT @@global.write_query_throttling_limit;
+SET @@global.write_query_throttling_limit = 1000;
+SELECT @@global.write_query_throttling_limit;
+SET @@global.write_query_throttling_limit = 0;
+SELECT @@global.write_query_throttling_limit;
+
+--error ER_WRONG_TYPE_FOR_VAR
+SET @@global.write_query_throttling_limit = 1.01;
+--error ER_WRONG_TYPE_FOR_VAR
+SET @@global.write_query_throttling_limit = 'ten';
+SELECT @@global.write_query_throttling_limit;
+-- echo # set write_query_throttling_limit to wrong value
+SET @@global.write_query_throttling_limit = 15000;
+SELECT @@global.write_query_throttling_limit;
+
+SET @@global.write_query_throttling_limit = @old_write_query_throttling_limit;
+SELECT @@global.write_query_throttling_limit;

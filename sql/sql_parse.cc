@@ -6347,6 +6347,93 @@ void mysql_init_multi_delete(LEX *lex)
   lex->query_tables_last= &lex->query_tables;
 }
 
+/** Query types in the context of throttling. This is strictly for
+throttling e.g. a write query type doesn't imply all the queries
+which will do a write. Instead, it implies the queries which will
+do write and are eligible for throttling as well. */
+enum throttle_query_type {
+  THROTTLE_QUERY_WRITE,
+  THROTTLE_QUERY_READ,
+  THROTTLE_QUERY_OTHER
+};
+
+/* Returns type of a query in the context of throttling. */
+static throttle_query_type get_throttle_query_type(LEX* lex)
+{
+  switch (lex->sql_command) {
+  case SQLCOM_UPDATE:
+  case SQLCOM_INSERT:
+  case SQLCOM_DELETE:
+  case SQLCOM_INSERT_SELECT:
+  case SQLCOM_REPLACE:
+  case SQLCOM_REPLACE_SELECT:
+    return THROTTLE_QUERY_WRITE;
+
+  case SQLCOM_SELECT:
+    return THROTTLE_QUERY_READ;
+
+  default:
+    return THROTTLE_QUERY_OTHER;
+  }
+}
+
+static bool throttle_query_if_needed(THD* thd)
+{
+  DBUG_ENTER("throttle_query_if_needed");
+
+  DBUG_ASSERT(thd);
+
+  LEX *lex= thd->lex;
+  throttle_query_type qry_type= get_throttle_query_type(lex);
+
+  /* Check if the query is eligible for throttling. */
+  if (qry_type == THROTTLE_QUERY_OTHER)
+    DBUG_RETURN(false);
+
+  /* We update some counters to reflect the new state of the system. */
+  if (qry_type == THROTTLE_QUERY_WRITE)
+  {
+    my_atomic_add64((longlong*)&write_queries, 1);
+    inc_write_query_running();
+  }
+  else
+  {
+    DBUG_ASSERT(qry_type == THROTTLE_QUERY_READ);
+    my_atomic_add64((longlong*)&read_queries, 1);
+  }
+
+  /* We never throttle super-user queries. */
+  if (thd->security_ctx->master_access & SUPER_ACL)
+    DBUG_RETURN(false);
+
+  bool throttle_query= false;
+  /* If we are here that means we have a query that is eligible
+  for throttling. We throttle based on:
+     -- total number of running threads
+     -- number of threads running write queries
+
+  We use local variable for dynamic options to avoid race. */
+  int32 general_limit= (int32)opt_general_query_throttling_limit;
+  int32 write_limit= (int32)opt_write_query_throttling_limit;
+
+  throttle_query= (general_limit && get_thread_running() > general_limit);
+
+  if (!throttle_query)
+    throttle_query= (write_limit && qry_type == THROTTLE_QUERY_WRITE
+                     && get_write_query_running() > write_limit);
+
+  if (throttle_query)
+  {
+    my_error(ER_QUERY_THROTTLED, MYF(0));
+    my_atomic_add64((longlong*)&total_query_rejected, 1);
+    if (qry_type == THROTTLE_QUERY_WRITE)
+      my_atomic_add64((longlong*)&write_query_rejected, 1);
+
+    DBUG_RETURN(true);
+  }
+
+  DBUG_RETURN(false);
+}
 
 /*
   When you modify mysql_parse(), you may need to mofify
@@ -6367,6 +6454,7 @@ void mysql_parse(THD *thd, char *rawbuf, uint length,
                  Parser_state *parser_state)
 {
   int error __attribute__((unused));
+
   DBUG_ENTER("mysql_parse");
 
   DBUG_EXECUTE_IF("parser_debug", turn_parser_debug_on(););
@@ -6401,7 +6489,12 @@ void mysql_parse(THD *thd, char *rawbuf, uint length,
                       ? (found_semicolon - thd->query())
                       : thd->query_length();
 
-    if (!err)
+    /* We throttle certain type of queries based on the current state
+    of the system. This function will check if we need to throttle and
+    if so, it will set the appropriate error and return true. */
+    bool query_throttled= throttle_query_if_needed(thd);
+
+    if (!err && !query_throttled)
     {
       /*
         See whether we can do any query rewriting. opt_log_raw only controls
@@ -6531,8 +6624,10 @@ void mysql_parse(THD *thd, char *rawbuf, uint length,
                                                    sql_statement_info[SQLCOM_END].m_key);
 
       DBUG_ASSERT(thd->is_error());
-      DBUG_PRINT("info",("Command aborted. Fatal_error: %d",
-			 thd->is_fatal_error));
+      /* no need of logging throttled query in error log */
+      if (!query_throttled)
+        DBUG_PRINT("info",("Command aborted. Fatal_error: %d",
+                           thd->is_fatal_error));
 
       query_cache_abort(&thd->query_cache_tls);
     }
@@ -6562,6 +6657,9 @@ void mysql_parse(THD *thd, char *rawbuf, uint length,
       general_log_write(thd, COM_QUERY, thd->query(), thd->query_length());
     parser_state->m_lip.found_semicolon= NULL;
   }
+
+  if (get_throttle_query_type(thd->lex) == THROTTLE_QUERY_WRITE)
+    dec_write_query_running();
 
   DBUG_VOID_RETURN;
 }

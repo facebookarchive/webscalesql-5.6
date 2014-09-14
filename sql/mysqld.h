@@ -294,6 +294,13 @@ extern ulong connection_errors_internal;
 extern ulong connection_errors_max_connection;
 extern ulong connection_errors_peer_addr;
 extern ulong log_warnings;
+extern uint opt_general_query_throttling_limit;
+extern uint opt_write_query_throttling_limit;
+extern ulonglong read_queries, write_queries;
+extern ulonglong total_query_rejected, write_query_rejected;
+extern int32 write_query_running;
+extern my_atomic_rwlock_t write_query_running_lock;
+
 /** The size of the host_cache. */
 extern uint host_cache_size;
 void init_sql_statement_names();
@@ -746,6 +753,46 @@ dec_thread_running()
   num_threads= my_atomic_add32(&num_thread_running, -1);
   my_atomic_rwlock_wrunlock(&thread_running_lock);
   return (num_threads-1);
+}
+
+inline int32
+get_thread_running()
+{
+  int32 num_threads;
+  my_atomic_rwlock_rdlock(&thread_running_lock);
+  num_threads= my_atomic_load32(&num_thread_running);
+  my_atomic_rwlock_rdunlock(&thread_running_lock);
+  return num_threads;
+}
+
+inline int32
+get_write_query_running()
+{
+  int32 num_writes_running;
+  my_atomic_rwlock_rdlock(&write_query_running_lock);
+  num_writes_running= my_atomic_load32(&write_query_running);
+  my_atomic_rwlock_rdunlock(&write_query_running_lock);
+  return (num_writes_running);
+}
+
+inline int32
+inc_write_query_running()
+{
+  int32 num_writes_running;
+  my_atomic_rwlock_wrlock(&write_query_running_lock);
+  num_writes_running= my_atomic_add32(&write_query_running, 1);
+  my_atomic_rwlock_wrunlock(&write_query_running_lock);
+  return (num_writes_running+1);
+}
+
+inline int32
+dec_write_query_running()
+{
+  int32 num_writes_running;
+  my_atomic_rwlock_wrlock(&write_query_running_lock);
+  num_writes_running= my_atomic_add32(&write_query_running, -1);
+  my_atomic_rwlock_wrunlock(&write_query_running_lock);
+  return (num_writes_running-1);
 }
 
 #if defined(MYSQL_DYNAMIC_PLUGIN) && defined(_WIN32)

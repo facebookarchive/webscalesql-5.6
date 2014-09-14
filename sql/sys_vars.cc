@@ -2649,6 +2649,18 @@ static Sys_var_mybool Sys_slave_compressed_protocol(
        GLOBAL_VAR(opt_slave_compressed_protocol), CMD_LINE(OPT_ARG),
        DEFAULT(FALSE));
 
+static Sys_var_uint Sys_general_query_throttling_limit(
+       "general_query_throttling_limit", "Start throttling queries if running threads high.",
+       GLOBAL_VAR(opt_general_query_throttling_limit), CMD_LINE(OPT_ARG),
+       VALID_RANGE(0, 10000), DEFAULT(0),
+       BLOCK_SIZE(1), NO_MUTEX_GUARD, NOT_IN_BINLOG, ON_CHECK(0), ON_UPDATE(0));
+
+static Sys_var_uint Sys_write_query_throttling_limit(
+       "write_query_throttling_limit", "Start throttling writes if running mutation queries high.",
+       GLOBAL_VAR(opt_write_query_throttling_limit), CMD_LINE(OPT_ARG),
+       VALID_RANGE(0, 5000), DEFAULT(0),
+       BLOCK_SIZE(1), NO_MUTEX_GUARD, NOT_IN_BINLOG, ON_CHECK(0), ON_UPDATE(0));
+
 #ifdef HAVE_REPLICATION
 static const char *slave_exec_mode_names[]=
        {"STRICT", "IDEMPOTENT", 0};

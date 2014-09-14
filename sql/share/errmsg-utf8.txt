@@ -7116,6 +7116,9 @@ ER_QUERY_TIMEOUT
 ER_NON_RO_SELECT_DISABLE_TIMER
   eng "Select is not a read only statement, disabling timer"
 
+ER_QUERY_THROTTLED 70101
+ eng "Query execution was throttled"
+
 #
 #  End of 5.6 error messages.
 #

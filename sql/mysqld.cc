@@ -538,6 +538,7 @@ query_id_t global_query_id;
 my_atomic_rwlock_t global_query_id_lock;
 my_atomic_rwlock_t thread_running_lock;
 my_atomic_rwlock_t slave_open_temp_tables_lock;
+my_atomic_rwlock_t write_query_running_lock;
 ulong aborted_threads, aborted_connects;
 ulong delayed_insert_timeout, delayed_insert_limit, delayed_queue_size;
 ulong delayed_insert_threads, delayed_insert_writes, delayed_rows_in_use;
@@ -551,6 +552,13 @@ my_bool log_bin_use_v1_row_events= 0;
 bool thread_cache_size_specified= false;
 bool host_cache_size_specified= false;
 bool table_definition_cache_specified= false;
+
+/** Related to query throttling logic. */
+uint opt_general_query_throttling_limit= 0;
+uint opt_write_query_throttling_limit= 0;
+int32 write_query_running= 0;
+ulonglong read_queries= 0, write_queries= 0;
+ulonglong total_query_rejected= 0, write_query_rejected= 0;
 
 Error_log_throttle err_log_throttle(Log_throttle::LOG_THROTTLE_WINDOW_SIZE,
                                     sql_print_error,
@@ -580,6 +588,7 @@ uint sync_binlog_period= 0, sync_relaylog_period= 0,
      sync_relayloginfo_period= 0, sync_masterinfo_period= 0,
      opt_mts_checkpoint_period, opt_mts_checkpoint_group;
 ulong expire_logs_days = 0;
+
 /**
   Soft upper limit for number of sp_head objects that can be stored
   in the sp_cache for one connection.
@@ -1934,6 +1943,7 @@ void clean_up(bool print_message)
   my_atomic_rwlock_destroy(&opt_binlog_max_flush_queue_time_lock);
   my_atomic_rwlock_destroy(&global_query_id_lock);
   my_atomic_rwlock_destroy(&thread_running_lock);
+  my_atomic_rwlock_destroy(&write_query_running_lock);
   free_charsets();
   mysql_mutex_lock(&LOCK_thread_count);
   DBUG_PRINT("quit", ("got thread count lock"));
@@ -7981,6 +7991,7 @@ SHOW_VAR status_vars[]= {
 #endif /*HAVE_QUERY_CACHE*/
   {"Queries",                  (char*) &show_queries,            SHOW_FUNC},
   {"Questions",                (char*) offsetof(STATUS_VAR, questions), SHOW_LONGLONG_STATUS},
+  {"Read_queries",             (char*) &read_queries,        SHOW_LONG},
   {"Select_full_join",         (char*) offsetof(STATUS_VAR, select_full_join_count), SHOW_LONGLONG_STATUS},
   {"Select_full_range_join",   (char*) offsetof(STATUS_VAR, select_full_range_join_count), SHOW_LONGLONG_STATUS},
   {"Select_range",             (char*) offsetof(STATUS_VAR, select_range_count), SHOW_LONGLONG_STATUS},
@@ -8051,10 +8062,14 @@ SHOW_VAR status_vars[]= {
   {"Threads_connected",        (char*) &connection_count,       SHOW_INT},
   {"Threads_created",        (char*) &thread_created,   SHOW_LONG_NOFLUSH},
   {"Threads_running",          (char*) &num_thread_running,     SHOW_INT},
+  {"Total_queries_rejected",   (char*) &total_query_rejected,   SHOW_LONG},
   {"Uptime",                   (char*) &show_starttime,         SHOW_FUNC},
 #ifdef ENABLED_PROFILING
   {"Uptime_since_flush_status",(char*) &show_flushstatustime,   SHOW_FUNC},
 #endif
+  {"Write_queries",            (char*) &write_queries,          SHOW_LONG},
+  {"Write_queries_rejected",   (char*) &write_query_rejected,   SHOW_LONG},
+  {"Write_queries_running",    (char*) &write_query_running,    SHOW_INT},
   {NullS, NullS, SHOW_LONG}
 };
 
@@ -8211,6 +8226,11 @@ static int mysql_init_variables(void)
   server_id_supplied= 0;
   test_flags= select_errors= dropping_tables= ha_open_options=0;
   global_thread_count= num_thread_running= kill_blocked_pthreads_flag= wake_pthread=0;
+  write_query_running= 0;
+  write_queries= 0;
+  read_queries= 0;
+  write_query_rejected= 0;
+  total_query_rejected= 0;
   slave_open_temp_tables= 0;
   blocked_pthread_count= 0;
   opt_endinfo= using_udf_functions= 0;
@@ -8257,6 +8277,7 @@ static int mysql_init_variables(void)
   my_atomic_rwlock_init(&opt_binlog_max_flush_queue_time_lock);
   my_atomic_rwlock_init(&global_query_id_lock);
   my_atomic_rwlock_init(&thread_running_lock);
+  my_atomic_rwlock_init(&write_query_running_lock);
   strmov(server_version, MYSQL_SERVER_VERSION);
   global_thread_list= new std::set<THD*>;
   waiting_thd_list= new std::list<THD*>;

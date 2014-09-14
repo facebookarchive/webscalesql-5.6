@@ -256,6 +256,8 @@ The following options may be given as the first argument:
  mysql.general_logif --log-output=TABLE is used
  --general-log-file=name 
  Log connections and queries to given file
+ --general-query-throttling-limit[=#] 
+ Start throttling queries if running threads high.
  --group-concat-max-len=# 
  The maximum length of the result of function 
  GROUP_CONCAT()
@@ -1016,6 +1018,8 @@ The following options may be given as the first argument:
  -V, --version       Output version information and exit.
  --wait-timeout=#    The number of seconds the server waits for activity on a
  connection before closing it
+ --write-query-throttling-limit[=#] 
+ Start throttling writes if running mutation queries high.
 
 Variables (--variable-name=value)
 abort-slave-event-count 0
@@ -1081,6 +1085,7 @@ ft-query-expansion-limit 20
 ft-stopword-file (No default value)
 gdb FALSE
 general-log FALSE
+general-query-throttling-limit 0
 group-concat-max-len 1024
 gtid-mode OFF
 gtid-precommit FALSE
@@ -1308,6 +1313,7 @@ updatable-views-with-limit YES
 validate-user-plugins TRUE
 verbose TRUE
 wait-timeout 28800
+write-query-throttling-limit 0
 
 To see what values a running MySQL server is using, type
 'mysqladmin variables' instead of 'mysqld --verbose --help'.

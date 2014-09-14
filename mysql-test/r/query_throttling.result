@@ -1,0 +1,52 @@
+#
+# Test query throttling
+#
+SET @old_general_query_throttling_limit= @@global.general_query_throttling_limit;
+SET @old_write_query_throttling_limit= @@global.general_query_throttling_limit;
+CREATE USER user1;
+CREATE USER user2;
+CREATE USER user3;
+CREATE USER user4;
+CREATE USER user5;
+CREATE TABLE t1 (a INT PRIMARY KEY, b INT) ENGINE=InnoDB;
+SET GLOBAL general_query_throttling_limit=2;
+# Connect root
+insert into t1 (a,b) select 1, sleep(2) from dual;
+# Connect user1
+insert into t1 (a,b) select 2, sleep(1) from dual;
+# Connect user2
+insert into t1 (a,b) select 3, sleep(1) from dual;
+select * from t1;
+a	b
+1	0
+2	0
+3	0
+select a, sleep(1) from t1;
+a	sleep(1)
+1	0
+2	0
+3	0
+SELECT variable_value FROM information_schema.global_status WHERE LOWER(variable_name) = 'write_queries_running';
+variable_value
+##
+SELECT variable_value FROM information_schema.global_status WHERE LOWER(variable_name) = 'read_queries';
+variable_value
+##
+SELECT variable_value FROM information_schema.global_status WHERE LOWER(variable_name) = 'write_queries';
+variable_value
+##
+SELECT variable_value FROM information_schema.global_status WHERE LOWER(variable_name) = 'total_queries_rejected';
+variable_value
+##
+SELECT variable_value FROM information_schema.global_status WHERE LOWER(variable_name) = 'write_queries_rejected';
+variable_value
+##
+# Connection: default
+DROP TABLE t1;
+DROP USER user1;
+DROP USER user2;
+DROP USER user3;
+DROP USER user4;
+DROP USER user5;
+SET global general_query_throttling_limit = @old_general_query_throttling_limit;
+SET global write_query_throttling_limit = @old_write_query_throttling_limit;

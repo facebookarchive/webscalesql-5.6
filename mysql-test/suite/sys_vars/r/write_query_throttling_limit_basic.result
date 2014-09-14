@@ -1,0 +1,44 @@
+SET @old_write_query_throttling_limit = @@global.write_query_throttling_limit;
+SELECT @old_write_query_throttling_limit;
+@old_write_query_throttling_limit
+0
+SET @@global.write_query_throttling_limit = DEFAULT;
+SELECT @@global.write_query_throttling_limit;
+@@global.write_query_throttling_limit
+0
+# write_query_throttling_limit is a global variable.
+SET @@session.write_query_throttling_limit = 1;
+ERROR HY000: Variable 'write_query_throttling_limit' is a GLOBAL variable and should be set with SET GLOBAL
+SELECT @@write_query_throttling_limit;
+@@write_query_throttling_limit
+0
+SET @@global.write_query_throttling_limit = 512;
+SELECT @@global.write_query_throttling_limit;
+@@global.write_query_throttling_limit
+512
+SET @@global.write_query_throttling_limit = 1000;
+SELECT @@global.write_query_throttling_limit;
+@@global.write_query_throttling_limit
+1000
+SET @@global.write_query_throttling_limit = 0;
+SELECT @@global.write_query_throttling_limit;
+@@global.write_query_throttling_limit
+0
+SET @@global.write_query_throttling_limit = 1.01;
+ERROR 42000: Incorrect argument type to variable 'write_query_throttling_limit'
+SET @@global.write_query_throttling_limit = 'ten';
+ERROR 42000: Incorrect argument type to variable 'write_query_throttling_limit'
+SELECT @@global.write_query_throttling_limit;
+@@global.write_query_throttling_limit
+0
+# set write_query_throttling_limit to wrong value
+SET @@global.write_query_throttling_limit = 15000;
+Warnings:
+Warning	1292	Truncated incorrect write_query_throttling_limit value: '15000'
+SELECT @@global.write_query_throttling_limit;
+@@global.write_query_throttling_limit
+5000
+SET @@global.write_query_throttling_limit = @old_write_query_throttling_limit;
+SELECT @@global.write_query_throttling_limit;
+@@global.write_query_throttling_limit
+0

@@ -176,7 +176,8 @@ bool trans_begin(THD *thd, uint flags)
       enforce_ro = !(thd->security_ctx->master_access & SUPER_ACL);
     if (opt_readonly && enforce_ro)
     {
-      my_error(ER_OPTION_PREVENTS_STATEMENT, MYF(0), "--read-only");
+      my_error(ER_OPTION_PREVENTS_STATEMENT, MYF(0),
+               opt_super_readonly ? "--read-only (super)" : "--read-only");
       DBUG_RETURN(true);
     }
     thd->tx_read_only= false;

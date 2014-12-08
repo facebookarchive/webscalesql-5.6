@@ -3137,3 +3137,4 @@ support-files/plugins.files
 storage/perfschema/pfs_lex_token.h
 storage/perfschema/gen_pfs_lex_token
 sql/share/bulgarian
+/arcanist/.phutil_module_cache

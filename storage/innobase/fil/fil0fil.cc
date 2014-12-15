@@ -658,9 +658,10 @@ fil_node_open_file(
 			ut_error;
 		}
 
-		if (size_bytes >= 1024 * 1024) {
-			/* Truncate the size to whole megabytes. */
-			size_bytes = ut_2pow_round(size_bytes, 1024 * 1024);
+		if (size_bytes >= UNIV_PAGE_SIZE * FSP_EXTENT_SIZE) {
+			/* Truncate the size to a multiple of extent size. */
+			size_bytes = ut_2pow_round(
+				size_bytes, UNIV_PAGE_SIZE * FSP_EXTENT_SIZE);
 		}
 
 		if (!fsp_flags_is_compressed(flags)) {
@@ -3902,8 +3903,11 @@ fil_user_tablespace_find_space_id(
 					false, page, 0);
 			}
 
-			bool compressed_ok = !buf_page_is_corrupted(
-				false, page, page_size);
+			bool compressed_ok = false;
+			if (page_size <= UNIV_PAGE_SIZE_DEF) {
+				compressed_ok = !buf_page_is_corrupted(
+					false, page, page_size);
+			}
 
 			if (uncompressed_ok || compressed_ok) {
 
@@ -5512,6 +5516,8 @@ _fil_io(
 		case 4096: zip_size_shift = 12; break;
 		case 8192: zip_size_shift = 13; break;
 		case 16384: zip_size_shift = 14; break;
+		case 32768: zip_size_shift = 15; break;
+		case 65536: zip_size_shift = 16; break;
 		default: ut_error;
 		}
 		offset = ((os_offset_t) block_offset << zip_size_shift)

@@ -1,4 +1,5 @@
 --source include/have_innodb.inc
+--source include/have_innodb_max_16k.inc
 create table t1(a blob) engine=innodb key_block_size=8;
 delimiter //;
 create function generate_blob()

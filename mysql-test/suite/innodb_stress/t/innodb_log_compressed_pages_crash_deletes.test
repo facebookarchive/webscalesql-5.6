@@ -8,6 +8,7 @@
 --echo # Binary must be compiled with debug for crash to occur
 --source include/have_debug.inc
 --source include/have_innodb.inc
+--source include/have_innodb_max_16k.inc
 
 --disable_query_log
 # record the file format in order to restore in the end.

@@ -1,6 +1,8 @@
 #------------------------------------------------------------------------------
 # FTS with FK and update cascade
 #-------------------------------------------------------------------------------
+--source include/have_innodb_max_16k.inc
+
 --disable_warnings
 drop table if exists t2,t1;
 --enable_warnings

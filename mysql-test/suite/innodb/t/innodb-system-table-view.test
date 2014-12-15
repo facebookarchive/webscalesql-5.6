@@ -3,6 +3,7 @@
 # information schema tables.
 
 --source include/have_innodb.inc
+--source include/have_innodb_max_16k.inc
 
 --disable_query_log
 SET default_storage_engine=InnoDB;

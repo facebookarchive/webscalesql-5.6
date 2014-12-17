@@ -15,14 +15,10 @@
 
 # Common warning flags for GCC, G++, Clang and Clang++
 SET(MY_WARNING_FLAGS "-Wall -Wextra -Wformat-security")
-MY_CHECK_C_COMPILER_FLAG("-Wvla" HAVE_WVLA) # Requires GCC 4.3+ or Clang
-IF(HAVE_WVLA)
-  SET(MY_WARNING_FLAGS "${MY_WARNING_FLAGS} -Wvla")
-ENDIF()
 
 # Common warning flags for GCC and Clang
 SET(MY_C_WARNING_FLAGS
-    "${MY_WARNING_FLAGS} -Wwrite-strings -Wdeclaration-after-statement")
+    "${MY_WARNING_FLAGS} -Wwrite-strings")
 
 # Common warning flags for G++ and Clang++
 SET(MY_CXX_WARNING_FLAGS

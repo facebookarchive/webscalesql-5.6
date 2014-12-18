@@ -659,6 +659,8 @@ static SHOW_VAR innodb_status_variables[]= {
   (char*) &export_vars.innodb_sec_rec_cluster_reads,	  SHOW_LONG},
   {"secondary_index_triggered_cluster_reads_avoided",
   (char*) &export_vars.innodb_sec_rec_cluster_reads_avoided, SHOW_LONG},
+  {"buffered_aio_submitted",
+   (char*) &export_vars.innodb_buffered_aio_submitted,    SHOW_LONG},
   {NullS, NullS, SHOW_LONG}
 };
 

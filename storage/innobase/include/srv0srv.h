@@ -126,6 +126,9 @@ struct srv_stats_t {
 
 	/** Number of rows inserted */
 	ulint_ctr_64_t		n_rows_inserted;
+
+	/** Number of buffered aio requests submitted */
+	ulint_ctr_64_t		n_aio_submitted;
 };
 
 extern const char*	srv_main_thread_op_info;
@@ -865,6 +868,8 @@ struct export_var_t{
 
 	ulint innodb_sec_rec_cluster_reads;	/*!< srv_sec_rec_cluster_reads */
 	ulint innodb_sec_rec_cluster_reads_avoided; /*!< srv_sec_rec_cluster_reads_avoided */
+
+	ulint innodb_buffered_aio_submitted;
 };
 
 /** Thread slot in the thread table.  */

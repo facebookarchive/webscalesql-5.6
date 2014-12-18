@@ -234,6 +234,16 @@ struct os_aio_array_t{
 				There is one such event for each
 				possible pending IO. The size of the
 				array is equal to n_slots. */
+	struct iocb**		pending;
+				/* Array to buffer the not-submitted aio
+				requests. The array length is n_slots.
+				It is divided into n_segments segments.
+				pending requests on each segment are buffered
+				separately.*/
+	ulint*			count;
+				/* Array of length n_segments. Each element
+				counts the number of not-submitted aio request
+				on that segment.*/
 #endif /* LINUX_NATIV_AIO */
 };
 
@@ -3758,6 +3768,13 @@ os_aio_array_create(
 	memset(io_event, 0x0, sizeof(*io_event) * n);
 	array->aio_events = io_event;
 
+	array->pending = static_cast<struct iocb**>(
+		ut_malloc(n * sizeof(struct iocb*)));
+	memset(array->pending, 0x0, sizeof(struct iocb*) * n);
+	array->count = static_cast<ulint*>(
+		ut_malloc(n_segments * sizeof(ulint)));
+	memset(array->count, 0x0, sizeof(ulint) * n_segments);
+
 skip_native_aio:
 #endif /* LINUX_NATIVE_AIO */
 	for (ulint i = 0; i < n; i++) {
@@ -3814,6 +3831,8 @@ os_aio_array_free(
 	if (srv_use_native_aio) {
 		ut_free(array->aio_events);
 		ut_free(array->aio_ctx);
+		ut_free(array->pending);
+		ut_free(array->count);
 	}
 #endif /* LINUX_NATIVE_AIO */
 
@@ -4435,6 +4454,51 @@ readahead requests. */
 
 #if defined(LINUX_NATIVE_AIO)
 /*******************************************************************//**
+Submit buffered AIO requests on the given segment to the kernel. */
+UNIV_INTERN
+void
+os_aio_linux_dispatch_read_array_submit()
+{
+	os_aio_array_t* array = os_aio_read_array;
+	ulint total_submitted = 0;
+	if (!srv_use_native_aio) {
+		return TRUE;
+	}
+	os_mutex_enter(array->mutex);
+	/* Submit aio requests buffered on all segments. */
+	for (ulint i = 0; i < array->n_segments; i++) {
+		ulint count = array->count[i];
+		if (count > 0) {
+			ulint iocb_index = i * array->n_slots
+					   / array->n_segments;
+			ulint submitted;
+			submitted = io_submit(array->aio_ctx[i], count,
+					      &(array->pending[iocb_index]));
+			if (submitted == count) {
+				total_submitted += submitted;
+			} else {
+				/* io_submit returns number of successfully
+				queued requests or -errno. */
+				fprintf(stderr, "Trying to sumbit %lu aio "
+					"requests, io_submit returns %lu.\n",
+					count, submitted);
+				if (submitted < 0) {
+					errno = -submitted;
+				}
+				ut_error;
+			}
+		}
+	}
+	/* Reset the aio request buffer. */
+	memset(array->pending, 0x0,
+	       sizeof(struct iocb*) * array->n_slots);
+	memset(array->count, 0x0, sizeof(ulint) * array->n_segments);
+	os_mutex_exit(array->mutex);
+
+	srv_stats.n_aio_submitted.add(total_submitted);
+}
+
+/*******************************************************************//**
 Dispatch an AIO request to the kernel.
 @return	TRUE on success. */
 static
@@ -4442,24 +4506,48 @@ ibool
 os_aio_linux_dispatch(
 /*==================*/
 	os_aio_array_t*	array,	/*!< in: io request array. */
-	os_aio_slot_t*	slot)	/*!< in: an already reserved slot. */
+	os_aio_slot_t*	slot,	/*!< in: an already reserved slot. */
+	ibool		should_buffer)	/*!< in: should buffer the request
+					rather than submit. */
 {
 	int		ret;
-	ulint		io_ctx_index;
+	ulint		io_ctx_index = 0;
 	struct iocb*	iocb;
+	ulint slots_per_segment;
 
-	ut_ad(slot != NULL);
+	ut_ad(slot);
 	ut_ad(array);
-
 	ut_a(slot->reserved);
 
 	/* Find out what we are going to work with.
 	The iocb struct is directly in the slot.
 	The io_context is one per segment. */
 
+	slots_per_segment = array->n_slots / array->n_segments;
 	iocb = &slot->control;
-	io_ctx_index = (slot->pos * array->n_segments) / array->n_slots;
-
+	io_ctx_index = slot->pos / slots_per_segment;
+	if (should_buffer && array == os_aio_read_array) {
+		ulint n;
+		ulint count;
+		os_mutex_enter(array->mutex);
+		/* There are array->n_slots elements in array->pending,
+		which is divided into array->n_segments area of equal size.
+		The iocb of each segment are buffered in its corresponding area
+		in the pending array consecutively as they come.
+		array->count[i] records the number of buffered aio requests
+		in the ith segment.*/
+		n = io_ctx_index * slots_per_segment
+			  + array->count[io_ctx_index];
+		array->pending[n] = iocb;
+		array->count[io_ctx_index] ++;
+		count = array->count[io_ctx_index];
+		os_mutex_exit(array->mutex);
+		if (count == slots_per_segment) {
+			os_aio_linux_dispatch_read_array_submit();
+		}
+		return(TRUE);
+	}
+	/* Submit the given request. */
 	ret = io_submit(array->aio_ctx[io_ctx_index], 1, &iocb);
 
 #if defined(UNIV_AIO_DEBUG)
@@ -4514,10 +4602,15 @@ os_aio_func(
 				(can be used to identify a completed
 				aio operation); ignored if mode is
 				OS_AIO_SYNC */
-	void*		message2)/*!< in: message for the aio handler
+	void*		message2,/*!< in: message for the aio handler
 				(can be used to identify a completed
 				aio operation); ignored if mode is
 				OS_AIO_SYNC */
+	ibool	should_buffer)	/*!< in: Whether to buffer an aio request.
+				AIO read ahead uses this. If you plan to
+				use this parameter, make sure you remember
+				to call os_aio_linux_dispatch_read_array_submit
+				when you're ready to commit all your requests.*/
 {
 	os_aio_array_t*	array;
 	os_aio_slot_t*	slot;
@@ -4625,7 +4718,8 @@ try_again:
 				       &(slot->control));
 
 #elif defined(LINUX_NATIVE_AIO)
-			if (!os_aio_linux_dispatch(array, slot)) {
+			if (!os_aio_linux_dispatch(array, slot,
+						   should_buffer)) {
 				goto err_exit;
 			}
 #endif /* WIN_ASYNC_IO */
@@ -4645,7 +4739,7 @@ try_again:
 					&(slot->control));
 
 #elif defined(LINUX_NATIVE_AIO)
-			if (!os_aio_linux_dispatch(array, slot)) {
+			if (!os_aio_linux_dispatch(array, slot, FALSE)) {
 				goto err_exit;
 			}
 #endif /* WIN_ASYNC_IO */

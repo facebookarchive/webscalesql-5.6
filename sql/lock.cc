@@ -293,6 +293,7 @@ MYSQL_LOCK *mysql_lock_tables(THD *thd, TABLE **tables, uint count, uint flags)
   MYSQL_LOCK *sql_lock;
   ulong timeout= (flags & MYSQL_LOCK_IGNORE_TIMEOUT) ?
     LONG_TIMEOUT : thd->variables.lock_wait_timeout;
+  const char *prev_proc_info;
 
   DBUG_ENTER("mysql_lock_tables");
 
@@ -302,8 +303,10 @@ MYSQL_LOCK *mysql_lock_tables(THD *thd, TABLE **tables, uint count, uint flags)
   if (! (sql_lock= get_lock_data(thd, tables, count, GET_LOCK_STORE_LOCKS)))
     DBUG_RETURN(NULL);
 
+  prev_proc_info= thd->proc_info;
   THD_STAGE_INFO(thd, stage_system_lock);
   DBUG_PRINT("info", ("thd->proc_info %s", thd->proc_info));
+
   if (sql_lock->table_count && lock_external(thd, sql_lock->table,
                                              sql_lock->table_count))
   {
@@ -340,6 +343,7 @@ end:
   }
 
   thd->set_time_after_lock();
+  thd->proc_info= prev_proc_info;
   DBUG_RETURN(sql_lock);
 }
 

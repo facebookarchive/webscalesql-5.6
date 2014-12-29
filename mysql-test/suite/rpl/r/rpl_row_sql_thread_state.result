@@ -1,0 +1,36 @@
+include/master-slave.inc
+Warnings:
+Note	####	Sending passwords in plain text without SSL/TLS is extremely insecure.
+Note	####	Storing MySQL user name or password information in the master info repository is not secure and is therefore not recommended. Please consider using the USER and PASSWORD connection options for START SLAVE; see the 'START SLAVE Syntax' in the MySQL Manual for more information.
+[connection master]
+#
+# Test locks rows to block a RBR delete rows event
+# so that the SQL thread state can be checked.
+#
+# connection: slave
+SET GLOBAL innodb_lock_wait_timeout = 100;
+# connection: master
+CREATE TABLE t1 (a INT PRIMARY KEY, b INT);
+INSERT INTO t1 VALUES (1,1),(2,2),(3,3),(4,4),(5,5);
+# connection: slave
+START TRANSACTION;
+SELECT * FROM t1 WHERE a > 2 LOCK IN SHARE MODE;
+a	b
+3	3
+4	4
+5	5
+# connection: slave1
+START TRANSACTION;
+SELECT * FROM t1 WHERE a > 4 LOCK IN SHARE MODE;
+a	b
+5	5
+# connection: master
+DELETE FROM t1 WHERE a > 2;
+# connection: slave
+ROLLBACK;
+# connection: slave
+SET GLOBAL innodb_lock_wait_timeout = DEFAULT;
+# connection: slave
+ROLLBACK;
+DROP TABLE t1;
+include/rpl_end.inc

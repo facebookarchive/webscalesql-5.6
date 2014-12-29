@@ -1955,6 +1955,8 @@ int slave_worker_exec_job(Slave_worker *worker, Relay_log_info *rli)
   worker->set_future_event_relay_log_pos(ev->future_event_relay_log_pos);
   worker->set_master_log_pos(ev->log_pos);
   worker->set_gaq_index(ev->mts_group_idx);
+  thd->print_proc_info("Executing %s event at position %lu",
+                       ev->get_type_str(), ev->log_pos);
   error= ev->do_apply_event_worker(worker);
   if (ev->ends_group() || (!worker->curr_group_seen_begin &&
                            /*

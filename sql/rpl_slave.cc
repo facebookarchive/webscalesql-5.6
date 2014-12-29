@@ -124,6 +124,59 @@ Slave_job_item * de_queue(Slave_jobs_queue *jobs, Slave_job_item *ret);
 bool append_item_to_jobs(slave_job_item *job_item,
                          Slave_worker *w, Relay_log_info *rli);
 
+/**
+  Thread state for the SQL slave thread.
+*/
+
+class THD_SQL_slave : public THD
+{
+private:
+  char *m_buffer;
+  size_t m_buffer_size;
+
+public:
+  /**
+    Constructor, used to represent slave thread state.
+
+    @param buffer Statically-allocated buffer.
+    @param size   Size of the passed buffer.
+  */
+  THD_SQL_slave(char *buffer, size_t size)
+  : m_buffer(buffer), m_buffer_size(size)
+  {
+    DBUG_ASSERT(buffer && size);
+    memset(m_buffer, 0, m_buffer_size);
+  }
+
+  virtual ~THD_SQL_slave()
+  {
+    m_buffer[0]= '\0';
+  }
+
+  void print_proc_info(const char *fmt, ...);
+};
+
+
+/**
+  Print an information (state) string for this slave thread.
+
+  @param fmt  Specifies how subsequent arguments are converted for output.
+  @param ...  Variable number of arguments.
+*/
+
+void THD_SQL_slave::print_proc_info(const char *fmt, ...)
+{
+  va_list args;
+
+  va_start(args, fmt);
+  my_vsnprintf(m_buffer, m_buffer_size - 1, fmt, args);
+  va_end(args);
+
+  /* Set field directly, profiling is not useful in a slave thread anyway. */
+  proc_info= m_buffer;
+}
+
+
 /*
   When slave thread exits, we need to remember the temporary tables so we
   can re-use them on slave start.
@@ -4944,11 +4997,13 @@ pthread_handler_t handle_slave_worker(void *arg)
   ulong purge_cnt= 0;
   ulonglong purge_size= 0;
   struct slave_job_item _item, *job_item= &_item;
+  /* Buffer lifetime extends across the entire runtime of the THD handle. */
+  static char proc_info_buf[256]= {0};
 
   my_thread_init();
   DBUG_ENTER("handle_slave_worker");
 
-  thd= new THD;
+  thd = new THD_SQL_slave(proc_info_buf, sizeof(proc_info_buf));
   if (!thd)
   {
     sql_print_error("Failed during slave worker initialization");
@@ -5830,6 +5885,9 @@ pthread_handler_t handle_slave_sql(void *arg)
   const char *errmsg;
   bool mts_inited= false;
 
+  /* Buffer lifetime extends across the entire runtime of the THD handle. */
+  static char proc_info_buf[256]= {0};
+
   // needs to call my_thread_init(), otherwise we get a coredump in DBUG_ stuff
   my_thread_init();
   DBUG_ENTER("handle_slave_sql");
@@ -5842,10 +5900,12 @@ pthread_handler_t handle_slave_sql(void *arg)
   rli->events_until_exit = abort_slave_event_count;
 #endif
 
-  thd = new THD; // note that contructor of THD uses DBUG_ !
+  // note that contructor of THD uses DBUG_ !
+  thd = new THD_SQL_slave(proc_info_buf, sizeof(proc_info_buf));
+
   thd->thread_stack = (char*)&thd; // remember where our stack is
   rli->info_thd= thd;
-  
+
   /* Inform waiting threads that slave has started */
   rli->slave_run_id++;
   rli->slave_running = 1;

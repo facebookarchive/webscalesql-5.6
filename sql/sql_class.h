@@ -2191,6 +2191,9 @@ public:
   */
   const char *proc_info;
 
+  /* Abstract method to set a formatted info-string. */
+  virtual void print_proc_info(const char *fmt, ...);
+
 private:
   unsigned int m_current_stage_key;
 

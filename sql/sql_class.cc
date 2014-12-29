@@ -1060,6 +1060,9 @@ THD::THD(bool enable_plugins)
   }
 }
 
+void THD::print_proc_info(const char *, ...)
+{
+}
 
 void THD::push_internal_handler(Internal_error_handler *handler)
 {

@@ -3122,6 +3122,8 @@ int Log_event::apply_event(Relay_log_info *rli)
         DBUG_ASSERT(actual_exec_mode == EVENT_EXEC_ASYNC);
       }
     }
+    thd->print_proc_info("Executing %s event at position %lu",
+                         get_type_str(), log_pos);
     DBUG_RETURN(do_apply_event(rli));
   }
 
@@ -11091,6 +11093,10 @@ int Rows_log_event::do_apply_event(Relay_log_info const *rli)
   DBUG_ENTER("Rows_log_event::do_apply_event(Relay_log_info*)");
   int error= 0;
 
+  /* Estimate upon the size (end) of the first row. */
+  ulong estimated_rows= 0;
+  ulong processed_rows= 1;
+
   if (opt_bin_log)
   {
     enum_gtid_statement_status state= gtid_pre_statement_checks(thd);
@@ -11420,6 +11426,25 @@ int Rows_log_event::do_apply_event(Relay_log_info const *rli)
 
       if (handle_idempotent_and_ignored_errors(rli, &error))
         break;
+
+      if (estimated_rows == 0)
+      {
+          if (m_curr_row < m_curr_row_end)
+            estimated_rows =
+              (m_rows_end - m_curr_row) / (m_curr_row_end - m_curr_row);
+         else if (m_curr_row == m_curr_row_end)
+            estimated_rows= 1;
+      }
+
+      if (m_curr_row <= m_rows_end)
+      {
+         thd->print_proc_info("Handling row %lu of %lu for a %s event on "
+                              "table `%.*b`.`%.*b`.", processed_rows++,
+                              estimated_rows, get_type_str(),
+                              (int) table->s->db.length, table->s->db.str,
+                              (int) table->s->table_name.length,
+                              table->s->table_name.str);
+      }
 
       /* this advances m_curr_row */
       do_post_row_operations(rli, error);

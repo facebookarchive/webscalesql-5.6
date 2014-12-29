@@ -4989,6 +4989,7 @@ bool open_tables(THD *thd, TABLE_LIST **start, uint *counter, uint flags,
   bool some_routine_modifies_data= FALSE;
   bool has_prelocking_list;
   enum xa_states xa_state;
+  const char *prev_proc_info= thd->proc_info;
   DBUG_ENTER("open_tables");
 
   thd->current_tablenr= 0;
@@ -5265,6 +5266,8 @@ err:
   {
     (*table_to_open)->table= NULL;
   }
+
+  thd->proc_info= prev_proc_info;
   DBUG_PRINT("open_tables", ("returning: %d", (int) error));
   DBUG_RETURN(error);
 }

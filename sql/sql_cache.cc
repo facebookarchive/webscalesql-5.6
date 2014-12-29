@@ -1889,11 +1889,13 @@ void Query_cache::invalidate(THD *thd, TABLE_LIST *tables_used,
 
 void Query_cache::invalidate(CHANGED_TABLE_LIST *tables_used)
 {
+  const char *prev_info;
   DBUG_ENTER("Query_cache::invalidate (changed table list)");
   if (is_disabled())
     DBUG_VOID_RETURN;
 
   THD *thd= current_thd;
+  prev_info = thd->proc_info;
   for (; tables_used; tables_used= tables_used->next)
   {
     THD_STAGE_INFO(thd, stage_invalidating_query_cache_entries_table_list);
@@ -1902,6 +1904,7 @@ void Query_cache::invalidate(CHANGED_TABLE_LIST *tables_used)
                           tables_used->key+
                           strlen(tables_used->key)+1));
   }
+  thd->proc_info= prev_info;
   DBUG_VOID_RETURN;
 }
 
@@ -1918,11 +1921,13 @@ void Query_cache::invalidate(CHANGED_TABLE_LIST *tables_used)
 */
 void Query_cache::invalidate_locked_for_write(TABLE_LIST *tables_used)
 {
+  const char *prev_info;
   DBUG_ENTER("Query_cache::invalidate_locked_for_write");
   if (is_disabled())
     DBUG_VOID_RETURN;
 
   THD *thd= current_thd;
+  prev_info = thd->proc_info;
   for (; tables_used; tables_used= tables_used->next_local)
   {
     THD_STAGE_INFO(thd, stage_invalidating_query_cache_entries_table);
@@ -1932,6 +1937,7 @@ void Query_cache::invalidate_locked_for_write(TABLE_LIST *tables_used)
       invalidate_table(thd, tables_used->table);
     }
   }
+  thd->proc_info= prev_info;
   DBUG_VOID_RETURN;
 }
 

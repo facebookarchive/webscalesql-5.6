@@ -125,12 +125,12 @@ FLUSH PRIVILEGES;
 --echo # Connecting using 'test_user1'
 --echo #
 --exec $MYSQLADMIN -S $MASTER_MYSOCK -P $MASTER_MYPORT ping 2>&1
---exec $MYSQLADMIN --no-defaults -S $MASTER_MYSOCK -P $MASTER_MYPORT ping 2>&1
+--exec $MYSQLADMIN -S $MASTER_MYSOCK -P $MASTER_MYPORT ping 2>&1
 --echo
 --echo # Connecting using 'test_user2'
 --echo #
 --exec $MYSQLADMIN --login-path=test-login-path1 --port=$MASTER_MYPORT ping 2>&1
---exec $MYSQLADMIN --no-defaults --login-path=test-login-path1 --port=$MASTER_MYPORT ping 2>&1
+--exec $MYSQLADMIN --login-path=test-login-path1 --port=$MASTER_MYPORT ping 2>&1
 
 --echo #
 --echo # Inserting a login path to test group suffix (client_suffix1)

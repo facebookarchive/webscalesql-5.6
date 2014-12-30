@@ -2453,7 +2453,11 @@ sub environment_setup {
   $ENV{'MYSQL'}=                    client_arguments("mysql");
   $ENV{'MYSQL_SLAVE'}=              client_arguments("mysql", ".2");
   $ENV{'MYSQL_UPGRADE'}=            client_arguments("mysql_upgrade");
-  $ENV{'MYSQLADMIN'}=               native_path($exe_mysqladmin);
+  $ENV{'MYSQLADMIN'}=               client_arguments("mysqladmin");
+  # Sometimes we invoke mysqladmin with parameters incompatible with
+  # what client_arguments generates, similar to EXE_MYSQL below.  We
+  # need the raw path to the executable for those tests.
+  $ENV{'MYSQLADMIN_EXEC'}=          native_path($exe_mysqladmin);
   $ENV{'MYSQL_CLIENT_TEST'}=        mysql_client_test_arguments();
   $ENV{'EXE_MYSQL'}=                $exe_mysql;
   $ENV{'MYSQL_PLUGIN'}=             $exe_mysql_plugin;

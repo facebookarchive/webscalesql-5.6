@@ -27,4 +27,4 @@ let $admin_prefix = --no-defaults;
 let $admin_suffix = --default-character-set=latin1 -S $MASTER_MYSOCK -P $MASTER_MYPORT -u root --password= ping;
 
 --echo # Test mysqladmin connecting to a server with an empty crl
---exec $MYSQLADMIN $admin_prefix $ssl_crl $admin_suffix 2>&1
+--exec $MYSQLADMIN_EXEC $admin_prefix $ssl_crl $admin_suffix 2>&1

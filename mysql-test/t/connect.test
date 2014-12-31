@@ -2,6 +2,8 @@
 # with right and wrong password, with and without database
 # Unfortunately the check is incomplete as we can't connect without database
 
+--disable_async_client
+
 # This test makes no sense with the embedded server
 --source include/not_embedded.inc
 

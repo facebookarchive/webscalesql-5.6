@@ -1,6 +1,7 @@
 #
 # functional change user tests
 #
+--disable_async_client
 connect (con_main,localhost,root,,,,,SKIPSECUREAUTH);
 
 SET GLOBAL secure_auth = OFF;

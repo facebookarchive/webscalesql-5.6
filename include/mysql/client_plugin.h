@@ -72,6 +72,10 @@ struct st_mysql_client_plugin_AUTHENTICATION
 {
   MYSQL_CLIENT_PLUGIN_HEADER
   int (*authenticate_user)(MYSQL_PLUGIN_VIO *vio, struct st_mysql *mysql);
+  /* NOTE: this really returns a net_async_status */
+  int (*authenticate_user_nonblocking)(MYSQL_PLUGIN_VIO *vio,
+                                       struct st_mysql *mysql,
+                                       int *result);
 };
 
 /******** using plugins ************/

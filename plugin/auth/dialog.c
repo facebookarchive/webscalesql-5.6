@@ -329,6 +329,7 @@ mysql_declare_client_plugin(AUTHENTICATION)
   init_dialog,
   NULL,
   NULL,
-  perform_dialog
+  perform_dialog,
+  0
 mysql_end_client_plugin;
 

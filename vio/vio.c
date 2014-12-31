@@ -89,6 +89,8 @@ static void vio_init(Vio *vio, enum enum_vio_type type,
     vio->io_wait        =no_io_wait;
     vio->is_connected   =vio_is_connected_pipe;
     vio->has_data       =has_no_data;
+    vio->is_blocking    =vio_is_blocking;
+    vio->set_blocking   =vio_set_blocking;
     DBUG_VOID_RETURN;
   }
 #endif
@@ -108,6 +110,8 @@ static void vio_init(Vio *vio, enum enum_vio_type type,
     vio->io_wait        =no_io_wait;
     vio->is_connected   =vio_is_connected_shared_memory;
     vio->has_data       =has_no_data;
+    vio->is_blocking    =vio_is_blocking;
+    vio->set_blocking   =vio_set_blocking;
     DBUG_VOID_RETURN;
   }
 #endif
@@ -128,6 +132,8 @@ static void vio_init(Vio *vio, enum enum_vio_type type,
     vio->is_connected   =vio_is_connected;
     vio->has_data       =vio_ssl_has_data;
     vio->timeout        =vio_socket_timeout;
+    vio->is_blocking    =vio_is_blocking;
+    vio->set_blocking   =vio_set_blocking;
     DBUG_VOID_RETURN;
   }
 #endif /* HAVE_OPENSSL */
@@ -146,6 +152,10 @@ static void vio_init(Vio *vio, enum enum_vio_type type,
   vio->timeout          =vio_socket_timeout;
   vio->has_data=        (flags & VIO_BUFFERED_READ) ?
                             vio_buff_has_data : has_no_data;
+  vio->is_blocking      =vio_is_blocking;
+  vio->set_blocking     =vio_set_blocking;
+
+  vio->is_blocking_flag = TRUE;
   DBUG_VOID_RETURN;
 }
 

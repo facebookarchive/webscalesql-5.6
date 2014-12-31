@@ -182,15 +182,15 @@ if ( $^O eq "MSWin32" )
   my $linkpath   = "$pkglibdir";
   # user32 is only needed for debug or embedded
   my @winlibs = ("wsock32.lib","advapi32.lib","user32.lib");
-  @lib_opts   = ("$linkpath/mysqlclient.lib",@winlibs);
+  @lib_opts   = ("$linkpath/webscalesqlclient.lib",@winlibs);
   @lib_r_opts = @lib_opts;
   @lib_e_opts = ("$linkpath/mysqlserver.lib",@winlibs);
 }
 else
 {
   my $linkpath   = "-L$pkglibdir @RPATH_OPTION@";
-  @lib_opts   = ($linkpath,"-lmysqlclient");
-  @lib_r_opts = ($linkpath,"-lmysqlclient_r");
+  @lib_opts   = ($linkpath,"-lwebscalesqlclient");
+  @lib_r_opts = ($linkpath,"-lwebscalesqlclient_r");
   @lib_e_opts = ($linkpath,"-lmysqld");
 }
 

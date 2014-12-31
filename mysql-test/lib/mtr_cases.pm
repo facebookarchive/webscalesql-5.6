@@ -1144,6 +1144,11 @@ sub collect_one_test_case {
   # ----------------------------------------------------------------------
   process_opts_file($tinfo, "$testdir/$tname-slave.opt", 'slave_opt');
 
+  # ----------------------------------------------------------------------
+  # Add mysqltest opts, list of extra option only for slave
+  # ----------------------------------------------------------------------
+  process_opts_file($tinfo, "$testdir/$tname-mysqltest.opt", 'mysqltest_opt');
+
   return $tinfo;
 }
 

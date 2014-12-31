@@ -117,6 +117,7 @@ TRUNCATE TABLE t1;
 --replace_result $MYSQLD_DATADIR MYSQLD_DATADIR
 eval LOAD DATA LOCAL INFILE '$MYSQLD_DATADIR/bug43746.sql' INTO TABLE t1;
 
+--suspend_async_client
 --replace_result $MYSQLD_DATADIR MYSQLD_DATADIR
 eval LOAD/* look mum, with comments in weird places! */DATA/* oh hai */LOCAL INFILE '$MYSQLD_DATADIR/bug43746.sql'/* we are */INTO/* from the internets */TABLE t1;
 
@@ -141,6 +142,7 @@ eval LOAD DATA/*!10000 LOCAL */INFILE '$MYSQLD_DATADIR/bug43746.sql'/* empty */I
 --replace_result $MYSQLD_DATADIR MYSQLD_DATADIR
 eval LOAD DATA/*!10000 LOCAL */INFILE '$MYSQLD_DATADIR/bug43746.sql' INTO/* empty */TABLE t1;
 
+--suspend_async_client
 --replace_result $MYSQLD_DATADIR MYSQLD_DATADIR
 eval LOAD/*!99999 special comments that do not expand */DATA/*!99999 code from the future */LOCAL INFILE '$MYSQLD_DATADIR/bug43746.sql'/*!99999 have flux capacitor */INTO/*!99999 will travel */TABLE t1;
 

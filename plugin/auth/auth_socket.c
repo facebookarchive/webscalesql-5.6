@@ -91,7 +91,7 @@ mysql_declare_plugin(socket_auth)
   NULL,
   NULL,
   NULL,
-  0,
+  0
 }
 mysql_declare_plugin_end;
 

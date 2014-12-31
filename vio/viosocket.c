@@ -56,6 +56,7 @@ int vio_socket_io_wait(Vio *vio, enum enum_vio_io_event event)
 {
   timeout_t timeout;
   int ret;
+  DBUG_ENTER(__func__);
 
   DBUG_ASSERT(event == VIO_IO_EVENT_READ || event == VIO_IO_EVENT_WRITE);
 
@@ -82,7 +83,8 @@ int vio_socket_io_wait(Vio *vio, enum enum_vio_io_event event)
     break;
   }
 
-  return ret;
+  DBUG_PRINT("exit", ("ret: %d", ret));
+  DBUG_RETURN(ret);
 }
 
 
@@ -116,15 +118,25 @@ size_t vio_read(Vio *vio, uchar *buf, size_t size)
   {
     int error= socket_errno;
 
-    /* The operation would block? */
+    /* Error encountered that is unrelated to blocking; percolate it up. */
     if (error != SOCKET_EAGAIN && error != SOCKET_EWOULDBLOCK)
       break;
 
+    /* non-blocking with either EAGAIN or EWOULDBLOCK -- don't call
+     * io_wait. 0 bytes are available. */
+    DBUG_ASSERT(error == SOCKET_EAGAIN || error == SOCKET_EWOULDBLOCK);
+    if (!vio_is_blocking(vio)) {
+      DBUG_PRINT("info", ("vio_read on nonblocking socket read no bytes"));
+      DBUG_RETURN(-1);
+    }
+
     /* Wait for input data to become available. */
-    if ((ret= vio_socket_io_wait(vio, VIO_IO_EVENT_READ)))
+    if ((ret= vio_socket_io_wait(vio, VIO_IO_EVENT_READ))) {
       break;
+    }
   }
 
+  DBUG_PRINT("exit", ("ret: %ld", ret));
   DBUG_RETURN(ret);
 }
 
@@ -145,7 +157,11 @@ size_t vio_read_buff(Vio *vio, uchar* buf, size_t size)
   if (vio->read_pos < vio->read_end)
   {
     rc= MY_MIN((size_t) (vio->read_end - vio->read_pos), size);
+#ifdef DEBUG_DATA_PACKETS
+    DBUG_DUMP("read bytes", vio->read_pos, rc);
+#endif
     memcpy(buf, vio->read_pos, rc);
+    DBUG_PRINT("buffer read", ("copied %lu bytes", rc));
     vio->read_pos+= rc;
     /*
       Do not try to read from the socket now even if rc < size:
@@ -156,8 +172,12 @@ size_t vio_read_buff(Vio *vio, uchar* buf, size_t size)
   else if (size < VIO_UNBUFFERED_READ_MIN_SIZE)
   {
     rc= vio_read(vio, (uchar*) vio->read_buffer, VIO_READ_BUFFER_SIZE);
+    DBUG_PRINT("read result", ("req: %lu, got: %lu", size, rc));
     if (rc != 0 && rc != (size_t) -1)
     {
+#ifdef DEBUG_DATA_PACKETS
+      DBUG_DUMP("read bytes", vio->read_buffer, rc);
+#endif
       if (rc > size)
       {
         vio->read_pos= vio->read_buffer + size;
@@ -168,7 +188,10 @@ size_t vio_read_buff(Vio *vio, uchar* buf, size_t size)
     }
   }
   else
+  {
     rc= vio_read(vio, buf, size);
+    DBUG_PRINT("read result", ("req: %lu, got: %lu", size, rc));
+  }
   DBUG_RETURN(rc);
 #undef VIO_UNBUFFERED_READ_MIN_SIZE
 }
@@ -207,9 +230,12 @@ size_t vio_write(Vio *vio, const uchar* buf, size_t size)
 }
 
 //WL#4896: Not covered
-static int vio_set_blocking(Vio *vio, my_bool status)
+int vio_set_blocking(Vio *vio, my_bool status)
 {
   DBUG_ENTER("vio_set_blocking");
+  DBUG_PRINT("info", ("blocking: fd %d, %d -> %d",
+                      mysql_socket_getfd(vio->mysql_socket),
+                      vio->is_blocking_flag, status));
 
 #ifdef _WIN32
   DBUG_ASSERT(vio->type != VIO_TYPE_NAMEDPIPE);
@@ -240,6 +266,8 @@ static int vio_set_blocking(Vio *vio, my_bool status)
 
     if (fcntl(mysql_socket_getfd(vio->mysql_socket), F_SETFL, flags) == -1)
       DBUG_RETURN(-1);
+
+    vio->is_blocking_flag = status;
   }
 #endif
 
@@ -316,6 +344,12 @@ int vio_socket_timeout(Vio *vio,
   DBUG_RETURN(ret);
 }
 
+my_bool
+vio_is_blocking(Vio * vio)
+{
+  DBUG_ENTER(__func__);
+  DBUG_RETURN(vio->is_blocking_flag);
+}
 
 int vio_fastsend(Vio * vio __attribute__((unused)))
 {
@@ -898,7 +932,7 @@ int vio_io_wait(Vio *vio, enum enum_vio_io_event event, timeout_t timeout)
 
 my_bool
 vio_socket_connect(Vio *vio, struct sockaddr *addr, socklen_t len,
-                   timeout_t timeout)
+                   my_bool nonblocking, timeout_t timeout)
 {
   int ret, wait;
   DBUG_ENTER("vio_socket_connect");
@@ -907,7 +941,8 @@ vio_socket_connect(Vio *vio, struct sockaddr *addr, socklen_t len,
   DBUG_ASSERT(vio->type == VIO_TYPE_SOCKET || vio->type == VIO_TYPE_TCPIP);
 
   /* If timeout is not infinite, set socket to non-blocking mode. */
-  if (!timeout_is_infinite(timeout) && vio_set_blocking(vio, FALSE))
+  if ((!timeout_is_infinite(timeout) || nonblocking) &&
+      vio_set_blocking(vio, FALSE))
     DBUG_RETURN(TRUE);
 
   /* Initiate the connection. */
@@ -935,7 +970,7 @@ vio_socket_connect(Vio *vio, struct sockaddr *addr, socklen_t len,
     2. The connection was set up successfully: getsockopt() will
        return 0 as an error.
   */
-  if (wait && (vio_io_wait(vio, VIO_IO_EVENT_CONNECT, timeout) == 1))
+  if (!nonblocking && wait && (vio_io_wait(vio, VIO_IO_EVENT_CONNECT, timeout) == 1))
   {
     int error;
     IF_WIN(int, socklen_t) optlen= sizeof(error);
@@ -961,13 +996,17 @@ vio_socket_connect(Vio *vio, struct sockaddr *addr, socklen_t len,
   }
 
   /* If necessary, restore the blocking mode, but only if connect succeeded. */
-  if (timeout_is_nonzero(timeout) && (ret == 0))
+  if ((!nonblocking && timeout_is_nonzero(timeout)) && (ret == 0))
   {
     if (vio_set_blocking(vio, TRUE))
       DBUG_RETURN(TRUE);
   }
 
-  DBUG_RETURN(MY_TEST(ret));
+  if (nonblocking && wait) {
+    DBUG_RETURN(FALSE);
+  } else {
+    DBUG_RETURN(MY_TEST(ret));
+  }
 }
 
 
@@ -1032,18 +1071,19 @@ my_bool vio_is_connected(Vio *vio)
 
 ssize_t vio_pending(Vio *vio)
 {
+  DBUG_ENTER(__func__);
   uint bytes= 0;
 
   /* Data pending on the read buffer. */
   if (vio->read_pos < vio->read_end)
-    return vio->read_end - vio->read_pos;
+    DBUG_RETURN(vio->read_end - vio->read_pos);
 
   /* Skip non-socket based transport types. */
   if (vio->type == VIO_TYPE_TCPIP || vio->type == VIO_TYPE_SOCKET)
   {
     /* Obtain number of readable bytes in the socket buffer. */
     if (socket_peek_read(vio, &bytes))
-      return -1;
+      DBUG_RETURN(-1);
   }
 
   /*
@@ -1051,7 +1091,8 @@ ssize_t vio_pending(Vio *vio)
     causes it to attempt to read from the socket.
   */
 
-  return (ssize_t) bytes;
+  DBUG_PRINT("bytes left", ("%u", bytes));
+  DBUG_RETURN((ssize_t) bytes);
 }
 
 #endif

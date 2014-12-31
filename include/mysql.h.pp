@@ -14,6 +14,49 @@ enum enum_server_command
   COM_BINLOG_DUMP_GTID,
   COM_END
 };
+enum net_async_status_enum
+{
+  NET_ASYNC_COMPLETE = 20100,
+  NET_ASYNC_NOT_READY
+};
+typedef enum net_async_status_enum net_async_status;
+enum net_async_operation_enum
+{
+  NET_ASYNC_OP_IDLE = 0,
+  NET_ASYNC_OP_READING = 20200,
+  NET_ASYNC_OP_WRITING,
+  NET_ASYNC_OP_COMPLETE
+};
+typedef enum net_async_operation_enum net_async_operation;
+enum net_async_read_packet_state_enum
+{
+  NET_ASYNC_PACKET_READ_IDLE = 0,
+  NET_ASYNC_PACKET_READ_HEADER = 20300,
+  NET_ASYNC_PACKET_READ_BODY,
+  NET_ASYNC_PACKET_READ_COMPLETE
+};
+typedef enum net_async_read_packet_state_enum net_async_read_packet_state;
+enum net_read_query_result_status_enum
+{
+  NET_ASYNC_READ_QUERY_RESULT_IDLE = 0,
+  NET_ASYNC_READ_QUERY_RESULT_FIELD_COUNT = 20240,
+  NET_ASYNC_READ_QUERY_RESULT_FIELD_INFO
+};
+typedef enum net_read_query_result_status_enum net_read_query_result_status;
+enum net_send_command_status_enum
+{
+  NET_ASYNC_SEND_COMMAND_IDLE = 0,
+  NET_ASYNC_SEND_COMMAND_WRITE_COMMAND = 20340,
+  NET_ASYNC_SEND_COMMAND_READ_STATUS = 20340
+};
+typedef enum net_send_command_status_enum net_send_command_status;
+enum net_async_block_state_enum
+{
+  NET_NONBLOCKING_CONNECT = 20130,
+  NET_NONBLOCKING_READ = 20140,
+  NET_NONBLOCKING_WRITE = 20150
+};
+typedef enum net_async_block_state_enum net_async_block_state;
 typedef struct {
   uint value_ms_;
 } timeout_t;
@@ -51,6 +94,24 @@ typedef struct st_net {
   char last_error[512];
   char sqlstate[5 +1];
   void *extension;
+  unsigned char *cur_pos;
+  net_async_block_state async_blocking_state;
+  net_async_operation async_operation;
+  size_t async_bytes_wanted;
+  my_bool read_rows_is_first_read;
+  net_send_command_status async_send_command_status;
+  net_read_query_result_status async_read_query_result_status;
+  net_async_read_packet_state async_packet_read_state;
+  size_t async_packet_length;
+  unsigned char *async_write_headers;
+  struct iovec* async_write_vector;
+  size_t async_write_vector_size;
+  size_t async_write_vector_current;
+  unsigned char inline_async_write_header[4 + 3 + 1 + 1];
+  struct iovec inline_async_write_vector[3];
+  ulong async_multipacket_read_saved_whereb;
+  ulong async_multipacket_read_total_len;
+  my_bool async_multipacket_read_started;
 } NET;
 enum enum_field_types { MYSQL_TYPE_DECIMAL, MYSQL_TYPE_TINY,
    MYSQL_TYPE_SHORT, MYSQL_TYPE_LONG,
@@ -109,6 +170,16 @@ my_bool net_write_command(NET *net,unsigned char command,
      const unsigned char *packet, size_t len);
 my_bool net_write_packet(NET *net, const unsigned char *packet, size_t length);
 unsigned long my_net_read(NET *net);
+net_async_status
+my_net_write_nonblocking(NET *net, const unsigned char *packet, size_t len,
+                         my_bool* res);
+net_async_status net_write_command_nonblocking(
+  NET *net, unsigned char command,
+  const unsigned char *prefix, size_t prefix_len,
+  const unsigned char *packet, size_t packet_len,
+  my_bool* res);
+net_async_status my_net_read_nonblocking(NET *net, ulong* len_ptr,
+                                         ulong* complen_ptr);
 struct rand_struct {
   unsigned long seed1,seed2,max_value;
   double max_value_dbl;
@@ -346,6 +417,25 @@ typedef struct character_set
 } MY_CHARSET_INFO;
 struct st_mysql_methods;
 struct st_mysql_stmt;
+enum mysql_async_operation_status {
+  ASYNC_OP_UNSET = 18000,
+  ASYNC_OP_CONNECT = 18010,
+  ASYNC_OP_QUERY = 18020
+};
+enum mysql_async_query_state_enum {
+  QUERY_IDLE = 0,
+  QUERY_SENDING,
+  QUERY_READING_RESULT
+};
+enum mysql_state_machine_status_enum {
+  STATE_MACHINE_FAILED = 1800,
+  STATE_MACHINE_CONTINUE,
+  STATE_MACHINE_WOULD_BLOCK,
+  STATE_MACHINE_DONE
+};
+typedef enum mysql_state_machine_status_enum mysql_state_machine_status;
+struct mysql_st_mysql_csm_context;
+typedef struct mysql_st_mysql_csm_context mysql_csm_context;
 typedef struct st_mysql
 {
   NET net;
@@ -380,7 +470,14 @@ typedef struct st_mysql
   my_bool *unbuffered_fetch_owner;
   char *info_buffer;
   void *extension;
+  MYSQL_DATA *rows_result_buffer;
+  MYSQL_ROWS **prev_row_ptr;
+  mysql_csm_context* connect_context;
+  enum mysql_async_operation_status async_op_status;
+  size_t async_query_length;
+  enum mysql_async_query_state_enum async_query_state;
 } MYSQL;
+typedef mysql_state_machine_status (*csm_function)(mysql_csm_context*);
 typedef struct st_mysql_res {
   my_ulonglong row_count;
   MYSQL_FIELD *fields;
@@ -397,6 +494,34 @@ typedef struct st_mysql_res {
   my_bool unbuffered_fetch_cancelled;
   void *extension;
 } MYSQL_RES;
+struct st_mysql_authsm_context;
+typedef struct st_mysql_authsm_context mysql_authsm_context;
+struct mysql_st_mysql_csm_context {
+  MYSQL *mysql;
+  const char *host;
+  const char *user;
+  const char *passwd;
+  const char *db;
+  uint port;
+  const char *unix_socket;
+  ulong client_flag;
+  my_bool non_blocking;
+  struct sockaddr *addr;
+  socklen_t len;
+  ulong pkt_length;
+  char* host_info;
+  char buff[(64*3)+(16*3)+100];
+  int scramble_data_len;
+  int pkt_scramble_len;
+  char *scramble_data;
+  const char *scramble_plugin;
+  mysql_authsm_context* auth_context;
+  my_bool saved_reconnect;
+  char **current_init_command;
+  char **last_init_command;
+  MYSQL_RES *init_command_result;
+  csm_function state_function;
+};
 typedef struct st_mysql_parameters
 {
   unsigned long *p_max_allowed_packet;
@@ -449,6 +574,27 @@ int mysql_real_query(MYSQL *mysql, const char *q,
      unsigned long length);
 MYSQL_RES * mysql_store_result(MYSQL *mysql);
 MYSQL_RES * mysql_use_result(MYSQL *mysql);
+my_bool mysql_real_connect_nonblocking_init(MYSQL *mysql,
+                                                            const char *host,
+                                                            const char *user,
+                                                            const char *passwd,
+                                                            const char *db,
+                                                            unsigned int port,
+                                                            const char *unix_socket,
+                                                            unsigned long clientflag);
+net_async_status mysql_real_connect_nonblocking_run(MYSQL *mysql,
+                                                            int *error);
+net_async_status
+mysql_send_query_nonblocking(MYSQL* mysql, const char* query, int *error);
+net_async_status
+mysql_real_query_nonblocking(MYSQL *mysql, const char* query,
+                             unsigned long length, int *error);
+net_async_status
+mysql_next_result_nonblocking(MYSQL *mysql, int* error);
+net_async_status
+mysql_select_db_nonblocking(MYSQL *mysql, const char *db, my_bool* error);
+int
+mysql_get_file_descriptor(MYSQL *mysql);
 void mysql_get_character_set_info(MYSQL *mysql,
                            MY_CHARSET_INFO *charset);
 void
@@ -489,6 +635,7 @@ int mysql_options(MYSQL *mysql,enum mysql_option option,
 int mysql_options4(MYSQL *mysql,enum mysql_option option,
                                        const void *arg1, const void *arg2);
 void mysql_free_result(MYSQL_RES *result);
+net_async_status mysql_free_result_nonblocking(MYSQL_RES *result);
 void mysql_data_seek(MYSQL_RES *result,
      my_ulonglong offset);
 MYSQL_ROW_OFFSET mysql_row_seek(MYSQL_RES *result,
@@ -496,6 +643,8 @@ MYSQL_ROW_OFFSET mysql_row_seek(MYSQL_RES *result,
 MYSQL_FIELD_OFFSET mysql_field_seek(MYSQL_RES *result,
         MYSQL_FIELD_OFFSET offset);
 MYSQL_ROW mysql_fetch_row(MYSQL_RES *result);
+net_async_status mysql_fetch_row_nonblocking(MYSQL_RES *res,
+                                                     MYSQL_ROW* row);
 unsigned long * mysql_fetch_lengths(MYSQL_RES *result);
 MYSQL_FIELD * mysql_fetch_field(MYSQL_RES *result);
 MYSQL_RES * mysql_list_fields(MYSQL *mysql, const char *table,

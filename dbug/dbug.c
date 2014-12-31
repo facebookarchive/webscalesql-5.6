@@ -1499,6 +1499,9 @@ void _db_dump_(uint _line_, const char *keyword,
 
   read_lock_stack(cs);
 
+  /* Don't dump more than 32k of data */
+  length = MY_MIN(length, 32 * 1024);
+
   if (_db_keyword_(cs, keyword, 0))
   {
     if (!cs->locked)

@@ -469,7 +469,12 @@ MYSQL_METHODS embedded_methods=
   emb_free_embedded_thd,
   emb_read_statistics,
   emb_read_query_result,
-  emb_read_rows_from_cursor
+  emb_read_rows_from_cursor,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL
 };
 
 /*

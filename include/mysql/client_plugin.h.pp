@@ -10,6 +10,8 @@ typedef struct st_plugin_vio_info
          MYSQL_VIO_PIPE, MYSQL_VIO_MEMORY } protocol;
   int socket;
 } MYSQL_PLUGIN_VIO_INFO;
+struct st_mysql;
+typedef struct st_mysql MYSQL;
 typedef struct st_plugin_vio
 {
   int (*read_packet)(struct st_plugin_vio *vio,
@@ -18,11 +20,22 @@ typedef struct st_plugin_vio
                       const unsigned char *packet,
                       int packet_len);
   void (*info)(struct st_plugin_vio *vio, struct st_plugin_vio_info *info);
+  MYSQL* mysql;
+  int (*read_packet_nonblocking)(struct st_plugin_vio *vio,
+                                 unsigned char **buf,
+                                 int *result);
+  int (*write_packet_nonblocking)(struct st_plugin_vio *vio,
+                                  const unsigned char *packet,
+                                  int packet_len,
+                                  int *result);
 } MYSQL_PLUGIN_VIO;
 struct st_mysql_client_plugin_AUTHENTICATION
 {
   int type; unsigned int interface_version; const char *name; const char *author; const char *desc; unsigned int version[3]; const char *license; void *mysql_api; int (*init)(char *, size_t, int, va_list); int (*deinit)(); int (*options)(const char *option, const void *);
   int (*authenticate_user)(MYSQL_PLUGIN_VIO *vio, struct st_mysql *mysql);
+  int (*authenticate_user_nonblocking)(MYSQL_PLUGIN_VIO *vio,
+                                       struct st_mysql *mysql,
+                                       int *result);
 };
 struct st_mysql_client_plugin *
 mysql_load_plugin(struct st_mysql *mysql, const char *name, int type,

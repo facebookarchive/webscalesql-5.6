@@ -105,6 +105,7 @@ my_bool my_net_init(NET *net, Vio* vio)
              MYF(MY_WME))))
     DBUG_RETURN(1);
   net->buff_end=net->buff+net->max_packet;
+  net->cur_pos = 0;
   net->error=0; net->return_status=0;
   net->pkt_nr=net->compress_pkt_nr=0;
   net->write_pos=net->read_pos = net->buff;
@@ -113,6 +114,9 @@ my_bool my_net_init(NET *net, Vio* vio)
   net->where_b = net->remain_in_buf=0;
   net->last_errno=0;
   net->unused= 0;
+
+  net->read_rows_is_first_read = TRUE;
+
 #ifdef MYSQL_SERVER
   net->extension= NULL;
 #endif
@@ -142,6 +146,7 @@ my_bool net_realloc(NET *net, size_t length)
 {
   uchar *buff;
   size_t pkt_length;
+  size_t cur_pos_offset;
   DBUG_ENTER("net_realloc");
   DBUG_PRINT("enter",("length: %lu", (ulong) length));
 
@@ -164,6 +169,7 @@ my_bool net_realloc(NET *net, size_t length)
     net_read_packet() may actually read 4 bytes depending on build flags and
     platform.
   */
+
   if (!(buff= (uchar*) my_realloc((char*) net->buff, pkt_length +
                                   NET_HEADER_SIZE + COMP_HEADER_SIZE + 1,
                                   MYF(MY_WME))))
@@ -174,7 +180,9 @@ my_bool net_realloc(NET *net, size_t length)
     /* In the server the error is reported by MY_WME flag. */
     DBUG_RETURN(1);
   }
+  cur_pos_offset = net->cur_pos - net->buff;
   net->buff=net->write_pos=buff;
+  net->cur_pos=net->buff+cur_pos_offset;
   net->buff_end=buff+(net->max_packet= (ulong) pkt_length);
   DBUG_RETURN(0);
 }
@@ -281,6 +289,7 @@ my_bool my_net_write(NET *net, const uchar *packet, size_t len)
   uchar buff[NET_HEADER_SIZE];
   int rc;
 
+  DBUG_DUMP("net write", packet, len);
   if (unlikely(!net->vio)) /* nowhere to write */
     return 0;
 
@@ -327,6 +336,256 @@ my_bool my_net_write(NET *net, const uchar *packet, size_t len)
   return rc;
 }
 
+static void reset_packet_write_state(NET* net) {
+  DBUG_ENTER(__func__);
+  if (net->async_write_vector) {
+    if (net->async_write_vector != net->inline_async_write_vector) {
+      my_free(net->async_write_vector);
+    }
+    net->async_write_vector = NULL;
+  }
+
+  if (net->async_write_headers) {
+    if (net->async_write_headers != net->inline_async_write_header) {
+      my_free(net->async_write_headers);
+    }
+    net->async_write_headers = NULL;
+  }
+
+  net->async_write_vector_size = 0;
+  net->async_write_vector_current = 0;
+  DBUG_VOID_RETURN;
+}
+
+/* Construct the proper buffers for our nonblocking write.  What we do
+ * here is we make an iovector for the entire write (header, command,
+ * and payload).  We then continually call writev on this vector,
+ * consuming parts from it as bytes are successfully written.  Headers
+ * for the message are all stored inside one buffer, separate from the
+ * payload; this lets us avoid copying the entire query just to insert
+ * the headers every 2**24 bytes.
+ *
+ * The most common case is the query fits in a packet.  In that case,
+ * we don't construct the iovector dynamically, instead using one we
+ * pre-allocated inside the net structure.  This avoids allocations in
+ * the common path, but requires special casing with our iovec and
+ * header buffer.
+*/
+static int begin_packet_write_state(NET* net, uchar command,
+                                    const uchar *packet, size_t packet_len,
+                                    const uchar *optional_prefix, size_t prefix_len) {
+  size_t total_len = packet_len + prefix_len;
+  my_bool include_command = (command < COM_END);
+  if (include_command) {
+    ++total_len;
+  }
+  size_t packet_count = 1 + total_len / MAX_PACKET_LENGTH;
+  DBUG_ENTER(__func__);
+  reset_packet_write_state(net);
+
+  struct iovec* vec;
+  uchar *headers;
+  if (total_len < MAX_PACKET_LENGTH) {
+    // Most writes hit this case, ie, less than MAX_PACKET_LENGTH of querytext.
+    vec = net->inline_async_write_vector;
+    headers = net->inline_async_write_header;
+  } else {
+    // Large query, create the vector and header buffer dynamically.
+    vec = (struct iovec*)my_malloc(sizeof(struct iovec) * packet_count * 2 + 1,
+                                   MYF(MY_ZEROFILL));
+    if (!vec) {
+      DBUG_RETURN(0);
+    }
+
+    headers = (uchar*)my_malloc(packet_count * (NET_HEADER_SIZE + 1),
+                                MYF(MY_ZEROFILL));
+    if (!headers) {
+      my_free(vec);
+      DBUG_RETURN(0);
+    }
+  }
+
+  // Regardless of where vec and headers come from, these are what we
+  // feed to writev and populate below.
+  net->async_write_vector = vec;
+  net->async_write_headers = headers;
+
+  // We sneak the command into the first header, so the special casing
+  // below about packet_num == 0 relates to that.  This lets us avoid
+  // an extra allocation and copying the input buffers again.
+  //
+  // Every chunk of MAX_PACKET_LENGTH results in a header and a
+  // payload, so we have twice as many entries in the IO vector as we
+  // have packet_count.  The first packet may be prefixed with a small
+  // amount of data, so that one actually might consume *three* iovec
+  // entries.
+  for (size_t packet_num = 0; packet_num < packet_count; ++packet_num) {
+    // First packet, our header.
+    uchar* buf = headers + packet_num * NET_HEADER_SIZE;
+    if (packet_num > 0) {
+      // First packet stole one extra byte from the header buffer for
+      // the command number, so account for it here.
+      ++buf;
+    }
+    size_t header_len = NET_HEADER_SIZE;
+    size_t bytes_queued = 0;
+
+    size_t packet_size = min<size_t>(MAX_PACKET_LENGTH, total_len);
+    int3store(buf, packet_size);
+    buf[3]= (uchar) net->pkt_nr++;
+
+    // We sneak the command byte into the header, even though
+    // technically it is payload.  This lets us avoid an allocation or
+    // separate one-byte entry in our iovec.
+    if (packet_num == 0 && include_command) {
+      buf[4] = command;
+      ++header_len;
+      // Our command byte counts against the packet size.
+      ++bytes_queued;
+    }
+
+    (*vec).iov_base = buf;
+    (*vec).iov_len = header_len;
+    ++vec;
+
+    // Second packet, our optional prefix (if any).
+    if (packet_num == 0 && optional_prefix != NULL) {
+      (*vec).iov_base = (void*)optional_prefix;
+      (*vec).iov_len = prefix_len;
+      ++vec;
+      bytes_queued += prefix_len;
+    }
+
+    // Final packet, the payload itself. Send however many bytes from
+    // packet we have left, and advance our packet pointer.
+    size_t remaining_bytes = packet_size - bytes_queued;
+    (*vec).iov_base = (void*)packet;
+    (*vec).iov_len = remaining_bytes;
+
+    bytes_queued += remaining_bytes;
+
+    packet += remaining_bytes;
+    total_len -= bytes_queued;
+
+    ++vec;
+
+    // Make sure we sent entire packets.
+    if (total_len > 0) {
+      DBUG_ASSERT(packet_size == MAX_PACKET_LENGTH);
+    }
+  }
+
+  // Make sure we don't have anything left to send.
+  DBUG_ASSERT(total_len == 0);
+
+  net->async_write_vector_size = (vec - net->async_write_vector);
+  net->async_write_vector_current = 0;
+
+  DBUG_RETURN(1);
+}
+
+static net_async_status net_write_vector_nonblocking(NET* net, ssize_t *res) {
+  struct iovec *vec = net->async_write_vector + net->async_write_vector_current;
+  DBUG_ENTER(__func__);
+
+  if (vio_is_blocking(net->vio)) {
+    vio_set_blocking(net->vio, FALSE);
+  }
+
+  *res = writev(net->fd, vec,
+    net->async_write_vector_size - net->async_write_vector_current);
+
+  if (*res < 0) {
+    if (errno == SOCKET_EAGAIN ||
+        errno == SOCKET_EWOULDBLOCK) {
+      net->async_blocking_state = NET_NONBLOCKING_WRITE;
+      DBUG_RETURN(NET_ASYNC_NOT_READY);
+    }
+    DBUG_RETURN(NET_ASYNC_COMPLETE);
+  }
+
+  size_t bytes_written = static_cast<size_t>(*res);
+  while (bytes_written > vec->iov_len) {
+    ++net->async_write_vector_current;
+    bytes_written -= vec->iov_len;
+    ++vec;
+  }
+
+  vec->iov_len -= bytes_written;
+  vec->iov_base = (char*)vec->iov_base + bytes_written;
+  if (vec->iov_len == 0) {
+    ++net->async_write_vector_current;
+  }
+
+  if (net->async_write_vector_current == net->async_write_vector_size) {
+    DBUG_RETURN(NET_ASYNC_COMPLETE);
+  }
+
+  net->async_blocking_state = NET_NONBLOCKING_WRITE;
+  DBUG_RETURN(NET_ASYNC_NOT_READY);
+}
+
+net_async_status
+net_write_command_nonblocking(NET *net, uchar command,
+                              const uchar *prefix, size_t prefix_len,
+                              const uchar *packet, size_t packet_len,
+                              my_bool* res)
+{
+  net_async_status status;
+  ssize_t rc;
+  DBUG_ENTER(__func__);
+  DBUG_DUMP("net write prefix", prefix, prefix_len);
+  DBUG_DUMP("net write pkt", packet, packet_len);
+  if (unlikely(!net->vio)) {
+    /* nowhere to write */
+    *res = 0;
+    DBUG_RETURN(NET_ASYNC_COMPLETE);
+  }
+
+  switch (net->async_operation) {
+    case NET_ASYNC_OP_IDLE:
+      MYSQL_NET_WRITE_START(len);
+      if (!begin_packet_write_state(net, command, packet, packet_len, prefix, prefix_len)) {
+        *res = 0;
+        goto done;
+      }
+      net->async_operation = NET_ASYNC_OP_WRITING;
+      /* fallthrough */
+    case NET_ASYNC_OP_WRITING:
+      status = net_write_vector_nonblocking(net, &rc);
+      if (status == NET_ASYNC_COMPLETE) {
+        if (rc < 0) {
+          *res = 1;
+        } else {
+          *res = 0;
+        }
+        goto done;
+      }
+
+      net->async_blocking_state = NET_NONBLOCKING_WRITE;
+      DBUG_RETURN(NET_ASYNC_NOT_READY);
+
+    case NET_ASYNC_OP_COMPLETE:
+      *res = 0;
+      goto done;
+    default:
+      DBUG_ASSERT(FALSE);
+      *res = 1;
+      DBUG_RETURN(NET_ASYNC_COMPLETE);
+  }
+
+ done:
+  reset_packet_write_state(net);
+  net->async_operation = NET_ASYNC_OP_IDLE;
+  MYSQL_NET_WRITE_DONE(1);
+  DBUG_RETURN(NET_ASYNC_COMPLETE);
+}
+
+net_async_status
+my_net_write_nonblocking(NET *net, const uchar *packet, size_t len, my_bool* res)
+{
+  return net_write_command_nonblocking(net, COM_END, packet, len, NULL, 0, res);
+}
 
 /**
   Send a command to the server.
@@ -713,6 +972,46 @@ static my_bool net_read_raw_loop(NET *net, size_t count)
   return MY_TEST(count);
 }
 
+/* Helper function to read up to count bytes from the network connection/
+
+   Returns packet_error (-1) on EOF or other errors, 0 if the read
+   would block, and otherwise the number of bytes read (which may be
+   less than the requested amount).
+*/
+static ulong net_read_available(NET *net,
+                                size_t count)
+{
+  size_t recvcnt;
+  DBUG_ENTER(__func__);
+
+  if (net->cur_pos + count > net->buff + net->max_packet) {
+    if (net_realloc(net, net->max_packet + count)) {
+      DBUG_RETURN(packet_error);
+    }
+  }
+
+  recvcnt= vio_read(net->vio, net->cur_pos, count);
+
+  /* Call would block, just return with socket_errno set */
+  if (recvcnt == VIO_SOCKET_ERROR &&
+      (socket_errno == SOCKET_EAGAIN ||
+       socket_errno == SOCKET_EWOULDBLOCK)) {
+    DBUG_RETURN(0);
+  }
+
+  /* Not EOF and not an error?  Return the bytes read.*/
+  if (recvcnt != 0 && recvcnt != VIO_SOCKET_ERROR) {
+    net->cur_pos += recvcnt;
+    update_statistics(thd_increment_bytes_received(recvcnt));
+    DBUG_RETURN(recvcnt);
+  }
+
+  /* EOF or hard failure; socket should be closed. */
+  net->error= 2;
+  net->last_errno= ER_NET_READ_ERROR;
+  DBUG_RETURN(packet_error);
+}
+
 
 /**
   Read the header of a packet. The MySQL protocol packet header
@@ -796,6 +1095,181 @@ static my_bool net_read_packet_header(NET *net)
   return FALSE;
 }
 
+static net_async_status net_read_data_nonblocking(NET *net,
+                                                  size_t count,
+                                                  my_bool* err_ptr)
+{
+  DBUG_ENTER(__func__);
+  size_t bytes_read = 0;
+  ulong rc;
+  switch (net->async_operation) {
+    case NET_ASYNC_OP_IDLE:
+      net->async_bytes_wanted = count;
+      net->async_operation = NET_ASYNC_OP_READING;
+      net->cur_pos = net->buff + net->where_b;
+      if (vio_is_blocking(net->vio)) {
+        vio_set_blocking(net->vio, FALSE);
+      }
+      /* fallthrough */
+    case NET_ASYNC_OP_READING:
+      rc = net_read_available(net, net->async_bytes_wanted);
+      if (rc == packet_error) {
+        *err_ptr = rc;
+        net->async_operation = NET_ASYNC_OP_IDLE;
+        DBUG_RETURN(NET_ASYNC_COMPLETE);
+      }
+      bytes_read = (size_t) rc;
+      net->async_bytes_wanted -= bytes_read;
+      if (net->async_bytes_wanted != 0) {
+        net->async_blocking_state = NET_NONBLOCKING_READ;
+        DBUG_PRINT("partial read", ("wanted/remaining: %lu, %lu",
+                                    count, net->async_bytes_wanted));
+        DBUG_RETURN(NET_ASYNC_NOT_READY);
+      }
+      /* fallthrough */
+    case NET_ASYNC_OP_COMPLETE:
+      net->async_bytes_wanted = 0;
+      net->async_operation = NET_ASYNC_OP_IDLE;
+      *err_ptr = 0;
+      DBUG_PRINT("read complete", ("read: %lu", count));
+      DBUG_RETURN(NET_ASYNC_COMPLETE);
+    default:
+      /* error, sure wish we could log something here */
+      DBUG_ASSERT(FALSE);
+      net->async_bytes_wanted = 0;
+      net->async_operation = NET_ASYNC_OP_IDLE;
+      *err_ptr = 1;
+      DBUG_RETURN(NET_ASYNC_COMPLETE);
+  }
+}
+
+static net_async_status net_read_packet_header_nonblock(NET *net,
+                                                        my_bool* err_ptr)
+{
+  DBUG_ENTER(__func__);
+  uchar pkt_nr;
+  if (net_read_data_nonblocking(net, NET_HEADER_SIZE, err_ptr) ==
+      NET_ASYNC_NOT_READY) {
+    net->async_blocking_state = NET_NONBLOCKING_READ;
+    DBUG_RETURN(NET_ASYNC_NOT_READY);
+  }
+  if (*err_ptr) {
+    DBUG_RETURN(NET_ASYNC_COMPLETE);
+  }
+
+  DBUG_DUMP("packet_header", net->buff + net->where_b, NET_HEADER_SIZE);
+
+  pkt_nr= net->buff[net->where_b + 3];
+
+  /*
+    Verify packet serial number against the truncated packet counter.
+    The local packet counter must be truncated since its not reset.
+  */
+  if (pkt_nr != (uchar) net->pkt_nr)
+  {
+    /* Not a NET error on the client. XXX: why? */
+#if defined(MYSQL_SERVER)
+    my_error(ER_NET_PACKETS_OUT_OF_ORDER, MYF(0));
+#elif defined(EXTRA_DEBUG)
+    /*
+      We don't make noise server side, since the client is expected
+      to break the protocol for e.g. --send LOAD DATA .. LOCAL where
+      the server expects the client to send a file, but the client
+      may reply with a new command instead.
+    */
+    fprintf(stderr, "Error: packets out of order (found %u, expected %u)\n",
+            (uint) pkt_nr, net->pkt_nr);
+    DBUG_ASSERT(pkt_nr == net->pkt_nr);
+#endif
+    *err_ptr = TRUE;
+    DBUG_RETURN(NET_ASYNC_COMPLETE);
+  }
+
+  net->pkt_nr++;
+
+  *err_ptr = FALSE;
+  DBUG_RETURN(NET_ASYNC_COMPLETE);
+}
+
+static net_async_status net_read_packet_nonblocking(NET *net,
+                                                    ulong* ret,
+                                                    ulong* complen)
+{
+  DBUG_ENTER(__func__);
+  size_t pkt_data_len;
+  my_bool err;
+
+  *complen = 0;
+
+  switch (net->async_packet_read_state) {
+    case NET_ASYNC_PACKET_READ_IDLE:
+      net->async_packet_read_state = NET_ASYNC_PACKET_READ_HEADER;
+      net->reading_or_writing= 0;
+      /* fallthrough */
+    case NET_ASYNC_PACKET_READ_HEADER:
+      if (net_read_packet_header_nonblock(net, &err) ==
+          NET_ASYNC_NOT_READY) {
+        net->async_blocking_state = NET_NONBLOCKING_READ;
+        DBUG_RETURN(NET_ASYNC_NOT_READY);
+      }
+      /* Retrieve packet length and number. */
+      if (err)
+        goto error;
+
+      net->compress_pkt_nr= net->pkt_nr;
+
+      /* The length of the packet that follows. */
+      net->async_packet_length= uint3korr(net->buff+net->where_b);
+      DBUG_PRINT("info", ("async packet len: %lu", net->async_packet_length));
+
+      /* End of big multi-packet. */
+      if (!net->async_packet_length)
+        goto end;
+
+      pkt_data_len =
+        max(net->async_packet_length, *complen) + net->where_b;
+
+      /* Expand packet buffer if necessary. */
+      if ((pkt_data_len >= net->max_packet) && net_realloc(net, pkt_data_len))
+        goto error;
+
+      net->async_packet_read_state = NET_ASYNC_PACKET_READ_BODY;
+      /* fallthrough */
+    case NET_ASYNC_PACKET_READ_BODY:
+      if (net_read_data_nonblocking(
+            net, net->async_packet_length, &err) ==
+          NET_ASYNC_NOT_READY) {
+        net->async_blocking_state = NET_NONBLOCKING_READ;
+        DBUG_RETURN(NET_ASYNC_NOT_READY);
+      }
+
+      if (err)
+        goto error;
+
+      net->async_packet_read_state = NET_ASYNC_PACKET_READ_COMPLETE;
+      /* fallthrough */
+
+    case NET_ASYNC_PACKET_READ_COMPLETE:
+      net->async_packet_read_state = NET_ASYNC_PACKET_READ_IDLE;
+      break;
+  }
+
+end:
+  *ret = net->async_packet_length;
+  net->read_pos = net->buff + net->where_b;
+#ifdef DEBUG_DATA_PACKETS
+  DBUG_DUMP("async read output", net->read_pos, *ret);
+#endif
+
+  net->read_pos[*ret] = 0;
+  net->reading_or_writing= 0;
+  DBUG_RETURN(NET_ASYNC_COMPLETE);
+
+error:
+  *ret = packet_error;
+  net->reading_or_writing= 0;
+  DBUG_RETURN(NET_ASYNC_COMPLETE);
+}
 
 /**
   Read one (variable-length) MySQL protocol packet.
@@ -859,6 +1333,7 @@ static ulong net_read_packet(NET *net, size_t *complen)
     goto error;
 
 end:
+  DBUG_DUMP("net read", net->read_pos, pkt_len);
   net->reading_or_writing= 0;
   return pkt_len;
 
@@ -867,6 +1342,28 @@ error:
   return packet_error;
 }
 
+
+net_async_status
+my_net_read_nonblocking(NET *net, ulong* len_ptr, ulong* complen_ptr)
+{
+  if (net_read_packet_nonblocking(net, len_ptr, complen_ptr) ==
+      NET_ASYNC_NOT_READY) {
+    net->async_blocking_state = NET_NONBLOCKING_READ;
+    return NET_ASYNC_NOT_READY;
+  }
+
+  if (*len_ptr == packet_error) {
+    return NET_ASYNC_COMPLETE;
+  }
+
+  DBUG_PRINT("info", ("chunk nb read: %lu", *len_ptr));
+
+  if (*len_ptr == MAX_PACKET_LENGTH) {
+    return NET_ASYNC_NOT_READY;
+  } else {
+    return NET_ASYNC_COMPLETE;
+  }
+}
 
 /**
   Read a packet from the client/server and return it without the internal

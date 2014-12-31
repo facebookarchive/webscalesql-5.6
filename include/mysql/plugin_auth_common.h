@@ -93,6 +93,9 @@ typedef struct st_plugin_vio_info
 #endif
 } MYSQL_PLUGIN_VIO_INFO;
 
+struct st_mysql;
+typedef struct st_mysql MYSQL;
+
 /**
   Provides plugin access to communication channel
 */
@@ -105,7 +108,7 @@ typedef struct st_plugin_vio
   */
   int (*read_packet)(struct st_plugin_vio *vio, 
                      unsigned char **buf);
-  
+
   /**
     Plugin provides a buffer with data and the length and this
     function sends it as a packet. Returns 0 on success, 1 on failure.
@@ -119,6 +122,19 @@ typedef struct st_plugin_vio
     about the connection.
   */
   void (*info)(struct st_plugin_vio *vio, struct st_plugin_vio_info *info);
+  MYSQL* mysql;
+
+  /* Async MySQL extension fields here. */
+  /* NOTE: this really returns a net_async_status */
+  int (*read_packet_nonblocking)(struct st_plugin_vio *vio,
+                                 unsigned char **buf,
+                                 int *result);
+
+  /* NOTE: this really returns a net_async_status */
+  int (*write_packet_nonblocking)(struct st_plugin_vio *vio,
+                                  const unsigned char *packet,
+                                  int packet_len,
+                                  int *result);
 
 } MYSQL_PLUGIN_VIO;
 

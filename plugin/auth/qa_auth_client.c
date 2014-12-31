@@ -123,5 +123,6 @@ mysql_declare_client_plugin(AUTHENTICATION)
   NULL,
   NULL,
   NULL,
-  test_plugin_client
+  test_plugin_client,
+  0
 mysql_end_client_plugin;

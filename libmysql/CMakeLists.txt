@@ -182,13 +182,13 @@ IF(WIN32)
   LIST(APPEND LIBS auth_win_client)
 ENDIF()
 
-# Merge several convenience libraries into one big mysqlclient
-MERGE_LIBRARIES(mysqlclient STATIC ${STATIC_MERGE_LIBS} COMPONENT Development)
-TARGET_LINK_LIBRARIES(mysqlclient ${ZLIB_LIBRARY} ${SSL_LIBRARIES})
+# Merge several convenience libraries into one big webscalesqlclient
+MERGE_LIBRARIES(webscalesqlclient STATIC ${STATIC_MERGE_LIBS} COMPONENT Development)
+TARGET_LINK_LIBRARIES(webscalesqlclient ${ZLIB_LIBRARY} ${SSL_LIBRARIES})
 
 # Visual Studio users need debug  static library for debug projects
 IF(MSVC)
- INSTALL_DEBUG_TARGET(mysqlclient DESTINATION ${INSTALL_LIBDIR}/debug)
+ INSTALL_DEBUG_TARGET(webscalesqlclient DESTINATION ${INSTALL_LIBDIR}/debug)
  INSTALL_DEBUG_TARGET(clientlib DESTINATION ${INSTALL_LIBDIR}/debug)
 ENDIF()
 
@@ -213,14 +213,14 @@ IF(UNIX)
 ENDIF()
 
 IF(UNIX)
-  GET_TARGET_NAME(mysqlclient lib_name)
-  INSTALL_SYMLINK(mysqlclient
-    ${lib_name} ${CMAKE_STATIC_LIBRARY_PREFIX}mysqlclient_r.a
+  GET_TARGET_NAME(webscalesqlclient lib_name)
+  INSTALL_SYMLINK(webscalesqlclient
+    ${lib_name} ${CMAKE_STATIC_LIBRARY_PREFIX}webscalesqlclient_r.a
     ${INSTALL_LIBDIR} Development)
 ENDIF()
 
 IF(NOT DISABLE_SHARED)
-  # Merge several convenience libraries into one big mysqlclient
+  # Merge several convenience libraries into one big webscalesqlclient
   # and link them together into shared library.
   MERGE_LIBRARIES(libmysql SHARED ${LIBS}
     EXPORTS ${CLIENT_API_FUNCTIONS}
@@ -233,9 +233,9 @@ IF(NOT DISABLE_SHARED)
       SET(OS_SHARED_LIB_VERSION
         "${SHARED_LIB_MAJOR_VERSION}.${SHARED_LIB_MINOR_VERSION}.0")
     ENDIF()
-    # Name of shared library is mysqlclient on Unix
+    # Name of shared library is webscalesqlclient on Unix
     SET_TARGET_PROPERTIES(libmysql PROPERTIES 
-      OUTPUT_NAME mysqlclient 
+      OUTPUT_NAME webscalesqlclient
       VERSION "${OS_SHARED_LIB_VERSION}" 
       SOVERSION "${SHARED_LIB_MAJOR_VERSION}")
     CONFIGURE_FILE(libmysql.ver.in ${CMAKE_CURRENT_BINARY_DIR}/libmysql.ver)
@@ -253,12 +253,12 @@ IF(NOT DISABLE_SHARED)
     ENDIF() 
     # clean direct output needs to be set several targets have the same name
     #(mysqlclient in this case)
-    SET_TARGET_PROPERTIES(mysqlclient PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+    SET_TARGET_PROPERTIES(webscalesqlclient PROPERTIES CLEAN_DIRECT_OUTPUT 1)
     SET_TARGET_PROPERTIES(libmysql PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 
-    # Install links to libmysqlclient.so (client_r)
+    # Install links to libwebscalesqlclient.so (client_r)
     GET_VERSIONED_LIBNAME(
-      "${CMAKE_SHARED_LIBRARY_PREFIX}mysqlclient_r"
+      "${CMAKE_SHARED_LIBRARY_PREFIX}webscalesqlclient_r"
       "${CMAKE_SHARED_LIBRARY_SUFFIX}"
       ""
       linkname)
@@ -272,7 +272,7 @@ IF(NOT DISABLE_SHARED)
     LIST(REMOVE_DUPLICATES OS_SHARED_LIB_SYMLINKS)
     FOREACH(ver ${OS_SHARED_LIB_SYMLINKS})
       GET_VERSIONED_LIBNAME(
-        "${CMAKE_SHARED_LIBRARY_PREFIX}mysqlclient_r"
+        "${CMAKE_SHARED_LIBRARY_PREFIX}webscalesqlclient_r"
         "${CMAKE_SHARED_LIBRARY_SUFFIX}"
         "${ver}"
         linkname)

@@ -185,6 +185,7 @@ our @opt_mysqld_envs;
 my $opt_stress;
 
 my $opt_compress;
+my $opt_async_client;
 my $opt_ssl;
 my $opt_skip_ssl;
 my @opt_skip_test_list;
@@ -370,6 +371,15 @@ sub main {
   mtr_report("Using suites: $opt_suites") unless @opt_cases;
 
   init_timers();
+
+  if ( $opt_async_client )
+  {
+    mtr_report("Tests will be run in async client mode");
+  }
+  else
+  {
+    mtr_report("Tests will be run in sync (default) client mode");
+  }
 
   mtr_report("Collecting tests...");
   my $tests= collect_test_cases($opt_reorder, $opt_suites, \@opt_cases, \@opt_skip_test_list);
@@ -1059,6 +1069,7 @@ sub command_line_setup {
              'skip-ssl'                 => \$opt_skip_ssl,
              'compress'                 => \$opt_compress,
              'vs-config=s'              => \$opt_vs_config,
+             'async-client'             => \$opt_async_client,
 
 	     # Max number of parallel threads to use
 	     'parallel=s'               => \$opt_parallel,
@@ -5897,6 +5908,9 @@ sub start_mysqltest ($) {
     $exe=  "strace";
     mtr_add_arg($args, "-o");
     mtr_add_arg($args, "%s/log/mysqltest.strace", $opt_vardir);
+    mtr_add_arg($args, "-s");
+    mtr_add_arg($args, "128");
+    mtr_add_arg($args, "-ttr");
     mtr_add_arg($args, "$exe_mysqltest");
   }
 
@@ -5957,6 +5971,11 @@ sub start_mysqltest ($) {
   if ( $opt_compress )
   {
     mtr_add_arg($args, "--compress");
+  }
+
+  if ( $opt_async_client )
+  {
+    mtr_add_arg($args, "--async-client");
   }
 
   if ( $opt_sleep )
@@ -6030,6 +6049,11 @@ sub start_mysqltest ($) {
     if ( defined $tinfo->{'record_file'} ) {
       mtr_add_arg($args, "--result-file=%s", $tinfo->{record_file});
     }
+  }
+
+  if ($tinfo->{'mysqltest_opt'})
+  {
+    push @$args, @{$tinfo->{'mysqltest_opt'}};
   }
 
   if ( $opt_client_gdb )
@@ -6519,6 +6543,7 @@ Options to control what engine/variation to run
   skip-ssl              Dont start server with support for ssl connections
   vs-config             Visual Studio configuration used to create executables
                         (default: MTR_VS_CONFIG environment variable)
+  async-client          Use async-client with select() to run the test case
 
   defaults-file=<config template> Use fixed config template for all
                         tests

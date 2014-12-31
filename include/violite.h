@@ -76,6 +76,8 @@ void    vio_delete(Vio* vio);
 int vio_shutdown(Vio* vio);
 my_bool vio_reset(Vio* vio, enum enum_vio_type type,
                   my_socket sd, void *ssl, uint flags);
+my_bool vio_is_blocking(Vio* vio);
+int     vio_set_blocking(Vio * vio, my_bool set_blocking_mode);
 size_t  vio_read(Vio *vio, uchar *	buf, size_t size);
 size_t  vio_read_buff(Vio *vio, uchar * buf, size_t size);
 size_t  vio_write(Vio *vio, const uchar * buf, size_t size);
@@ -107,7 +109,7 @@ ssize_t vio_pending(Vio *vio);
 int vio_timeout(Vio *vio, uint which, timeout_t timeout);
 /* Connect to a peer. */
 my_bool vio_socket_connect(Vio *vio, struct sockaddr *addr, socklen_t len,
-                           timeout_t timeout);
+                           my_bool nonblocking, timeout_t timeout);
 
 my_bool vio_get_normalized_ip_string(const struct sockaddr *addr, int addr_length,
                                      char *ip_string, size_t ip_string_size);
@@ -194,6 +196,8 @@ void vio_end(void);
 #define vio_peer_addr(vio, buf, prt, buflen)    (vio)->peer_addr(vio, buf, prt, buflen)
 #define vio_io_wait(vio, event, timeout)        (vio)->io_wait(vio, event, timeout)
 #define vio_is_connected(vio)                   (vio)->is_connected(vio)
+#define vio_is_blocking(vio)                    (vio)->is_blocking(vio)
+#define vio_set_blocking(vio, val)              (vio)->set_blocking(vio, val)
 #endif /* !defined(DONT_MAP_VIO) */
 
 /* This enumerator is used in parser - should be always visible */
@@ -278,5 +282,8 @@ struct st_vio
   size_t  shared_memory_remain;
   char    *shared_memory_pos;
 #endif /* HAVE_SMEM */
+  my_bool (*is_blocking)(Vio* vio);
+  int     (*set_blocking)(Vio * vio, my_bool val);
+  my_bool is_blocking_flag;
 };
 #endif /* vio_violite_h_ */

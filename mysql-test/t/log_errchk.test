@@ -9,8 +9,8 @@
 #
 call mtr.add_suppression("Could not open");
 
---let $gen_log_file= $MYSQLTEST_VARDIR/tmp/general_log.fifo
---let $slow_query_log_file= $MYSQLTEST_VARDIR/tmp/slow_log.fifo
+--let $gen_log_file= $MYSQL_TMP_DIR/general_log.fifo
+--let $slow_query_log_file= $MYSQL_TMP_DIR/slow_log.fifo
 --let GREP_FILE=$MYSQLTEST_VARDIR/log/mysqld.1.err
 
 --exec mkfifo $gen_log_file
@@ -20,11 +20,11 @@ call mtr.add_suppression("Could not open");
 --echo #         system variable.
 # Only regular files can be set to general log. Setting fifo file to general log
 # reports an error.
---replace_result $MYSQLTEST_VARDIR MYSQLTEST_VARDIR
+--replace_result $MYSQL_TMP_DIR MYSQL_TMP_DIR
 --error ER_WRONG_VALUE_FOR_VAR
 --eval SET GLOBAL general_log_file="$gen_log_file";
 
---replace_result $MYSQLTEST_VARDIR MYSQLTEST_VARDIR
+--replace_result $MYSQL_TMP_DIR MYSQL_TMP_DIR
 --error ER_WRONG_VALUE_FOR_VAR
 --eval SET GLOBAL slow_query_log_file="$slow_query_log_file";
 

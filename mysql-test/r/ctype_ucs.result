@@ -1721,7 +1721,10 @@ t1	CREATE TABLE `t1` (
   `c1` varchar(21) CHARACTER SET ucs2 NOT NULL DEFAULT ''
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1
 drop table t1;
-create table t1 as select concat(rand()) as c1;
+select hex(concat(rand(0)));
+hex(concat(rand(0)))
+0030002E00310035003500320032003000340032003700360039003400390033003500370034
+create table t1 as select concat(rand(0)) as c1;
 show create table t1;
 Table	Create Table
 t1	CREATE TABLE `t1` (

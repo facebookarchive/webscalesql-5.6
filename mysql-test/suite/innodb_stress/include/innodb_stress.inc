@@ -28,6 +28,8 @@ if ($fake_changes)
 call mtr.add_suppression("innodb_zip_debug is enabled and this is a non-debug mysqld. Please disable it immediately if the machine is serving production traffic.");
 # Expected during mysql crash recovery due to partial binlog events written to the binary log
 call mtr.add_suppression("Error in Log_event::read_log_event()");
+# Page corruption are possible during crash tests. This should not fail the test.
+call mtr.add_suppression("Warning: database page corruption or a failed");
 --enable_query_log
 
 --sync_slave_with_master

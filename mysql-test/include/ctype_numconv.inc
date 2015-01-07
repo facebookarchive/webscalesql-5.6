@@ -211,7 +211,8 @@ create table t1 as select concat(sign(0.5)) as c1;
 show create table t1;
 drop table t1;
 
-create table t1 as select concat(rand()) as c1;
+select hex(concat(rand(0)));
+create table t1 as select concat(rand(0)) as c1;
 show create table t1;
 drop table t1;
 

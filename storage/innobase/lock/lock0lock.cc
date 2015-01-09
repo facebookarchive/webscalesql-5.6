@@ -4068,7 +4068,10 @@ lock_table_create(
 	any locks. */
 	assert_trx_in_list(trx);
 
-	if ((type_mode & LOCK_MODE_MASK) == LOCK_AUTO_INC) {
+	ulint extract_mode = (type_mode & LOCK_MODE_MASK);
+	table->lock_counter[extract_mode]++;
+
+	if (extract_mode == LOCK_AUTO_INC) {
 		++table->n_waiting_or_granted_auto_inc_locks;
 	}
 
@@ -4237,6 +4240,9 @@ lock_table_remove_low(
 	UT_LIST_REMOVE(trx_locks, trx->lock.trx_locks, lock);
 	UT_LIST_REMOVE(un_member.tab_lock.locks, table->locks, lock);
 
+	ut_ad(table->lock_counter[lock_get_mode(lock)] > 0);
+	table->lock_counter[lock_get_mode(lock)]--;
+
 	MONITOR_INC(MONITOR_TABLELOCK_REMOVED);
 	MONITOR_DEC(MONITOR_NUM_TABLELOCK);
 }
@@ -4343,6 +4349,21 @@ lock_table_enqueue_waiting(
 }
 
 /*********************************************************************//**
+Checks if there are table locks incompatible with current lock type.
+@return true if compatible. */
+static
+my_bool
+lock_table_compatible_fast_check(
+/*=============================*/
+       enum lock_mode          mode,   /*!< in: lock mode */
+       const dict_table_t*     table)  /*!< in: table */
+{
+	return ((mode == LOCK_IS || mode == LOCK_IX)
+		&& table->lock_counter[LOCK_S] == 0
+		&& table->lock_counter[LOCK_X] == 0);
+}
+
+/*********************************************************************//**
 Checks if other transactions have an incompatible mode lock request in
 the lock queue.
 @return	lock or NULL */
@@ -4361,6 +4382,9 @@ lock_table_other_has_incompatible(
 	const lock_t*	lock;
 
 	ut_ad(lock_mutex_own());
+
+	if (lock_table_compatible_fast_check(mode, table))
+		return(NULL);
 
 	for (lock = UT_LIST_GET_LAST(table->locks);
 	     lock != NULL;
@@ -4519,6 +4543,8 @@ lock_table_dequeue(
 			they are now qualified to it */
 {
 	lock_t*	lock;
+	dict_table_t*   table;
+	enum lock_mode type = lock_get_mode(in_lock);
 
 	ut_ad(lock_mutex_own());
 	ut_a(lock_get_type_low(in_lock) == LOCK_TABLE);
@@ -4526,6 +4552,10 @@ lock_table_dequeue(
 	lock = UT_LIST_GET_NEXT(un_member.tab_lock.locks, in_lock);
 
 	lock_table_remove_low(in_lock);
+
+	table = in_lock->un_member.tab_lock.table;
+	if (lock_table_compatible_fast_check(type, table))
+		return;
 
 	/* Check if waiting locks in the queue can now be granted: grant
 	locks if there are no conflicting locks ahead. */
@@ -5503,6 +5533,9 @@ lock_table_queue_validate(
 	ut_ad(lock_mutex_own());
 	ut_ad(mutex_own(&trx_sys->mutex));
 
+	ulint lock_counter[LOCK_NUM];
+	memset(lock_counter, 0, LOCK_NUM * sizeof (ulint));
+
 	for (lock = UT_LIST_GET_FIRST(table->locks);
 	     lock != NULL;
 	     lock = UT_LIST_GET_NEXT(un_member.tab_lock.locks, lock)) {
@@ -5523,7 +5556,13 @@ lock_table_queue_validate(
 			ut_a(lock_table_has_to_wait_in_queue(lock));
 		}
 
+		lock_counter[lock_get_mode(lock)]++;
 		ut_a(lock_trx_table_locks_find(lock->trx, lock));
+	}
+
+	/* Check if the value stored in dict_table_t::lock_counter is correct. */
+	for (int i = 0; i < LOCK_NUM; i++) {
+		ut_a(lock_counter[i] == table->lock_counter[i]);
 	}
 
 	return(TRUE);

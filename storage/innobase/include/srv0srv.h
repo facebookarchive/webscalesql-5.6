@@ -51,6 +51,7 @@ Created 10/10/1995 Heikki Tuuri
 #include "srv0conc.h"
 #include "buf0checksum.h"
 #include "ut0counter.h"
+#include "atomic_stat.h"
 
 /* Global counters used inside InnoDB. */
 struct srv_stats_t {
@@ -247,6 +248,10 @@ extern ulong	srv_auto_extend_increment;
 
 extern ibool	srv_created_new_raw;
 
+/* Optimize prefix index queries to skip cluster index lookup when possible */
+/* Enables or disables this prefix optimization.  Disabled by default. */
+extern my_bool	srv_prefix_index_cluster_optimization;
+
 /** Maximum number of srv_n_log_files, or innodb_log_files_in_group */
 #define SRV_N_LOG_FILES_MAX 100
 extern ulong	srv_n_log_files;
@@ -437,6 +442,11 @@ extern ulong srv_sync_array_size;
 extern my_bool srv_print_all_deadlocks;
 
 extern my_bool	srv_cmp_per_index_enabled;
+
+/** Number of times secondary index lookup triggered cluster lookup */
+extern atomic_stat<ulint>	srv_sec_rec_cluster_reads;
+/** Number of times prefix optimization avoided triggering cluster lookup */
+extern atomic_stat<ulint>	srv_sec_rec_cluster_reads_avoided;
 
 /** Perform deadlock detection check. */
 extern my_bool srv_deadlock_detect;
@@ -848,6 +858,9 @@ struct export_var_t{
 	ulint innodb_purge_view_trx_id_age;	/*!< rw_max_trx_id
 						- purged view's min trx_id */
 #endif /* UNIV_DEBUG */
+
+	ulint innodb_sec_rec_cluster_reads;	/*!< srv_sec_rec_cluster_reads */
+	ulint innodb_sec_rec_cluster_reads_avoided; /*!< srv_sec_rec_cluster_reads_avoided */
 };
 
 /** Thread slot in the thread table.  */

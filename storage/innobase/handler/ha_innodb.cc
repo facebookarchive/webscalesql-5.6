@@ -16453,6 +16453,11 @@ static MYSQL_SYSVAR_ULONG(saved_page_number_debug,
   NULL, innodb_save_page_no, 0, 0, UINT_MAX32, 0);
 #endif /* UNIV_DEBUG */
 
+static MYSQL_SYSVAR_BOOL(deadlock_detect, srv_deadlock_detect,
+  PLUGIN_VAR_NOCMDARG,
+  "Enableds deadlock detection checking.",
+  NULL, NULL, TRUE);
+
 static struct st_mysql_sys_var* innobase_system_variables[]= {
   MYSQL_SYSVAR(additional_mem_pool_size),
   MYSQL_SYSVAR(api_trx_level),
@@ -16478,6 +16483,7 @@ static struct st_mysql_sys_var* innobase_system_variables[]= {
   MYSQL_SYSVAR(compression_level),
   MYSQL_SYSVAR(data_file_path),
   MYSQL_SYSVAR(data_home_dir),
+  MYSQL_SYSVAR(deadlock_detect),
   MYSQL_SYSVAR(doublewrite),
   MYSQL_SYSVAR(api_enable_binlog),
   MYSQL_SYSVAR(api_enable_mdl),

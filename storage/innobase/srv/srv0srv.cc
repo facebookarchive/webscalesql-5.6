@@ -316,6 +316,9 @@ UNIV_INTERN ulong	srv_force_recovery_crash;
 
 UNIV_INTERN my_bool	srv_print_all_deadlocks = FALSE;
 
+/** Perform deadlock detection check. */
+UNIV_INTERN my_bool	srv_deadlock_detect = TRUE;
+
 /** Enable INFORMATION_SCHEMA.innodb_cmp_per_index */
 UNIV_INTERN my_bool	srv_cmp_per_index_enabled = FALSE;
 

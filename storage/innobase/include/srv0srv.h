@@ -438,6 +438,9 @@ extern my_bool srv_print_all_deadlocks;
 
 extern my_bool	srv_cmp_per_index_enabled;
 
+/** Perform deadlock detection check. */
+extern my_bool srv_deadlock_detect;
+
 /** Status variables to be passed to MySQL */
 extern struct export_var_t export_vars;
 

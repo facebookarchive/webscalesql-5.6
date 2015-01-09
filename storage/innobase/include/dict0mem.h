@@ -1191,6 +1191,9 @@ struct dict_table_t{
 				NOT allowed until this count gets to zero;
 				MySQL does NOT itself check the number of
 				open handles at drop */
+	ulint		lock_counter[LOCK_NUM];
+				/*!< Counter array for each table lock mode;
+				Protected by lock_sys::mutex */
 	UT_LIST_BASE_NODE_T(lock_t)
 			locks;	/*!< list of locks on the table; protected
 				by lock_sys->mutex */

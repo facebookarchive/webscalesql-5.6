@@ -331,6 +331,10 @@ UNIV_INTERN ulint	srv_fast_shutdown	= 0;
 /* Generate a innodb_status.<pid> file */
 UNIV_INTERN ibool	srv_innodb_status	= FALSE;
 
+/* Optimize prefix index queries to skip cluster index lookup when possible */
+/* Enables or disables this prefix optimization.  Disabled by default. */
+UNIV_INTERN my_bool	srv_prefix_index_cluster_optimization = 0;
+
 /* When estimating number of different key values in an index, sample
 this many index pages, there are 2 ways to calculate statistics:
 * persistent stats that are calculated by ANALYZE TABLE and saved
@@ -441,6 +445,13 @@ static ulint		srv_main_idle_loops		= 0;
 static ulint		srv_main_shutdown_loops		= 0;
 /** Log writes involving flush. */
 static ulint		srv_log_writes_and_flush	= 0;
+
+/** Number of times secondary index lookup triggered cluster lookup */
+atomic_stat<ulint>	srv_sec_rec_cluster_reads;
+
+/** Number of times prefix optimization avoided triggering cluster lookup */
+atomic_stat<ulint>	srv_sec_rec_cluster_reads_avoided;
+
 
 /* This is only ever touched by the master thread. It records the
 time when the last flush of log file has happened. The master
@@ -1485,6 +1496,11 @@ srv_export_innodb_status(void)
 			(ulint) (max_trx_id - up_limit_id);
 	}
 #endif /* UNIV_DEBUG */
+
+	export_vars.innodb_sec_rec_cluster_reads =
+		srv_sec_rec_cluster_reads.load();
+	export_vars.innodb_sec_rec_cluster_reads_avoided =
+		srv_sec_rec_cluster_reads_avoided.load();
 
 	mutex_exit(&srv_innodb_monitor_mutex);
 }

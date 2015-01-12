@@ -1,0 +1,38 @@
+--disable_warnings
+--source include/master-slave.inc
+CREATE TABLE `t1` (
+  `c` int(11) DEFAULT NULL,
+  `d` int(11) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+CREATE TABLE `t2` (
+  `c` int(11) DEFAULT NULL,
+  `d` int(11) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `t` (
+  `c` int(11) DEFAULT NULL,
+  `d` int(11) NOT NULL
+) ENGINE=MRG_MyISAM DEFAULT CHARSET=utf8 INSERT_METHOD=LAST UNION=(`t1`,`t2`);
+
+--echo
+--echo flush to 000002
+--echo
+
+flush logs;
+insert into t values(1,1);
+flush logs;
+
+--echo
+--echo flush to 000003 so 02 only contain one transaction
+--echo
+
+let $MYSQLD_DATADIR= `select @@datadir`;
+--exec $MYSQL_BINLOG $MYSQLD_DATADIR/master-bin.000002 | $MYSQL test
+sync_slave_with_master;
+connection slave;
+select count(*) from t;
+connection master;
+drop table t,t1,t2;
+
+
+--source include/rpl_end.inc

@@ -11223,8 +11223,14 @@ int Rows_log_event::do_apply_event(Relay_log_info const *rli)
        */
       RPL_TABLE_LIST *ptr= rli->tables_to_lock;
       for (uint i= 0 ; ptr && (i < rli->tables_to_lock_count);
-           ptr= static_cast<RPL_TABLE_LIST*>(ptr->next_global), i++)
+           ptr= static_cast<RPL_TABLE_LIST*>(ptr->next_global))
       {
+        /* Bug #69574 */
+        if (ptr->parent_l && (ptr->parent_l->table->s->db_type()->db_type == DB_TYPE_MRG_MYISAM))
+          continue;
+
+        i++;
+
         DBUG_ASSERT(ptr->m_tabledef_valid);
         TABLE *conv_table;
         if (!ptr->m_tabledef.compatible_with(thd, const_cast<Relay_log_info*>(rli),

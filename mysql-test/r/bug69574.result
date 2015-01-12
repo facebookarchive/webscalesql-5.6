@@ -1,0 +1,28 @@
+include/master-slave.inc
+[connection master]
+CREATE TABLE `t1` (
+`c` int(11) DEFAULT NULL,
+`d` int(11) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+CREATE TABLE `t2` (
+`c` int(11) DEFAULT NULL,
+`d` int(11) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+CREATE TABLE `t` (
+`c` int(11) DEFAULT NULL,
+`d` int(11) NOT NULL
+) ENGINE=MRG_MyISAM DEFAULT CHARSET=utf8 INSERT_METHOD=LAST UNION=(`t1`,`t2`);
+
+flush to 000002
+
+flush logs;
+insert into t values(1,1);
+flush logs;
+
+flush to 000003 so 02 only contain one transaction
+
+select count(*) from t;
+count(*)
+2
+drop table t,t1,t2;
+include/rpl_end.inc

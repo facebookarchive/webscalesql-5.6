@@ -1,0 +1,10 @@
+include/master-slave.inc
+[connection master]
+create table t1(id int primary key, c int);
+insert into t1 values(1,1),(2,2),(3,3);
+include/sync_slave_sql_with_master.inc
+include/stop_slave_sql.inc
+include/start_slave_sql.inc
+insert into t1 values(4,4);
+drop table t1;
+include/rpl_end.inc

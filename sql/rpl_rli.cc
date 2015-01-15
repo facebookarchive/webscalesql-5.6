@@ -553,7 +553,8 @@ int Relay_log_info::init_relay_log_pos(const char* log,
       {
         DBUG_PRINT("info",("found event of another type=%d",
                            ev->get_type_code()));
-        look_for_description_event= (ev->get_type_code() == ROTATE_EVENT);
+        look_for_description_event= (ev->get_type_code() == ROTATE_EVENT ||
+                                     ev->get_type_code() == PREVIOUS_GTIDS_LOG_EVENT);
         delete ev;
       }
     }

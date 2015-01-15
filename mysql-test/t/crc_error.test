@@ -1,0 +1,19 @@
+--source include/not_windows.inc
+--disable_warnings
+--source include/master-slave.inc
+--enable_warnings
+
+--connection master
+create table t1(id int primary key, c int);
+insert into t1 values(1,1),(2,2),(3,3);
+
+#stop and start sql_thread to reprodue bug #73806
+--source include/sync_slave_sql_with_master.inc
+--source include/stop_slave_sql.inc
+--source include/start_slave_sql.inc
+
+--connection master
+insert into t1 values(4,4);
+drop table t1;
+
+--source include/rpl_end.inc

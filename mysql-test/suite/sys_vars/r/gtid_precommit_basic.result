@@ -1,0 +1,69 @@
+SET @start_value = @@global.gtid_precommit;
+SELECT @start_value;
+@start_value
+0
+SET @@global.gtid_precommit = DEFAULT;
+SELECT @@global.gtid_precommit = FALSE;
+@@global.gtid_precommit = FALSE
+1
+SET @@global.gtid_precommit = ON;
+SELECT @@global.gtid_precommit;
+@@global.gtid_precommit
+1
+SET @@global.gtid_precommit = OFF;
+SELECT @@global.gtid_precommit;
+@@global.gtid_precommit
+0
+SET @@global.gtid_precommit = 2;
+ERROR 42000: Variable 'gtid_precommit' can't be set to the value of '2'
+SET @@global.gtid_precommit = -1;
+ERROR 42000: Variable 'gtid_precommit' can't be set to the value of '-1'
+SET @@global.gtid_precommit = TRUEF;
+ERROR 42000: Variable 'gtid_precommit' can't be set to the value of 'TRUEF'
+SET @@global.gtid_precommit = TRUE_F;
+ERROR 42000: Variable 'gtid_precommit' can't be set to the value of 'TRUE_F'
+SET @@global.gtid_precommit = FALSE0;
+ERROR 42000: Variable 'gtid_precommit' can't be set to the value of 'FALSE0'
+SET @@global.gtid_precommit = OON;
+ERROR 42000: Variable 'gtid_precommit' can't be set to the value of 'OON'
+SET @@global.gtid_precommit = ONN;
+ERROR 42000: Variable 'gtid_precommit' can't be set to the value of 'ONN'
+SET @@global.gtid_precommit = OOFF;
+ERROR 42000: Variable 'gtid_precommit' can't be set to the value of 'OOFF'
+SET @@global.gtid_precommit = 0FF;
+ERROR 42000: Variable 'gtid_precommit' can't be set to the value of '0FF'
+SET @@global.gtid_precommit = ' ';
+ERROR 42000: Variable 'gtid_precommit' can't be set to the value of ' '
+SET @@global.gtid_precommit = " ";
+ERROR 42000: Variable 'gtid_precommit' can't be set to the value of ' '
+SET @@global.gtid_precommit = '';
+ERROR 42000: Variable 'gtid_precommit' can't be set to the value of ''
+SET @@session.gtid_precommit = OFF;
+ERROR HY000: Variable 'gtid_precommit' is a GLOBAL variable and should be set with SET GLOBAL
+SELECT @@session.gtid_precommit;
+ERROR HY000: Variable 'gtid_precommit' is a GLOBAL variable
+SELECT IF(@@global.gtid_precommit, "ON", "OFF") = VARIABLE_VALUE
+FROM INFORMATION_SCHEMA.GLOBAL_VARIABLES
+WHERE VARIABLE_NAME='gtid_precommit';
+IF(@@global.gtid_precommit, "ON", "OFF") = VARIABLE_VALUE
+1
+SET @@global.gtid_precommit = 0;
+SELECT @@global.gtid_precommit;
+@@global.gtid_precommit
+0
+SET @@global.gtid_precommit = 1;
+SELECT @@global.gtid_precommit;
+@@global.gtid_precommit
+1
+SET @@global.gtid_precommit = TRUE;
+SELECT @@global.gtid_precommit;
+@@global.gtid_precommit
+1
+SET @@global.gtid_precommit = FALSE;
+SELECT @@global.gtid_precommit;
+@@global.gtid_precommit
+0
+SET @@global.gtid_precommit = @start_value;
+SELECT @@global.gtid_precommit;
+@@global.gtid_precommit
+0

@@ -4654,6 +4654,12 @@ static Sys_var_enum Sys_gtid_mode(
        );
 #endif
 
+static Sys_var_mybool Sys_gtid_precommit("gtid_precommit",
+    "If true, all auto generated gtid will be added into gtid_executed "
+    "set before flushing binlog from cache to file.",
+    GLOBAL_VAR(opt_gtid_precommit),
+    CMD_LINE(OPT_ARG), DEFAULT(FALSE));
+
 #endif // HAVE_REPLICATION
 
 

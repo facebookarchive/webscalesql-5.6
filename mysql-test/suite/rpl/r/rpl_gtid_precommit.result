@@ -1,0 +1,49 @@
+include/master-slave.inc
+[connection master]
+include/rpl_set_gtid_mode.inc
+SET @old_gtid_precommit = @@global.gtid_precommit;
+SET GLOBAL gtid_precommit = 0;
+CREATE TABLE t1 (a INT PRIMARY KEY, b INT);
+INSERT INTO t1 VALUES (1,2);
+INSERT INTO t1 VALUES (2,3);
+INSERT INTO t1 VALUES (3,4);
+SET GLOBAL gtid_precommit = 1;
+INSERT INTO t1 VALUES (4,5);
+INSERT INTO t1 VALUES (5,6);
+INSERT INTO t1 VALUES (6,7);
+SET GLOBAL gtid_precommit = 0;
+#Lost record(7,8) on both master and slave if failed to write binlog file.
+SET SESSION DEBUG = 'd,simulate_do_write_cache_failure';
+INSERT INTO t1 VALUES (7,8);
+#Lost record(8,9) on both master and slave if failed to write binlog file.
+SET GLOBAL gtid_precommit = 1;
+SET SESSION DEBUG = 'd,simulate_do_write_cache_failure';
+INSERT INTO t1 VALUES (8,9);
+SET SESSION DEBUG = '';
+INSERT INTO t1 VALUES (9,10);
+SELECT SUBSTRING_INDEX(@@GLOBAL.GTID_EXECUTED, ":", -1) AS GTID_SET_ON_SLAVE;
+GTID_SET_ON_SLAVE
+1-8
+SELECT  * from t1 ORDER BY a;
+a	b
+1	2
+2	3
+3	4
+4	5
+5	6
+6	7
+9	10
+SELECT SUBSTRING_INDEX(@@GLOBAL.GTID_EXECUTED, ":", -1) AS GTID_SET_ON_MASTER;
+GTID_SET_ON_MASTER
+1-8
+SELECT * FROM t1 ORDER BY a;
+a	b
+1	2
+2	3
+3	4
+4	5
+5	6
+6	7
+9	10
+SET GLOBAL gtid_precommit = @old_gtid_precommit;
+DROP TABLE t1;

@@ -1,0 +1,81 @@
+##################### mysql-test\t\gtid_precommit_basic.test #############
+#                                                                              #
+# Variable Name: gtid_precommit                                                #
+# Scope: GLOBAL                                                                #
+# Access Type: Dynamic                                                         #
+# Data Type: BOOLEAN                                                           #
+# Default Value: FALSE                                                         #
+# Valid Values: TRUE, FALSE                                                    #
+################################################################################
+
+--source include/not_embedded.inc
+--source include/load_sysvars.inc
+
+# Saving initial value of gtid_precommit in a temporary variable
+SET @start_value = @@global.gtid_precommit;
+SELECT @start_value;
+
+# Verify default value of variable
+SET @@global.gtid_precommit = DEFAULT;
+SELECT @@global.gtid_precommit = FALSE;
+
+# Change the value of gtid_precommit to a valid value
+SET @@global.gtid_precommit = ON;
+SELECT @@global.gtid_precommit;
+SET @@global.gtid_precommit = OFF;
+SELECT @@global.gtid_precommit;
+
+# Change the value of gtid_precommit to invalid value
+--Error ER_WRONG_VALUE_FOR_VAR
+SET @@global.gtid_precommit = 2;
+--Error ER_WRONG_VALUE_FOR_VAR
+SET @@global.gtid_precommit = -1;
+--Error ER_WRONG_VALUE_FOR_VAR
+SET @@global.gtid_precommit = TRUEF;
+--Error ER_WRONG_VALUE_FOR_VAR
+SET @@global.gtid_precommit = TRUE_F;
+--Error ER_WRONG_VALUE_FOR_VAR
+SET @@global.gtid_precommit = FALSE0;
+--Error ER_WRONG_VALUE_FOR_VAR
+SET @@global.gtid_precommit = OON;
+--Error ER_WRONG_VALUE_FOR_VAR
+SET @@global.gtid_precommit = ONN;
+--Error ER_WRONG_VALUE_FOR_VAR
+SET @@global.gtid_precommit = OOFF;
+--Error ER_WRONG_VALUE_FOR_VAR
+SET @@global.gtid_precommit = 0FF;
+--Error ER_WRONG_VALUE_FOR_VAR
+SET @@global.gtid_precommit = ' ';
+--Error ER_WRONG_VALUE_FOR_VAR
+SET @@global.gtid_precommit = " ";
+--Error ER_WRONG_VALUE_FOR_VAR
+SET @@global.gtid_precommit = '';
+
+
+# Test if accessing session gtid_precommit gives error.
+--Error ER_GLOBAL_VARIABLE
+SET @@session.gtid_precommit = OFF;
+--Error ER_INCORRECT_GLOBAL_LOCAL_VAR
+SELECT @@session.gtid_precommit;
+
+# Check if the value in GLOBAL Tables matches values in variable
+SELECT IF(@@global.gtid_precommit, "ON", "OFF") = VARIABLE_VALUE
+FROM INFORMATION_SCHEMA.GLOBAL_VARIABLES
+WHERE VARIABLE_NAME='gtid_precommit';
+
+
+# Check if 0 and 1 values can be used on variable.
+SET @@global.gtid_precommit = 0;
+SELECT @@global.gtid_precommit;
+SET @@global.gtid_precommit = 1;
+SELECT @@global.gtid_precommit;
+
+# Check if TRUE and FALSE values can be used on variable
+SET @@global.gtid_precommit = TRUE;
+SELECT @@global.gtid_precommit;
+SET @@global.gtid_precommit = FALSE;
+SELECT @@global.gtid_precommit;
+
+# Restore initial value
+SET @@global.gtid_precommit = @start_value;
+SELECT @@global.gtid_precommit;

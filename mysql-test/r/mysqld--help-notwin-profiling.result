@@ -269,6 +269,9 @@ The following options may be given as the first argument:
  GROUP_CONCAT()
  --gtid-mode=name    Whether Global Transaction Identifiers (GTIDs) are
  enabled. Can be ON or OFF.
+ --gtid-precommit    If true, all auto generated gtid will be added into
+ gtid_executed set before flushing binlog from cache to
+ file.
  -?, --help          Display this help and exit.
  --host-cache-size=# How many host names should be cached to avoid resolving.
  --ignore-builtin-innodb 
@@ -1097,6 +1100,7 @@ gdb FALSE
 general-log FALSE
 group-concat-max-len 1024
 gtid-mode OFF
+gtid-precommit FALSE
 help TRUE
 host-cache-size 279
 ignore-builtin-innodb FALSE

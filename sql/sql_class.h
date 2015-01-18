@@ -3735,6 +3735,11 @@ public:
   */
   Gtid owned_gtid;
   /**
+    If true, a newly auto generated gtid will be added into gtid_executed
+    set immediately without maintaining gtid_owned set.
+  */
+  bool gtid_precommit;
+  /**
     If this thread owns a set of GTIDs (i.e., GTID_NEXT_LIST != NULL),
     then this member variable contains the subset of those GTIDs that
     are owned by this thread.

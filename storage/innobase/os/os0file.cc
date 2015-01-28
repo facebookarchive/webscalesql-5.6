@@ -4462,16 +4462,16 @@ os_aio_linux_dispatch_read_array_submit()
 	os_aio_array_t* array = os_aio_read_array;
 	ulint total_submitted = 0;
 	if (!srv_use_native_aio) {
-		return TRUE;
+		return;
 	}
 	os_mutex_enter(array->mutex);
 	/* Submit aio requests buffered on all segments. */
 	for (ulint i = 0; i < array->n_segments; i++) {
-		ulint count = array->count[i];
+		int count = array->count[i];
 		if (count > 0) {
 			ulint iocb_index = i * array->n_slots
 					   / array->n_segments;
-			ulint submitted;
+			int submitted;
 			submitted = io_submit(array->aio_ctx[i], count,
 					      &(array->pending[iocb_index]));
 			if (submitted == count) {
@@ -4479,8 +4479,8 @@ os_aio_linux_dispatch_read_array_submit()
 			} else {
 				/* io_submit returns number of successfully
 				queued requests or -errno. */
-				fprintf(stderr, "Trying to sumbit %lu aio "
-					"requests, io_submit returns %lu.\n",
+				fprintf(stderr, "Trying to sumbit %d aio "
+					"requests, io_submit returns %d.\n",
 					count, submitted);
 				if (submitted < 0) {
 					errno = -submitted;

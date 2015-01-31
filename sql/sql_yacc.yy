@@ -1031,10 +1031,10 @@ bool my_yyoverflow(short **a, YYSTYPE **b, ulong *yystacksize);
 %lex-param { class THD *YYTHD }
 %pure-parser                                    /* We have threads */
 /*
-  Currently there are 161 shift/reduce conflicts.
+  Currently there are 165 shift/reduce conflicts.
   We should not introduce new conflicts any more.
 */
-%expect 161
+%expect 165
 
 /*
    Comments for TOKENS.
@@ -1358,6 +1358,7 @@ bool my_yyoverflow(short **a, YYSTYPE **b, ulong *yystacksize);
 %token  MATCH                         /* SQL-2003-R */
 %token  MAX_CONNECTIONS_PER_HOUR
 %token  MAX_QUERIES_PER_HOUR
+%token  MAX_STATEMENT_TIME_SYM
 %token  MAX_ROWS
 %token  MAX_SIZE_SYM
 %token  MAX_SYM                       /* SQL-2003-N */
@@ -8768,6 +8769,26 @@ select_option:
               Lex->select_lex.sql_cache= SELECT_LEX::SQL_CACHE;
             }
           }
+        | MAX_STATEMENT_TIME_SYM EQ real_ulong_num
+          {
+            /**
+              MAX_STATEMENT_TIME is applicable to SELECT query and that too
+              only for the TOP LEVEL SELECT statement.
+              MAX_STATEMENT_TIME is not appliable to SELECTs of stored routines.
+            */
+            if (Lex->sphead ||
+                Lex->current_select != &Lex->select_lex    ||
+                (Lex->sql_command == SQLCOM_CREATE_TABLE   ||
+                 Lex->sql_command == SQLCOM_CREATE_VIEW    ||
+                 Lex->sql_command == SQLCOM_REPLACE_SELECT ||
+                 Lex->sql_command == SQLCOM_INSERT_SELECT))
+            {
+              my_error(ER_CANT_USE_OPTION_HERE, MYF(0), "MAX_STATEMENT_TIME");
+              MYSQL_YYABORT;
+            }
+
+            Lex->max_statement_time= $3;
+          }
         ;
 
 select_lock_type:
@@ -14303,6 +14324,7 @@ keyword_sp:
         | MASTER_AUTO_POSITION_SYM {}
         | MAX_CONNECTIONS_PER_HOUR {}
         | MAX_QUERIES_PER_HOUR     {}
+        | MAX_STATEMENT_TIME_SYM   {}
         | MAX_SIZE_SYM             {}
         | MAX_UPDATES_PER_HOUR     {}
         | MAX_USER_CONNECTIONS_SYM {}

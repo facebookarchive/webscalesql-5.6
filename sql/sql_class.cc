@@ -60,6 +60,7 @@
 #include "lock.h"
 #include "global_threads.h"
 #include "mysqld.h"
+#include "sql_timer.h"                          // thd_timer_destroy
 
 #include <mysql/psi/mysql_statement.h>
 
@@ -1041,6 +1042,9 @@ THD::THD(bool enable_plugins)
 
   binlog_next_event_pos.file_name= NULL;
   binlog_next_event_pos.pos= 0;
+
+  timer= NULL;
+  timer_cache= NULL;
 #ifndef DBUG_OFF
   gis_debug= 0;
 #endif
@@ -1572,6 +1576,13 @@ void THD::release_resources()
   if (m_enable_plugins)
     plugin_thdvar_cleanup(this);
 
+#ifdef HAVE_MY_TIMER
+  DBUG_ASSERT(timer == NULL);
+
+  if (timer_cache)
+    thd_timer_destroy(timer_cache);
+#endif
+
   m_release_resources_done= true;
 }
 
@@ -1715,7 +1726,7 @@ void THD::awake(THD::killed_state state_to_set)
   /* Set the 'killed' flag of 'this', which is the target THD object. */
   killed= state_to_set;
 
-  if (state_to_set != THD::KILL_QUERY)
+  if (state_to_set != THD::KILL_QUERY && state_to_set != THD::KILL_TIMEOUT)
   {
 #ifdef SIGNAL_WITH_VIO_SHUTDOWN
     if (this != current_thd)
@@ -1757,6 +1768,13 @@ void THD::awake(THD::killed_state state_to_set)
     if (!slave_thread)
       MYSQL_CALLBACK(thread_scheduler, post_kill_notification, (this));
   }
+
+  /* Interrupt target waiting inside a storage engine. */
+  if (state_to_set != THD::NOT_KILLED)
+    ha_kill_connection(this);
+
+  if (state_to_set == THD::KILL_TIMEOUT)
+    status_var.max_statement_time_exceeded++;
 
   /* Broadcast a condition to kick the target if it is waiting on it. */
   if (mysys_var)
@@ -4140,6 +4158,16 @@ extern "C" int thd_killed(const MYSQL_THD thd)
 }
 
 /**
+  Set the killed status of the current statement.
+
+  @param thd  user thread connection handle
+*/
+extern "C" void thd_set_kill_status(const MYSQL_THD thd)
+{
+  thd->send_kill_message();
+}
+
+/**
   Return the thread id of a user thread
   @param thd user thread
   @return thread id
@@ -4261,7 +4289,6 @@ extern "C" bool thd_is_strict_mode(const MYSQL_THD thd)
 {
   return thd->is_strict_mode();
 }
-
 
 #ifndef EMBEDDED_LIBRARY
 extern "C" void thd_pool_wait_begin(MYSQL_THD thd, int wait_type);

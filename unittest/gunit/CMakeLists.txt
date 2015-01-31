@@ -254,6 +254,7 @@ SET(TESTS
   stdcxx
   strtoll
   thread_utils
+  my_timer
   )
 
 # Add tests (link them with gunit/gmock libraries and the server libraries) 

@@ -328,6 +328,13 @@
 #cmakedefine HAVE_SYS_EVENT_H 1
 #cmakedefine HAVE_SYS_QUEUE_H 1
 #cmakedefine HAVE_TAILQFOREACH 1
+#cmakedefine HAVE_SIGEV_THREAD_ID 1
+#cmakedefine HAVE_SIGEV_PORT 1
+#cmakedefine HAVE_POSIX_TIMERS 1
+#cmakedefine HAVE_KQUEUE_TIMERS 1
+#cmakedefine HAVE_WINDOWS_TIMERS 1
+#cmakedefine HAVE_MY_TIMER 1
+
 #define USE_MB 1
 #define USE_MB_IDENT 1
 

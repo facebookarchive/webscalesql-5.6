@@ -18,6 +18,7 @@
 
 #include "my_global.h"                          /* NO_EMBEDDED_ACCESS_CHECKS */
 #include "sql_acl.h"                            /* GLOBAL_ACLS */
+#include "global_threads.h"
 
 class Comp_creator;
 class Item;
@@ -144,6 +145,42 @@ extern uint server_command_flags[];
 extern const LEX_STRING command_name[];
 extern uint server_command_flags[];
 
+#ifdef HAVE_MY_TIMER
+// Statement timeout function(s)
+extern void reset_statement_timer(THD *thd);
+#endif
+
+/**
+  Callback function used by kill_one_thread and timer_notify functions
+  to find "thd" based on the thread id.
+
+  @note It acquires LOCK_thd_data mutex when it finds matching thd.
+  It is the responsibility of the caller to release this mutex.
+*/
+inline THD* find_thd_from_id(ulong id)
+{
+  THD *tmp= NULL;
+
+  mysql_mutex_lock(&LOCK_thread_count);
+  Thread_iterator it= global_thread_list_begin();
+  Thread_iterator end= global_thread_list_end();
+  for (; it != end; ++it)
+  {
+    if ((*it)->get_command() == COM_DAEMON)
+      continue;
+    if ((*it)->thread_id == id)
+    {
+      tmp= *it;
+      mysql_mutex_lock(&tmp->LOCK_thd_data);    // Lock from delete
+      break;
+    }
+  }
+  mysql_mutex_unlock(&LOCK_thread_count);
+
+  return tmp;
+}
+
+
 /* Inline functions */
 inline bool check_identifier_name(LEX_STRING *str, uint err_code)
 {
@@ -212,6 +249,5 @@ inline bool is_supported_parser_charset(const CHARSET_INFO *cs)
 }
 
 extern "C" bool sqlcom_can_generate_row_events(const THD *thd);
-
 
 #endif /* SQL_PARSE_INCLUDED */

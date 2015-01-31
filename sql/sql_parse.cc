@@ -100,6 +100,9 @@
 #include "global_threads.h"
 #include "sql_analyse.h"
 #include "table_cache.h" // table_cache_manager
+#include "sql_timer.h"   // thd_timer_set, thd_timer_reset
+#include "sp_rcontext.h"
+ 
 
 #include <algorithm>
 using std::max;
@@ -1107,6 +1110,101 @@ static my_bool deny_updates_if_read_only_option(THD *thd,
   /* Assuming that only temporary tables are modified. */
   DBUG_RETURN(FALSE);
 }
+
+
+#ifdef HAVE_MY_TIMER
+/**
+  Check whether max statement time is applicable to statement or not.
+
+
+  @param  thd   Thread (session) context.
+
+  @return true  if max statement time is applicable to statement
+  @return false otherwise.
+*/
+static inline bool is_timer_applicable_to_statement(THD *thd)
+{
+  bool timer_value_is_set= (thd->lex->max_statement_time ||
+                            thd->variables.max_statement_time);
+
+  /**
+    Following conditions are checked,
+      - is SELECT statement.
+      - timer support is implemented and it is initialized.
+      - statement is not made by the slave threads.
+      - timer is not set for statement
+      - timer out value of is set
+      - SELECT statement is not from any stored programs.
+  */
+  return (thd->lex->sql_command == SQLCOM_SELECT &&
+          (have_statement_timeout == SHOW_OPTION_YES) &&
+          !thd->slave_thread &&
+          !thd->timer && timer_value_is_set &&
+          !thd->sp_runtime_ctx);
+}
+
+
+/**
+  Get the maximum execution time for a statement.
+
+  @return Length of time in milliseconds.
+
+  @remark A zero timeout means that no timeout should be
+          applied to this particular statement.
+
+*/
+static inline ulong get_max_statement_time(THD *thd)
+{
+  return (thd->lex->max_statement_time ? thd->lex->max_statement_time :
+                                        thd->variables.max_statement_time);
+}
+
+
+/**
+  Set the time until the currently running statement is aborted.
+
+  @param  thd   Thread (session) context.
+
+  @return true if the timer was armed.
+*/
+static inline bool set_statement_timer(THD *thd)
+{
+  ulong max_statement_time= get_max_statement_time(thd);
+
+  /**
+    whether timer can be set for the statement or not should be checked before
+    calling set_statement_timer function.
+  */
+  DBUG_ASSERT(is_timer_applicable_to_statement(thd) == true);
+  DBUG_ASSERT(thd->timer == NULL);
+
+  thd->timer= thd_timer_set(thd, thd->timer_cache, max_statement_time);
+  thd->timer_cache= NULL;
+
+  if (thd->timer)
+    thd->status_var.max_statement_time_set++;
+  else
+    thd->status_var.max_statement_time_set_failed++;
+
+  return thd->timer;
+}
+
+
+/**
+  Deactivate the timer associated with the statement that was executed.
+
+  @param  thd   Thread (session) context.
+*/
+
+void reset_statement_timer(THD *thd)
+{
+  DBUG_ASSERT(thd->timer);
+  /* Cache the timer object if it can be reused. */
+  thd->timer_cache= thd_timer_reset(thd->timer);
+  thd->timer= NULL;
+}
+#endif
+
 
 /**
   Perform one connection-level (COM_XXXX) command.
@@ -5009,7 +5107,9 @@ finish:
     /* report error issued during command execution */
     if (thd->killed_errno())
       thd->send_kill_message();
-    if (thd->killed == THD::KILL_QUERY || thd->killed == THD::KILL_BAD_DATA)
+    if (thd->killed == THD::KILL_QUERY ||
+        thd->killed == THD::KILL_TIMEOUT ||
+        thd->killed == THD::KILL_BAD_DATA)
     {
       thd->killed= THD::NOT_KILLED;
       thd->mysys_var->abort= 0;
@@ -5082,7 +5182,11 @@ static bool execute_sqlcom_select(THD *thd, TABLE_LIST *all_tables)
 {
   LEX	*lex= thd->lex;
   select_result *result= lex->result;
+#ifdef HAVE_MY_TIMER
+  bool statement_timer_armed= false;
+#endif
   bool res;
+
   /* assign global limit variable if limit is not given */
   {
     SELECT_LEX *param= lex->unit.global_parameters;
@@ -5090,6 +5194,13 @@ static bool execute_sqlcom_select(THD *thd, TABLE_LIST *all_tables)
       param->select_limit=
         new Item_int((ulonglong) thd->variables.select_limit);
   }
+
+#ifdef HAVE_MY_TIMER
+  //check if timer is applicable to statement, if applicable then set timer.
+  if (is_timer_applicable_to_statement(thd))
+    statement_timer_armed= set_statement_timer(thd);
+#endif
+
   if (!(res= open_normal_and_derived_tables(thd, all_tables, 0)))
   {
     if (lex->describe)
@@ -5123,6 +5234,12 @@ static bool execute_sqlcom_select(THD *thd, TABLE_LIST *all_tables)
         delete save_result;
     }
   }
+
+#ifdef HAVE_MY_TIMER
+  if (statement_timer_armed && thd->timer)
+    reset_statement_timer(thd);
+#endif
+
   DEBUG_SYNC(thd, "after_table_open");
   return res;
 }
@@ -7242,26 +7359,12 @@ void add_join_natural(TABLE_LIST *a, TABLE_LIST *b, List<String> *using_fields,
 
 uint kill_one_thread(THD *thd, ulong id, bool only_kill_query)
 {
-  THD *tmp= NULL;
   uint error=ER_NO_SUCH_THREAD;
   DBUG_ENTER("kill_one_thread");
   DBUG_PRINT("enter", ("id=%lu only_kill=%d", id, only_kill_query));
 
-  mysql_mutex_lock(&LOCK_thread_count);
-  Thread_iterator it= global_thread_list_begin();
-  Thread_iterator end= global_thread_list_end();
-  for (; it != end; ++it)
-  {
-    if ((*it)->get_command() == COM_DAEMON)
-      continue;
-    if ((*it)->thread_id == id)
-    {
-      tmp= *it;
-      mysql_mutex_lock(&tmp->LOCK_thd_data);    // Lock from delete
-      break;
-    }
-  }
-  mysql_mutex_unlock(&LOCK_thread_count);
+  /* If successful we'll have LOCK_thd_data on return. */
+  THD* tmp= find_thd_from_id(id);
   if (tmp)
   {
 

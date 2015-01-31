@@ -108,6 +108,8 @@
 #include "sp_cache.h"
 #include "sql_reload.h"  // reload_acl_and_cache
 
+#include "my_timer.h"    // my_timer_init, my_timer_deinit
+
 #ifdef HAVE_POLL_H
 #include <poll.h>
 #endif
@@ -703,6 +705,7 @@ SHOW_COMP_OPTION have_ssl, have_symlink, have_dlopen, have_query_cache;
 SHOW_COMP_OPTION have_geometry, have_rtree_keys;
 SHOW_COMP_OPTION have_crypt, have_compress;
 SHOW_COMP_OPTION have_profiling;
+SHOW_COMP_OPTION have_statement_timeout= SHOW_OPTION_DISABLED;
 
 /* Thread specific variables */
 
@@ -1499,6 +1502,13 @@ static void close_connections(void)
   }
   if (get_thread_count() > 0)
     sleep(2);         // Give threads time to die
+
+#ifdef HAVE_MY_TIMER
+  if (have_statement_timeout == SHOW_OPTION_YES)
+    my_timer_deinitialize();
+
+  have_statement_timeout= SHOW_OPTION_DISABLED;
+#endif
 
   /*
     Force remaining threads to die by closing the connection to the client
@@ -4614,6 +4624,18 @@ static int init_server_components()
   mdl_init();
   if (table_def_init() | hostname_cache_init(host_cache_size))
     unireg_abort(1);
+
+#ifdef HAVE_MY_TIMER
+  if (my_timer_initialize())
+  {
+    sql_print_error("Failed to initialize timer component (errno %d).", errno);
+    have_statement_timeout= SHOW_OPTION_NO;
+  }
+  else
+    have_statement_timeout= SHOW_OPTION_YES;
+#else
+  have_statement_timeout= SHOW_OPTION_NO;
+#endif
 
   query_cache_set_min_res_unit(query_cache_min_res_unit);
   query_cache_init();
@@ -7935,6 +7957,9 @@ SHOW_VAR status_vars[]= {
   {"Last_query_cost",          (char*) offsetof(STATUS_VAR, last_query_cost), SHOW_DOUBLE_STATUS},
   {"Last_query_partial_plans", (char*) offsetof(STATUS_VAR, last_query_partial_plans), SHOW_LONGLONG_STATUS},
   {"Max_used_connections",     (char*) &max_used_connections,  SHOW_LONG},
+  {"Max_statement_time_exceeded",   (char*) offsetof(STATUS_VAR, max_statement_time_exceeded), SHOW_LONG_STATUS},
+  {"Max_statement_time_set",        (char*) offsetof(STATUS_VAR, max_statement_time_set), SHOW_LONG_STATUS},
+  {"Max_statement_time_set_failed", (char*) offsetof(STATUS_VAR, max_statement_time_set_failed), SHOW_LONG_STATUS},
   {"Not_flushed_delayed_rows", (char*) &delayed_rows_in_use,    SHOW_LONG_NOFLUSH},
   {"Open_files",               (char*) &my_file_opened,         SHOW_LONG_NOFLUSH},
   {"Open_streams",             (char*) &my_stream_opened,       SHOW_LONG_NOFLUSH},
@@ -9398,6 +9423,10 @@ PSI_mutex_key key_RELAYLOG_LOCK_xids;
 PSI_mutex_key key_LOCK_sql_rand;
 PSI_mutex_key key_gtid_ensure_index_mutex;
 PSI_mutex_key key_LOCK_thread_created;
+#ifdef HAVE_MY_TIMER
+PSI_mutex_key key_thd_timer_mutex;
+#endif
+ 
 
 static PSI_mutex_info all_server_mutexes[]=
 {
@@ -9473,7 +9502,10 @@ static PSI_mutex_info all_server_mutexes[]=
   { &key_LOCK_thd_remove, "LOCK_thd_remove", PSI_FLAG_GLOBAL},
   { &key_LOCK_log_throttle_qni, "LOCK_log_throttle_qni", PSI_FLAG_GLOBAL},
   { &key_gtid_ensure_index_mutex, "Gtid_state", PSI_FLAG_GLOBAL},
-  { &key_LOCK_thread_created, "LOCK_thread_created", PSI_FLAG_GLOBAL }
+  { &key_LOCK_thread_created, "LOCK_thread_created", PSI_FLAG_GLOBAL },
+#ifdef HAVE_MY_TIMER
+  { &key_thd_timer_mutex, "thd_timer_mutex", 0},
+#endif
 };
 
 PSI_rwlock_key key_rwlock_LOCK_grant, key_rwlock_LOCK_logger,
@@ -9570,12 +9602,19 @@ static PSI_cond_info all_server_conds[]=
   { &key_COND_thread_count, "COND_thread_count", PSI_FLAG_GLOBAL},
   { &key_COND_thread_cache, "COND_thread_cache", PSI_FLAG_GLOBAL},
   { &key_COND_flush_thread_cache, "COND_flush_thread_cache", PSI_FLAG_GLOBAL},
-  { &key_gtid_ensure_index_cond, "Gtid_state", PSI_FLAG_GLOBAL}
+  { &key_gtid_ensure_index_cond, "Gtid_state", PSI_FLAG_GLOBAL},
+#ifdef HAVE_MY_TIMER
+  { &key_thread_timer_notifier, "thread_timer_notifier", PSI_FLAG_GLOBAL},
+#endif
 };
 
 PSI_thread_key key_thread_bootstrap, key_thread_delayed_insert,
   key_thread_handle_manager, key_thread_main,
   key_thread_one_connection, key_thread_signal_hand;
+
+#ifdef HAVE_MY_TIMER
+PSI_thread_key key_thread_timer_notifier;
+#endif
 
 static PSI_thread_info all_server_threads[]=
 {

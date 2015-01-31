@@ -22,6 +22,7 @@
 #include <mysql/plugin.h>
 #include <mysql/service_thd_wait.h>
 #include <mysql/psi/mysql_stage.h>
+#include "sql_class.h"
 #include <my_murmur3.h>
 
 #ifdef HAVE_PSI_INTERFACE
@@ -2276,7 +2277,10 @@ MDL_context::acquire_lock(MDL_request *mdl_request, ulong lock_wait_timeout)
       my_error(ER_LOCK_WAIT_TIMEOUT, MYF(0));
       break;
     case MDL_wait::KILLED:
-      my_error(ER_QUERY_INTERRUPTED, MYF(0));
+      if ((get_thd())->killed == THD::KILL_TIMEOUT)
+        my_error(ER_QUERY_TIMEOUT, MYF(0));
+      else
+        my_error(ER_QUERY_INTERRUPTED, MYF(0));
       break;
     default:
       DBUG_ASSERT(0);

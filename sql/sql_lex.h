@@ -2548,6 +2548,9 @@ public:
 
   class Explain_format *explain_format;
 
+  // Maximum execution time for a statement.
+  ulong max_statement_time;
+
   LEX();
 
   virtual ~LEX()

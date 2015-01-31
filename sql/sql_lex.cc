@@ -488,6 +488,7 @@ void lex_start(THD *thd)
   lex->is_change_password= false;
   lex->is_set_password_sql= false;
   lex->mark_broken(false);
+  lex->max_statement_time= 0;
   DBUG_VOID_RETURN;
 }
 

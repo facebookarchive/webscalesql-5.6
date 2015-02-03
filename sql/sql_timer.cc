@@ -32,6 +32,12 @@ C_MODE_START
 static void timer_callback(my_timer_t *);
 C_MODE_END
 
+#ifdef HAVE_MY_TIMER
+#ifdef HAVE_PSI_INTERFACE
+extern PSI_mutex_key key_thd_timer_mutex;
+#endif
+#endif
+
 /**
   Allocate and initialize a thread timer object.
 

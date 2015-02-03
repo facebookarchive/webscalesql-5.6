@@ -156,7 +156,7 @@ SELECT f2();
 f2()
 1
 Warnings:
-Note	1886	Select is not a read only statement, disabling timer
+Note	1887	Select is not a read only statement, disabling timer
 DROP FUNCTION f1;
 DROP FUNCTION f2;
 CREATE PROCEDURE p1()

@@ -391,10 +391,6 @@ extern PSI_thread_key key_thread_bootstrap, key_thread_delayed_insert,
   key_thread_handle_manager, key_thread_kill_server, key_thread_main,
   key_thread_one_connection, key_thread_signal_hand;
 
-#ifdef HAVE_MY_TIMER
-extern PSI_thread_key key_thread_timer_notifier;
-#endif
-
 #ifdef HAVE_MMAP
 extern PSI_file_key key_file_map;
 #endif /* HAVE_MMAP */

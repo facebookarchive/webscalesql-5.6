@@ -14,7 +14,6 @@ enum enum_server_command
   COM_BINLOG_DUMP_GTID,
   COM_END
 };
-C_MODE_START
 typedef struct {
   uint value_ms_;
 } timeout_t;
@@ -25,7 +24,6 @@ my_bool timeout_is_infinite(const timeout_t t);
 int timeout_is_nonzero(const timeout_t t);
 uint timeout_to_millis(const timeout_t t);
 uint timeout_to_seconds(const timeout_t t);
-C_MODE_END
 struct st_vio;
 typedef struct st_vio Vio;
 typedef struct st_net {

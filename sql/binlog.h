@@ -20,6 +20,8 @@
 #include "log_event.h"
 #include "log.h"
 
+extern ulong rpl_read_size;
+
 class Relay_log_info;
 class Master_info;
 

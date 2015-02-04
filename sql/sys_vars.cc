@@ -61,6 +61,8 @@
 #include "my_aes.h" // my_aes_opmode_names
 
 #include "log_event.h"
+#include "binlog.h"
+
 #ifdef WITH_PERFSCHEMA_STORAGE_ENGINE
 #include "../storage/perfschema/pfs_server.h"
 #endif /* WITH_PERFSCHEMA_STORAGE_ENGINE */
@@ -3983,6 +3985,13 @@ static Sys_var_mybool Sys_relay_log_recovery(
        "starts re-fetching from the master right after the last transaction "
        "processed",
         READ_ONLY GLOBAL_VAR(relay_log_recovery), CMD_LINE(OPT_ARG), DEFAULT(FALSE));
+
+static Sys_var_ulong Sys_rpl_read_size(
+       "rpl_read_size",
+       "The size for reads done from the binlog and relay log.",
+       GLOBAL_VAR(rpl_read_size), CMD_LINE(REQUIRED_ARG),
+       VALID_RANGE(IO_SIZE * 2, ULONG_MAX), DEFAULT(IO_SIZE * 2),
+       BLOCK_SIZE(IO_SIZE));
 
 static Sys_var_mybool Sys_slave_allow_batching(
        "slave_allow_batching", "Allow slave to batch requests",

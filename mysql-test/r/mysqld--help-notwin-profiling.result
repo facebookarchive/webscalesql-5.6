@@ -820,6 +820,7 @@ The following options may be given as the first argument:
  not sure, leave this option unset
  --report-user=name  The account user name of the slave to be reported to the
  master during slave registration
+ --rpl-read-size=#   The size for reads done from the binlog and relay log.
  --rpl-stop-slave-timeout=# 
  Timeout in seconds to wait for slave to stop before
  returning a warning.
@@ -1249,6 +1250,7 @@ report-host (No default value)
 report-password (No default value)
 report-port 0
 report-user (No default value)
+rpl-read-size 8192
 rpl-stop-slave-timeout 604800
 safe-user-create FALSE
 secure-auth TRUE

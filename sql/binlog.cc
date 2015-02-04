@@ -38,6 +38,9 @@ using std::min;
 using std::string;
 using std::list;
 
+/* Size for IO_CACHE buffer for binlog & relay log */
+ulong rpl_read_size;
+
 #define FLAGSTR(V,F) ((V)&(F)?#F" ":"")
 
 /**
@@ -1942,7 +1945,7 @@ File open_binlog_file(IO_CACHE *log, const char *log_file_name, const char **err
     *errmsg = "Could not open log file";
     goto err;
   }
-  if (init_io_cache(log, file, IO_SIZE*2, READ_CACHE, 0, 0,
+  if (init_io_cache(log, file, rpl_read_size, READ_CACHE, 0, 0,
                     MYF(MY_WME|MY_DONT_CHECK_FILESIZE)))
   {
     sql_print_error("Failed to create a cache on log (file '%s')",

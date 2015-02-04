@@ -1,0 +1,51 @@
+#
+# test rpl_read_size my.cnf variable.
+# This test verifies data is consistent across master and slave
+# even after dynamically changing rpl_read_size value on slave.
+#
+
+--source include/master-slave.inc
+
+--disable_warnings
+drop table if exists t1;
+--enable_warnings
+
+create table t1(i int, t longtext);
+
+let $master_rpl_read_size= `SELECT @@global.rpl_read_size`;
+
+--echo increase buffer and then make slave reconnect to use larger buffer
+SET @@global.rpl_read_size = 1048576;
+SELECT @@global.rpl_read_size;
+
+connection slave;
+let $slave_rpl_read_size= `SELECT @@global.rpl_read_size`;
+SET @@global.rpl_read_size = 1048576;
+SELECT @@global.rpl_read_size;
+--source include/stop_slave.inc
+--source include/start_slave.inc
+
+connection master;
+
+insert into t1 values (0, "");
+
+let $x=`select lpad("foo", 70000, "bar")`;
+
+--disable_query_log
+eval insert into t1 values (1, "$x");
+--enable_query_log
+
+# Verify the contents of table t1 on master.
+select i, length(t) from t1;
+
+sync_slave_with_master;
+
+# Verify the contents of table t1 on slave.
+# Should be same as contents in master.
+select i, length(t) from t1;
+eval SET @@global.rpl_read_size= $slave_rpl_read_size;
+
+connection master;
+eval SET @@global.rpl_read_size= $master_rpl_read_size;
+drop table t1;
+--source include/rpl_end.inc

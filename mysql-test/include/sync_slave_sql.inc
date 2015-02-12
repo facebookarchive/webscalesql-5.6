@@ -62,7 +62,7 @@ if ($_slave_master_file == $_saved_file)
       --echo debug: It seems that SQL thread is already synced (by verifying master file and position)
       --echo debug: Changing slave timeout to 1 seconds
     }
-    --let $_sss_slave_timeout= 1
+    --let $_sss_slave_timeout= 60
   }
 }
 

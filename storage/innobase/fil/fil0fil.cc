@@ -662,7 +662,6 @@ fil_node_open_file(
 			/* Truncate the size to a multiple of extent size. */
 			size_bytes = ut_2pow_round(
 				size_bytes, UNIV_PAGE_SIZE * FSP_EXTENT_SIZE);
-			size_bytes = ut_2pow_round(size_bytes, 1024 * 1024);
 		}
 
 		if (!fsp_flags_is_compressed(flags)) {

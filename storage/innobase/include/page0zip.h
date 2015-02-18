@@ -50,6 +50,8 @@ extern uint	page_zip_level;
 /* Whether or not to log compressed page images to avoid possible
 compression algorithm changes in zlib. */
 extern my_bool	page_zip_log_pages;
+extern my_bool page_zip_zlib_wrap;
+extern uint page_zip_zlib_strategy;
 
 /**********************************************************************//**
 Determine the size of a compressed page in bytes.
@@ -126,7 +128,7 @@ page_zip_compress(
 				m_start, m_end, m_nonempty */
 	const page_t*	page,	/*!< in: uncompressed page */
 	dict_index_t*	index,	/*!< in: index of the B-tree node */
-	ulint		level,	/*!< in: compression level */
+	uchar		compression_flags,	/*!< in: compression options to be used */
 	mtr_t*		mtr)	/*!< in: mini-transaction, or NULL */
 	__attribute__((nonnull(1,2,3)));
 
@@ -481,10 +483,39 @@ UNIV_INLINE
 void
 page_zip_compress_write_log_no_data(
 /*================================*/
-	ulint		level,	/*!< in: compression level */
+	uchar		compression_flags,	/*!< in: compression options to be used */
 	const page_t*	page,	/*!< in: page that is compressed */
 	dict_index_t*	index,	/*!< in: index */
 	mtr_t*		mtr);	/*!< in: mtr */
+/**********************************************************************//**
+Read the compression level and other compression options from the compression
+flag. */
+UNIV_INLINE
+void
+page_zip_decode_compression_flags(
+/*=============================*/
+	uchar  flags,
+	uint*  level,
+	uint*  no_wrap,
+	uint*  strategy);
+
+/**********************************************************************//**
+Write the compression level and other compression options into the compression
+flag and return it. */
+UNIV_INLINE
+uchar
+page_zip_encode_compression_flags(
+/*=============================*/
+	uint  level,
+	uint  no_wrap,
+	uint  strategy);
+
+#define page_zip_compression_flags \
+    page_zip_encode_compression_flags( \
+    page_zip_level, \
+    page_zip_zlib_wrap, \
+    page_zip_zlib_strategy)
+
 /**********************************************************************//**
 Parses a log record of compressing an index page without the data.
 @return	end of log record or NULL */

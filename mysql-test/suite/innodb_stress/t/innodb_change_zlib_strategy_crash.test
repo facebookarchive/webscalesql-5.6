@@ -1,0 +1,100 @@
+--echo #
+--echo # Testing crash recovery when log_compressed_pages=OFF and innodb_zlib_strategy option is changed dynamically.
+--echo #
+--source include/not_embedded.inc
+--echo # Don't test this under valgrind, memory leaks will occur
+--source include/not_valgrind.inc
+
+--echo # Binary must be compiled with debug for crash to occur
+--source include/have_debug.inc
+--source include/have_innodb.inc
+
+# record the file format in order to restore in the end.
+--disable_query_log
+--let $file_format_save = `SELECT @@innodb_file_format`
+--let $log_compressed_pages_save = `SELECT @@innodb_log_compressed_pages`
+--let $innodb_zlib_strategy_save = `SELECT @@innodb_zlib_strategy`
+--enable_query_log
+
+--disable_warnings
+DROP TABLE IF EXISTS t1;
+SET GLOBAL INNODB_FILE_FORMAT = 'Barracuda';
+--enable_warnings
+
+--disable_query_log
+# some versions of this test use zipdebug, and so generate this warning in non-debug builds
+call mtr.add_suppression("innodb_zip_debug is enabled and this is a non-debug mysqld. Please disable it immediately if the machine is serving production traffic.");
+# Expected during mysql crash recovery due to partial binlog events written to the binary log
+call mtr.add_suppression("Error in Log_event::read_log_event()");
+--enable_query_log
+
+# create the table with compressed pages of size 1K.
+CREATE TABLE t1(id INT PRIMARY KEY, msg varchar(255))
+ENGINE=INNODB
+ROW_FORMAT=COMPRESSED
+KEY_BLOCK_SIZE=1;
+
+delimiter //;
+create procedure setcrash(IN i INT)
+  begin
+    CASE i
+      WHEN 1 THEN SET SESSION debug="d,crash_commit_after_prepare";
+      WHEN 2 THEN SET SESSION debug="d,crash_commit_after_log";
+      WHEN 3 THEN SET SESSION debug="d,crash_commit_before_unlog";
+      WHEN 4 THEN SET SESSION debug="d,crash_commit_after";
+      WHEN 5 THEN SET SESSION debug="d,crash_commit_before";
+    ELSE BEGIN END;
+  END CASE;
+end //
+delimiter ;//
+
+let $num_tests = 5;
+let $idx = 1;
+while ($num_tests)
+{
+--disable_query_log
+  let $num_inserts = 10000;
+  START TRANSACTION;
+  while ($num_inserts) {
+    if (`SELECT CAST(FLOOR(RAND() * 17) AS UNSIGNED) = 0`) {
+      SET GLOBAL innodb_zlib_strategy = CAST(FLOOR(RAND() * 5) AS UNSIGNED) ;
+    }
+    eval
+INSERT INTO t1(id, msg)
+VALUES ($idx, REPEAT(PASSWORD($idx), 5));
+    dec $num_inserts;
+    inc $idx;
+  }
+
+# Write file to make mysql-test-run.pl expect crash
+--exec echo "restart" > $MYSQLTEST_VARDIR/tmp/mysqld.1.expect
+
+  eval call setcrash($num_tests);
+  dec $num_tests;
+# Run the crashing query
+--error 0,2013
+  COMMIT;
+
+# Turn on reconnect
+--enable_reconnect
+# Call script that will poll the server waiting for
+# it to be back online again
+--source include/wait_until_connected_again.inc
+}
+--enable_query_log
+
+CHECKSUM TABLE t1;
+
+--disable_query_log
+# final cleanup
+DROP TABLE t1;
+DROP PROCEDURE setcrash;
+SET SESSION DEBUG= 'RESET';
+# restore innodb_file_format and innodb_file_format_check
+eval SET GLOBAL innodb_file_format = \"$file_format_save\";
+eval SET GLOBAL innodb_log_compressed_pages = $log_compressed_pages_save;
+eval SET GLOBAL innodb_zlib_strategy = $innodb_zlib_strategy_save;
+--enable_query_log
+
+# clean exit
+--exit

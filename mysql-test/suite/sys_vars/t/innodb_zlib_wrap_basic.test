@@ -1,0 +1,59 @@
+
+#
+# 2013-04-19 - Added
+#
+
+--source include/have_innodb.inc
+--source include/load_sysvars.inc
+
+SET @start_global_value = @@global.innodb_zlib_wrap;
+SELECT @start_global_value;
+
+#
+# exists as global only
+#
+--echo Valid values are 0, 1, ON, and OFF
+SELECT @@global.innodb_zlib_wrap between 0 and 1;
+SELECT @@global.innodb_zlib_wrap;
+--error ER_INCORRECT_GLOBAL_LOCAL_VAR
+SELECT @@session.innodb_zlib_wrap;
+SET global innodb_zlib_wrap = 'ON';
+SELECT @@global.innodb_zlib_wrap;
+SET global innodb_zlib_wrap = 'OFF';
+SELECT @@global.innodb_zlib_wrap;
+SHOW global variables like 'innodb_zlib_wrap';
+SHOW session variables like 'innodb_zlib_wrap';
+SELECT * from information_schema.global_variables where variable_name='innodb_zlib_wrap';
+SELECT * from information_schema.session_variables where variable_name='innodb_zlib_wrap';
+
+#
+# SHOW that it's writable
+#
+SET GLOBAL innodb_zlib_wrap = 0;
+SELECT @@global.innodb_zlib_wrap;
+SELECT * from information_schema.global_variables where variable_name='innodb_zlib_wrap';
+SELECT * from information_schema.session_variables where variable_name='innodb_zlib_wrap';
+--error ER_GLOBAL_VARIABLE
+SET session innodb_zlib_wrap = 1;
+
+#
+# incorrect types
+#
+--error ER_WRONG_TYPE_FOR_VAR
+SET global innodb_zlib_wrap = 1.1;
+--error ER_WRONG_TYPE_FOR_VAR
+SET global innodb_zlib_wrap = 1e1;
+
+#
+# min/max/DEFAULT values
+#
+SET global innodb_zlib_wrap = 0;
+SELECT @@global.innodb_zlib_wrap;
+SET global innodb_zlib_wrap = 1;
+SELECT @@global.innodb_zlib_wrap;
+SET global innodb_zlib_wrap = DEFAULT;
+SELECT @@global.innodb_zlib_wrap;
+
+
+SET @@global.innodb_zlib_wrap = @start_global_value;
+SELECT @@global.innodb_zlib_wrap;

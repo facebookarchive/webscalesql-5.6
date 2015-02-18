@@ -302,6 +302,13 @@ NULL value when collecting statistics. By default, it is set to
 SRV_STATS_NULLS_EQUAL(0), ie. all NULL value are treated equal */
 UNIV_INTERN ulong srv_innodb_stats_method = SRV_STATS_NULLS_EQUAL;
 
+/* Enable adaptive sleep time calculation for page cleaner thread if enabled. */
+UNIV_INTERN my_bool	srv_pc_adaptive_sleep;
+
+/** The maximum time limit for a single LRU tail flush iteration by the page
+cleaner thread */
+UNIV_INTERN ulint	srv_cleaner_max_lru_time = 1000;
+
 UNIV_INTERN srv_stats_t	srv_stats;
 
 /* structure to pass status variables to MySQL */

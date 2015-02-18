@@ -1433,7 +1433,7 @@ buf_pool_init(
 
 	btr_search_sys_create(buf_pool_get_curr_size() / sizeof(void*) / 64);
 
-	buf_flush_event = os_event_create();
+	buf_lru_event = os_event_create();
 
 	return(DB_SUCCESS);
 }

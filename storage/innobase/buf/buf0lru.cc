@@ -1302,9 +1302,9 @@ loop:
 			buffer pool. */
 			buf_pool->try_LRU_scan = FALSE;
 
-			/* Also tell the page_cleaner thread that
+			/* Also tell the lru_manager thread that
 			there is work for it to do. */
-			os_event_set(buf_flush_event);
+			os_event_set(buf_lru_event);
 		}
 	}
 

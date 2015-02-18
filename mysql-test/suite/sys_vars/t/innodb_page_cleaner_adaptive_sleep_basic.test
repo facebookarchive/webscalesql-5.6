@@ -1,0 +1,70 @@
+
+
+# 2015-01-30 - Added
+#
+
+--source include/have_innodb.inc
+
+SET @start_global_value = @@global.innodb_page_cleaner_adaptive_sleep;
+SELECT @start_global_value;
+
+#
+# exists as global only
+#
+--echo Valid values are 'ON' and 'OFF'
+select @@global.innodb_page_cleaner_adaptive_sleep in (0, 1);
+select @@global.innodb_page_cleaner_adaptive_sleep;
+--error ER_INCORRECT_GLOBAL_LOCAL_VAR
+select @@session.innodb_page_cleaner_adaptive_sleep;
+show global variables like 'innodb_page_cleaner_adaptive_sleep';
+show session variables like 'innodb_page_cleaner_adaptive_sleep';
+select * from information_schema.global_variables where variable_name='innodb_page_cleaner_adaptive_sleep';
+select * from information_schema.session_variables where variable_name='innodb_page_cleaner_adaptive_sleep';
+
+#
+# show that it's writable
+#
+set global innodb_page_cleaner_adaptive_sleep='OFF';
+select @@global.innodb_page_cleaner_adaptive_sleep;
+select * from information_schema.global_variables where variable_name='innodb_page_cleaner_adaptive_sleep';
+select * from information_schema.session_variables where variable_name='innodb_page_cleaner_adaptive_sleep';
+set @@global.innodb_page_cleaner_adaptive_sleep=1;
+select @@global.innodb_page_cleaner_adaptive_sleep;
+select * from information_schema.global_variables where variable_name='innodb_page_cleaner_adaptive_sleep';
+select * from information_schema.session_variables where variable_name='innodb_page_cleaner_adaptive_sleep';
+set global innodb_page_cleaner_adaptive_sleep=0;
+select @@global.innodb_page_cleaner_adaptive_sleep;
+select * from information_schema.global_variables where variable_name='innodb_page_cleaner_adaptive_sleep';
+select * from information_schema.session_variables where variable_name='innodb_page_cleaner_adaptive_sleep';
+set @@global.innodb_page_cleaner_adaptive_sleep='ON';
+select @@global.innodb_page_cleaner_adaptive_sleep;
+select * from information_schema.global_variables where variable_name='innodb_page_cleaner_adaptive_sleep';
+select * from information_schema.session_variables where variable_name='innodb_page_cleaner_adaptive_sleep';
+--error ER_GLOBAL_VARIABLE
+set session innodb_page_cleaner_adaptive_sleep='OFF';
+--error ER_GLOBAL_VARIABLE
+set @@session.innodb_page_cleaner_adaptive_sleep='ON';
+
+#
+# incorrect types
+#
+--error ER_WRONG_TYPE_FOR_VAR
+set global innodb_page_cleaner_adaptive_sleep=1.1;
+--error ER_WRONG_TYPE_FOR_VAR
+set global innodb_page_cleaner_adaptive_sleep=1e1;
+--error ER_WRONG_VALUE_FOR_VAR
+set global innodb_page_cleaner_adaptive_sleep=2;
+--echo NOTE: The following should fail with ER_WRONG_VALUE_FOR_VAR (BUG#50643)
+set global innodb_page_cleaner_adaptive_sleep=-3;
+select @@global.innodb_page_cleaner_adaptive_sleep;
+select * from information_schema.global_variables where variable_name='innodb_page_cleaner_adaptive_sleep';
+select * from information_schema.session_variables where variable_name='innodb_page_cleaner_adaptive_sleep';
+--error ER_WRONG_VALUE_FOR_VAR
+set global innodb_page_cleaner_adaptive_sleep='AUTO';
+
+#
+# Cleanup
+#
+
+SET @@global.innodb_page_cleaner_adaptive_sleep = @start_global_value;
+SELECT @@global.innodb_page_cleaner_adaptive_sleep;

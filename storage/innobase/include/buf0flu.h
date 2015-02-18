@@ -36,8 +36,11 @@ Created 11/5/1995 Heikki Tuuri
 /** Flag indicating if the page_cleaner is in active state. */
 extern ibool buf_page_cleaner_is_active;
 
+/** Flag indicating if the lru_manager is in active state. */
+extern ibool buf_lru_manager_is_active;
+
 /** Event to synchronise with the flushing. */
-extern os_event_t	buf_flush_event;
+extern os_event_t	buf_lru_event;
 
 /********************************************************************//**
 Remove a block from the flush list of modified blocks. */
@@ -185,6 +188,18 @@ os_thread_ret_t
 DECLARE_THREAD(buf_flush_page_cleaner_thread)(
 /*==========================================*/
 	void*	arg);		/*!< in: a dummy parameter required by
+				os_thread_create */
+
+/******************************************************************//**
+lru_manager thread tasked with performing LRU flushes and evictions to refill
+the buffer pool free lists.  As of now we'll have only one instance of this
+thread.
+@return a dummy parameter */
+extern "C" UNIV_INTERN
+os_thread_ret_t
+DECLARE_THREAD(buf_flush_lru_manager_thread)(
+/*=========================================*/
+	void*   arg);           /*!< in: a dummy parameter required by
 				os_thread_create */
 /*********************************************************************//**
 Clears up tail of the LRU lists:

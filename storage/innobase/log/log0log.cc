@@ -3304,10 +3304,22 @@ loop:
 		goto loop;
 	}
 
+	srv_shutdown_state = SRV_SHUTDOWN_FLUSH_PHASE;
+
+	count = 0;
+	while (buf_lru_manager_is_active) {
+		++count;
+		os_thread_sleep(100000);
+		if (srv_print_verbose_log && count > 600) {
+			ib_logf(IB_LOG_LEVEL_INFO,
+				"Waiting for lru_manager thread to exit.");
+			count = 0;
+		}
+	}
+
 	/* At this point only page_cleaner should be active. We wait
 	here to let it complete the flushing of the buffer pools
 	before proceeding further. */
-	srv_shutdown_state = SRV_SHUTDOWN_FLUSH_PHASE;
 	count = 0;
 	while (buf_page_cleaner_is_active) {
 		++count;

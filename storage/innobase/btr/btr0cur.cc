@@ -108,6 +108,24 @@ UNIV_INTERN uint	btr_cur_limit_optimistic_insert_debug = 0;
 can be released by page reorganize, then it is reorganized */
 #define BTR_CUR_PAGE_REORGANIZE_LIMIT	(UNIV_PAGE_SIZE / 32)
 
+/** Window bits and memory level parameters are used for zlib functions
+deflate() and inflate(). Changing window bits to a smaller size will make
+decompression not work on the existing data (i.e. tables need be dumped
+and re-compressed after this change). Increasing windowBits should be OK
+in terms of backwards-data-compatibility. Changing memLevel will only affect
+future compressions, but not decompression. Decompression is independent
+of memLevel. Therefore changing memLevel is backwards-data-compatible
+both ways. Higher memLevel or higher windowBits mean better compression
+and more memory usage. These values must be so that the compressing (or
+decompressing) a blob should not require more memory than compressing (or
+decompressing) a database page. This is because we use the same malloc_cache
+for compressing (or decompressing) pages and blobs. See the calls to
+mem_heap_create() in page_zip_compress(), page_zip_decompress(),
+btr_store_big_rec_extern_fields(), and
+btr_copy_externally_stored_field_prefix_low(). */
+#define BTR_CUR_BLOB_WBITS 15
+#define BTR_CUR_BLOB_MEM_LEVEL 7
+
 /** The structure of a BLOB part header */
 /* @{ */
 /*--------------------------------------*/
@@ -4441,6 +4459,8 @@ btr_store_big_rec_extern_fields(
 	mem_heap_t*	heap = NULL;
 	page_zip_des_t*	page_zip;
 	z_stream	c_stream;
+	int window_bits = page_zip_zlib_wrap ? BTR_CUR_BLOB_WBITS
+	                                     : - ((int) BTR_CUR_BLOB_WBITS);
 	buf_block_t**	freed_pages	= NULL;
 	ulint		n_freed_pages	= 0;
 	dberr_t		error		= DB_SUCCESS;
@@ -4482,7 +4502,9 @@ btr_store_big_rec_extern_fields(
 		page_zip_set_alloc(&c_stream, heap);
 
 		err = deflateInit2(&c_stream, page_zip_level,
-				   Z_DEFLATED, 15, 7, Z_DEFAULT_STRATEGY);
+				   Z_DEFLATED, window_bits,
+				   BTR_CUR_BLOB_MEM_LEVEL,
+				   page_zip_zlib_strategy);
 		ut_a(err == Z_OK);
 	}
 
@@ -5400,10 +5422,22 @@ btr_copy_zblob_prefix(
 			}
 			break;
 		case Z_STREAM_END:
-			if (next_page_no == FIL_NULL) {
-				goto end_of_blob;
+#ifdef UNIV_DEBUG
+			if (next_page_no != FIL_NULL) {
+				ut_print_timestamp(stderr);
+				fprintf(stderr, "  InnoDB: Decompression stream ended before going "
+					"through all of the external pages allocated for this "
+					"blob. This is likely because of a zlib bug that "
+					"requires more space than necessary during compression."
+					" As a result, the next blob page must be empty except "
+					"for the header. space id = %lu, page no = "
+					"%lu, next page no = %lu.\n",
+					(ulong) space_id, (ulong) page_no,
+					(ulong) next_page_no);
 			}
-			/* fall through */
+#endif
+			goto end_of_blob;
+			break;
 		default:
 inflate_error:
 			ut_print_timestamp(stderr);
@@ -5412,7 +5446,7 @@ inflate_error:
 				" compressed BLOB"
 				" page %lu space %lu returned %d (%s)\n",
 				(ulong) page_no, (ulong) space_id,
-				err, d_stream.msg);
+				err, d_stream.msg ? d_stream.msg : "");
 		case Z_BUF_ERROR:
 			goto end_of_blob;
 		}
@@ -5601,6 +5635,19 @@ btr_copy_externally_stored_field(
 							      space_id,
 							      page_no, offset,
 							      trx);
+
+	if (*len != local_len + extern_len) {
+		ut_print_timestamp(stderr);
+		fprintf(stderr,
+			"  InnoDB: Possible blob truncation. Expected length"
+			" of the blob is %lu but read %lu bytes."
+			" space id = %lu, page no = %lu.\n",
+			local_len + extern_len,
+			*len,
+			space_id,
+			page_no);
+		ut_ad(0);
+	}
 
 	return(buf);
 }

@@ -1,0 +1,103 @@
+--echo #
+--echo # Testing crash recovery when log_compressed_pages=OFF
+--echo #
+--source include/not_embedded.inc
+--echo # Don't test this under valgrind, memory leaks will occur
+--source include/not_valgrind.inc
+
+--echo # Binary must be compiled with debug for crash to occur
+--source include/have_debug.inc
+--source include/have_innodb.inc
+
+--disable_query_log
+# record the file format in order to restore in the end.
+--let $file_format_save = `SELECT @@innodb_file_format`
+--let $log_compressed_pages_save = `SELECT @@innodb_log_compressed_pages`
+--enable_query_log
+
+--disable_warnings
+DROP TABLE IF EXISTS t1;
+SET GLOBAL INNODB_FILE_FORMAT = 'Barracuda';
+--enable_warnings
+
+--disable_query_log
+# some versions of this test use zipdebug, and so generate this warning in non-debug builds
+call mtr.add_suppression("innodb_zip_debug is enabled and this is a non-debug mysqld. Please disable it immediately if the machine is serving production traffic.");
+# Expected during mysql crash recovery due to partial binlog events written to the binary log
+call mtr.add_suppression("Error in Log_event::read_log_event()");
+--enable_query_log
+
+# create the table with compressed pages of size 1K.
+CREATE TABLE t1(id INT PRIMARY KEY, msg VARCHAR(255))
+ENGINE=INNODB
+ROW_FORMAT=COMPRESSED
+KEY_BLOCK_SIZE=1;
+
+delimiter //;
+create procedure setcrash(IN i INT)
+  begin
+    CASE i
+      WHEN 1 THEN SET SESSION debug="d,crash_commit_after_prepare";
+      WHEN 2 THEN SET SESSION debug="d,crash_commit_after_log";
+      WHEN 3 THEN SET SESSION debug="d,crash_commit_before_unlog";
+      WHEN 4 THEN SET SESSION debug="d,crash_commit_after";
+      WHEN 5 THEN SET SESSION debug="d,crash_commit_before";
+    ELSE BEGIN END;
+  END CASE;
+end //
+delimiter ;//
+
+let $num_tests = 5;
+
+while ($num_tests)
+{
+# disable logging of compressed page images.
+  SET GLOBAL innodb_log_compressed_pages = OFF;
+
+  let $num_inserts = 21;
+
+  START TRANSACTION;
+  while ($num_inserts)
+  {
+    eval
+INSERT INTO t1(id, msg)
+VALUES ($num_inserts, REPEAT(PASSWORD($num_inserts), 5));
+    dec $num_inserts;
+  }
+
+--echo # Write file to make mysql-test-run.pl expect crash
+--exec echo "restart" > $MYSQLTEST_VARDIR/tmp/mysqld.1.expect
+
+  eval call setcrash($num_tests);
+
+--echo # Run the crashing query
+--error 0,2013
+  COMMIT;
+
+--echo # Turn on reconnect
+--enable_reconnect
+--echo # Call script that will poll the server waiting for
+--echo # it to be back online again
+--source include/wait_until_connected_again.inc
+
+# t1 must have all 21 records
+  SELECT * FROM t1;
+
+  TRUNCATE TABLE t1;
+
+  dec $num_tests;
+}
+
+# final cleanup
+DROP TABLE t1;
+DROP PROCEDURE setcrash;
+SET SESSION DEBUG= 'RESET';
+
+--disable_query_log
+# restore innodb_file_format and innodb_file_format_check
+eval SET GLOBAL innodb_file_format = \"$file_format_save\";
+eval SET GLOBAL innodb_log_compressed_pages = $log_compressed_pages_save;
+--enable_query_log
+
+# clean exit
+--exit

@@ -1,0 +1,79 @@
+--source include/not_embedded.inc
+--source include/load_sysvars.inc
+
+# Saving initial value of innodb_lru_manager_max_sleep_time
+# in a temporary variable
+SET @start_value = @@global.innodb_lru_manager_max_sleep_time;
+SELECT @start_value;
+
+# Display the DEFAULT value of innodb_lru_manager_max_sleep_time
+SET @@global.innodb_lru_manager_max_sleep_time = 99;
+SET @@global.innodb_lru_manager_max_sleep_time = DEFAULT;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+
+# Verify default value of variable
+SET @@global.innodb_lru_manager_max_sleep_time = @start_value;
+SELECT @@global.innodb_lru_manager_max_sleep_time = 1000;
+
+# Change the value of innodb_lru_manager_max_sleep_time to a valid value
+SET @@global.innodb_lru_manager_max_sleep_time = 0;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+SET @@global.innodb_lru_manager_max_sleep_time = 1;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+SET @@global.innodb_lru_manager_max_sleep_time = 4294967295;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+SET @@global.innodb_lru_manager_max_sleep_time = 4294967294;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+SET @@global.innodb_lru_manager_max_sleep_time = 65536;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+
+# Change the value of innodb_lru_manager_max_sleep_time to invalid value
+SET @@global.innodb_lru_manager_max_sleep_time = -1;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+SET @@global.innodb_lru_manager_max_sleep_time = 4294967296;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+SET @@global.innodb_lru_manager_max_sleep_time = 10240022115;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+--Error ER_WRONG_TYPE_FOR_VAR
+SET @@global.innodb_lru_manager_max_sleep_time = 10000.01;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+SET @@global.innodb_lru_manager_max_sleep_time = -1024;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+SET @@global.innodb_lru_manager_max_sleep_time = 42949672950;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+
+--Error ER_WRONG_TYPE_FOR_VAR
+SET @@global.innodb_lru_manager_max_sleep_time = ON;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+--Error ER_WRONG_TYPE_FOR_VAR
+SET @@global.innodb_lru_manager_max_sleep_time = 'test';
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+
+# Test if accessing session innodb_lru_manager_max_sleep_time gives error
+--Error ER_GLOBAL_VARIABLE
+SET @@session.innodb_lru_manager_max_sleep_time = 0;
+SELECT @@innodb_lru_manager_max_sleep_time;
+
+# Check if the value in GLOBAL & SESSION Tables matches values in variable
+SELECT @@global.innodb_lru_manager_max_sleep_time = VARIABLE_VALUE
+FROM INFORMATION_SCHEMA.GLOBAL_VARIABLES
+WHERE VARIABLE_NAME='innodb_lru_manager_max_sleep_time';
+
+# Check if innodb_lru_manager_max_sleep_time can be accessed with and without @@ sign
+--Error ER_GLOBAL_VARIABLE
+SET innodb_lru_manager_max_sleep_time = 1;
+SELECT @@innodb_lru_manager_max_sleep_time;
+--Error ER_PARSE_ERROR
+SET local.innodb_lru_manager_max_sleep_time = 1;
+--Error ER_UNKNOWN_TABLE
+SELECT local.innodb_lru_manager_max_sleep_time;
+--Error ER_PARSE_ERROR
+SET global.innodb_lru_manager_max_sleep_time = 1;
+--Error ER_UNKNOWN_TABLE
+SELECT global.innodb_lru_manager_max_sleep_time;
+--Error ER_BAD_FIELD_ERROR
+SELECT innodb_lru_manager_max_sleep_time = @@session.innodb_lru_manager_max_sleep_time;
+
+# Restore initial value
+SET @@global.innodb_lru_manager_max_sleep_time = @start_value;
+SELECT @@global.innodb_lru_manager_max_sleep_time;

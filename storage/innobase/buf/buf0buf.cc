@@ -1524,7 +1524,7 @@ buf_pool_init(
 	}
 #endif // HAVE_LIBNUMA
 
-  buf_flush_event = os_event_create();
+	buf_lru_event = os_event_create();
 
 	return(DB_SUCCESS);
 }

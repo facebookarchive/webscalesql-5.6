@@ -396,6 +396,7 @@ static PSI_thread_info	all_innodb_threads[] = {
 	{&srv_master_thread_key, "srv_master_thread", 0},
 	{&srv_purge_thread_key, "srv_purge_thread", 0},
 	{&buf_page_cleaner_thread_key, "page_cleaner_thread", 0},
+	{&buf_lru_manager_thread_key, "lru_manager_thread", 0},
 	{&recv_writer_thread_key, "recv_writer_thread", 0}
 };
 # endif /* UNIV_PFS_THREAD */
@@ -16493,6 +16494,17 @@ static MYSQL_SYSVAR_BOOL(deadlock_detect, srv_deadlock_detect,
   "Enableds deadlock detection checking.",
   NULL, NULL, TRUE);
 
+static MYSQL_SYSVAR_ULONG(lru_manager_max_sleep_time, srv_cleaner_max_lru_time,
+  PLUGIN_VAR_RQCMDARG,
+  "The maximum time limit for a single LRU tail flush iteration by the lru "
+  "manager thread in miliseconds",
+  NULL, NULL, 1000, 0, UINT_MAX32, 0);
+
+static MYSQL_SYSVAR_BOOL(page_cleaner_adaptive_sleep, srv_pc_adaptive_sleep,
+  PLUGIN_VAR_RQCMDARG,
+  "Enable adaptive sleep time calculation for page cleaner thread",
+  NULL, NULL, FALSE);
+
 static struct st_mysql_sys_var* innobase_system_variables[]= {
   MYSQL_SYSVAR(additional_mem_pool_size),
   MYSQL_SYSVAR(api_trx_level),
@@ -16653,6 +16665,8 @@ static struct st_mysql_sys_var* innobase_system_variables[]= {
   MYSQL_SYSVAR(fil_make_page_dirty_debug),
   MYSQL_SYSVAR(saved_page_number_debug),
 #endif /* UNIV_DEBUG */
+  MYSQL_SYSVAR(lru_manager_max_sleep_time),
+  MYSQL_SYSVAR(page_cleaner_adaptive_sleep),
   NULL
 };
 

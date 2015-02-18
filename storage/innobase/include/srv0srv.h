@@ -447,6 +447,12 @@ extern my_bool	srv_cmp_per_index_enabled;
 /** Perform deadlock detection check. */
 extern my_bool srv_deadlock_detect;
 
+/* The maximum time limit for a single LRU tail flush iteration by the lru manager thread */
+extern ulint	srv_cleaner_max_lru_time;
+
+/* Enable adaptive sleep time calculation for page cleaner thread if enabled. */
+extern my_bool	srv_pc_adaptive_sleep;
+
 /** Status variables to be passed to MySQL */
 extern struct export_var_t export_vars;
 
@@ -456,6 +462,7 @@ extern srv_stats_t	srv_stats;
 # ifdef UNIV_PFS_THREAD
 /* Keys to register InnoDB threads with performance schema */
 extern mysql_pfs_key_t	buf_page_cleaner_thread_key;
+extern mysql_pfs_key_t  buf_lru_manager_thread_key;
 extern mysql_pfs_key_t	trx_rollback_clean_thread_key;
 extern mysql_pfs_key_t	io_handler_thread_key;
 extern mysql_pfs_key_t	srv_lock_timeout_thread_key;

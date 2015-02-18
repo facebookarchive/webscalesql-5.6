@@ -2726,6 +2726,8 @@ files_checked:
 		os_thread_create(buf_flush_page_cleaner_thread, NULL, NULL);
 	}
 
+	os_thread_create(buf_flush_lru_manager_thread, NULL, NULL);
+
 #ifdef UNIV_DEBUG
 	/* buf_debug_prints = TRUE; */
 #endif /* UNIV_DEBUG */

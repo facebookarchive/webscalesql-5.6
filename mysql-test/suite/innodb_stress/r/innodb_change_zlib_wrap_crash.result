@@ -1,0 +1,25 @@
+#
+# Testing crash recovery when log_compressed_pages=OFF and innodb_zlib_wrap option is changed dynamically.
+#
+# Don't test this under valgrind, memory leaks will occur
+# Binary must be compiled with debug for crash to occur
+DROP TABLE IF EXISTS t1;
+SET GLOBAL INNODB_FILE_FORMAT = 'Barracuda';
+CREATE TABLE t1(id INT PRIMARY KEY, msg varchar(255))
+ENGINE=INNODB
+ROW_FORMAT=COMPRESSED
+KEY_BLOCK_SIZE=1;
+create procedure setcrash(IN i INT)
+begin
+CASE i
+WHEN 1 THEN SET SESSION debug="d,crash_commit_after_prepare";
+WHEN 2 THEN SET SESSION debug="d,crash_commit_after_log";
+WHEN 3 THEN SET SESSION debug="d,crash_commit_before_unlog";
+WHEN 4 THEN SET SESSION debug="d,crash_commit_after";
+WHEN 5 THEN SET SESSION debug="d,crash_commit_before";
+ELSE BEGIN END;
+END CASE;
+end //
+CHECKSUM TABLE t1;
+Table	Checksum
+test.t1	1855900423

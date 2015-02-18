@@ -1,0 +1,107 @@
+SET @start_value = @@global.innodb_lru_manager_max_sleep_time;
+SELECT @start_value;
+@start_value
+1000
+SET @@global.innodb_lru_manager_max_sleep_time = 99;
+SET @@global.innodb_lru_manager_max_sleep_time = DEFAULT;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+@@global.innodb_lru_manager_max_sleep_time
+1000
+SET @@global.innodb_lru_manager_max_sleep_time = @start_value;
+SELECT @@global.innodb_lru_manager_max_sleep_time = 1000;
+@@global.innodb_lru_manager_max_sleep_time = 1000
+1
+SET @@global.innodb_lru_manager_max_sleep_time = 0;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+@@global.innodb_lru_manager_max_sleep_time
+0
+SET @@global.innodb_lru_manager_max_sleep_time = 1;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+@@global.innodb_lru_manager_max_sleep_time
+1
+SET @@global.innodb_lru_manager_max_sleep_time = 4294967295;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+@@global.innodb_lru_manager_max_sleep_time
+4294967295
+SET @@global.innodb_lru_manager_max_sleep_time = 4294967294;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+@@global.innodb_lru_manager_max_sleep_time
+4294967294
+SET @@global.innodb_lru_manager_max_sleep_time = 65536;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+@@global.innodb_lru_manager_max_sleep_time
+65536
+SET @@global.innodb_lru_manager_max_sleep_time = -1;
+Warnings:
+Warning	1292	Truncated incorrect innodb_lru_manager_max_sleep_tim value: '-1'
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+@@global.innodb_lru_manager_max_sleep_time
+0
+SET @@global.innodb_lru_manager_max_sleep_time = 4294967296;
+Warnings:
+Warning	1292	Truncated incorrect innodb_lru_manager_max_sleep_tim value: '4294967296'
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+@@global.innodb_lru_manager_max_sleep_time
+4294967295
+SET @@global.innodb_lru_manager_max_sleep_time = 10240022115;
+Warnings:
+Warning	1292	Truncated incorrect innodb_lru_manager_max_sleep_tim value: '10240022115'
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+@@global.innodb_lru_manager_max_sleep_time
+4294967295
+SET @@global.innodb_lru_manager_max_sleep_time = 10000.01;
+ERROR 42000: Incorrect argument type to variable 'innodb_lru_manager_max_sleep_time'
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+@@global.innodb_lru_manager_max_sleep_time
+4294967295
+SET @@global.innodb_lru_manager_max_sleep_time = -1024;
+Warnings:
+Warning	1292	Truncated incorrect innodb_lru_manager_max_sleep_tim value: '-1024'
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+@@global.innodb_lru_manager_max_sleep_time
+0
+SET @@global.innodb_lru_manager_max_sleep_time = 42949672950;
+Warnings:
+Warning	1292	Truncated incorrect innodb_lru_manager_max_sleep_tim value: '42949672950'
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+@@global.innodb_lru_manager_max_sleep_time
+4294967295
+SET @@global.innodb_lru_manager_max_sleep_time = ON;
+ERROR 42000: Incorrect argument type to variable 'innodb_lru_manager_max_sleep_time'
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+@@global.innodb_lru_manager_max_sleep_time
+4294967295
+SET @@global.innodb_lru_manager_max_sleep_time = 'test';
+ERROR 42000: Incorrect argument type to variable 'innodb_lru_manager_max_sleep_time'
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+@@global.innodb_lru_manager_max_sleep_time
+4294967295
+SET @@session.innodb_lru_manager_max_sleep_time = 0;
+ERROR HY000: Variable 'innodb_lru_manager_max_sleep_time' is a GLOBAL variable and should be set with SET GLOBAL
+SELECT @@innodb_lru_manager_max_sleep_time;
+@@innodb_lru_manager_max_sleep_time
+4294967295
+SELECT @@global.innodb_lru_manager_max_sleep_time = VARIABLE_VALUE
+FROM INFORMATION_SCHEMA.GLOBAL_VARIABLES
+WHERE VARIABLE_NAME='innodb_lru_manager_max_sleep_time';
+@@global.innodb_lru_manager_max_sleep_time = VARIABLE_VALUE
+1
+SET innodb_lru_manager_max_sleep_time = 1;
+ERROR HY000: Variable 'innodb_lru_manager_max_sleep_time' is a GLOBAL variable and should be set with SET GLOBAL
+SELECT @@innodb_lru_manager_max_sleep_time;
+@@innodb_lru_manager_max_sleep_time
+4294967295
+SET local.innodb_lru_manager_max_sleep_time = 1;
+ERROR 42000: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'innodb_lru_manager_max_sleep_time = 1' at line 1
+SELECT local.innodb_lru_manager_max_sleep_time;
+ERROR 42S02: Unknown table 'local' in field list
+SET global.innodb_lru_manager_max_sleep_time = 1;
+ERROR 42000: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'innodb_lru_manager_max_sleep_time = 1' at line 1
+SELECT global.innodb_lru_manager_max_sleep_time;
+ERROR 42S02: Unknown table 'global' in field list
+SELECT innodb_lru_manager_max_sleep_time = @@session.innodb_lru_manager_max_sleep_time;
+ERROR 42S22: Unknown column 'innodb_lru_manager_max_sleep_time' in 'field list'
+SET @@global.innodb_lru_manager_max_sleep_time = @start_value;
+SELECT @@global.innodb_lru_manager_max_sleep_time;
+@@global.innodb_lru_manager_max_sleep_time
+1000

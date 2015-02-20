@@ -43,6 +43,7 @@
 #include <violite.h>
 #include <signal.h>
 #include <errno.h>
+#include <sys/uio.h>
 #include "probes_mysql.h"
 
 #include <algorithm>

@@ -531,6 +531,7 @@ net_write_command_nonblocking(NET *net, uchar command,
                               const uchar *packet, size_t packet_len,
                               my_bool* res)
 {
+  size_t length=packet_len+1+prefix_len;		/* 1 extra byte for command */
   net_async_status status;
   ssize_t rc;
   DBUG_ENTER(__func__);
@@ -544,7 +545,7 @@ net_write_command_nonblocking(NET *net, uchar command,
 
   switch (net->async_operation) {
     case NET_ASYNC_OP_IDLE:
-      MYSQL_NET_WRITE_START(len);
+      MYSQL_NET_WRITE_START(length);
       if (!begin_packet_write_state(net, command, packet, packet_len, prefix, prefix_len)) {
         *res = 0;
         goto done;

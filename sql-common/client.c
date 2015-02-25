@@ -826,6 +826,7 @@ cli_advanced_command_nonblocking(MYSQL *mysql, enum enum_server_command command,
 {
   NET *net= &mysql->net;
   my_bool result= 1;
+  *ret = result;
   my_bool stmt_skip= stmt ? stmt->state != MYSQL_STMT_INIT_DONE : FALSE;
   DBUG_ENTER(__func__);
   DBUG_DUMP("sending", header, header_length);

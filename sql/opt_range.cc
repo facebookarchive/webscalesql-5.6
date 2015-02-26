@@ -7806,7 +7806,7 @@ key_or(RANGE_OPT_PARAM *param, SEL_ARG *key1, SEL_ARG *key2)
     {
       swap_variables(SEL_ARG *,key1,key2);
     }
-    if (key1->use_count > 0 || !(key1=key1->clone_tree(param)))
+    if (key1->use_count > 0 && !(key1=key1->clone_tree(param)))
       return 0;                                 // OOM
   }
 

@@ -17,4 +17,4 @@ short timeout, over one second, should also work	sleep(1.49)
 short timeout, over one second, should also work	0
 select "long timeout, should 1500ms accuracy", sleep(1.51);
 ERROR HY000: Read timeout is reached
-ERROR HY000: Can't connect to MySQL server on '192.0.2.1' (110)
+ERROR HY000: Can't connect to MySQL server on '192.0.2.1' (101/110)

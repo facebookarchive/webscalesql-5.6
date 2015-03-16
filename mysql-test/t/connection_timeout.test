@@ -19,5 +19,6 @@ select "long timeout, should 1500ms accuracy", sleep(1.51);
 # 192.0.2.1 is in the TEST-NET range, defined by RFC to never be
 # reachable. Used to confirm connect timeouts.
 --disable_abort_on_error
+--replace_result (101) (101/110) (110) (101/110)
 connect (con3,192.0.2.1,root,,,,,TIMEOUT_1500MS);
 --error 2003

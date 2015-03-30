@@ -3211,8 +3211,8 @@ static int replace_user_table(THD *thd, TABLE *table, LEX_USER *combo,
 	 if old_passwords == 2, error.
       * An empty password is considered to be of mysql_native type.
     */
-    
-    if (combo->plugin.str == NULL || combo->plugin.str == '\0')
+
+    if (combo->plugin.str == NULL || combo->plugin.str[0] == '\0')
     {
       if (combo->uses_identified_by_password_clause)
       {
@@ -9303,7 +9303,7 @@ void fill_effective_table_privileges(THD *thd, GRANT_INFO *grant,
   /* global privileges */
   grant->privilege= sctx->master_access;
 
-  if (!sctx->priv_user)
+  if (sctx->priv_user[0] == '\0')
   {
     DBUG_PRINT("info", ("privilege 0x%lx", grant->privilege));
     DBUG_VOID_RETURN;                         // it is slave

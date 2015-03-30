@@ -94,7 +94,6 @@ typedef struct st_plugin_vio_info
 } MYSQL_PLUGIN_VIO_INFO;
 
 struct st_mysql;
-typedef struct st_mysql MYSQL;
 
 /**
   Provides plugin access to communication channel
@@ -122,7 +121,7 @@ typedef struct st_plugin_vio
     about the connection.
   */
   void (*info)(struct st_plugin_vio *vio, struct st_plugin_vio_info *info);
-  MYSQL* mysql;
+  struct st_mysql* mysql;
 
   /* Async MySQL extension fields here. */
   /* NOTE: this really returns a net_async_status */

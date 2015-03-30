@@ -395,7 +395,6 @@ typedef struct st_mysql_res {
 */
 
 struct st_mysql_authsm_context;
-typedef struct st_mysql_authsm_context mysql_authsm_context;
 
 struct mysql_st_mysql_csm_context {
   /* state for the overall connection process */
@@ -419,7 +418,7 @@ struct mysql_st_mysql_csm_context {
   char *scramble_data;
   const char *scramble_plugin;
 
-  mysql_authsm_context *auth_context;
+  struct st_mysql_authsm_context *auth_context;
 
   /* state for running init_commands */
   my_bool saved_reconnect;

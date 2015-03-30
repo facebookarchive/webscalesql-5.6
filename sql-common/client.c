@@ -2815,9 +2815,8 @@ typedef struct {
 
 /* A state machine for authentication itself. */
 struct st_mysql_authsm_context;
-typedef struct st_mysql_authsm_context mysql_authsm_context;
 
-typedef mysql_state_machine_status (*authsm_function)(mysql_authsm_context*);
+typedef mysql_state_machine_status (*authsm_function)(struct st_mysql_authsm_context*);
 
 typedef enum {
   READING_PASSWORD = 8098,
@@ -2846,6 +2845,8 @@ struct st_mysql_authsm_context {
 
   authsm_function state_function;
 };
+
+typedef struct st_mysql_authsm_context mysql_authsm_context;
 
 /*
   Write 1-8 bytes of string length header infromation to dest depending on

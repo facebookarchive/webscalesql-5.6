@@ -158,6 +158,10 @@ be excluded from instrumentation. */
 # define YY_NO_UNISTD_H 1
 #endif /* __WIN__ */
 
+#if defined(HAVE_FDATASYNC) && defined(HAVE_DECL_FDATASYNC)
+# define UNIV_FDATASYNC 1
+#endif
+
 /*			DEBUG VERSION CONTROL
 			===================== */
 

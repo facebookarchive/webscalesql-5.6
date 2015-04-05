@@ -16016,6 +16016,11 @@ static MYSQL_SYSVAR_STR(flush_method, innobase_file_flush_method,
   PLUGIN_VAR_RQCMDARG | PLUGIN_VAR_READONLY,
   "With which method to flush data.", NULL, NULL, NULL);
 
+static MYSQL_SYSVAR_BOOL(use_fdatasync, srv_use_fdatasync,
+  PLUGIN_VAR_NOCMDARG,
+  "Use fdatasync instead of fsync if supported on this platform.",
+  NULL, NULL, FALSE);
+
 static MYSQL_SYSVAR_BOOL(large_prefix, innobase_large_prefix,
   PLUGIN_VAR_NOCMDARG,
   "Support large index prefix length of REC_VERSION_56_MAX_INDEX_COL_LEN (3072) bytes.",
@@ -16844,6 +16849,7 @@ static struct st_mysql_sys_var* innobase_system_variables[]= {
   MYSQL_SYSVAR(thread_sleep_delay),
   MYSQL_SYSVAR(autoinc_lock_mode),
   MYSQL_SYSVAR(version),
+  MYSQL_SYSVAR(use_fdatasync),
   MYSQL_SYSVAR(use_sys_malloc),
   MYSQL_SYSVAR(use_native_aio),
   MYSQL_SYSVAR(change_buffering),

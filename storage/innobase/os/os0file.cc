@@ -2232,7 +2232,16 @@ os_file_fsync(
 	failures = 0;
 
 	do {
-		ret = fsync(file);
+
+#ifdef UNIV_FDATASYNC
+		if (srv_use_fdatasync) {
+			ret = fdatasync(file);
+		} else
+#endif /* UNIV_FDATASYNC */
+
+		{
+			ret = fsync(file);
+		}
 
 		os_n_fsyncs++;
 

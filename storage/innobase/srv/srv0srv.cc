@@ -273,6 +273,7 @@ UNIV_INTERN ulong	srv_insert_buffer_batch_size = 20;
 UNIV_INTERN char*	srv_file_flush_method_str = NULL;
 UNIV_INTERN ulint	srv_unix_file_flush_method = SRV_UNIX_FSYNC;
 UNIV_INTERN ulint	srv_win_file_flush_method = SRV_WIN_IO_UNBUFFERED;
+UNIV_INTERN my_bool	srv_use_fdatasync = FALSE;
 
 UNIV_INTERN ulint	srv_max_n_open_files	  = 300;
 

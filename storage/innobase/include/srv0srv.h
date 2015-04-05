@@ -346,6 +346,7 @@ extern ib_uint64_t	srv_archive_recovery_limit_lsn;
 extern char*	srv_file_flush_method_str;
 extern ulint	srv_unix_file_flush_method;
 extern ulint	srv_win_file_flush_method;
+extern my_bool	srv_use_fdatasync;
 
 extern ulint	srv_max_n_open_files;
 

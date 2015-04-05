@@ -1758,6 +1758,19 @@ innobase_start_or_create_for_mysql(void)
 	srv_use_native_aio = FALSE;
 #endif /* __WIN__ */
 
+#if defined(UNIV_FDATASYNC)
+
+	if (srv_use_fdatasync) {
+		ib_logf(IB_LOG_LEVEL_INFO, "Using fdatasync");
+	}
+#else
+	if (srv_use_fdatasync) {
+		ib_logf(IB_LOG_LEVEL_WARN, "fdatasync() not supported. "
+			"Falling back on fsync()");
+		srv_use_fdatasync = FALSE;
+	}
+#endif
+
 	if (srv_file_flush_method_str == NULL) {
 		/* These are the default options */
 

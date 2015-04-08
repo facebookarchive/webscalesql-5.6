@@ -1,0 +1,2 @@
+--innodb_use_native_aio=1
+--force-restart

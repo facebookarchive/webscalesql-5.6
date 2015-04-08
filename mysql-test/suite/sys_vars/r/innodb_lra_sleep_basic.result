@@ -1,0 +1,30 @@
+SET GLOBAL innodb_lra_sleep = 128;
+SELECT @@GLOBAL.innodb_lra_sleep;
+@@GLOBAL.innodb_lra_sleep
+128
+SET SESSION innodb_lra_sleep=1000000;
+Warnings:
+Warning	1292	Truncated incorrect innodb_lra_sleep value: '1000000'
+SELECT @@SESSION.innodb_lra_sleep;
+@@SESSION.innodb_lra_sleep
+1000
+SET SESSION innodb_lra_sleep=0;
+SELECT @@SESSION.innodb_lra_sleep;
+@@SESSION.innodb_lra_sleep
+0
+SET SESSION innodb_lra_sleep=16384;
+Warnings:
+Warning	1292	Truncated incorrect innodb_lra_sleep value: '16384'
+SELECT @@SESSION.innodb_lra_sleep;
+@@SESSION.innodb_lra_sleep
+1000
+SET GLOBAL innodb_lra_sleep=-1;
+Warnings:
+Warning	1292	Truncated incorrect innodb_lra_sleep value: '-1'
+SELECT @@GLOBAL.innodb_lra_sleep;
+@@GLOBAL.innodb_lra_sleep
+0
+SET GLOBAL innodb_lra_sleep = default;
+SELECT @@GLOBAL.innodb_lra_sleep;
+@@GLOBAL.innodb_lra_sleep
+50

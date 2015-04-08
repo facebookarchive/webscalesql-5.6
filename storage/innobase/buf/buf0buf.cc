@@ -3224,9 +3224,10 @@ got_block:
 
 	mtr_memo_push(mtr, fix_block, fix_type);
 
-	if (mode != BUF_PEEK_IF_IN_POOL && !access_time) {
-		/* In the case of a first access, try to apply linear
-		read-ahead */
+	if (mode != BUF_PEEK_IF_IN_POOL && !access_time
+	    && (!mtr->trx || !mtr->trx->lra.lra_size)) {
+		/* In the case of a first access, and logical read ahead
+		is not set, try to apply linear read-ahead */
 
 		buf_read_ahead_linear(
 			space, zip_size, offset, ibuf_inside(mtr));
@@ -3336,9 +3337,9 @@ buf_page_optimistic_get(
 	mutex_exit(&block->mutex);
 #endif
 
-	if (!access_time) {
-		/* In the case of a first access, try to apply linear
-		read-ahead */
+	if (!access_time && (!mtr->trx || !mtr->trx->lra.lra_size)) {
+		/* In the case of a first access, and logical read ahead
+		is not set, try to apply linear read-ahead */
 
 		buf_read_ahead_linear(buf_block_get_space(block),
 				      buf_block_get_zip_size(block),

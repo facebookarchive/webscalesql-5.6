@@ -30,6 +30,42 @@ Created 11/5/1995 Heikki Tuuri
 #include "buf0types.h"
 
 /********************************************************************//**
+Low-level function which reads a page asynchronously from a file to the
+buffer buf_pool if it is not already there, in which case does nothing.
+Sets the io_fix flag and sets an exclusive lock on the buffer frame. The
+flag is cleared and the x-lock released by an i/o-handler thread.
+@return 1 if a read request was queued, 0 if the page already resided
+in buf_pool, or if the page is in the doublewrite buffer blocks in
+which case it is never read into the pool, or if the tablespace does
+not exist or is being dropped
+@return 1 if read request is issued. 0 if it is not */
+UNIV_INTERN
+ulint
+buf_read_page_low(
+/*==============*/
+	dberr_t*	err,	/*!< out: DB_SUCCESS or DB_TABLESPACE_DELETED
+			if we are trying to read from a non-existent
+			tablespace, or a tablespace which is just now being
+			dropped */
+	bool	sync,	/*!< in: TRUE if synchronous aio is desired */
+	ulint	mode,	/*!< in: BUF_READ_IBUF_PAGES_ONLY, ...,
+			ORed to OS_AIO_SIMULATED_WAKE_LATER (see below
+			at read-ahead functions) */
+	ulint	space,	/*!< in: space id */
+	ulint	zip_size,/*!< in: compressed page size, or 0 */
+	ibool	unzip,	/*!< in: TRUE=request uncompressed page */
+	ib_int64_t tablespace_version, /*!< in: if the space memory object has
+			this timestamp different from what we are giving here,
+			treat the tablespace as dropped; this is a timestamp
+			we use to stop dangling page reads from a tablespace
+			which we have DISCARDed + IMPORTed back */
+	ulint	offset,	/*!< in: page number */
+	ibool	should_buffer);	/*!< in: whether to buffer an aio request.
+				AIO read ahead uses this. If you plan to
+				use this parameter, make sure you remember
+				to call os_aio_linux_dispatch_read_array_submit
+				when you're ready to commit all your requests.*/
+/********************************************************************//**
 High-level function which reads a page asynchronously from a file to the
 buffer buf_pool if it is not already there. Sets the io_fix flag and sets
 an exclusive lock on the buffer frame. The flag is cleared and the x-lock

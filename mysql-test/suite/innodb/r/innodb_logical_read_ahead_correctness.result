@@ -1,0 +1,88 @@
+DROP TABLE IF EXISTS t1_small;
+DROP TABLE IF EXISTS t1;
+DROP TABLE IF EXISTS t1_lra;
+DROP TABLE IF EXISTS t2_small;
+DROP TABLE IF EXISTS t3_small;
+CREATE TABLE t1_small(a INT NOT NULL PRIMARY KEY AUTO_INCREMENT, b VARCHAR(256)) ENGINE=INNODB;
+SET SESSION innodb_lra_size=1;
+SELECT * FROM t1_small;
+a	b
+SET SESSION innodb_lra_size=0;
+INSERT INTO t1_small(b) VALUES(REPEAT('a',256));
+SET SESSION innodb_lra_size=1;
+SELECT a, LENGTH(b) FROM t1_small;
+a	LENGTH(b)
+1	256
+SET SESSION innodb_lra_size=0;
+DROP TABLE t1_small;
+CREATE TABLE `t2_small` (
+`id1` bigint(20) unsigned NOT NULL DEFAULT '0',
+`time` bigint(20) unsigned NOT NULL DEFAULT '0',
+`id2` bigint(20) unsigned NOT NULL DEFAULT '0',
+`id2_type` int(10) unsigned DEFAULT NULL,
+`data` text,
+`status` tinyint(3) unsigned DEFAULT NULL,
+PRIMARY KEY (`id1`,`time`,`id2`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+SET SESSION innodb_lra_size=1;
+SELECT * FROM t2_small;
+id1	time	id2	id2_type	data	status
+DROP TABLE t2_small;
+CREATE TABLE `t3_small` (
+`id` bigint(20) NOT NULL,
+`a` text,
+`b` text,
+`c` text,
+`d` text,
+`e` text,
+`f` text,
+`g` text,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+SET SESSION innodb_lra_size=1;
+SELECT * FROM t3_small;
+id	a	b	c	d	e	f	g
+DROP TABLE t3_small;
+CREATE TABLE t1(a INT NOT NULL PRIMARY KEY AUTO_INCREMENT, b VARCHAR(256)) ENGINE=INNODB;
+CREATE TABLE t1_lra(a INT NOT NULL PRIMARY KEY AUTO_INCREMENT, b VARCHAR(256)) ENGINE=INNODB;
+INSERT INTO t1 VALUES (0, REPEAT('a',256));
+INSERT INTO t1(b) SELECT b FROM t1;
+INSERT INTO t1(b) SELECT b FROM t1;
+INSERT INTO t1(b) SELECT b FROM t1;
+INSERT INTO t1(b) SELECT b FROM t1;
+INSERT INTO t1(b) SELECT b FROM t1;
+INSERT INTO t1(b) SELECT b FROM t1;
+INSERT INTO t1(b) SELECT b FROM t1;
+INSERT INTO t1(b) SELECT b FROM t1;
+INSERT INTO t1(b) SELECT b FROM t1;
+INSERT INTO t1(b) SELECT b FROM t1;
+INSERT INTO t1(b) SELECT b FROM t1;
+INSERT INTO t1(b) SELECT b FROM t1;
+INSERT INTO t1(b) SELECT b FROM t1;
+INSERT INTO t1(b) SELECT b FROM t1;
+INSERT INTO t1_lra SELECT * FROM t1;
+CHECKSUM TABLE t1;
+Table	Checksum
+test.t1	2793042655
+SET SESSION innodb_lra_size=1;
+SET SESSION innodb_lra_pages_before_sleep=128;
+SET SESSION innodb_lra_sleep=100;
+CHECKSUM TABLE t1_lra;
+Table	Checksum
+test.t1_lra	2793042655
+DELETE FROM t1 WHERE a >= 5480 AND a < 5520;
+DELETE FROM t1 WHERE a >= 5520 AND a < 5550;
+CHECKSUM TABLE t1;
+Table	Checksum
+test.t1	1005864202
+SET GLOBAL innodb_lra_debug=1;
+DELETE FROM t1_lra WHERE a >= 5480 AND a < 5520;
+DELETE FROM t1_lra WHERE a >= 5520 AND a < 5550;
+SET SESSION innodb_lra_size=1;
+SET SESSION innodb_lra_pages_before_sleep=128;
+SET SESSION innodb_lra_sleep=100;
+CHECKSUM TABLE t1_lra;
+Table	Checksum
+test.t1_lra	1005864202
+DROP TABLE t1;
+DROP TABLE t1_lra;

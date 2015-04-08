@@ -1,0 +1,28 @@
+SET GLOBAL innodb_lra_size = 128;
+SELECT @@GLOBAL.innodb_lra_size;
+@@GLOBAL.innodb_lra_size
+128
+SET SESSION innodb_lra_size=1000000;
+Warnings:
+Warning	1292	Truncated incorrect innodb_lra_size value: '1000000'
+SELECT @@SESSION.innodb_lra_size;
+@@SESSION.innodb_lra_size
+16384
+SET SESSION innodb_lra_size=0;
+SELECT @@SESSION.innodb_lra_size;
+@@SESSION.innodb_lra_size
+0
+SET SESSION innodb_lra_size=16384;
+SELECT @@SESSION.innodb_lra_size;
+@@SESSION.innodb_lra_size
+16384
+SET GLOBAL innodb_lra_size=-1;
+Warnings:
+Warning	1292	Truncated incorrect innodb_lra_size value: '-1'
+SELECT @@GLOBAL.innodb_lra_size;
+@@GLOBAL.innodb_lra_size
+0
+SET GLOBAL innodb_lra_size = default;
+SELECT @@GLOBAL.innodb_lra_size;
+@@GLOBAL.innodb_lra_size
+0

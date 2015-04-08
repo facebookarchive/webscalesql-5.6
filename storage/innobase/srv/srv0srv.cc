@@ -1522,6 +1522,12 @@ srv_export_innodb_status(void)
 
 	export_vars.innodb_buffered_aio_submitted =
 		srv_stats.n_aio_submitted;
+	export_vars.innodb_logical_read_ahead_misses =
+		srv_stats.n_logical_read_ahead_misses;
+	export_vars.innodb_logical_read_ahead_prefetched =
+		srv_stats.n_logical_read_ahead_prefetched;
+	export_vars.innodb_logical_read_ahead_in_buf_pool =
+		srv_stats.n_logical_read_ahead_in_buf_pool;
 
 	mutex_exit(&srv_innodb_monitor_mutex);
 }

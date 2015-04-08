@@ -262,11 +262,12 @@ btr_pcur_restore_position_func(
 /*===========================*/
 	ulint		latch_mode,	/*!< in: BTR_SEARCH_LEAF, ... */
 	btr_pcur_t*	cursor,		/*!< in: detached persistent cursor */
+	ulint		level,		/*!< in: level in the btree */
 	const char*	file,		/*!< in: file name */
 	ulint		line,		/*!< in: line where called */
 	mtr_t*		mtr);		/*!< in: mtr */
-#define btr_pcur_restore_position(l,cur,mtr)				\
-	btr_pcur_restore_position_func(l,cur,__FILE__,__LINE__,mtr)
+#define btr_pcur_restore_position(l, cur, mtr)				\
+	btr_pcur_restore_position_func(l, cur, 0, __FILE__, __LINE__, mtr)
 /*********************************************************//**
 Gets the rel_pos field for a cursor whose position has been stored.
 @return	BTR_PCUR_ON, ... */

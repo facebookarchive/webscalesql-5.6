@@ -223,6 +223,7 @@ btr_pcur_restore_position_func(
 /*===========================*/
 	ulint		latch_mode,	/*!< in: BTR_SEARCH_LEAF, ... */
 	btr_pcur_t*	cursor,		/*!< in: detached persistent cursor */
+	ulint		level,		/*!< in: btree level to set cursor to */
 	const char*	file,		/*!< in: file name */
 	ulint		line,		/*!< in: line where called */
 	mtr_t*		mtr)		/*!< in: mtr */
@@ -251,7 +252,7 @@ btr_pcur_restore_position_func(
 		btr_cur_open_at_index_side(
 			cursor->rel_pos == BTR_PCUR_BEFORE_FIRST_IN_TREE,
 			index, latch_mode,
-			btr_pcur_get_btr_cur(cursor), 0, mtr);
+			btr_pcur_get_btr_cur(cursor), level, mtr);
 
 		cursor->latch_mode = latch_mode;
 		cursor->pos_state = BTR_PCUR_IS_POSITIONED;
@@ -263,9 +264,13 @@ btr_pcur_restore_position_func(
 	ut_a(cursor->old_rec);
 	ut_a(cursor->old_n_fields);
 
-	if (UNIV_LIKELY(latch_mode == BTR_SEARCH_LEAF)
-	    || UNIV_LIKELY(latch_mode == BTR_MODIFY_LEAF)) {
-		/* Try optimistic restoration. */
+	if (true
+#ifdef UNIV_DEBUG
+	    && !level
+#endif
+	    && (UNIV_LIKELY(latch_mode == BTR_SEARCH_LEAF)
+	    || UNIV_LIKELY(latch_mode == BTR_MODIFY_LEAF))) {
+		/* Try optimistic restoration */
 
 		if (buf_page_optimistic_get(latch_mode,
 					    cursor->block_when_stored,
@@ -321,24 +326,27 @@ btr_pcur_restore_position_func(
 
 	/* Save the old search mode of the cursor */
 	old_mode = cursor->search_mode;
-
-	switch (cursor->rel_pos) {
-	case BTR_PCUR_ON:
+	if (level > 0) {
 		mode = PAGE_CUR_LE;
-		break;
-	case BTR_PCUR_AFTER:
-		mode = PAGE_CUR_G;
-		break;
-	case BTR_PCUR_BEFORE:
-		mode = PAGE_CUR_L;
-		break;
-	default:
-		ut_error;
-		mode = 0;
+	} else {
+		switch (cursor->rel_pos) {
+		case BTR_PCUR_ON:
+			mode = PAGE_CUR_LE;
+			break;
+		case BTR_PCUR_AFTER:
+			mode = PAGE_CUR_G;
+			break;
+		case BTR_PCUR_BEFORE:
+			mode = PAGE_CUR_L;
+			break;
+		default:
+			ut_error;
+			mode = 0;
+		}
 	}
 
-	btr_pcur_open_with_no_init_func(index, tuple, mode, latch_mode,
-					cursor, 0, file, line, mtr);
+	btr_pcur_open_with_no_init_func_low(index, tuple, mode, latch_mode,
+					    cursor, level, 0, file, line, mtr);
 
 	/* Restore the old search mode */
 	cursor->search_mode = old_mode;

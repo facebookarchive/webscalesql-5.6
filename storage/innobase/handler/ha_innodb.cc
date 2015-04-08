@@ -540,6 +540,25 @@ static MYSQL_THDVAR_ULONG(lock_wait_timeout, PLUGIN_VAR_RQCMDARG,
   "Timeout in seconds an InnoDB transaction may wait for a lock before being rolled back. Values above 100000000 disable the timeout.",
   NULL, NULL, 50, 1, 1024 * 1024 * 1024, 0);
 
+static MYSQL_THDVAR_ULONG(lra_size, PLUGIN_VAR_OPCMDARG,
+  "The size (in MBs) of the total size of the pages that innodb will prefetch "
+  "while scanning a table during this session. This is meant to be used only "
+  "for table scans. The upper limit of this variable is 16384 which "
+  "corresponds to prefetching 16GB of data. When set to max, this algorithm "
+  "may use 100M memory.", NULL, NULL, 0, 0, 16384, 0);
+
+static MYSQL_THDVAR_ULONG(lra_pages_before_sleep, PLUGIN_VAR_OPCMDARG,
+  "This variable defines the number of node pointer records traversed while "
+  "holding the index lock before releasing the index lock and sleeping for a "
+  "short period of time so that the other threads get a chance to x-latch the "
+  "index lock.",
+  NULL, NULL, 1024, 128, ULINT_MAX, 0);
+
+static MYSQL_THDVAR_ULONG(lra_sleep, PLUGIN_VAR_OPCMDARG,
+  "The time LRA sleeps milliseconds before processing the next batch of "
+  "lra_pages_before_sleep node pointer records.",
+  NULL, NULL, 50, 0, 1000, 0);
+
 static MYSQL_THDVAR_STR(ft_user_stopword_table,
   PLUGIN_VAR_OPCMDARG|PLUGIN_VAR_MEMALLOC,
   "User supplied stopword table name, effective in the session level.",
@@ -664,6 +683,12 @@ static SHOW_VAR innodb_status_variables[]= {
   (char*) &export_vars.innodb_sec_rec_cluster_reads_avoided, SHOW_LONG},
   {"buffered_aio_submitted",
    (char*) &export_vars.innodb_buffered_aio_submitted,    SHOW_LONG},
+  {"logical_read_ahead_misses",
+   (char*) &export_vars.innodb_logical_read_ahead_misses, SHOW_LONG},
+  {"logical_read_ahead_prefetched",
+   (char*) &export_vars.innodb_logical_read_ahead_prefetched, SHOW_LONG},
+  {"logical_read_ahead_in_buf_pool",
+   (char*) &export_vars.innodb_logical_read_ahead_in_buf_pool, SHOW_LONG},
   {NullS, NullS, SHOW_LONG}
 };
 
@@ -2056,6 +2081,11 @@ innobase_trx_init(
 	trx->check_unique_secondary = !thd_test_options(
 		thd, OPTION_RELAXED_UNIQUE_CHECKS);
 
+	trx_lra_reset(trx,
+		      THDVAR(thd, lra_size),
+		      THDVAR(thd, lra_pages_before_sleep),
+		      THDVAR(thd, lra_sleep));
+
 	DBUG_VOID_RETURN;
 }
 
@@ -2077,6 +2107,10 @@ innobase_trx_allocate(
 	trx = trx_allocate_for_mysql();
 
 	trx->mysql_thd = thd;
+	trx_lra_reset(trx,
+		      THDVAR(thd, lra_size),
+		      THDVAR(thd, lra_pages_before_sleep),
+		      THDVAR(thd, lra_sleep));
 
 	innobase_trx_init(thd, trx);
 
@@ -3412,6 +3446,7 @@ innobase_commit_low(
 /*================*/
 	trx_t*	trx)	/*!< in: transaction handle */
 {
+	trx_lra_free(&(trx->lra));
 	if (trx_is_started(trx)) {
 
 		trx_commit_for_mysql(trx);
@@ -16660,6 +16695,15 @@ static MYSQL_SYSVAR_ULONG(saved_page_number_debug,
   srv_saved_page_number_debug, PLUGIN_VAR_OPCMDARG,
   "An InnoDB page number.",
   NULL, innodb_save_page_no, 0, 0, UINT_MAX32, 0);
+
+extern my_bool row_lra_debug;
+
+static MYSQL_SYSVAR_BOOL(lra_debug, row_lra_debug,
+  PLUGIN_VAR_NOCMDARG,
+  "When set to true, the purge thread stops until the logical read ahead "
+  "sets this variable to TRUE. Used for testing edge cases regarding the "
+  "purge thread and logical read ahead.",
+  NULL, NULL, FALSE);
 #endif /* UNIV_DEBUG */
 
 static MYSQL_SYSVAR_BOOL(deadlock_detect, srv_deadlock_detect,
@@ -16837,7 +16881,11 @@ static struct st_mysql_sys_var* innobase_system_variables[]= {
   MYSQL_SYSVAR(trx_purge_view_update_only_debug),
   MYSQL_SYSVAR(fil_make_page_dirty_debug),
   MYSQL_SYSVAR(saved_page_number_debug),
+  MYSQL_SYSVAR(lra_debug),
 #endif /* UNIV_DEBUG */
+  MYSQL_SYSVAR(lra_size),
+  MYSQL_SYSVAR(lra_pages_before_sleep),
+  MYSQL_SYSVAR(lra_sleep),
   MYSQL_SYSVAR(zlib_wrap),
   MYSQL_SYSVAR(zlib_strategy),
   MYSQL_SYSVAR(lru_manager_max_sleep_time),

@@ -1,0 +1,28 @@
+SET GLOBAL innodb_lra_pages_before_sleep = 128;
+SELECT @@GLOBAL.innodb_lra_pages_before_sleep;
+@@GLOBAL.innodb_lra_pages_before_sleep
+128
+SET SESSION innodb_lra_pages_before_sleep=1000000;
+SELECT @@SESSION.innodb_lra_pages_before_sleep;
+@@SESSION.innodb_lra_pages_before_sleep
+1000000
+SET SESSION innodb_lra_pages_before_sleep=0;
+Warnings:
+Warning	1292	Truncated incorrect innodb_lra_pages_before_sleep value: '0'
+SELECT @@SESSION.innodb_lra_pages_before_sleep;
+@@SESSION.innodb_lra_pages_before_sleep
+128
+SET SESSION innodb_lra_pages_before_sleep=16384;
+SELECT @@SESSION.innodb_lra_pages_before_sleep;
+@@SESSION.innodb_lra_pages_before_sleep
+16384
+SET GLOBAL innodb_lra_pages_before_sleep=-1;
+Warnings:
+Warning	1292	Truncated incorrect innodb_lra_pages_before_sleep value: '-1'
+SELECT @@GLOBAL.innodb_lra_pages_before_sleep;
+@@GLOBAL.innodb_lra_pages_before_sleep
+128
+SET GLOBAL innodb_lra_pages_before_sleep = default;
+SELECT @@GLOBAL.innodb_lra_pages_before_sleep;
+@@GLOBAL.innodb_lra_pages_before_sleep
+1024

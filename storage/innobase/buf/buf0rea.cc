@@ -100,7 +100,6 @@ in buf_pool, or if the page is in the doublewrite buffer blocks in
 which case it is never read into the pool, or if the tablespace does
 not exist or is being dropped
 @return 1 if read request is issued. 0 if it is not */
-static
 ulint
 buf_read_page_low(
 /*==============*/

@@ -1,0 +1,77 @@
+--source include/have_innodb.inc
+--source include/have_native_aio.inc
+# embedded server does not support restarting
+-- source include/not_embedded.inc
+
+--disable_warnings
+DROP TABLE if exists t1;
+--enable_warnings
+
+let $page_size = query_get_value(SELECT @@innodb_page_size, @@innodb_page_size, 1);
+
+# Create table.
+CREATE TABLE t1 (a INT NOT NULL PRIMARY KEY AUTO_INCREMENT, b VARCHAR(256)) ENGINE=INNODB;
+
+# Populate table.
+INSERT INTO t1 VALUES (0, REPEAT('a',256));
+INSERT INTO t1 SELECT 0, b FROM t1;
+INSERT INTO t1 SELECT 0, b FROM t1;
+INSERT INTO t1 SELECT 0, b FROM t1;
+INSERT INTO t1 SELECT 0, b FROM t1;
+INSERT INTO t1 SELECT 0, b FROM t1;
+INSERT INTO t1 SELECT 0, b FROM t1;
+INSERT INTO t1 SELECT 0, b FROM t1;
+INSERT INTO t1 SELECT 0, b FROM t1;
+INSERT INTO t1 SELECT 0, b FROM t1;
+INSERT INTO t1 SELECT 0, b FROM t1;
+INSERT INTO t1 SELECT 0, b FROM t1;
+INSERT INTO t1 SELECT 0, b FROM t1;
+INSERT INTO t1 SELECT 0, b FROM t1;
+INSERT INTO t1 SELECT 0, b FROM t1;
+INSERT INTO t1 SELECT 0, b FROM t1;
+INSERT INTO t1 SELECT 0, b FROM t1;
+
+--source include/restart_mysqld.inc
+
+show global status like "innodb_buffered_aio_submitted";
+show global status like "innodb_logical_read_ahead_misses";
+show global status like "innodb_logical_read_ahead_prefetched";
+show global status like "innodb_logical_read_ahead_in_buf_pool";
+
+# set the logical read ahead large enough to prefetch
+# the entire table.
+SET SESSION innodb_lra_size=1024;
+SET SESSION innodb_lra_pages_before_sleep=128;
+SET SESSION innodb_lra_sleep=100;
+checksum table t1;
+
+# the asynchronous io submits must be nonzero and equal
+# to the innodb_logical_read_ahead_prefetched.
+select t1.variable_value=t2.variable_value prefetched_equals_submitted from information_schema.global_status t1, information_schema.global_status t2 where t1.variable_name = 'innodb_logical_read_ahead_prefetched' and t2.variable_name='innodb_buffered_aio_submitted';
+
+# there should be no misses, all pages must have been
+# prefetched by the logical read ahead.
+show global status like "innodb_logical_read_ahead_misses";
+# the total number of pages prefetched must be close to the number
+# of leaf pages of the table.
+
+let $expected_pages = 1000;
+if ($page_size == 32768)
+{
+  let $expected_pages = 500;
+}
+--replace_result $expected_pages expected_pages
+eval select variable_value > $expected_pages from information_schema.global_status where variable_name="innodb_logical_read_ahead_prefetched";
+# innodb_logical_read_ahead_in_buf_pool is the number of pages
+# of the table that were already in the buffer pool while doing the scan.
+# This should be small.
+
+let $expected = 100;
+if ($page_size == 32768)
+{
+  let $expected = 50;
+}
+--replace_result $expected expected
+eval select variable_value < $expected from information_schema.global_status where variable_name="innodb_logical_read_ahead_in_buf_pool";
+
+DROP TABLE t1;

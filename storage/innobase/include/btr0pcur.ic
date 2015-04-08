@@ -448,6 +448,53 @@ Opens an persistent cursor to an index tree without initializing the
 cursor. */
 UNIV_INLINE
 void
+btr_pcur_open_with_no_init_func_low(
+/*============================*/
+	dict_index_t*	index,	/*!< in: index */
+	const dtuple_t*	tuple,	/*!< in: tuple on which search done */
+	ulint		mode,	/*!< in: PAGE_CUR_L, ...;
+				NOTE that if the search is made using a unique
+				prefix of a record, mode should be
+				PAGE_CUR_LE, not PAGE_CUR_GE, as the latter
+				may end up on the previous page of the
+				record! */
+	ulint		latch_mode,/*!< in: BTR_SEARCH_LEAF, ...;
+				NOTE that if has_search_latch != 0 then
+				we maybe do not acquire a latch on the cursor
+				page, but assume that the caller uses his
+				btr search latch to protect the record! */
+	btr_pcur_t*	cursor, /*!< in: memory buffer for persistent cursor */
+	ulint		level,	/*!< in: level in the btree */
+	ulint		has_search_latch,/*!< in: latch mode the caller
+				currently has on btr_search_latch:
+				RW_S_LATCH, or 0 */
+	const char*	file,	/*!< in: file name */
+	ulint		line,	/*!< in: line where called */
+	mtr_t*		mtr)	/*!< in: mtr */
+{
+	btr_cur_t*	btr_cursor;
+
+	cursor->latch_mode = latch_mode;
+	cursor->search_mode = mode;
+
+	/* Search with the tree cursor */
+
+	btr_cursor = btr_pcur_get_btr_cur(cursor);
+
+	btr_cur_search_to_nth_level(index, level, tuple, mode, latch_mode,
+				    btr_cursor, has_search_latch,
+				    file, line, mtr);
+	cursor->pos_state = BTR_PCUR_IS_POSITIONED;
+
+	cursor->old_stored = BTR_PCUR_OLD_NOT_STORED;
+
+	cursor->trx_if_known = NULL;
+}
+/**************************************************************//**
+Opens an persistent cursor to an index tree without initializing the
+cursor. */
+UNIV_INLINE
+void
 btr_pcur_open_with_no_init_func(
 /*============================*/
 	dict_index_t*	index,	/*!< in: index */
@@ -471,23 +518,9 @@ btr_pcur_open_with_no_init_func(
 	ulint		line,	/*!< in: line where called */
 	mtr_t*		mtr)	/*!< in: mtr */
 {
-	btr_cur_t*	btr_cursor;
-
-	cursor->latch_mode = latch_mode;
-	cursor->search_mode = mode;
-
-	/* Search with the tree cursor */
-
-	btr_cursor = btr_pcur_get_btr_cur(cursor);
-
-	btr_cur_search_to_nth_level(index, 0, tuple, mode, latch_mode,
-				    btr_cursor, has_search_latch,
-				    file, line, mtr);
-	cursor->pos_state = BTR_PCUR_IS_POSITIONED;
-
-	cursor->old_stored = BTR_PCUR_OLD_NOT_STORED;
-
-	cursor->trx_if_known = NULL;
+	return btr_pcur_open_with_no_init_func_low(
+			index, tuple, mode, latch_mode, cursor,
+			0, has_search_latch, file, line, mtr);
 }
 
 /*****************************************************************//**

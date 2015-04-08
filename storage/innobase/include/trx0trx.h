@@ -39,6 +39,7 @@ Created 3/26/1996 Heikki Tuuri
 #include "trx0xa.h"
 #include "ut0vec.h"
 #include "fts0fts.h"
+#include "btr0types.h"
 
 /** Dummy session used currently in MySQL interface */
 extern sess_t*	trx_dummy_sess;
@@ -133,7 +134,6 @@ trx_lists_init_at_db_start(void);
 #define trx_start_if_not_started_xa(t)				\
 	trx_start_if_not_started_xa_low((t))
 #endif /* UNIV_DEBUG */
-
 /*************************************************************//**
 Starts the transaction if it is not yet started. */
 UNIV_INTERN
@@ -630,6 +630,103 @@ struct trx_lock_t {
 
 #define TRX_MAGIC_N	91118598
 
+/*******************************************************************//**
+Helper data structure to store page numbers in an internally-linked hash
+table. */
+typedef struct page_no_holder_struct page_no_holder_t;
+struct page_no_holder_struct {
+        ulint	page_no;
+        page_no_holder_t* hash;
+};
+
+struct lra_t {
+	ulint		lra_size;	/* Total size (in MBs) of the
+					pages that will be prefetched by
+					logical read ahead. */
+	ulint		lra_n_pages;	/* Number of pages that lra prefetches
+					every time. This is computed using
+					lra_size and the currently scanned
+					table's block size */
+	ulint		lra_space_id;	/* The last space id that the scanning
+					transaction accessed. If the scanning
+					trx accesses multiple tables, we need
+					to reset the data structures that lra
+					uses. */
+	ulint		lra_page_no;	/* The last page that was visited
+					by the trx. Used by the
+					logical-read-ahead algorithm to
+					determine if a new prefetch should be
+					performed. */
+	hash_table_t*	lra_ht1;
+	hash_table_t*	lra_ht2;	/* Hash tables store the leaf page
+					numbers for the already prefetched
+					pages. Each hash table will typically
+					have lra_n_pages pages and when the
+					scanning trx visits all lra_n_pages
+					pages in one of them, we will empty
+					that one and prefetch another batch of
+					lra_n_pages pages. */
+	hash_table_t*	lra_ht;		/* Points to lra_ht1 and lra_ht2
+					alternatingly. */
+	ulint		lra_n_pages_since;/* number of leaf pages visited since
+					the last prefetch operation. We require
+					that no prefetch be done until the
+					scanning trx scans lra_n_pages pages.
+					*/
+	ulint*		lra_sort_arr;	/* Array used for sorting the page
+					numbers before issuing the read
+					requests */
+	page_no_holder_t* lra_arr1;	/* Pre-allocated array of
+					page_no_holder objects which are used
+					by the logical-read-ahead algorithm for
+					lra_ht1. */
+	page_no_holder_t* lra_arr2;	/* Pre-allocated array of
+					page_no_holder objects which are used
+					by the logical-read-ahead algorithm for
+					lra_ht2. */
+	btr_pcur_t*	lra_cur;	/* The persistent cursor that points
+					to the first node pointer record for
+					which the associated leaf page is not
+					prefetched by LRA. */
+	ulint		lra_pages_before_sleep;
+					/* Number of node pointer records
+					traversed while holding the index lock
+					before releasing the index lock and
+					sleeping for a short period of time so
+					that the other threads get a chance to
+					x-latch the index lock. */
+	ulint		lra_sleep;	/* Sleep time in milliseconds. */
+	ulint		lra_tree_height;/* Tree height. */
+};
+
+/*************************************************************//**
+Frees data structures related to logical-read-ahead. */
+void
+trx_lra_free(
+/*=============================*/
+	lra_t*	lra);		/*!< in: lra structure. */
+/*************************************************************//**
+Creates or frees data structures related to logical-read-ahead.
+based on the value of lra_size. */
+UNIV_INTERN
+void
+trx_lra_reset(
+	trx_t* trx, /*!< in: transaction */
+	ulint lra_size, /*!< in: lra_size in MB.
+				       If 0, the fields that are releated
+				       to logical-read-ahead will be free'd
+				       if they were initialized. */
+	ulint lra_pages_before_sleep,
+					/*!< in: lra_pages_before_sleep
+					is the number of node pointer records
+					traversed while holding the index lock
+					before releasing the index lock and
+					sleeping for a short period of time so
+					that the other threads get a chance to
+					x-latch the index lock. */
+	ulint lra_sleep);		/* lra_sleep is the sleep time in
+					milliseconds. */
+
 /** The transaction handle
 
 Normally, there is a 1:1 relationship between a transaction handle
@@ -783,6 +880,8 @@ struct trx_t{
 					FALSE, one can save CPU time and about
 					150 bytes in the undo log size as then
 					we skip XA steps */
+	lra_t		lra;		/* Data structure for logical read
+					ahead states. */
 	ulint		flush_log_later;/* In 2PC, we hold the
 					prepare_commit mutex across
 					both phases. In that case, we

@@ -516,6 +516,7 @@ btr_cur_search_to_nth_level(
 	    btr_search_enabled below, and btr_search_guess_on_hash()
 	    will have to check it again. */
 	    && UNIV_LIKELY(btr_search_enabled)
+	    && !level
 	    && btr_search_guess_on_hash(index, info, tuple, mode,
 					latch_mode, cursor,
 					has_search_latch, mtr)) {

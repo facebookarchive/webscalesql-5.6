@@ -647,6 +647,12 @@ struct lra_t {
 					every time. This is computed using
 					lra_size and the currently scanned
 					table's block size */
+	ulint		lra_n_spaces;	/* Number of times space id can change
+					before lra is disabled during
+					transaction execution. */
+	ulint		lra_count_n_spaces;
+					/* Number of times space id changes
+					during transaction execution. */
 	ulint		lra_space_id;	/* The last space id that the scanning
 					transaction accessed. If the scanning
 					trx accesses multiple tables, we need
@@ -711,22 +717,22 @@ based on the value of lra_size. */
 UNIV_INTERN
 void
 trx_lra_reset(
-	trx_t* trx, /*!< in: transaction */
-	ulint lra_size, /*!< in: lra_size in MB.
-				       If 0, the fields that are releated
-				       to logical-read-ahead will be free'd
-				       if they were initialized. */
-	ulint lra_pages_before_sleep,
-					/*!< in: lra_pages_before_sleep
-					is the number of node pointer records
-					traversed while holding the index lock
-					before releasing the index lock and
-					sleeping for a short period of time so
-					that the other threads get a chance to
-					x-latch the index lock. */
-	ulint lra_sleep);		/* lra_sleep is the sleep time in
-					milliseconds. */
-
+/*=============================*/
+	trx_t*	trx,		/*!< in: transaction */
+	ulint	lra_size,	/*!< in: lra_size in MB. If 0, the fields that
+				are releated to logical-read-ahead will be freed
+				if they were initialized. */
+	ulint	lra_pages_before_sleep,
+				/*!< in: The number of node pointer records
+				traversed while holding the index lock before
+				releasing the index lock and sleeping for a
+				short period of time so that the other threads
+				get a chance to x-latch the index lock. */
+	ulint	lra_sleep,	/*!< in: Sleep time in milliseconds. */
+	ulint	lra_n_spaces,	/*!< in: Number of space switches before lra is
+				disabled. */
+	bool	reset_lra_count_n_spaces);
+				/*!< in: whether to reset lra_count_n_spaces. */
 /** The transaction handle
 
 Normally, there is a 1:1 relationship between a transaction handle

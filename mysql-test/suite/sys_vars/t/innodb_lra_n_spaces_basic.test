@@ -1,0 +1,14 @@
+--source include/have_innodb.inc
+
+SET GLOBAL innodb_lra_n_spaces = 10;
+SELECT @@GLOBAL.innodb_lra_n_spaces;
+SET SESSION innodb_lra_n_spaces=1;
+SELECT @@SESSION.innodb_lra_n_spaces;
+SET SESSION innodb_lra_n_spaces=16;
+SELECT @@SESSION.innodb_lra_n_spaces;
+SET SESSION innodb_lra_n_spaces=0;
+SELECT @@SESSION.innodb_lra_n_spaces;
+SET GLOBAL innodb_lra_n_spaces=1000;
+SELECT @@GLOBAL.innodb_lra_n_spaces;
+SET GLOBAL innodb_lra_n_spaces = default;
+SELECT @@GLOBAL.innodb_lra_n_spaces;

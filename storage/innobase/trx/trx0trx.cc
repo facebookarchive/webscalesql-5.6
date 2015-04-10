@@ -100,6 +100,8 @@ trx_lra_init(
 {
 	lra->lra_size = 0;
 	lra->lra_space_id = 0;
+	lra->lra_n_spaces = 0;
+	lra->lra_count_n_spaces = 0;
 	lra->lra_n_pages = 0;
 	lra->lra_n_pages_since = 0;
 	lra->lra_page_no = 0;
@@ -158,7 +160,11 @@ trx_lra_reset(
 				releasing the index lock and sleeping for a
 				short period of time so that the other threads
 				get a chance to x-latch the index lock. */
-	ulint	lra_sleep)	/*!< in: Sleep time in milliseconds. */
+	ulint	lra_sleep,	/*!< in: Sleep time in milliseconds. */
+	ulint	lra_n_spaces,	/*!< in: Number of space switches before lra is
+				disabled. */
+	bool	reset_lra_count_n_spaces)
+				/*!< in: whether to reset lra_count_n_spaces. */
 {
 #ifndef TARGET_OS_LINUX
 	if (lra_size) {
@@ -186,6 +192,7 @@ trx_lra_reset(
 				   + 2 * sizeof(page_no_holder_t))
 		    + sizeof(btr_pcur_t);
 	lra->lra_size = lra_size;
+	lra->lra_n_spaces = lra_n_spaces;
 	lra->lra_space_id = 0;
 	lra->lra_n_pages = 0;
 	lra->lra_n_pages_since = 0;
@@ -193,6 +200,9 @@ trx_lra_reset(
 	lra->lra_pages_before_sleep = lra_pages_before_sleep;
 	lra->lra_sleep = lra_sleep;
 	lra->lra_tree_height = 0;
+	if (reset_lra_count_n_spaces) {
+		lra->lra_count_n_spaces = 0;
+	}
 	if (lra->lra_ht) {
 		ut_a(lra->lra_ht1);
 		ut_a(lra->lra_ht2);

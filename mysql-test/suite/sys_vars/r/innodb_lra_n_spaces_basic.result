@@ -1,0 +1,28 @@
+SET GLOBAL innodb_lra_n_spaces = 10;
+SELECT @@GLOBAL.innodb_lra_n_spaces;
+@@GLOBAL.innodb_lra_n_spaces
+10
+SET SESSION innodb_lra_n_spaces=1;
+SELECT @@SESSION.innodb_lra_n_spaces;
+@@SESSION.innodb_lra_n_spaces
+1
+SET SESSION innodb_lra_n_spaces=16;
+SELECT @@SESSION.innodb_lra_n_spaces;
+@@SESSION.innodb_lra_n_spaces
+16
+SET SESSION innodb_lra_n_spaces=0;
+Warnings:
+Warning	1292	Truncated incorrect innodb_lra_n_spaces value: '0'
+SELECT @@SESSION.innodb_lra_n_spaces;
+@@SESSION.innodb_lra_n_spaces
+1
+SET GLOBAL innodb_lra_n_spaces=1000;
+Warnings:
+Warning	1292	Truncated incorrect innodb_lra_n_spaces value: '1000'
+SELECT @@GLOBAL.innodb_lra_n_spaces;
+@@GLOBAL.innodb_lra_n_spaces
+16
+SET GLOBAL innodb_lra_n_spaces = default;
+SELECT @@GLOBAL.innodb_lra_n_spaces;
+@@GLOBAL.innodb_lra_n_spaces
+3

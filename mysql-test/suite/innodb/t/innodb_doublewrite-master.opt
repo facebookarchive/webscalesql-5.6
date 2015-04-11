@@ -2,4 +2,6 @@
 --innodb-file-per-table
 --innodb_file_format='Barracuda'
 --innodb_flush_log_at_trx_commit=1
+--innodb-checksums
+--innodb-checksum-algorithm='innodb'
 --force-restart

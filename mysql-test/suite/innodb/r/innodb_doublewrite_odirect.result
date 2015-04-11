@@ -16,9 +16,12 @@ INSERT INTO t1(a) SELECT NULL FROM t1;
 INSERT INTO t1(a) SELECT NULL FROM t1;
 INSERT INTO t1(a) SELECT NULL FROM t1;
 INSERT INTO t1(a) SELECT NULL FROM t1;
-FLUSH TABLES t1;
+# Ensure that dirty pages of table t1 are flushed.
 InnoDB: Cannot recover it from the doublewrite buffer because it was written in reduced-doublewrite mode.
 
+SELECT COUNT(*) FROM t1;
+COUNT(*)
+8192
 SET GLOBAL innodb_doublewrite=1;
 CREATE TABLE t2(a INT PRIMARY KEY AUTO_INCREMENT, b char(255) default '') ENGINE=innodb;
 INSERT INTO t2(a) VALUES(NULL);
@@ -35,8 +38,11 @@ INSERT INTO t2(a) SELECT NULL FROM t2;
 INSERT INTO t2(a) SELECT NULL FROM t2;
 INSERT INTO t2(a) SELECT NULL FROM t2;
 INSERT INTO t2(a) SELECT NULL FROM t2;
-FLUSH TABLES t2;
+# Ensure that dirty pages of table t1 are flushed.
 InnoDB: Trying to recover it from the doublewrite buffer.
 
+SELECT COUNT(*) FROM t2;
+COUNT(*)
+8192
 DROP TABLE t1;
 DROP TABLE t2;

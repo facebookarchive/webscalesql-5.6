@@ -1518,13 +1518,6 @@ static void close_connections(void)
   if (get_thread_count() > 0)
     sleep(2);         // Give threads time to die
 
-#ifdef HAVE_MY_TIMER
-  if (have_statement_timeout == SHOW_OPTION_YES)
-    my_timer_deinitialize();
-
-  have_statement_timeout= SHOW_OPTION_DISABLED;
-#endif
-
   /*
     Force remaining threads to die by closing the connection to the client
     This will ensure that threads that are waiting for a command from the
@@ -1973,6 +1966,14 @@ void clean_up(bool print_message)
 
   if (THR_MALLOC)
     (void) pthread_key_delete(THR_MALLOC);
+
+#ifdef HAVE_MY_TIMER
+  if (have_statement_timeout == SHOW_OPTION_YES)
+    my_timer_deinitialize();
+
+  have_statement_timeout= SHOW_OPTION_DISABLED;
+#endif
+
 
   /*
     The following lines may never be executed as the main thread may have

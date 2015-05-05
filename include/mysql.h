@@ -405,12 +405,12 @@ struct mysql_st_mysql_csm_context {
   const char *db;
   uint port;
   const char *unix_socket;
-  ulong client_flag;
+  unsigned long client_flag;
   my_bool non_blocking;
 
   struct sockaddr *addr;
   socklen_t len;
-  ulong pkt_length;
+  unsigned long pkt_length;
   char *host_info;
   char buff[NAME_LEN+USERNAME_LENGTH+100];
   int scramble_data_len;

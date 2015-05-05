@@ -489,8 +489,8 @@ typedef struct st_net {
   struct iovec inline_async_write_vector[3];
 
   /* State for reading responses that are larger than MAX_PACKET_LENGTH */
-  ulong async_multipacket_read_saved_whereb;
-  ulong async_multipacket_read_total_len;
+  unsigned long async_multipacket_read_saved_whereb;
+  unsigned long async_multipacket_read_total_len;
   my_bool async_multipacket_read_started;
 } NET;
 
@@ -630,8 +630,8 @@ net_async_status net_write_command_nonblocking(
   const unsigned char *prefix, size_t prefix_len,
   const unsigned char *packet, size_t packet_len,
   my_bool* res);
-net_async_status my_net_read_nonblocking(NET *net, ulong* len_ptr,
-                                         ulong* complen_ptr);
+net_async_status my_net_read_nonblocking(NET *net, unsigned long* len_ptr,
+                                         unsigned long* complen_ptr);
 
 #ifdef MY_GLOBAL_INCLUDED
 void my_net_set_write_timeout(NET *net, const timeout_t timeout);

@@ -109,8 +109,8 @@ typedef struct st_net {
   size_t async_write_vector_current;
   unsigned char inline_async_write_header[4 + 3 + 1 + 1];
   struct iovec inline_async_write_vector[3];
-  ulong async_multipacket_read_saved_whereb;
-  ulong async_multipacket_read_total_len;
+  unsigned long async_multipacket_read_saved_whereb;
+  unsigned long async_multipacket_read_total_len;
   my_bool async_multipacket_read_started;
 } NET;
 enum enum_field_types { MYSQL_TYPE_DECIMAL, MYSQL_TYPE_TINY,
@@ -178,8 +178,8 @@ net_async_status net_write_command_nonblocking(
   const unsigned char *prefix, size_t prefix_len,
   const unsigned char *packet, size_t packet_len,
   my_bool* res);
-net_async_status my_net_read_nonblocking(NET *net, ulong* len_ptr,
-                                         ulong* complen_ptr);
+net_async_status my_net_read_nonblocking(NET *net, unsigned long* len_ptr,
+                                         unsigned long* complen_ptr);
 struct rand_struct {
   unsigned long seed1,seed2,max_value;
   double max_value_dbl;
@@ -503,11 +503,11 @@ struct mysql_st_mysql_csm_context {
   const char *db;
   uint port;
   const char *unix_socket;
-  ulong client_flag;
+  unsigned long client_flag;
   my_bool non_blocking;
   struct sockaddr *addr;
   socklen_t len;
-  ulong pkt_length;
+  unsigned long pkt_length;
   char *host_info;
   char buff[(64*3)+(16*3)+100];
   int scramble_data_len;

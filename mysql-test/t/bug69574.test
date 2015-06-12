@@ -26,10 +26,9 @@ flush logs;
 --echo flush to 000003 so 02 only contain one transaction
 --echo
 
-let $port= query_get_value("select @@port", @@port, 1);
 let $MYSQLD_DATADIR= `select @@datadir`;
---exec $MYSQL_BINLOG  $MYSQLD_DATADIR/master-bin.000002 | mysql -h127.0.0.1 -P$port -uroot test
---sleep 1
+--exec $MYSQL_BINLOG $MYSQLD_DATADIR/master-bin.000002 | $MYSQL test
+sync_slave_with_master;
 connection slave;
 select count(*) from t;
 connection master;

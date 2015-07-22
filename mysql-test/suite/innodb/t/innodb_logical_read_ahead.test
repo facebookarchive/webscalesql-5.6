@@ -1,5 +1,7 @@
 --source include/have_innodb.inc
 --source include/have_native_aio.inc
+# embedded server does not support restarting
+-- source include/not_embedded.inc
 
 --disable_warnings
 DROP TABLE if exists t1;

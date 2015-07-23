@@ -8,6 +8,7 @@
 # Valid Values: TRUE, FALSE                                                    #
 ################################################################################
 
+--source include/not_embedded.inc
 --source include/load_sysvars.inc
 
 # Saving initial value of gtid_precommit in a temporary variable

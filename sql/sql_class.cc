@@ -720,6 +720,12 @@ void thd_inc_row_count(THD *thd)
   thd->get_stmt_da()->inc_current_row_for_warning();
 }
 
+extern "C"
+void thd_store_lsn(THD* thd, ulonglong lsn, int engine_type)
+{
+  DBUG_ASSERT(thd->prepared_engine != NULL);
+  thd->prepared_engine->update_lsn(engine_type, lsn);
+}
 
 /**
   Dumps a text description of a thread, its security context
@@ -1058,6 +1064,8 @@ THD::THD(bool enable_plugins)
     m_token_array= (unsigned char*) my_malloc(max_digest_length,
                                               MYF(MY_WME));
   }
+
+  prepared_engine= NULL;
 }
 
 void THD::print_proc_info(const char *, ...)
@@ -1651,6 +1659,9 @@ THD::~THD()
   if (rli_slave)
     rli_slave->cleanup_after_session();
 #endif
+
+  if (prepared_engine)
+    delete prepared_engine;
 
   free_root(&main_mem_root, MYF(0));
 

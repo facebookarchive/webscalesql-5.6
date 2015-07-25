@@ -1002,7 +1002,9 @@ static
 bool
 innobase_flush_logs(
 /*================*/
-	handlerton*	hton);		/*!< in: InnoDB handlerton */
+	handlerton*	hton,		/*!< in: InnoDB handlerton */
+	ulonglong	target_lsn);	/*! <in: write/fsync redo to this lsn, or
+					 sync to max lsn if target_lsn = 0. */
 
 /************************************************************************//**
 Implements the SHOW ENGINE INNODB STATUS command. Sends the output of the
@@ -1193,6 +1195,14 @@ thd_trx_is_auto_commit(
 	       && thd_is_select(thd));
 }
 
+/*******************************************************************//**
+@return the engine type of innodb. */
+UNIV_INTERN
+int
+innobase_get_type(void)
+{
+	return (innodb_hton_ptr->db_type);
+}
 /******************************************************************//**
 Save some CPU by testing the value of srv_thread_concurrency in inline
 functions. */
@@ -3434,7 +3444,9 @@ static
 bool
 innobase_flush_logs(
 /*================*/
-	handlerton*	hton)	/*!< in/out: InnoDB handlerton */
+	handlerton*	hton,	/*!< in/out: InnoDB handlerton */
+	ulonglong	target_lsn)/*! <in: write/fsync redo to this lsn, or
+				    sync to max lsn if target_lsn = 0 */
 {
 	bool	result = 0;
 
@@ -3442,7 +3454,13 @@ innobase_flush_logs(
 	DBUG_ASSERT(hton == innodb_hton_ptr);
 
 	if (!srv_read_only_mode) {
-		log_buffer_flush_to_disk();
+		if (target_lsn == 0) {
+			log_buffer_flush_to_disk();
+		} else if (srv_flush_log_at_trx_commit > 0) {
+			log_write_up_to(target_lsn,
+					LOG_WAIT_ONE_GROUP,
+					(srv_flush_log_at_trx_commit == 1));
+		}
 	}
 
 	DBUG_RETURN(result);

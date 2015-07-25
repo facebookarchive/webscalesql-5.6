@@ -36,7 +36,7 @@ public:
     friend class Stage_manager;
   public:
     Mutex_queue()
-      : m_first(NULL), m_last(&m_first)
+      : m_first(NULL), m_last(&m_first), group_prepared_engine(NULL)
     {
     }
 
@@ -50,6 +50,10 @@ public:
 
     void deinit() {
       mysql_mutex_destroy(&m_lock);
+      if (group_prepared_engine)
+      {
+        delete group_prepared_engine;
+      }
     }
 
     bool is_empty() const {
@@ -65,8 +69,6 @@ public:
        This will fetch the entire queue in one go.
     */
     THD *fetch_and_empty();
-
-    std::pair<bool,THD*> pop_front();
 
   private:
     void lock() { mysql_mutex_lock(&m_lock); }
@@ -85,6 +87,12 @@ public:
        the last thread that is enqueued.
     */
     THD **m_last;
+
+    /**
+       Store the max prepared log for each engine that supports ha_flush_logs.
+       We have to init group_prepared_engine after all plugins are inited.
+    */
+    engine_lsn_map* group_prepared_engine;
 
     /** Lock for protecting the queue. */
     mysql_mutex_t m_lock;
@@ -173,11 +181,6 @@ public:
     @retval false Thread was not stage leader and processing has been done.
    */
   bool enroll_for(StageID stage, THD *first, mysql_mutex_t *stage_mutex);
-
-  std::pair<bool,THD*> pop_front(StageID stage)
-  {
-    return m_queue[stage].pop_front();
-  }
 
 #ifndef DBUG_OFF
   /**

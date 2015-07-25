@@ -58,6 +58,9 @@ const char *set_thd_proc_info(void *thd_arg, const char *info,
                               const char *calling_file,
                               const unsigned int calling_line);
 
+extern "C"
+void thd_store_lsn(THD* thd, ulonglong lsn, int engine_type);
+
 #define thd_proc_info(thd, msg) \
   set_thd_proc_info(thd, msg, __func__, __FILE__, __LINE__)
 
@@ -3782,6 +3785,9 @@ public:
     are owned by this thread.
   */
   Gtid_set owned_gtid_set;
+
+  /* Store lsn for engine when preparing finished. */
+  engine_lsn_map* prepared_engine;
 
   void clear_owned_gtids()
   {

@@ -529,8 +529,6 @@ ulong binlog_cache_size=0;
 ulonglong  max_binlog_cache_size=0;
 ulong slave_max_allowed_packet= 0;
 ulong binlog_stmt_cache_size=0;
-my_atomic_rwlock_t opt_binlog_max_flush_queue_time_lock;
-int32 opt_binlog_max_flush_queue_time= 0;
 ulonglong  max_binlog_stmt_cache_size=0;
 ulong query_cache_size=0;
 ulong refresh_version;  /* Increments on each reload */
@@ -1228,7 +1226,7 @@ bool mysqld_embedded=0;
 bool mysqld_embedded=1;
 #endif
 
-static my_bool plugins_are_initialized= FALSE;
+my_bool plugins_are_initialized= FALSE;
 
 #ifndef DBUG_OFF
 static const char* default_dbug_option;
@@ -1939,7 +1937,6 @@ void clean_up(bool print_message)
   DBUG_PRINT("quit", ("Error messages freed"));
   /* Tell main we are ready */
   logger.cleanup_end();
-  my_atomic_rwlock_destroy(&opt_binlog_max_flush_queue_time_lock);
   my_atomic_rwlock_destroy(&global_query_id_lock);
   my_atomic_rwlock_destroy(&thread_running_lock);
   my_atomic_rwlock_destroy(&write_query_running_lock);
@@ -8282,7 +8279,6 @@ static int mysql_init_variables(void)
   what_to_log= ~ (1L << (uint) COM_TIME);
   refresh_version= 1L;  /* Increments on each reload */
   global_query_id= thread_id= 1L;
-  my_atomic_rwlock_init(&opt_binlog_max_flush_queue_time_lock);
   my_atomic_rwlock_init(&global_query_id_lock);
   my_atomic_rwlock_init(&thread_running_lock);
   my_atomic_rwlock_init(&write_query_running_lock);

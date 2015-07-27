@@ -90,6 +90,8 @@ INSERT INTO t1 SELECT * FROM t1;
 INSERT INTO t1 SELECT * FROM t1;
 INSERT INTO t1 SELECT * FROM t1;
 INSERT INTO t1 SELECT * FROM t1;
+INSERT INTO t1 SELECT * FROM t1;
+INSERT INTO t1 SELECT * FROM t1;
 SET @@SESSION.max_statement_time = 2;
 SELECT * from t1;
 ERROR HY000: Query execution was interrupted, max_statement_time exceeded
@@ -122,7 +124,7 @@ EXECUTE stmt2;
 ERROR HY000: Query execution was interrupted, max_statement_time exceeded
 EXECUTE stmt3;
 count(*)
-4096
+16384
 DEALLOCATE PREPARE stmt1;
 DEALLOCATE PREPARE stmt2;
 DEALLOCATE PREPARE stmt3;

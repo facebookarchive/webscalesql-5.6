@@ -527,8 +527,7 @@ public:
 
   inline bool uses_buffer_owned_by(const String *s) const
   {
-    return (alloced && s->alloced &&
-            Ptr >= s->Ptr && Ptr < s->Ptr + s->str_length);
+    return (s->alloced && Ptr >= s->Ptr && Ptr < s->Ptr + s->str_length);
   }
   bool is_ascii() const
   {
